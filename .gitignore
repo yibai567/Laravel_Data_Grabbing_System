@@ -10,7 +10,7 @@ composer.lock
 composer.phar
 /.idea
 /.vagrant
-/vendor
+/vendor/*
 npm-debug.log
 .env
 .phpstorm.meta.php
