@@ -16,3 +16,10 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+//创建抓取任务接口
+Route::prefix('crawl')->namespace('Crawl')->group(function(){
+    Route::post('task', 'CrawlTaskController@create');
+    Route::post('task', 'CrawlTaskController@create');
+    Route::post('response/send', 'CrawlResponseController@send');
+});
