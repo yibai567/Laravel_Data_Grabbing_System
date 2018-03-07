@@ -83,7 +83,7 @@ class CrawlTaskController extends Controller
     public function generateScript(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id' => 'string|nullable',
+            'id' => 'integer|required',
         ]);
 
         if ($validator->fails()) {
@@ -123,7 +123,7 @@ class CrawlTaskController extends Controller
             str_replace($content, '{{{URL}}}', $task['resource_url']);
         }
         if (generateScript($scriptFile, $content)) {
-            return $this->resObjectGet('脚本生成成功', 'crawl_task.generate_script', $request->path());
+            return response('脚本生成成功', 200);
         } else {
             return response('脚本生成失败', 402);
         }
