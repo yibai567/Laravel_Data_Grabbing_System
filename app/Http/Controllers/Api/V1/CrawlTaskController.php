@@ -107,6 +107,7 @@ class CrawlTaskController extends Controller
 
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/crawl/task/generate_script', $params);
+
         if ($data['status_code'] == 401) {
             return response('参数错误', 401);
         }
@@ -124,10 +125,25 @@ class CrawlTaskController extends Controller
      */
     public function execute(Request $request)
     {
-        $taskId = intval($request->get('id'));
-        $params = ['id' => $taskId];
+        $validator = Validator::make($request->all(), [
+            'id' => 'string|nullable',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return  response($value, 401);
+            }
+        }
+        $params = [
+            'id' => intval($request->get('id')),
+        ];
+
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/crawl/task/execute', $params);
-        return $data;
+        if ($data['status'] == 401) {
+            return response('测试失败', 401);
+        }
+        return $this->resObjectGet('执行成功', 'crawl_task.execute', $request->path());
     }
 }

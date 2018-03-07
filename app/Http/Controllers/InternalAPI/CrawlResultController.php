@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class CrawlResultController extends Controller
 {
-    public function create(CrawlResultCreateRequest $request)
+    public function create(Request $request)
     {
         $result = [];
         $validator = Validator::make($request->all(), [
@@ -41,15 +41,13 @@ class CrawlResultController extends Controller
             'setting_selectors' => $request->setting_selectors,
             'setting_keywords' => $request->setting_keywords,
             'setting_data_type' => $request->setting_data_type,
-
         ];
-
         $pos  = strpos($params['original_data'] , $params['setting_keywords']);
         if ( $pos  ===  false ) {
             return $result;
         }
+
         $dispatcher = app('Dingo\Api\Dispatcher');
-        print_r($dispatcher);die;
         $data = $dispatcher->post('internal_api/basic/crawl/result', $params);
         print_r($data);die;
         if ($data['status_code'] == 401) {

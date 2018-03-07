@@ -28,7 +28,7 @@ class CrawlTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return  $this->response->error($value, 401);
+                return  response($value, 401);
             }
         }
         $params = [
@@ -135,6 +135,17 @@ class CrawlTaskController extends Controller
      */
     public function execute(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'id' => 'string|nullable',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return response($value, 401);
+            }
+        }
+
         $taskId = intval($request->get('task_id'));
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->get('internal_api/basic/crawl/task?id=' . $taskId);
