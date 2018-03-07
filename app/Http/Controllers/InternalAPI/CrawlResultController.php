@@ -16,8 +16,8 @@ class CrawlResultController extends Controller
         $validator = Validator::make($request->all(), [
             'crawl_task_id' => 'string|nullable',
             'original_data' => 'string|nullable',
-            'task_start_time' => 'string|nullable',
-            'task_end_time' => 'integer|nullable',
+            'task_start_time' => 'date|nullable',
+            'task_end_time' => 'date|nullable',
             'task_url' => 'string|nullable',
             'format_data' => 'string|nullable',
             'setting_selectors' => 'string|nullable',
@@ -28,14 +28,14 @@ class CrawlResultController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return  $this->response->error($value, 401);
+                return response($value, 401);
             }
         }
         $params = [
             'crawl_task_id' => $request->crawl_task_id,
             'original_data' => $request->original_data,
             'task_start_time' => $request->task_start_time,
-            'task_end_time' => intval($request->task_end_time),
+            'task_end_time' => $request->task_end_time,
             'task_url' => $request->task_url,
             'format_data' => $request->format_data,
             'setting_selectors' => $request->setting_selectors,
@@ -49,7 +49,6 @@ class CrawlResultController extends Controller
 
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/basic/crawl/result', $params);
-        print_r($data);die;
         if ($data['status_code'] == 401) {
             return response('参数错误', 401);
         }
@@ -57,7 +56,7 @@ class CrawlResultController extends Controller
         if ($data['data']) {
             $result = $data['data'];
         }
-        return $result;
+        return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
 
     public function pushList()
