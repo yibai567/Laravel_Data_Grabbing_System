@@ -15,12 +15,20 @@ if (!function_exists('generateScript')) {
         return true;
     }
 }
+
+if (!function_exists('createLog')) {
     public function createLog($filename = null, $content='')
     {
+        if (!is_dir(dirname($filename))) {
+            mkdir(dirname($filename));
+        }
+        
         if(file_put_contents($filename, $content,FILE_APPEND)){
             return  "写入成功。<br />";
         }
-        if($data = file_get_contents($file)){
+        if($data = file_get_contents($filename)){
             return  "写入文件的内容是：$data";
         }
     }
+}
+

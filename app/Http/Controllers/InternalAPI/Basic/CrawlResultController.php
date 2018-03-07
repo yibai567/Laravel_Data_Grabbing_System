@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\InternalAPI\Basic;
 
+use DB;
 use App\Http\Requests\CrawlResultCreateRequest;
 use App\Models\CrawlResult;
 use App\Http\Controllers\InternalAPI\Controller;
-use DB;
 
 class CrawlResultController extends Controller
 {

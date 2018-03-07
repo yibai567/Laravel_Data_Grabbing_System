@@ -23,6 +23,11 @@ class CrawlTaskController extends Controller
         return $result;
     }
 
+    /**
+     * 状态更新
+     * @param Request $request
+     * @return mixed
+     */
     public function updateStatus(Request $request)
     {
         $taskId = intval($request->get('task_id'));
@@ -75,10 +80,11 @@ class CrawlTaskController extends Controller
         $task = CrawlTask::findOrFail($taskId);
         $now = time();
 
-        $scriptFile = storage_path('scripts') . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $task->id . '-' . $now . '.js';
-        $task->script_generate_time = $now;
+        $scriptFile = CrawlTask::SCRIPT_PATH . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $task->id . '_' . $now . '.js';
+        $task->script_last_generate_time = $now;
         $task->save();
         generateScript($scriptFile, $scriptContent);
+        return response('脚本生成成功', 200);
     }
 
     /**
@@ -87,12 +93,15 @@ class CrawlTaskController extends Controller
      */
     public function execute(Request $request)
     {
-        $scriptFile = CrawlTask::SCRIPT_PATH . '/' . $request->get('filename');
+        $taskId = $request->get('task_id');
+        $task = CrawlTask::findOrFail($taskId);
+        $scriptFile = CrawlTask::SCRIPT_PATH . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $task->id . '_' . $task->script_last_generate_time . '.js';
+        //$scriptFile = CrawlTask::SCRIPT_PATH . '/get_baidu_info.js';
         if (!file_exists($scriptFile)) {
             return response('脚本文件不存在', 401);
         }
         $command = 'casperjs ' . $scriptFile;
-        exec($command, $output, $return_var);
+        exec($command, $output, $return);
         return $output;
     }
 }
