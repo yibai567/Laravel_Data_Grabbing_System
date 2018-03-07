@@ -118,24 +118,24 @@ class CrawlTaskController extends Controller
     public function execute(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id' => 'string|nullable',
+            'id' => 'integer|required',
         ]);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return  response($value, 401);
+                return response($value, 401);
             }
         }
         $params = [
             'id' => intval($request->get('id')),
         ];
-
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/crawl/task/execute', $params);
-        if ($data['status'] == 401) {
-            return response('测试失败', 401);
+        $res = [];
+        if ($data['data']) {
+            $res = $data['data'];
         }
-        return $this->resObjectGet('执行成功', 'crawl_task.execute', $request->path());
+        return $this->resObjectGet($res, 'crawl_task.generate_script', $request->path());
     }
 }

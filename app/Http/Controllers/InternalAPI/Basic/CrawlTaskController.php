@@ -104,7 +104,7 @@ class CrawlTaskController extends Controller
     public function retrieve(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            "id" => "nullable|integer|min:1",
+            "id" => "integer|required",
         ]);
 
         if ($validator->fails()) {
@@ -131,8 +131,8 @@ class CrawlTaskController extends Controller
     public function updateScriptLastGenerateTime(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            "id" => "nullable|integer",
-            "script_last_generate_time" => "nullable|integer"
+            "id" => "integer|required",
+            "script_last_generate_time" => "integer|required"
         ]);
 
         if ($validator->fails()) {

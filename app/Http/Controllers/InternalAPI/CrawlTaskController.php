@@ -136,7 +136,7 @@ class CrawlTaskController extends Controller
     public function execute(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id' => 'string|nullable',
+            'id' => 'integer|required',
         ]);
 
         if ($validator->fails()) {
@@ -145,13 +145,13 @@ class CrawlTaskController extends Controller
                 return response($value, 401);
             }
         }
-
         $taskId = intval($request->get('task_id'));
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->get('internal_api/basic/crawl/task?id=' . $taskId);
         if ($data['status_code'] == 401) {
             return response('参数错误', 401);
         }
+
         $task = $data['data'];
         $scriptFile = CrawlTask::SCRIPT_PATH . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $task->id . '_' . $task->script_last_generate_time . '.js';
         if (!file_exists($scriptFile)) {
@@ -159,9 +159,6 @@ class CrawlTaskController extends Controller
         }
         $command = 'casperjs ' . $scriptFile;
         exec($command, $output, $return);
-        if ($return == 1) {
-            return response($output, 401);
-        }
         return response($output, 200);
     }
 }
