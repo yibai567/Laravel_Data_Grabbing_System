@@ -15,6 +15,8 @@ $api->version(
             $api->post('/crawl/task', 'CrawlTaskController@create');
             $api->post('/crawl/task/status','CrawlTaskController@updateStatus');
             $api->post('/crawl/result', 'CrawlResultController@create');
+            $api->post('/crawl/task/generate_script', 'CrawlTaskController@generateScript');
+            $api->post('/crawl/task/execute', 'CrawlTaskController@execute');
         });
     }
 );

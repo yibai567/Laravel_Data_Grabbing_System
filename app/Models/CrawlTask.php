@@ -18,6 +18,8 @@ class CrawlTask extends Model
     const RESPONSE_TYPE_SMS = 3; //短信响应
     const RESPONSE_TYPE_WEWORK = 4; //企业微信响应
 
+    const SCRIPT_PREFIX = 'grab';
+    const SCRIPT_PATH = '/alidata/www/currency_dev/create_spider_file';
     protected $table = 't_crawl_task';
 
     protected $fillable = [
@@ -33,6 +35,7 @@ class CrawlTask extends Model
         'setting_id',
         'test_result',
         'test_time',
+        'script_generate_time'
     ];
 
     public function setting()

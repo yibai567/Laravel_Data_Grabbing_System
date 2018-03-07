@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\InternalAPI\Basic;
+namespace App\Http\Controllers\InternalAPI;
 
 use App\Services\FilterService;
 use App\Http\Controllers\Controller as BaseController;

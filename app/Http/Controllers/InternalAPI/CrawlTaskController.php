@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\InternalAPI;
 
 use App\Http\Requests\CrawlTaskCreateRequest;
+use App\Models\CrawlTask;
 use Illuminate\Http\Request;
 
 class CrawlTaskController extends Controller
@@ -58,5 +59,40 @@ class CrawlTaskController extends Controller
         } else {
             return $data;
         }
+    }
+
+    /**
+     * 生成抓取任务脚本文件
+     * @param Request $request
+     */
+    public function generateScript(Request $request)
+    {
+        $taskId = $request->get('task_id', null);
+        $scriptContent = $request->get('content');
+        if (!$taskId) {
+            return response('参数错误', 401);
+        }
+        $task = CrawlTask::findOrFail($taskId);
+        $now = time();
+
+        $scriptFile = storage_path('scripts') . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $task->id . '-' . $now . '.js';
+        $task->script_generate_time = $now;
+        $task->save();
+        generateScript($scriptFile, $scriptContent);
+    }
+
+    /**
+     * 执行接口
+     * @return mixed
+     */
+    public function execute(Request $request)
+    {
+        $scriptFile = CrawlTask::SCRIPT_PATH . '/' . $request->get('filename');
+        if (!file_exists($scriptFile)) {
+            return response('脚本文件不存在', 401);
+        }
+        $command = 'casperjs ' . $scriptFile;
+        exec($command, $output, $return_var);
+        return $output;
     }
 }

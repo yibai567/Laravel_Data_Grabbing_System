@@ -1,0 +1,17 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Pascal
+ * Date: 2018/2/9
+ * Time: 下午5:11
+ */
+
+if (!function_exists('generateScript')) {
+    function generateScript($filename = null, $content='') {
+        if (!is_dir(dirname($filename))) {
+            mkdir(dirname($filename));
+        }
+        file_put_contents($filename, $content);
+        return true;
+    }
+}

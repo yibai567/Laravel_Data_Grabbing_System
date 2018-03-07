@@ -6,6 +6,7 @@ use App\Http\Requests\CrawlTaskCreateRequest;
 use App\Models\CrawlTask;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\InternalAPI\Controller;
 
 class CrawlTaskController extends Controller
 {

@@ -26,7 +26,7 @@ class CreateTCrawlTaskTable extends Migration
             $table->string('response_params', 50)->nullable()->comment('参数');
             $table->text('test_result')->nullable()->comment('测试结果');
             $table->dateTime('test_time')->nullable()->comment('测试时间');
-            $table->dateTime('script_last_generate_time')->nullable()->comment('脚本最后生成时间');
+            $table->integer('script_last_generate_time')->nullable()->comment('脚本最后生成时间');
             $table->unsignedInteger('setting_id')->nullable()->comment('配置ID');
             $table->timestamps();
             $table->softDeletes();

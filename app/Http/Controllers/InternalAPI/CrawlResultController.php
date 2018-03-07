@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\InternalAPI;
 
 use App\Http\Requests\CrawlResultCreateRequest;
+use App\Http\Controllers\InternalAPI\Controller;
 
 class CrawlResultController extends Controller
 {
