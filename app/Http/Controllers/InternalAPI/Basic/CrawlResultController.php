@@ -6,6 +6,8 @@ use DB;
 use App\Http\Requests\CrawlResultCreateRequest;
 use App\Models\CrawlResult;
 use App\Http\Controllers\InternalAPI\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CrawlResultController extends Controller
 {
@@ -14,14 +16,42 @@ class CrawlResultController extends Controller
      * @param CrawlResultCreateRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function create(CrawlResultCreateRequest $request)
+    public function create(Request $request)
     {
-        $data = $request->postFillData();
+        $validator = Validator::make($request->all(), [
+            'crawl_task_id' => 'string|nullable',
+            'original_data' => 'string|nullable',
+            'task_start_time' => 'date|nullable',
+            'task_end_time' => 'date|nullable',
+            'task_url' => 'string|nullable',
+            'format_data' => 'string|nullable',
+            'setting_selectors' => 'string|nullable',
+            'setting_keywords' => 'string|nullable',
+            'setting_data_type' => 'string|nullable',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return response($value, 401);
+            }
+        }
+        $data = [
+            'crawl_task_id' => $request->crawl_task_id,
+            'original_data' => $request->original_data,
+            'task_start_time' => $request->task_start_time,
+            'task_end_time' => $request->task_end_time,
+            'task_url' => $request->task_url,
+            'format_data' => $request->format_data,
+            'setting_selectors' => $request->setting_selectors,
+            'setting_keywords' => $request->setting_keywords,
+            'setting_data_type' => $request->setting_data_type,
+        ];
         if (empty($data)) {
-            return response('返回数据为空', 404);
+            return $this->resObjectGet($data, 'crawl_result', $request->path());
         }
         if ($this->isTaskExist($data['crawl_task_id'], $data['task_url'])) {
-            return response('任务已存在');
+            return $this->resObjectGet($data['crawl_task_id'], 'crawl_result', $request->path());
         }
         $result = CrawlResult::create($data);
         return $this->resObjectGet($result, 'crawl_result', $request->path());
