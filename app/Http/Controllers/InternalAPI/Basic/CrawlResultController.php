@@ -71,7 +71,7 @@ class CrawlResultController extends Controller
      */
     protected function isTaskExist($taskId, $taskUrl)
     {
-        $crawlResult = CrawlResult::where(['task_url' => $taskId, 'crawl_task_id' => $taskUrl])
+        $crawlResult = CrawlResult::where(['task_url' => $taskUrl, 'crawl_task_id' => $taskId])
             ->first();
         if ($crawlResult) {
             return true;
