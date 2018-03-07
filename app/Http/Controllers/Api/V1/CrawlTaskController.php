@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\Base\BasicController;
 use App\Http\Requests\CrawlTaskCreateRequest;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
-class CrawlTaskController extends BasicController
+class CrawlTaskController extends Controller
 {
     public function create(CrawlTaskCreateRequest $request)
     {

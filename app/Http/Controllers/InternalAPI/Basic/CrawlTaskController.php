@@ -7,7 +7,7 @@ use App\Models\CrawlTask;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class CrawlTaskController extends BaseController
+class CrawlTaskController extends Controller
 {
     /**
      * 创建爬虫任务接口-基础接口

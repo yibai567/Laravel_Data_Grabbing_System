@@ -4,7 +4,7 @@ namespace App\Http\Controllers\InternalAPI;
 
 use App\Http\Requests\CrawlResultCreateRequest;
 
-class CrawlResultController extends BaseController
+class CrawlResultController extends Controller
 {
     public function create(CrawlResultCreateRequest $request)
     {

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\InternalAPI\Basic;
 use App\Http\Requests\CrawlResultCreateRequest;
 use App\Models\CrawlResult;
 
-class CrawlResultController extends BaseController
+class CrawlResultController extends Controller
 {
     /**
      * 返回爬虫结果接口

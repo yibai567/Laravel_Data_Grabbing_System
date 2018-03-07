@@ -5,7 +5,7 @@ namespace App\Http\Controllers\InternalAPI;
 use App\Http\Requests\CrawlTaskCreateRequest;
 use Illuminate\Http\Request;
 
-class CrawlTaskController extends BaseController
+class CrawlTaskController extends Controller
 {
     public function create(CrawlTaskCreateRequest $request)
     {
