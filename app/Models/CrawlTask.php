@@ -40,6 +40,6 @@ class CrawlTask extends Model
 
     public function setting()
     {
-        $this->hasOne('App\Models\CrawlSetting', 'setting_id', 'id');
+        return $this->hasOne('App\Models\CrawlSetting', 'id', 'setting_id');
     }
 }

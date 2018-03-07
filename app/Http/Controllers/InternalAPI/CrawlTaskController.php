@@ -82,31 +82,51 @@ class CrawlTaskController extends Controller
      */
     public function generateScript(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'id' => 'string|nullable',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return  response($value, 401);
+            }
+        }
+
         $taskId = intval($request->get('id'));
+
         //调用生成脚本接口
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->get('internal_api/basic/crawl/task?id=' . $taskId);
         if ($data['status_code'] == 401) {
             return response('参数错误', 401);
         }
+
         $task = $data['data'];
+
         $now = time();
         $scriptFile = CrawlTask::SCRIPT_PATH . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $task['id'] . '_' . $now . '.js';
-        $params = ['id' => $taskId, 'update_script_last_generate_time' => $now];
+
+        $params = ['id' => $taskId, 'script_last_generate_time' => $now];
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/basic/crawl/task/update_script_last_generate_time', $params);
+
         if ($data['status_code'] == 401) {
             return response('更新时间失败', 401);
         }
-        if ($task['setting']['type'] == CrawlSetting::TYPE_GENERAL) {
-            $content = $task['setting']['content'];
-            $scriptContent = str_replace($content, '{{{URL}}}', $task['resource_url']);
-        } else {
+
+        if ($task['setting']['type'] == CrawlSetting::TYPE_CUSTOM) {
             //自定义模版类型
-            $scriptContent = '';
+            $content = '';
+        } else {
+            $content = $task['setting']['content'];
+            str_replace($content, '{{{URL}}}', $task['resource_url']);
         }
-        generateScript($scriptFile, $scriptContent);
-        return response('脚本生成成功', 200);
+        if (generateScript($scriptFile, $content)) {
+            return $this->resObjectGet('脚本生成成功', 'crawl_task.generate_script', $request->path());
+        } else {
+            return response('脚本生成失败', 402);
+        }
     }
 
     /**

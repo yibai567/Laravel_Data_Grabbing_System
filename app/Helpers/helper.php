@@ -19,15 +19,15 @@ if (!function_exists('generateScript')) {
 if (!function_exists('createLog')) {
     function createLog($filename = null, $content='')
     {
-        if (!is_dir(dirname($filename))) {
-            mkdir(dirname($filename));
-        }
+        if ($filename && $content) {
+            if (!is_dir(dirname($filename))) {
+                mkdir(dirname($filename));
+            }
 
-        if(file_put_contents($filename, $content,FILE_APPEND)){
-            return  "写入成功。<br />";
-        }
-        if($data = file_get_contents($filename)){
-            return  "写入文件的内容是：$data";
+            if(file_put_contents($filename, $content)){
+                return true;
+            }
+            return false;
         }
     }
 }

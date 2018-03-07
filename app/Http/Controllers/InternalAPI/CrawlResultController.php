@@ -11,7 +11,7 @@ class CrawlResultController extends Controller
     {
         $params = $request->postFillData();
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('basic/crawl/result', $params);
+        $data = $dispatcher->post('internal_api/basic/crawl/result', $params);
         if ($data['status_code'] == 401) {
             return response('参数错误', 401);
         }

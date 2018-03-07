@@ -110,12 +110,12 @@ class CrawlTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return  $this->response->error($value, 401);
+                return  response($value, 401);
             }
         }
 
         $taskId = intval($request->get('id'));
-        $task = CrawlTask::with('setting')->findOrFail($taskId);
+        $task = CrawlTask::with('setting')->find($taskId);
         $data = [];
         if ($task) {
             $data = $task->toArray();

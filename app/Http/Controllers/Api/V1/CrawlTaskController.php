@@ -91,8 +91,20 @@ class CrawlTaskController extends Controller
      */
     public function generateScript(Request $request)
     {
-        $taskId = intval($request->get('id'));
-        $params = ['id' => $taskId];
+        $validator = Validator::make($request->all(), [
+            'id' => 'string|nullable',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return  response($value, 401);
+            }
+        }
+        $params = [
+            'id' => intval($request->get('id')),
+        ];
+
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/crawl/task/generate_script', $params);
         if ($data['status_code'] == 401) {
@@ -102,7 +114,7 @@ class CrawlTaskController extends Controller
         if ($data['data']) {
             $result = $data['data'];
         }
-        return $result;
+        return $this->resObjectGet($result, 'crawl_task.generate_script', $request->path());
     }
 
     /**
