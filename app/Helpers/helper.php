@@ -15,3 +15,12 @@ if (!function_exists('generateScript')) {
         return true;
     }
 }
+    public function createLog($filename = null, $content='')
+    {
+        if(file_put_contents($filename, $content,FILE_APPEND)){
+            return  "写入成功。<br />";
+        }
+        if($data = file_get_contents($file)){
+            return  "写入文件的内容是：$data";
+        }
+    }
