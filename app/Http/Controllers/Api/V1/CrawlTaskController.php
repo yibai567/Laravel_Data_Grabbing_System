@@ -132,10 +132,6 @@ class CrawlTaskController extends Controller
         ];
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/crawl/task/execute', $params);
-        $res = [];
-        if ($data['data']) {
-            $res = $data['data'];
-        }
-        return $this->resObjectGet($res, 'crawl_task.generate_script', $request->path());
+        return response($data, 200);
     }
 }

@@ -145,7 +145,7 @@ class CrawlTaskController extends Controller
                 return response($value, 401);
             }
         }
-        $taskId = intval($request->get('task_id'));
+        $taskId = intval($request->get('id'));
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->get('internal_api/basic/crawl/task?id=' . $taskId);
         if ($data['status_code'] == 401) {
@@ -153,7 +153,7 @@ class CrawlTaskController extends Controller
         }
 
         $task = $data['data'];
-        $scriptFile = CrawlTask::SCRIPT_PATH . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $task->id . '_' . $task->script_last_generate_time . '.js';
+        $scriptFile = CrawlTask::SCRIPT_PATH . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $taskId . '_' . $task['script_last_generate_time'] . '.js';
         if (!file_exists($scriptFile)) {
             return response('脚本文件不存在', 401);
         }
