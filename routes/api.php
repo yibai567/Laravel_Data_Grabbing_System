@@ -1,25 +1,32 @@
 <?php
 
-use Illuminate\Http\Request;
+$api = app('Dingo\Api\Routing\Router');
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
+$api->version(
+    'v1',
+    ['namespace' => 'App\Http\Controllers\InternalAPI'],
+    function (Dingo\Api\Routing\Router $api) {
+        $api->group(['prefix' => 'internal_api'], function($api){
+            $api->group(['prefix'=>'basic', 'namespace' => 'Basic'], function($api){
+                $api->post('/crawl/task', 'CrawlTaskController@create');
+                $api->post('/crawl/task/status','CrawlTaskController@updateStatus');
+                $api->post('/crawl/result', 'CrawlResultController@create');
+            });
+            $api->post('/crawl/task', 'CrawlTaskController@create');
+            $api->post('/crawl/task/status','CrawlTaskController@updateStatus');
+            $api->post('/crawl/result', 'CrawlResultController@create');
+        });
+    }
+);
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-//创建抓取任务接口
-Route::prefix('crawl')->namespace('Crawl')->group(function(){
-    Route::post('task', 'CrawlTaskController@create');
-    Route::post('task', 'CrawlTaskController@create');
-    Route::post('response/send', 'CrawlResponseController@send');
-});
+$api->version(
+    'v1',
+    ['namespace' => 'App\Http\Controllers\Api'],
+    function (Dingo\Api\Routing\Router $api) {
+        $api->group(['prefix'=>'v1', 'namespace' => 'V1'], function($api){
+            $api->post('/crawl/task', 'CrawlTaskController@create');
+            $api->post('/crawl/task/status','CrawlTaskController@updateStatus');
+            $api->post('/crawl/result', 'CrawlResultController@create');
+        });
+    }
+);
