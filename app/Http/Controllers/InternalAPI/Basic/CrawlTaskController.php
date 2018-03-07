@@ -7,6 +7,7 @@ use App\Models\CrawlTask;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\InternalAPI\Controller;
+use Illuminate\Support\Facades\Validator;
 
 class CrawlTaskController extends Controller
 {
@@ -33,13 +34,19 @@ class CrawlTaskController extends Controller
      */
     public function updateStatus(Request $request)
     {
-        $taskId = intval($request->get('task_id'));
-        $status = intval($request->get('status'));
+        $validator = Validator::make($request->all(), [
+            "id" => "integer|required",
+            "status" => "integer|required"
+        ]);
 
-        $task = CrawlTask::findOrFail($taskId);
-        if (empty($task)) {
-            return response('任务不存在', 404);
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return  $this->response->error($value, 401);
+            }
         }
+        $taskId = intval($request->get('id'));
+        $status = intval($request->get('status'));
         $statusArr = [
             CrawlTask::IS_INIT,
             CrawlTask::IS_TEST_SUCCESS,
@@ -52,13 +59,74 @@ class CrawlTaskController extends Controller
             return response('status 参数错误', 401);
         }
 
-        if ($status == $task->status) {
-            return response('status 未做更改', 401);
+        $task = CrawlTask::findOrFail($taskId);
+        $data = [];
+        if ($task) {
+            $data = $task->toArray();
+        }
+        if ($task->status !== $status) {
+            $task->status = $status;
+            $task->save();
         }
 
-        $task->status = $status;
+        return $this->resObjectGet($data, 'crawl_task', $request->path());
+    }
+
+    /**
+     * 获取任务详情
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function retrieve(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "id" => "nullable|integer|min:1",
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return  $this->response->error($value, 401);
+            }
+        }
+
+        $taskId = intval($request->get('id'));
+        $task = CrawlTask::with('setting')->findOrFail($taskId);
+        $data = [];
+        if ($task) {
+            $data = $task->toArray();
+        }
+        return $this->resObjectGet($data, 'crawl_task', $request->path());
+    }
+
+    /**
+     * 更新脚本最后更新时间
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateScriptLastGenerateTime(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "id" => "nullable|integer",
+            "script_last_generate_time" => "nullable|integer"
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return  $this->response->error($value, 401);
+            }
+        }
+
+        $taskId = intval($request->get('id'));
+        $scriptLastGenerateTime = intval($request->get('script_last_generate_time'));
+        if (empty($scriptLastGenerateTime)) {
+            $scriptLastGenerateTime = time();
+        }
+        $task = CrawlTask::findOrFail($taskId);
+        $task->script_last_generate_time = $scriptLastGenerateTime;
         $task->save();
-        Log::info('task ' . $task->id . '状态更新成功, 当前状态为 ' . $task->status);
-        return $this->resObjectGet($task, 'crawl_task', $request->path());
+        $data = $task->toArray();
+        return $this->resObjectGet($data, 'crawl_task', $request->path());
     }
 }

@@ -7,11 +7,16 @@ use Illuminate\Http\Request;
 
 class CrawlTaskController extends Controller
 {
+    /**
+     * 创建任务接口
+     * @param CrawlTaskCreateRequest $request
+     * @return array
+     */
     public function create(CrawlTaskCreateRequest $request)
     {
         $params = $request->postFillData();
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('basic/crawl/task', $params);
+        $data = $dispatcher->post('internal_api/crawl/task', $params);
         if ($data['status_code'] == 401) {
             return response('参数错误', 401);
         }
@@ -22,37 +27,60 @@ class CrawlTaskController extends Controller
         return $result;
     }
 
+    /**
+     * 更新状态接口
+     * @param Request $request
+     * @return mixed
+     */
     public function updateStatus(Request $request)
     {
         $taskId = intval($request->get('task_id'));
         $status = intval($request->get('status'));
-
-        $task = CrawlTask::findOrFail($taskId);
-        if (empty($task)) {
-            return $this->response->error('任务不存在', 404);
-        }
-        $statusArr = [
-            CrawlTask::IS_INIT,
-            CrawlTask::IS_TEST_SUCCESS,
-            CrawlTask::IS_TEST_ERROR,
-            CrawlTask::IS_START_UP,
-            CrawlTask::IS_PAUSE,
-            CrawlTask::IS_ARCHIEVE,
-        ];
-        if (!in_array($status, $statusArr)) {
-            return $this->response->error('status 参数错误', 401);
-        }
-
-        if ($status == $task->status) {
-            return $this->response->error('status 未做更改', 401);
-        }
-        $params = ['task_id' => $taskId, 'status' => $status];
+        $params = ['id' => $taskId, 'status' => $status];
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('basic/crawl/task', $params);
-        if ($data['status_code'] == 200) {
-            return $data['data'];
-        } else {
-            return $data;
+        $data = $dispatcher->post('internal_api/crawl/task/status', $params);
+        if ($data['status_code'] == 401) {
+            return response('参数错误', 401);
         }
+        $result = [];
+        if ($data['data']) {
+            $result = $data['data'];
+        }
+        return $result;
+    }
+
+    /**
+     * 生成脚本接口
+     * @param Request $request
+     * @return array
+     */
+    public function generateScript(Request $request)
+    {
+        $taskId = intval($request->get('id'));
+        $params = ['id' => $taskId];
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $data = $dispatcher->post('internal_api/crawl/task/generate_script', $params);
+        if ($data['status_code'] == 401) {
+            return response('参数错误', 401);
+        }
+        $result = [];
+        if ($data['data']) {
+            $result = $data['data'];
+        }
+        return $result;
+    }
+
+    /**
+     * 执行脚本接口
+     * @param Request $request
+     * @return mixed
+     */
+    public function execute(Request $request)
+    {
+        $taskId = intval($request->get('id'));
+        $params = ['id' => $taskId];
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $data = $dispatcher->post('internal_api/crawl/task/execute', $params);
+        return $data;
     }
 }

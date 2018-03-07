@@ -21,4 +21,9 @@ class CrawlResultController extends Controller
         }
         return $result;
     }
+
+    public function pushList()
+    {
+
+    }
 }

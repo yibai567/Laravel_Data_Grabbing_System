@@ -23,6 +23,7 @@ class CreateTCrawlTaskTable extends Migration
             $table->unsignedTinyInteger('status')->nullable()->comment('状态： 1、未启动 2、测试成功 3、测试失败 4、启动中 5、已停止 6、归档');
             $table->unsignedTinyInteger('response_type')->nullable()->comment('响应类型 1、API（默认只支持）2、邮件 3、短信 4、企业微信');
             $table->string('response_url', 100)->nullable()->comment('发送接口地址');
+            $table->string('keywords', 100)->nullable()->comment('关键词');
             $table->string('response_params', 50)->nullable()->comment('参数');
             $table->text('test_result')->nullable()->comment('测试结果');
             $table->dateTime('test_time')->nullable()->comment('测试时间');

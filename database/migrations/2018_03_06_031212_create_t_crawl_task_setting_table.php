@@ -24,6 +24,8 @@ class CreateTCrawlTaskSettingTable extends Migration
             $table->unsignedTinyInteger('content_type')->nullable()->comment('内容类型1、list 2、content');
             $table->unsignedTinyInteger('is_proxy')->nullable()->comment('是否需要代理 1、需要代理 2、不需要代理');
             $table->unsignedTinyInteger('response_type')->nullable()->comment('响应类型 1、API（默认只支持）2、邮件 3、短信 4、企业微信');
+            $table->text('content')->nullable()->comment('抓取模版内容');
+            $table->unsignedTinyInteger('type')->nullable()->comment('抓取模版类型 1 通用模版 2自定义模版');
             $table->unsignedTinyInteger('status')->nullable()->comment('状态 1、可用 2、不可用');
             $table->timestamps();
             $table->softDeletes();
