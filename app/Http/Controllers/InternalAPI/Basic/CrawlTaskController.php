@@ -16,12 +16,35 @@ class CrawlTaskController extends Controller
      * @param CrawlTaskCreateRequest $request
      * @return json
      */
-    public function create(CrawlTaskCreateRequest $request)
+    public function create(Request $request)
     {
-        $data = $request->postFillData();
-        if (empty($data)) {
-            return response('返回数据为空', 404);
+        $validator = Validator::make($request->all(), [
+            'name' => 'string|nullable',
+            'description' => 'string|nullable',
+            'resource_url' => 'required|string|nullable',
+            'cron_type' => 'integer|nullable',
+            'selectors' => 'string|nullable',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return  $this->response->error($value, 401);
+            }
         }
+        $data = [
+            'name' => $request->name,
+            'description' => $request->description,
+            'resource_url' => $request->resource_url,
+            'cron_type' => intval($request->cron_type),
+            'selectors' => $request->selectors,
+            'status' => CrawlTask::IS_INIT,
+            'response_type' => CrawlTask::RESPONSE_TYPE_API,
+            'response_url' => '',
+            'response_params' => '',
+            'test_time' => null,
+            'test_result' => '',
+        ];
         $task = CrawlTask::create($data);
         return $this->resObjectGet($task, 'crawl_task', $request->path());
     }
@@ -59,11 +82,12 @@ class CrawlTaskController extends Controller
             return response('status 参数错误', 401);
         }
 
-        $task = CrawlTask::findOrFail($taskId);
+        $task = CrawlTask::find($taskId);
         $data = [];
-        if ($task) {
-            $data = $task->toArray();
+        if (empty($task)) {
+            return  $this->response->error('任务不存在', 401);
         }
+        $data = $task->toArray();
         if ($task->status !== $status) {
             $task->status = $status;
             $task->save();

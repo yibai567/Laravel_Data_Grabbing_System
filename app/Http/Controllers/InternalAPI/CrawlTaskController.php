@@ -6,12 +6,39 @@ use App\Http\Requests\CrawlTaskCreateRequest;
 use App\Models\CrawlSetting;
 use App\Models\CrawlTask;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CrawlTaskController extends Controller
 {
-    public function create(CrawlTaskCreateRequest $request)
+    /**
+     * 创建任务
+     * @param Request $request
+     * @return array
+     */
+    public function create(Request $request)
     {
-        $params = $request->postFillData();
+        $validator = Validator::make($request->all(), [
+            'name' => 'string|nullable',
+            'description' => 'string|nullable',
+            'resource_url' => 'string|nullable',
+            'cron_type' => 'integer|nullable',
+            'selectors' => 'string|nullable',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return  $this->response->error($value, 401);
+            }
+        }
+        $params = [
+            'name' => $request->name,
+            'description' => $request->description,
+            'resource_url' => $request->resource_url,
+            'cron_type' => intval($request->cron_type),
+            'selectors' => $request->selectors,
+        ];
+
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/basic/crawl/task', $params);
         if ($data['status_code'] == 401) {
@@ -21,7 +48,7 @@ class CrawlTaskController extends Controller
         if ($data['data']) {
             $result = $data['data'];
         }
-        return $result;
+        return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 
     /**
