@@ -58,22 +58,37 @@ class CrawlTaskController extends Controller
      */
     public function updateStatus(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            "id" => "integer|required",
+            "status" => "integer|required"
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return  $this->response->error($value, 401);
+            }
+        }
         $taskId = intval($request->get('id'));
         $status = intval($request->get('status'));
         if ($status == CrawlTask::IS_INIT) {
             // 生成脚本
-            $params = ['task_id' => $taskId];
+            $params = ['id' => $taskId];
             $dispatcher = app('Dingo\Api\Dispatcher');
             $dispatcher->post('internal_api/crawl/task/generate_script', $params);
         }
-        $params = ['task_id' => $taskId, 'status' => $status];
+        $params = ['id' => $taskId, 'status' => $status];
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal_api/basic/crawl/task', $params);
-        if ($data['status_code'] == 200) {
-            return $data['data'];
-        } else {
-            return $data;
+        $data = $dispatcher->post('internal_api/basic/crawl/task/status', $params);
+        if ($data['status_code'] !== 200) {
+            return response('更新失败', $data['status_code']);
         }
+        $res = [];
+        if ($data['data']) {
+            $res = $data['data'];
+        }
+
+        return $this->resObjectGet($res, 'crawl_task.updateStatus', $request->path());
     }
 
     /**

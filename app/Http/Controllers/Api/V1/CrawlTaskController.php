@@ -68,7 +68,7 @@ class CrawlTaskController extends Controller
             }
         }
         $params = [
-            'name' => intval($request->get('name')),
+            'id' => intval($request->get('id')),
             'status' => intval($request->get('status')),
         ];
 
