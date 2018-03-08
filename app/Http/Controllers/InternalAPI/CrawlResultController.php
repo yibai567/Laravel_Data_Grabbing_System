@@ -59,8 +59,50 @@ class CrawlResultController extends Controller
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
 
-    public function pushList()
+    public function pushList(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'data' => 'string',
+        ]);
 
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return response($value, 401);
+            }
+        }
+        $params = [
+            'data' => $request->data
+        ];
+        $new_data = [];
+        foreach ($params['data'] as $key => &$value) {
+            $pos  = strpos($value['original_data'] , $value['setting_keywords']);
+            if ( $pos  !==  false ) {
+                $result['crawl_task_id'] = $value['crawl_task_id'];
+                $result['original_data'] =  $value['original_data'];
+                $data['task_start_time'] =  $value['task_start_time'];
+                $data['task_end_time'] =  $value['task_end_time'];
+                $result['task_url'] =  $value['task_url'];
+                $data['format_data'] =  $value['format_data'];
+                $data['setting_selectors'] =  $value['setting_selectors'];
+                $result['setting_keywords'] =  $value['setting_keywords'];
+                $data['setting_data_type'] =  $value['setting_data_type'];
+                $new_data[] = $result;
+            }
+        }
+
+        $newResult = [];
+        if (empty($new_data)) {
+            return $newResult;
+        }
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $resultData = $dispatcher->post('internal_api/basic/crawl/result/push_by_list', $new_data);
+        if ($resultData['status_code'] == 401) {
+            return response('参数错误', 401);
+        }
+        if ($resultData['data']) {
+            $result = $resultData['data'];
+        }
+        return $this->resObjectGet($resultData, 'crawl_result', $request->path());
     }
 }

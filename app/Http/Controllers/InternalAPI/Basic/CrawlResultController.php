@@ -69,20 +69,20 @@ class CrawlResultController extends Controller
         DB::beginTransaction();
         foreach ($data as $item) {
             if (!$this->isTaskExist($item['crawl_task_id'], $item['task_url'])) {
-                $items[] = $item;
+                $items[] = [
+                    'crawl_task_id' => $item['crawl_task_id'],
+                    'original_data' => $item['original_data'],
+                    'task_start_time' => $item['task_start_time'],
+                    'task_end_time' => $item['task_end_time'],
+                    'task_url' => $item['task_url'],
+                    'format_data' => $item['format_data'],
+                    'setting_selectors' => $item['setting_selectors'],
+                    'setting_keywords' => $item['setting_keywords'],
+                    'setting_data_type' => $item['setting_data_type'],
+                    'status' => CrawlResult::IS_UNTREATED,
+                ];
             }
-            $items[] = [
-                'crawl_task_id' => $item['crawl_task_id'],
-                'original_data' => $item['original_data'],
-                'task_start_time' => $item['task_start_time'],
-                'task_end_time' => $item['task_end_time'],
-                'task_url' => $item['task_url'],
-                'format_data' => $item['format_data'],
-                'setting_selectors' => $item['setting_selectors'],
-                'setting_keywords' => $item['setting_keywords'],
-                'setting_data_type' => $item['setting_data_type'],
-                'status' => CrawlResult::IS_UNTREATED,
-            ];
+
         }
         $result = CrawlResult::insert($items);
         DB::commit();
