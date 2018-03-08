@@ -173,7 +173,7 @@ class CrawlTaskController extends Controller
             return response('脚本文件不存在', 401);
         }
         $command = 'casperjs ' . $scriptFile . ' --env=test';
-        exec($command, $output, $return);
-        return response($output, 200);
+        $output = shell_exec($command);
+        return $this->resObjectGet($output, 'crawl_task.execute', $request->path());
     }
 }
