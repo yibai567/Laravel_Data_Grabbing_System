@@ -116,9 +116,11 @@ class CrawlTaskController extends Controller
         if ($data['status_code'] == 401) {
             return response('参数错误', 401);
         }
+        if (empty($data['data'])) {
+            return response('任务不存在', 401);
+        }
 
         $task = $data['data'];
-
         $now = time();
         $scriptFile = CrawlTask::SCRIPT_PATH . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $task['id'] . '_' . $now . '.js';
 
