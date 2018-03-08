@@ -14,6 +14,7 @@ return [
     */
 
     'default' => env('LOG_CHANNEL', 'stack'),
+    'application_name' => env('LOG_APPLICATION_NAME', 'jinse_webmagic'),
 
     /*
     |--------------------------------------------------------------------------
@@ -32,7 +33,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single'],
+            'channels' => ['daily'],
         ],
 
         'single' => [
@@ -44,8 +45,9 @@ return [
         'daily' => [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
+            'tap' => [App\Logging\CustomizeFormatter::class],
             'level' => 'debug',
-            'days' => 7,
+            'days' => 30,
         ],
 
         'slack' => [

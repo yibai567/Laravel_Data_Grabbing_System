@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Requests\CrawlResultCreateRequest;
+use Illuminate\Http\Request;
+use Log;
 
 class CrawlResultController extends Controller
 {
@@ -15,4 +17,5 @@ class CrawlResultController extends Controller
     {
 
     }
+
 }
