@@ -132,9 +132,6 @@ class CrawlTaskController extends Controller
         ];
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/crawl/task/execute', $params);
-        if ($data['status_code'] == 401) {
-            return response('没有接口文件', 401);
-        }
-        return $this->resObjectGet($data['data'], 'crawl_task.execute', $request->path());
+        return $this->resObjectGet($data, 'crawl_task.execute', $request->path());
     }
 }
