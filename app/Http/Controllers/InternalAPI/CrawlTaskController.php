@@ -157,7 +157,7 @@ class CrawlTaskController extends Controller
         if (!file_exists($scriptFile)) {
             return response('脚本文件不存在', 401);
         }
-        $command = 'casperjs ' . $scriptFile;
+        $command = 'casperjs ' . $scriptFile . ' --env=test';
         exec($command, $output, $return);
         return response($output, 200);
     }
