@@ -15,6 +15,7 @@ class CrawlTaskController extends Controller
      */
     public function create(Request $request)
     {
+        infoLog('抓取平台任务添加业务API开始', $request);
         $validator = Validator::make($request->all(), [
             'name' => 'string|nullable',
             'description' => 'string|nullable',
@@ -22,13 +23,17 @@ class CrawlTaskController extends Controller
             'cron_type' => 'integer|nullable',
             'selectors' => 'string|nullable',
         ]);
-
+        infoLog('抓取平台任务添加业务API参数验证', $validator);
         if ($validator->fails()) {
+            infoLog('抓取平台任务添加业务API参数验证失败', $validator->fails());
             $errors = $validator->errors();
+            infoLog('抓取平台任务添加业务API参数验证失败', $errors);
             foreach ($errors->all() as $value) {
+                infoLog('抓取平台任务添加业务API参数验证失败', $value);
                 return  response($value, 401);
             }
         }
+        infoLog('抓取平台任务添加业务API参数验证结束');
         $params = [
             'name' => $request->name,
             'description' => $request->description,
@@ -36,16 +41,20 @@ class CrawlTaskController extends Controller
             'cron_type' => intval($request->cron_type),
             'selectors' => $request->selectors,
         ];
-
+        infoLog('抓取平台任务添加业务API参数过滤', $params);
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/crawl/task', $params);
+        infoLog('抓取平台任务添加业务API调用内部创建任务接口internal_api/crawl/task', $params);
         if ($data['status_code'] == 401) {
+            infoLog('抓取平台任务添加业务API调用内部创建任务接口internal_api/crawl/task失败', $data);
             return response('参数错误', 401);
         }
+        infoLog('抓取平台任务添加业务API调用内部创建任务接口internal_api/crawl/task完成', $data);
         $result = [];
         if ($data['data']) {
             $result = $data['data'];
         }
+        infoLog('抓取平台任务添加业务API完成', $result);
         return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 
