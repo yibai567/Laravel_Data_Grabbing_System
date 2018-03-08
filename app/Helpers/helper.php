@@ -16,19 +16,27 @@ if (!function_exists('generateScript')) {
     }
 }
 
-if (!function_exists('createLog')) {
-    function createLog($filename = null, $content='')
+/**
+ * 记录信息日志
+ * @message 内容描述
+ * @params 参数
+ */
+if (!function_exists('infoLog')) {
+    function infoLog($message, $params = [])
     {
-        if ($filename && $content) {
-            if (!is_dir(dirname($filename))) {
-                mkdir(dirname($filename));
-            }
+        new Log();
+        $extend = array(
+            'params' => $params,
+        );
+        Log::info($message, $extend);
+    }
+}
 
-            if(file_put_contents($filename, $content)){
-                return true;
-            }
-            return false;
-        }
+if (!function_exists('otherLog')) {
+    function otherLog($type = 'debug', $message)
+    {
+        new Log();
+        Log::$type($message);
     }
 }
 
