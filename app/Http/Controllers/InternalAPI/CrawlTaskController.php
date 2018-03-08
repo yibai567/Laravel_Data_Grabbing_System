@@ -120,7 +120,7 @@ class CrawlTaskController extends Controller
             $content = '';
         } else {
             $content = $task['setting']['content'];
-            str_replace($content, '{{{URL}}}', $task['resource_url']);
+            $content = str_replace('{{{URL}}}', $task['resource_url'], $content);
         }
         if (generateScript($scriptFile, $content)) {
             return response('脚本生成成功', 200);
