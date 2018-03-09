@@ -117,6 +117,13 @@ class CrawlTaskController extends Controller
             'id' => intval($request->get('id')),
         ];
 
+        $params = ['id' => $params['id']];
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $data = $dispatcher->post('internal_api/basic/crawl/task/update_script_file', $params);
+        if ($data['status_code'] == 401) {
+            return response('更新脚本失败', 401);
+        }
+
         //调用基础接口获取任务详情
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->get('internal_api/basic/crawl/task?id=' . $params['id']);
@@ -127,12 +134,6 @@ class CrawlTaskController extends Controller
             return response('任务不存在', 401);
         }
         $task = $data['data'];
-        $params = ['id' => $params['id']];
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal_api/basic/crawl/task/update_script_file', $params);
-        if ($data['status_code'] == 401) {
-            return response('更新脚本失败', 401);
-        }
         if ($task['setting']['type'] == CrawlSetting::TYPE_CUSTOM) {
             //自定义模版类型
             $content = '';
