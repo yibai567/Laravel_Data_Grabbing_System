@@ -30,7 +30,7 @@ class CrawlTaskController extends Controller
             infoLog('抓取平台任务添加业务API参数验证失败', $errors);
             foreach ($errors->all() as $value) {
                 infoLog('抓取平台任务添加业务API参数验证失败', $value);
-                return  response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         infoLog('抓取平台任务添加业务API参数验证结束');
@@ -47,7 +47,7 @@ class CrawlTaskController extends Controller
         infoLog('抓取平台任务添加业务API调用内部创建任务接口internal_api/crawl/task', $params);
         if ($data['status_code'] == 401) {
             infoLog('抓取平台任务添加业务API调用内部创建任务接口internal_api/crawl/task失败', $data);
-            return response('参数错误', 401);
+            return $this->resError(401, '参数错误');
         }
         infoLog('抓取平台任务添加业务API调用内部创建任务接口internal_api/crawl/task完成', $data);
         $result = [];
@@ -77,7 +77,7 @@ class CrawlTaskController extends Controller
             infoLog('抓取平台更新状态参数验证失败', $errors);
             foreach ($errors->all() as $value) {
                 infoLog('抓取平台更新状态参数验证错误信息', $value);
-                return  response($value, 401);
+                return $this->resError(401, $value);
             }
             infoLog('抓取平台更新状态接口参数验证结束', $request);
         }
@@ -92,7 +92,7 @@ class CrawlTaskController extends Controller
         infoLog('抓取平台更新状态接口调用更新任务状态接口返回成功', $data);
         if ($data['status_code'] == 401) {
             infoLog('抓取平台更新状态接口调用更新任务状态接口返回错误码', $data['status_code']);
-            return response('参数错误', 401);
+            return $this->resError(401, '参数错误');
         }
         infoLog('抓取平台更新状态接口调用更新任务状态接口正常情况', $data);
         $result = [];
@@ -123,7 +123,7 @@ class CrawlTaskController extends Controller
             infoLog('抓取平台生成脚本文件接口参数验证失败错误信息', $errors);
             foreach ($errors->all() as $value) {
                 infoLog('抓取平台生成脚本文件接口参数验证失败错误值', $value);
-                return  response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         infoLog('抓取平台生成脚本文件接口参数验证结束');
@@ -134,7 +134,7 @@ class CrawlTaskController extends Controller
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/crawl/task/generate_script', $params);
         if ($data['status_code'] == 401) {
-            return response('生成脚本失败', 401);
+            return $this->resError(401, '生成脚本失败');
         }
         $result = [];
         if ($data['data']) {
@@ -164,7 +164,7 @@ class CrawlTaskController extends Controller
             infoLog('抓取平台执行脚本接口参数验证失败错误信息', $errors);
             foreach ($errors->all() as $value) {
                 infoLog('抓取平台执行脚本接口参数验证失败错误值', $value);
-                return  response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         infoLog('抓取平台执行脚本接口参数验证结束');
@@ -203,7 +203,7 @@ class CrawlTaskController extends Controller
             infoLog('抓取平台启动任务接口参数验证失败错误信息', $errors);
             foreach ($errors->all() as $value) {
                 infoLog('抓取平台启动任务接口参数验证失败错误值', $value);
-                return  response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         infoLog('抓取平台启动任务接口参数验证结束');
@@ -242,7 +242,7 @@ class CrawlTaskController extends Controller
             infoLog('抓取平台停止任务接口参数验证失败错误信息', $errors);
             foreach ($errors->all() as $value) {
                 infoLog('抓取停止任务任务接口参数验证失败错误值', $value);
-                return  response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         infoLog('抓取平台停止任务接口参数验证结束');

@@ -19,7 +19,8 @@ class CrawlTask extends Model
     const RESPONSE_TYPE_WEWORK = 4; //企业微信响应
 
     const SCRIPT_PREFIX = 'grab';
-    const SCRIPT_PATH = '/alidata/www/crawl_platform_script/script';
+//    const SCRIPT_PATH = '/alidata/www/crawl_platform_script/script';
+    const SCRIPT_PATH = '/Users/Pascal/Work/code/projects/jinse-webmagic/storage/scripts';
     protected $table = 't_crawl_task';
 
     protected $fillable = [

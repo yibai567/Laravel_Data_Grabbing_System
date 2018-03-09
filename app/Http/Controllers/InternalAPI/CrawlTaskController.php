@@ -42,7 +42,7 @@ class CrawlTaskController extends Controller
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/basic/crawl/task', $params);
         if ($data['status_code'] == 401) {
-            return response('参数错误', 401);
+            return $this->resError(401, '参数错误');
         }
         $result = [];
         if ($data['data']) {
@@ -66,7 +66,7 @@ class CrawlTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return  $this->response->error($value, 401);
+                return $this->resError(401, $value);
             }
         }
         $taskId = intval($request->get('id'));
@@ -81,7 +81,7 @@ class CrawlTaskController extends Controller
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/basic/crawl/task/status', $params);
         if ($data['status_code'] !== 200) {
-            return response('更新失败', $data['status_code']);
+            return $this->resError($data['status_code'], '更新失败');
         }
         $res = [];
         if ($data['data']) {
@@ -109,7 +109,7 @@ class CrawlTaskController extends Controller
             infoLog('抓取平台生成脚本文件接口参数验证失败错误信息', $errors);
             foreach ($errors->all() as $value) {
                 infoLog('抓取平台生成脚本文件接口参数验证失败错误值', $value);
-                return  response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         infoLog('抓取平台生成脚本文件接口参数验证结束');
@@ -121,17 +121,17 @@ class CrawlTaskController extends Controller
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/basic/crawl/task/update_script_file', $params);
         if ($data['status_code'] == 401) {
-            return response('更新脚本失败', 401);
+            return $this->resError(401, '更新脚本失败');
         }
 
         //调用基础接口获取任务详情
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->get('internal_api/basic/crawl/task?id=' . $params['id']);
         if ($data['status_code'] == 401) {
-            return response('参数错误', 401);
+            return $this->resError(401, '参数错误');
         }
         if (empty($data['data'])) {
-            return response('任务不存在', 401);
+            return $this->resError(401, '任务不存在');
         }
         $task = $data['data'];
         if ($task['setting']['type'] == CrawlSetting::TYPE_CUSTOM) {
@@ -148,7 +148,7 @@ class CrawlTaskController extends Controller
         }
 
         if (!generateScript($task['script_file'], $content)) {
-            return response('脚本生成失败', 402);
+            return $this->resError(402, '脚本生成失败');
         }
         return $this->resObjectGet('脚本生成成功', 'crawl_task.generate_script', $request->path());
         infoLog('抓取平台生成脚本文件接口完成');
@@ -172,7 +172,7 @@ class CrawlTaskController extends Controller
             infoLog('抓取平台执行接口参数验证失败错误信息', $errors);
             foreach ($errors->all() as $value) {
                 infoLog('抓取平台执行接口参数验证失败错误值', $value);
-                return  response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         infoLog('抓取平台生成脚本文件接口参数验证结束');
@@ -181,11 +181,11 @@ class CrawlTaskController extends Controller
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->get('internal_api/basic/crawl/task?id=' . $taskId);
         if ($data['status_code'] == 401) {
-            return response('参数错误', 401);
+            return $this->resError(401, '参数错误');
         }
         $task = $data['data'];
         if (!file_exists($task['script_file'])) {
-            return response('脚本文件不存在', 401);
+            return $this->resError(401, '脚本文件不存在');
         }
         $command = 'casperjs ' . $task['script_file'] . ' --env=test';
         $output = shell_exec($command);
@@ -206,7 +206,7 @@ class CrawlTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         // 获取任务详情
@@ -214,7 +214,7 @@ class CrawlTaskController extends Controller
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->get('internal_api/basic/crawl/task?id=' . $taskId);
         if ($data['status_code'] == 401) {
-            return response('参数错误', 401);
+            return $this->resError(401, '参数错误');
         }
         $task = $data['data'];
         //创建节点任务
@@ -237,7 +237,7 @@ class CrawlTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         $taskId = intval($request->id);

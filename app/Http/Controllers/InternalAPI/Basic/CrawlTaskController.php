@@ -27,7 +27,7 @@ class CrawlTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return  response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         $data = [
@@ -63,7 +63,7 @@ class CrawlTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return  $this->response->error($value, 401);
+                return $this->resError(401, $value);
             }
         }
         $taskId = intval($request->get('id'));
@@ -77,13 +77,13 @@ class CrawlTaskController extends Controller
             CrawlTask::IS_ARCHIEVE,
         ];
         if (!in_array($status, $statusArr)) {
-            return response('status 参数错误', 401);
+            return $this->resError(401, 'status 参数错误');
         }
 
         $task = CrawlTask::find($taskId);
         $data = [];
         if (empty($task)) {
-            return  $this->response->error('任务不存在', 401);
+            return $this->resError(401, '任务不存在');
         }
         $data = $task->toArray();
         if ($task->status !== $status) {
@@ -108,7 +108,7 @@ class CrawlTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return  response($value, 401);
+                return $this->resError(401, $value);
             }
         }
 
@@ -136,7 +136,7 @@ class CrawlTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return  $this->response->error($value, 401);
+                return $this->resError(401, $value);
             }
         }
 
@@ -172,17 +172,17 @@ class CrawlTaskController extends Controller
             infoLog('抓取平台基础接口更新脚本文件接口参数验证错误', $errors);
             foreach ($errors->all() as $value) {
                 infoLog('抓取平台基础接口更新脚本文件接口参数验证错误详情', $value);
-                return  $this->response->error($value, 401);
+                return $this->resError(401, $value);
             }
             infoLog('抓取平台基础接口更新脚本文件接口参数验证错误完成');
         }
         infoLog('抓取平台基础接口更新脚本文件接口参数验证完成');
         $taskId = intval($request->get('id'));
-        $scriptFile = CrawlTask::SCRIPT_PATH . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $taskId . '_' . date('Y-m-d-His') . '.js';
+        $scriptFile = CrawlTask::SCRIPT_PREFIX . '_' . $taskId . '_' . date('YmdHis') . '.js';
         infoLog('抓取平台基础接口更新脚本文件接口参数准备', [$taskId, $scriptFile]);
         $task = CrawlTask::find($taskId);
         if (empty($task)) {
-            response('任务不存在', 401);
+            return $this->resError(401, '任务不存在');
         }
         if ($task->script_file) {
             $task->last_script_file = $task->script_file;

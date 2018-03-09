@@ -33,4 +33,22 @@ class Controller extends BaseController
         $result = $service->filterResponseForList($object, $type, $url);
         return response()->json($result);
     }
+
+    /**
+     * 返回错误信息
+     * @param $status_code
+     * @param $message
+     * @param null $data
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function resError($status_code, $message, $data = null)
+    {
+        $result = [
+            'status_code' => $status_code,
+            'message' => $message,
+            'data' => $data,
+        ];
+
+        return response()->json($result);
+    }
 }

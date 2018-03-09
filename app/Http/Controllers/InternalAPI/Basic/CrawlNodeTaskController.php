@@ -30,7 +30,7 @@ class CrawlNodeTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         $data = [
@@ -61,7 +61,7 @@ class CrawlNodeTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         $data = [
@@ -69,7 +69,7 @@ class CrawlNodeTaskController extends Controller
         ];
         $nodeTask = CrawlNodeTask::find($data['id']);
         if (empty($nodeTask)) {
-            return response('找不到节点信息', 401);
+            return $this->resError(401, '找不到节点信息');
         }
         if ($nodeTask['status'] !== CrawlNodeTask::IS_STOP) {
             $nodeTask->status = CrawlNodeTask::IS_STOP;
@@ -92,7 +92,7 @@ class CrawlNodeTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         $data = [
@@ -101,14 +101,12 @@ class CrawlNodeTaskController extends Controller
 
         $node = CrawlNodeTask::find($data['id']);
         if (empty($node)) {
-            return response('找不到节点信息', 401);
+            return $this->resError(401, '找不到节点信息');
         }
         if ($node['status'] !== CrawlNodeTask::IS_STARTUP) {
             $node->status = CrawlNodeTask::IS_STARTUP;
             $node->save();
         }
-
-
         return $this->resObjectGet($node, 'crawl_node_task.start', $request->path());
     }
 
@@ -126,7 +124,7 @@ class CrawlNodeTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         $crawlTaskId = $request->crawl_task_id;

@@ -23,7 +23,7 @@ class CrawlNodeTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         $taskId = intval($request->crawl_task_id);
@@ -40,20 +40,20 @@ class CrawlNodeTaskController extends Controller
         $dispatcher = app('Dingo\Api\Dispatcher');
         $res = $dispatcher->get('internal_api/basic/crawl/node/get_usable_node');
         if ($res['status_code'] === 401) {
-            return response(['message' => '没有可用Node节点'], 401);
+            return $this->resError(401, '没有可用Node节点');
         }
         $node = $res['data'];
         if (empty($node) && empty($node['id'])) {
-            return response('没有可用的Node节点', 401);
+            return $this->resError(401, '没有可用Node节点');
         }
         $dispatcher = app('Dingo\Api\Dispatcher');
         $res = $dispatcher->get('internal_api/basic/crawl/task?id=' . $taskId);
         if ($res['status_code'] === 401 ) {
-            return response('任务不存在', 401);
+            return $this->resError(401, '任务不存在');
         }
         $task = $res['data'];
         if (!file_exists($task['script_file'])) {
-            return response('脚本文件不存在', 401);
+            return $this->resError(401, '脚本文件不存在');
         }
         $scriptFile = $task['script_file'];
         $cmdStartup = 'docker ' . $scriptFile . ' --ip=' . $node['ip'] . ' start';
@@ -101,7 +101,7 @@ class CrawlNodeTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         $params = ['id' => intval($request->id)];
@@ -130,14 +130,14 @@ class CrawlNodeTaskController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                return response($value, 401);
+                return $this->resError(401, $value);
             }
         }
         $params = ['id' => intval($request->id)];
         $dispatcher = app('Dingo\Api\Dispatcher');
         $res = $dispatcher->post('internal_api/basic/crawl/node_task/stop', $params);
         if ($res['status_code'] === 401) {
-            return response(['message' => '没有可用Node节点'], 401);
+            return $this->resError(401, '没有可用Node节点');
         }
         if ($res['data']) {
             $res = $res['data'];
