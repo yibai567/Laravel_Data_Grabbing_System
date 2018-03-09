@@ -244,7 +244,7 @@ class CrawlTaskController extends Controller
             $item = $res['data'];
             $params = ['id' => $item['id']];
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $dispatcher->post('internal_api/basic/crawl/node_task/stop', $params);
+            $dispatcher->post('internal_api/crawl/node_task/stop', $params);
         }
         // 更新任务状态为停止
         $params = ['id' => $taskId, 'status' => CrawlTask::IS_PAUSE];

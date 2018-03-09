@@ -18,6 +18,7 @@ $api->version(
 
             $api->post('/crawl/node_task', 'CrawlNodeTaskController@create');
             $api->post('/crawl/node_task/stop', 'CrawlNodeTaskController@stopTask');
+            $api->post('/crawl/node_task/start', 'CrawlNodeTaskController@startTask');
 
 
             $api->group(['prefix'=>'basic', 'namespace' => 'Basic'], function($api){
