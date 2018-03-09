@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Validator;
 
 class CrawlResultController extends Controller
 {
+     // 1，默认，2测试
+    const ENV_DEFAULT = 1;
+    const ENV_TEST = 2;
+
     public function create(Request $request)
     {
         $result = [];
@@ -61,48 +65,80 @@ class CrawlResultController extends Controller
 
     public function pushList(Request $request)
     {
+        $result = $request->all();
+        //infoLog('[pushList] start', json_encode($result));
         $validator = Validator::make($request->all(), [
-            'data' => 'string',
+            'data' => 'nullable',
+            'crawl_task_id' => 'numeric|nullable',
+            'task_start_time' => 'date|nullable',
+            'task_end_time' => 'date|nullable',
+            'task_url' => 'string|nullable',
+            'setting_selectors' => 'string|nullable',
+            'setting_keywords' => 'string|nullable',
+            'setting_data_type' => 'numeric|nullable',
+            'env' => 'numeric|nullable',
         ]);
-
+        //infoLog('[pushList] $request->all()', $request->all());
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
+                //infoLog('[pushList] $validator->fails()', $value);
                 return response($value, 401);
             }
         }
+        $data = $request->data;
+        $env =  $request->env;
         $params = [
-            'data' => $request->data
+            'crawl_task_id' => $request->crawl_task_id,
+            'task_start_time' => $request->task_start_time,
+            'task_end_time' => $request->task_end_time,
+            'task_url' => $request->task_url,
+            'setting_selectors' => $request->setting_selectors,
+            'setting_keywords' => $request->setting_keywords,
+            'setting_data_type' => $request->setting_data_type,
         ];
-        $new_data = [];
-        foreach ($params['data'] as $key => &$value) {
-            $pos  = strpos($value['original_data'] , $value['setting_keywords']);
-            if ( $pos  !==  false ) {
-                $result['crawl_task_id'] = $value['crawl_task_id'];
-                $result['original_data'] =  $value['original_data'];
-                $data['task_start_time'] =  $value['task_start_time'];
-                $data['task_end_time'] =  $value['task_end_time'];
-                $result['task_url'] =  $value['task_url'];
-                $data['format_data'] =  $value['format_data'];
-                $data['setting_selectors'] =  $value['setting_selectors'];
-                $result['setting_keywords'] =  $value['setting_keywords'];
-                $data['setting_data_type'] =  $value['setting_data_type'];
-                $new_data[] = $result;
-            }
+
+        $result = [];
+        if (empty($data)) {
+            //infoLog('[pushList] $params["data"] empty!');
+            return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
 
-        $newResult = [];
-        if (empty($new_data)) {
-            return $newResult;
+        $params['original_data'] = json_encode($data);
+        $newData = [];
+        //  var_dump($data);
+        //$data = json_decode(json_encode($data), true);
+        // exit();
+       // $data = json_encode($data);
+        foreach ($data as $key => $value) {
+            $pos  = strpos($value['text'] , $params['setting_keywords']);
+            if ($pos !== false){
+                $newData[] = $value;
+            }
+        }
+        if (empty($newData)) {
+            //infoLog('[pushList] $newData empty!');
+            return $this->resObjectGet($result, 'crawl_result', $request->path());
+        }
+
+        $params['format_data'] = json_encode($newData);
+        //infoLog("+++++",$params);
+        if ($env == self::ENV_TEST) {
+            //infoLog('[pushList] $env 2');
+            return $this->resObjectGet($params, 'crawl_result', $request->path());
         }
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $resultData = $dispatcher->post('internal_api/basic/crawl/result/push_by_list', $new_data);
+
+        infoLog('internal_api params', json_encode($params));
+        $resultData = $dispatcher->post('internal_api/basic/crawl/result/push_by_list', $params = []);
         if ($resultData['status_code'] == 401) {
+            infoLog('[pushList] internal_api/crawl/result/push_list msg', $resultData['status_code']);
             return response('参数错误', 401);
         }
         if ($resultData['data']) {
             $result = $resultData['data'];
         }
-        return $this->resObjectGet($resultData, 'crawl_result', $request->path());
+        //infoLog('[pushList] end', $result);
+        return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
 }
