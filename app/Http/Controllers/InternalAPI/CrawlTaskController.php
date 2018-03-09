@@ -139,7 +139,12 @@ class CrawlTaskController extends Controller
             $content = '';
         } else {
             $content = $task['setting']['content'];
-            $content = str_replace('{{{URL}}}', $task['resource_url'], $content);
+            $content = str_replace('{{{crawl_task_id}}}', $task['id'], $content);
+//            $content = str_replace('{{{task_start_time}}}', '', $content);
+//            $content = str_replace('{{{task_end_time}}}', '', $content);
+            $content = str_replace('{{{setting_selectors}}}', $task['setting']['selectors'], $content);
+            $content = str_replace('{{{setting_keywords}}}', $task['setting']['keywords'], $content);
+            $content = str_replace('{{{setting_data_type}}}', $task['setting']['data_type'], $content);
         }
 
         if (!generateScript($task['script_file'], $content)) {

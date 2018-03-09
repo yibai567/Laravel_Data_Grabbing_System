@@ -210,12 +210,16 @@ class CrawlTaskController extends Controller
         $params = [
             'id' => intval($request->get('id')),
         ];
+        infoLog('抓取平台启动任务接口调用业务基础接口启动任务', $params);
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/crawl/task/startup', $params);
+        infoLog('抓取平台启动任务接口调用业务基础接口启动任务返回', $data);
         $res = [];
         if ($data['data']) {
             $res = $data['data'];
+            infoLog('抓取平台启动任务接口调用业务基础接口启动任务返回', $res);
         }
+        infoLog('抓取平台启动任务接口完成');
         return $this->resObjectGet($res, 'crawl_task.startup', $request->path());
     }
 
@@ -245,12 +249,16 @@ class CrawlTaskController extends Controller
         $params = [
             'id' => intval($request->get('id')),
         ];
+        infoLog('抓取平台停止任务接口调用基础业务接口停止任务', $params);
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/crawl/task/stop', $params);
+        infoLog('抓取平台停止任务接口调用基础业务接口停止任务返回数据', $data);
         $res = [];
         if ($data['data']) {
             $res = $data['data'];
+            infoLog('抓取平台停止任务接口调用基础业务接口停止任务返回数据', $res);
         }
+        infoLog('抓取平台停止任务接口');
         return $this->resObjectGet($res, 'crawl_task.stop', $request->path());
     }
 }
