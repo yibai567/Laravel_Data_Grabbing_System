@@ -27,16 +27,15 @@ class CrawlNodeTaskController extends Controller
             }
         }
         $taskId = intval($request->crawl_task_id);
+        $params = ['crawl_task_id' => $taskId];
         //停止指定任务id当前在运行的任务
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->get('internal_api/basic/crawl/node_task/list_startuped_task');
+        $res = $dispatcher->post('internal_api/basic/crawl/node_task/get_startuped_task_by_task_id', $params);
         if ($res['data']) {
-            $items = $res['data'];
-            foreach ($items as $item) {
-                $params = ['id' => $item['id']];
-                $dispatcher = app('Dingo\Api\Dispatcher');
-                $dispatcher->post('internal_api/crawl/node_task/stop', $params);
-            }
+            $item = $res['data'];
+            $params = ['id' => $item['id']];
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $dispatcher->post('internal_api/crawl/node_task/stop', $params);
         }
         $dispatcher = app('Dingo\Api\Dispatcher');
         $res = $dispatcher->get('internal_api/basic/crawl/node/get_usable_node');
@@ -148,7 +147,7 @@ class CrawlNodeTaskController extends Controller
         // 更新任务状态为停止
         $params = ['id' => $res['crawl_task_id'], 'status' => CrawlTask::IS_PAUSE];
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $dispatcher->post('internal_api/crawl/task/status', $params);
+        $res = $dispatcher->post('internal_api/crawl/task/status', $params);
 
         return $this->resObjectGet($result, 'crawl_node_task.start', $request->path());
     }

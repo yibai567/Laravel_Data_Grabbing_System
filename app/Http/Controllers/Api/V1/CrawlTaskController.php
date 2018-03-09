@@ -218,4 +218,39 @@ class CrawlTaskController extends Controller
         }
         return $this->resObjectGet($res, 'crawl_task.startup', $request->path());
     }
+
+    /**
+     * 停止任务接口
+     * @param Request $request
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function stop(Request $request)
+    {
+        infoLog('抓取平台停止任务接口启动', $request);
+        $validator = Validator::make($request->all(), [
+            'id' => 'integer|required',
+        ]);
+        infoLog('抓取平台停止任务接口参数验证', $validator);
+
+        if ($validator->fails()) {
+            infoLog('抓取平台停止任务接口参数验证失败', $validator->fails());
+            $errors = $validator->errors();
+            infoLog('抓取平台停止任务接口参数验证失败错误信息', $errors);
+            foreach ($errors->all() as $value) {
+                infoLog('抓取停止任务任务接口参数验证失败错误值', $value);
+                return  response($value, 401);
+            }
+        }
+        infoLog('抓取平台停止任务接口参数验证结束');
+        $params = [
+            'id' => intval($request->get('id')),
+        ];
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $data = $dispatcher->post('internal_api/crawl/task/stop', $params);
+        $res = [];
+        if ($data['data']) {
+            $res = $data['data'];
+        }
+        return $this->resObjectGet($res, 'crawl_task.stop', $request->path());
+    }
 }

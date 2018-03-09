@@ -14,8 +14,11 @@ $api->version(
             $api->post('/crawl/task/generate_script', 'CrawlTaskController@generateScript');
             $api->post('/crawl/task/execute', 'CrawlTaskController@execute');
             $api->post('/crawl/task/startup', 'CrawlTaskController@startup');
+            $api->post('/crawl/task/stop', 'CrawlTaskController@stop');
 
             $api->post('/crawl/node_task', 'CrawlNodeTaskController@create');
+            $api->post('/crawl/node_task/stop', 'CrawlNodeTaskController@stopTask');
+
 
             $api->group(['prefix'=>'basic', 'namespace' => 'Basic'], function($api){
                 $api->get('/crawl/task', 'CrawlTaskController@retrieve');
@@ -30,7 +33,7 @@ $api->version(
                 $api->post('/crawl/node_task', 'CrawlNodeTaskController@create');
                 $api->post('/crawl/node_task/start', 'CrawlNodeTaskController@startTask');
                 $api->post('/crawl/node_task/stop', 'CrawlNodeTaskController@stopTask');
-                $api->get('/crawl/node_task/list_startuped_task', 'CrawlNodeTaskController@listStartupedTaskByTaskId');
+                $api->post('/crawl/node_task/get_startuped_task_by_task_id', 'CrawlNodeTaskController@getStartupedTaskByTaskId');
             });
         });
     }
@@ -48,6 +51,7 @@ $api->version(
             $api->post('/crawl/result', 'CrawlResultController@create');
             $api->post('/crawl/result/list', 'CrawlResultController@pushList');
             $api->post('/crawl/task/startup','CrawlTaskController@startup');
+            $api->post('/crawl/task/stop','CrawlTaskController@stop');
         });
     }
 );

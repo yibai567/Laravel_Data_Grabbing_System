@@ -218,4 +218,38 @@ class CrawlTaskController extends Controller
         $dispatcher->post('internal_api/crawl/node_task', $params);
         return $this->resObjectGet($data, 'crawl_task.execute', $request->path());
     }
+
+    /**
+     * 停止任务
+     * @param Request $request
+     */
+    public function stop(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'integer|required',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return response($value, 401);
+            }
+        }
+        $taskId = intval($request->id);
+        $params = ['crawl_task_id' => $taskId];
+        //停止指定任务id当前在运行的任务
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $res = $dispatcher->post('internal_api/basic/crawl/node_task/get_startuped_task_by_task_id', $params);
+        if ($res['data']) {
+            $item = $res['data'];
+            $params = ['id' => $item['id']];
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $dispatcher->post('internal_api/basic/crawl/node_task/stop', $params);
+        }
+        // 更新任务状态为停止
+        $params = ['id' => $taskId, 'status' => CrawlTask::IS_PAUSE];
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $res = $dispatcher->post('internal_api/crawl/task/status', $params);
+        return $this->resObjectGet('任务停止成功', 'crawl_task.execute', $request->path());
+    }
 }

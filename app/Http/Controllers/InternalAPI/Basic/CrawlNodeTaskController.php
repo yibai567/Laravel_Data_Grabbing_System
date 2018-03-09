@@ -58,7 +58,6 @@ class CrawlNodeTaskController extends Controller
         $validator = Validator::make($request->all(), [
             'id' => 'integer|nullable',
         ]);
-
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
@@ -68,17 +67,15 @@ class CrawlNodeTaskController extends Controller
         $data = [
             'id' => intval($request->id),
         ];
-
-        $node = CrawlNodeTask::find($data['id']);
-        if (empty($node)) {
+        $nodeTask = CrawlNodeTask::find($data['id']);
+        if (empty($nodeTask)) {
             return response('找不到节点信息', 401);
         }
-        if ($node['status'] !== CrawlNodeTask::IS_STOP) {
-            $node->status = CrawlNodeTask::IS_STOP;
-            $node->save();
+        if ($nodeTask['status'] !== CrawlNodeTask::IS_STOP) {
+            $nodeTask->status = CrawlNodeTask::IS_STOP;
+            $nodeTask->save();
         }
-
-        return $this->resObjectGet($node, 'crawl_node_task.stop', $request->path());
+        return $this->resObjectGet($nodeTask, 'crawl_node_task.stop', $request->path());
     }
 
     /**
@@ -120,10 +117,20 @@ class CrawlNodeTaskController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function listStartupedTaskByTaskId(Request $request)
+    public function getStartupedTaskByTaskId(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'crawl_task_id' => 'integer|nullable',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return response($value, 401);
+            }
+        }
         $crawlTaskId = $request->crawl_task_id;
-        $tasks = CrawlNodeTask::where('status', CrawlNodeTask::IS_STARTUP)->where('crawl_task_id', $crawlTaskId)->get();
-        return $this->resObjectGet($tasks, 'crawl_node_task.list_startuped_task', $request->path());
+        $task = CrawlNodeTask::where('status', CrawlNodeTask::IS_STARTUP)->where('crawl_task_id', $crawlTaskId)->first();
+        return $this->resObjectGet($task, 'crawl_node_task.list_startuped_task', $request->path());
     }
 }
