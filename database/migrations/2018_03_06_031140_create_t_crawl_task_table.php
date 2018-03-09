@@ -28,6 +28,8 @@ class CreateTCrawlTaskTable extends Migration
             $table->text('test_result')->nullable()->comment('测试结果');
             $table->dateTime('test_time')->nullable()->comment('测试时间');
             $table->integer('script_last_generate_time')->nullable()->comment('脚本最后生成时间');
+            $table->string('script_file')->nullable()->comment('脚本文件');
+            $table->string('last_script_file')->nullable()->comment('上一个脚本文件');
             $table->unsignedInteger('setting_id')->nullable()->comment('配置ID');
             $table->timestamps();
             $table->softDeletes();

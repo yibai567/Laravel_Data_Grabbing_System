@@ -121,15 +121,12 @@ class CrawlTaskController extends Controller
         }
 
         $task = $data['data'];
-        $now = time();
-        $scriptFile = CrawlTask::SCRIPT_PATH . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $task['id'] . '_' . $now . '.js';
-
-        $params = ['id' => $taskId, 'script_last_generate_time' => $now];
+        $params = ['id' => $taskId];
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal_api/basic/crawl/task/update_script_last_generate_time', $params);
+        $data = $dispatcher->post('internal_api/basic/crawl/task/update_script_file', $params);
 
         if ($data['status_code'] == 401) {
-            return response('更新时间失败', 401);
+            return response('更新脚本失败', 401);
         }
 
         if ($task['setting']['type'] == CrawlSetting::TYPE_CUSTOM) {
@@ -139,7 +136,7 @@ class CrawlTaskController extends Controller
             $content = $task['setting']['content'];
             $content = str_replace('{{{URL}}}', $task['resource_url'], $content);
         }
-        if (generateScript($scriptFile, $content)) {
+        if (generateScript($task['script_file'], $content)) {
             return response('脚本生成成功', 200);
         } else {
             return response('脚本生成失败', 402);
@@ -162,6 +159,7 @@ class CrawlTaskController extends Controller
                 return response($value, 401);
             }
         }
+        // 获取任务详情
         $taskId = intval($request->get('id'));
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->get('internal_api/basic/crawl/task?id=' . $taskId);
@@ -169,12 +167,16 @@ class CrawlTaskController extends Controller
             return response('参数错误', 401);
         }
 
+        //创建节点任务
+        $params = ['crawl_task_id' => $taskId];
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $data = $dispatcher->post('internal_api/crawl_node', $params);
+
         $task = $data['data'];
-        $scriptFile = CrawlTask::SCRIPT_PATH . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $taskId . '_' . $task['script_last_generate_time'] . '.js';
-        if (!file_exists($scriptFile)) {
+        if (!file_exists($task['script_file'])) {
             return response('脚本文件不存在', 401);
         }
-        $command = 'casperjs ' . $scriptFile . ' --env=test';
+        $command = 'casperjs ' . $task['script_file'] . ' --env=test';
         $output = shell_exec($command);
         return $this->resObjectGet($output, 'crawl_task.execute', $request->path());
     }

@@ -113,4 +113,16 @@ class CrawlNodeTaskController extends Controller
         $node->save();
         return $this->resObjectGet($node, 'crawl_node_task.start', $request->path());
     }
+
+    /**
+     * 获取已有任务id下所有在运行任务
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function listStartupedTaskByTaskId(Request $request)
+    {
+        $crawlTaskId = $request->crawl_task_id;
+        $tasks = CrawlNodeTask::where('status', CrawlNodeTask::IS_STARTUP)->where('crawl_task_id', $crawlTaskId)->get();
+        return $this->resObjectGet($tasks, 'crawl_node_task.list_startuped_task', $request->path());
+    }
 }

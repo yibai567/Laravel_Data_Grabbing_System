@@ -35,7 +35,9 @@ class CrawlTask extends Model
         'setting_id',
         'test_result',
         'test_time',
-        'script_last_generate_time'
+        'script_last_generate_time',
+        'script_file',
+        'last_script_file'
     ];
 
     public function setting()
