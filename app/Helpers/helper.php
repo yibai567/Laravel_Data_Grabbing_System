@@ -40,3 +40,24 @@ if (!function_exists('otherLog')) {
     }
 }
 
+/**
+ * post请求封装
+ */
+if (!function_exists('dingoPost')) {
+    function dingoPost($url, $params = [])
+    {
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        return $dispatcher->post($url, $params);
+    }
+}
+
+/**
+ * get请求封装
+ */
+if (!function_exists('dingoGet')) {
+    function dingoGet($url, $params = [])
+    {
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        return $dispatcher->get($url, $params);
+    }
+}
