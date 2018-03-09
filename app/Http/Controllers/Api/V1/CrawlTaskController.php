@@ -111,23 +111,39 @@ class CrawlTaskController extends Controller
      */
     public function generateScript(Request $request)
     {
+        infoLog('抓取平台生成脚本文件接口启动', $request);
         $validator = Validator::make($request->all(), [
             'id' => 'integer|required',
         ]);
+        infoLog('抓取平台生成脚本文件接口参数验证', $validator);
 
         if ($validator->fails()) {
+            infoLog('抓取平台生成脚本文件接口参数验证失败', $validator->fails());
             $errors = $validator->errors();
+            infoLog('抓取平台生成脚本文件接口参数验证失败错误信息', $errors);
             foreach ($errors->all() as $value) {
+                infoLog('抓取平台生成脚本文件接口参数验证失败错误值', $value);
                 return  response($value, 401);
             }
         }
+        infoLog('抓取平台生成脚本文件接口参数验证结束');
         $params = [
             'id' => intval($request->get('id')),
         ];
 
+        infoLog('抓取平台生成脚本文件接口调用基础业务接口参数准备', $params);
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/crawl/task/generate_script', $params);
-        return $this->resObjectGet($data, 'crawl_task.generate_script', $request->path());
+        if ($data['status_code'] == 401) {
+            return response('生成脚本失败', 401);
+        }
+        $result = [];
+        if ($data['data']) {
+            $result = $data['data'];
+            infoLog('抓取平台生成脚本文件接口调用基础业务接口返回数据', $result);
+        }
+        infoLog('抓取平台生成脚本文件接口完成');
+        return $this->resObjectGet($result, 'crawl_task.generate_script', $request->path());
     }
 
     /**

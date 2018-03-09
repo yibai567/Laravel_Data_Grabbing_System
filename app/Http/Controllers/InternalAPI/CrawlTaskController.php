@@ -97,38 +97,42 @@ class CrawlTaskController extends Controller
      */
     public function generateScript(Request $request)
     {
+        infoLog('抓取平台生成脚本文件接口启动', $request);
         $validator = Validator::make($request->all(), [
             'id' => 'integer|required',
         ]);
+        infoLog('抓取平台生成脚本文件接口参数验证', $validator);
 
         if ($validator->fails()) {
+            infoLog('抓取平台生成脚本文件接口参数验证失败', $validator->fails());
             $errors = $validator->errors();
+            infoLog('抓取平台生成脚本文件接口参数验证失败错误信息', $errors);
             foreach ($errors->all() as $value) {
+                infoLog('抓取平台生成脚本文件接口参数验证失败错误值', $value);
                 return  response($value, 401);
             }
         }
+        infoLog('抓取平台生成脚本文件接口参数验证结束');
+        $params = [
+            'id' => intval($request->get('id')),
+        ];
 
-        $taskId = intval($request->get('id'));
-
-        //调用生成脚本接口
+        //调用基础接口获取任务详情
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->get('internal_api/basic/crawl/task?id=' . $taskId);
+        $data = $dispatcher->get('internal_api/basic/crawl/task?id=' . $params['id']);
         if ($data['status_code'] == 401) {
             return response('参数错误', 401);
         }
         if (empty($data['data'])) {
             return response('任务不存在', 401);
         }
-
         $task = $data['data'];
-        $params = ['id' => $taskId];
+        $params = ['id' => $params['id']];
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/basic/crawl/task/update_script_file', $params);
-
         if ($data['status_code'] == 401) {
             return response('更新脚本失败', 401);
         }
-
         if ($task['setting']['type'] == CrawlSetting::TYPE_CUSTOM) {
             //自定义模版类型
             $content = '';
@@ -136,11 +140,13 @@ class CrawlTaskController extends Controller
             $content = $task['setting']['content'];
             $content = str_replace('{{{URL}}}', $task['resource_url'], $content);
         }
+
         if (generateScript($task['script_file'], $content)) {
             return response('脚本生成成功', 200);
         } else {
             return response('脚本生成失败', 402);
         }
+        infoLog('抓取平台生成脚本文件接口完成');
     }
 
     /**

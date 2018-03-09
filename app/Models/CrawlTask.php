@@ -28,7 +28,6 @@ class CrawlTask extends Model
         'resource_url',
         'cron_type',
         'selectors',
-        'status',
         'response_type',
         'response_url',
         'response_params',
@@ -37,7 +36,8 @@ class CrawlTask extends Model
         'test_time',
         'script_last_generate_time',
         'script_file',
-        'last_script_file'
+        'last_script_file',
+        'status',
     ];
 
     public function setting()

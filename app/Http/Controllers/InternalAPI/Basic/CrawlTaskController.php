@@ -2,11 +2,8 @@
 
 namespace App\Http\Controllers\InternalAPI\Basic;
 
-use App\Http\Requests\CrawlTaskCreateRequest;
 use App\Models\CrawlTask;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\InternalAPI\Controller;
 use Illuminate\Support\Facades\Validator;
 
@@ -164,29 +161,35 @@ class CrawlTaskController extends Controller
      */
     public function updateScriptFile(Request $request)
     {
+        infoLog('抓取平台基础接口更新脚本文件接口启动');
         $validator = Validator::make($request->all(), [
             "id" => "integer|required",
         ]);
-
+        infoLog('抓取平台基础接口更新脚本文件接口参数验证', $validator);
         if ($validator->fails()) {
+            infoLog('抓取平台基础接口更新脚本文件接口参数验证错误', $validator->fails());
             $errors = $validator->errors();
+            infoLog('抓取平台基础接口更新脚本文件接口参数验证错误', $errors);
             foreach ($errors->all() as $value) {
+                infoLog('抓取平台基础接口更新脚本文件接口参数验证错误详情', $value);
                 return  $this->response->error($value, 401);
             }
+            infoLog('抓取平台基础接口更新脚本文件接口参数验证错误完成');
         }
-
+        infoLog('抓取平台基础接口更新脚本文件接口参数验证完成');
         $taskId = intval($request->get('id'));
-        $scriptFile = CrawlTask::SCRIPT_PATH . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $taskId . '_' . Carbon::now() . '.js';
+        $scriptFile = CrawlTask::SCRIPT_PATH . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $taskId . '_' . date('Y-m-d-His') . '.js';
+        infoLog('抓取平台基础接口更新脚本文件接口参数准备', [$taskId, $scriptFile]);
         $task = CrawlTask::find($taskId);
         if (empty($task)) {
             response('任务不存在', 401);
         }
-        if (isset($task->script_file)) {
-            $task->last_script_file = $task->last_script_file;
+        if ($task->script_file) {
+            $task->last_script_file = $task->script_file;
         }
         $task->script_file = $scriptFile;
         $task->save();
-        $data = $task->toArray();
-        return $this->resObjectGet($data, 'crawl_task', $request->path());
+        infoLog('抓取平台基础接口更新脚本文件接口完成');
+        return $this->resObjectGet($task, 'crawl_task', $request->path());
     }
 }
