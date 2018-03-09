@@ -38,7 +38,6 @@ class CrawlNodeTaskController extends Controller
                 $dispatcher->post('internal_api/crawl/node_task/stop', $params);
             }
         }
-
         $dispatcher = app('Dingo\Api\Dispatcher');
         $res = $dispatcher->get('internal_api/basic/crawl/node/get_usable_node');
         if ($res['status_code'] === 401) {
@@ -54,6 +53,9 @@ class CrawlNodeTaskController extends Controller
             return response('任务不存在', 401);
         }
         $task = $res['data'];
+        if (!file_exists($task['script_file'])) {
+            return response('脚本文件不存在', 401);
+        }
         $scriptFile = $task['script_file'];
         $cmdStartup = 'docker ' . $scriptFile . ' --ip=' . $node['ip'] . ' start';
         $cmdStop = 'docker ' . $scriptFile . ' --ip=' . $node['ip'] . ' stop';
@@ -75,9 +77,9 @@ class CrawlNodeTaskController extends Controller
         if ($res['data']) {
             $data = $res['data'];
             //启动任务
-            $params = ['id', $data['id']];
+            $params = ['id' => $data['id']];
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $dispatcher->post('internal_api/crawl/node_task/start', $params);
+            $res = $dispatcher->post('internal_api/basic/crawl/node_task/start', $params);
             // 更新任务状态为启动中
             $params = ['id' => $data['crawl_task_id'], 'status' => CrawlTask::IS_START_UP];
             $dispatcher = app('Dingo\Api\Dispatcher');

@@ -150,21 +150,27 @@ class CrawlTaskController extends Controller
     }
 
     /**
-     * 执行接口
+     * 执行接口-测试使用
      * @return mixed
      */
     public function execute(Request $request)
     {
+        infoLog('抓取平台执行接口启动', $request);
         $validator = Validator::make($request->all(), [
             'id' => 'integer|required',
         ]);
+        infoLog('抓取平台执行接口参数验证', $validator);
 
         if ($validator->fails()) {
+            infoLog('抓取平台执行接口参数验证失败', $validator->fails());
             $errors = $validator->errors();
+            infoLog('抓取平台执行接口参数验证失败错误信息', $errors);
             foreach ($errors->all() as $value) {
-                return response($value, 401);
+                infoLog('抓取平台执行接口参数验证失败错误值', $value);
+                return  response($value, 401);
             }
         }
+        infoLog('抓取平台生成脚本文件接口参数验证结束');
         // 获取任务详情
         $taskId = intval($request->get('id'));
         $dispatcher = app('Dingo\Api\Dispatcher');
@@ -172,7 +178,6 @@ class CrawlTaskController extends Controller
         if ($data['status_code'] == 401) {
             return response('参数错误', 401);
         }
-
         $task = $data['data'];
         if (!file_exists($task['script_file'])) {
             return response('脚本文件不存在', 401);
@@ -185,7 +190,7 @@ class CrawlTaskController extends Controller
     /**
      * 启动任务
      * @param Request $request
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     * @return array
      */
     public function startup(Request $request)
     {
@@ -207,7 +212,6 @@ class CrawlTaskController extends Controller
             return response('参数错误', 401);
         }
         $task = $data['data'];
-
         //创建节点任务
         $params = ['crawl_task_id' => $task['id']];
         $dispatcher = app('Dingo\Api\Dispatcher');

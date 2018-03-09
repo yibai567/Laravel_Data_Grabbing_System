@@ -30,7 +30,7 @@ $api->version(
                 $api->post('/crawl/node_task', 'CrawlNodeTaskController@create');
                 $api->post('/crawl/node_task/start', 'CrawlNodeTaskController@startTask');
                 $api->post('/crawl/node_task/stop', 'CrawlNodeTaskController@stopTask');
-                $api->post('/crawl/node_task/list_startuped_task', 'CrawlNodeTaskController@listStartupedTaskByTaskId');
+                $api->get('/crawl/node_task/list_startuped_task', 'CrawlNodeTaskController@listStartupedTaskByTaskId');
             });
         });
     }

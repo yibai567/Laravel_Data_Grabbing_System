@@ -43,6 +43,7 @@ class CrawlNodeTaskController extends Controller
             'start_on' => $request->start_on,
             'end_on' => $request->end_on,
         ];
+
         $nodeTask = CrawlNodeTask::create($data);
         return $this->resObjectGet($nodeTask, 'crawl_node_task', $request->path());
     }
@@ -72,11 +73,11 @@ class CrawlNodeTaskController extends Controller
         if (empty($node)) {
             return response('找不到节点信息', 401);
         }
-        if ($node['status'] === CrawlNodeTask::IS_STOP) {
-            return response('节点当前未启动', 401);
+        if ($node['status'] !== CrawlNodeTask::IS_STOP) {
+            $node->status = CrawlNodeTask::IS_STOP;
+            $node->save();
         }
-        $node->status = CrawlNodeTask::IS_STOP;
-        $node->save();
+
         return $this->resObjectGet($node, 'crawl_node_task.stop', $request->path());
     }
 
@@ -105,12 +106,12 @@ class CrawlNodeTaskController extends Controller
         if (empty($node)) {
             return response('找不到节点信息', 401);
         }
-        if ($node['status'] === CrawlNodeTask::IS_STARTUP) {
-            return response('节点当前正在运行中', 401);
+        if ($node['status'] !== CrawlNodeTask::IS_STARTUP) {
+            $node->status = CrawlNodeTask::IS_STARTUP;
+            $node->save();
         }
 
-        $node->status = CrawlNodeTask::IS_STARTUP;
-        $node->save();
+
         return $this->resObjectGet($node, 'crawl_node_task.start', $request->path());
     }
 

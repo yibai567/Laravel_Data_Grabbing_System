@@ -152,25 +152,35 @@ class CrawlTaskController extends Controller
      */
     public function execute(Request $request)
     {
+        infoLog('抓取平台执行脚本接口启动', $request);
         $validator = Validator::make($request->all(), [
             'id' => 'integer|required',
         ]);
+        infoLog('抓取平台执行脚本接口参数验证', $validator);
 
         if ($validator->fails()) {
+            infoLog('抓取平台执行脚本接口参数验证失败', $validator->fails());
             $errors = $validator->errors();
+            infoLog('抓取平台执行脚本接口参数验证失败错误信息', $errors);
             foreach ($errors->all() as $value) {
-                return response($value, 401);
+                infoLog('抓取平台执行脚本接口参数验证失败错误值', $value);
+                return  response($value, 401);
             }
         }
+        infoLog('抓取平台执行脚本接口参数验证结束');
         $params = [
             'id' => intval($request->get('id')),
         ];
+        infoLog('抓取平台执行脚本接口请求基础接口执行脚本接口', $params);
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/crawl/task/execute', $params);
+        infoLog('抓取平台执行脚本接口请求基础接口执行脚本接口返回', $data);
         $res = [];
         if ($data['data']) {
+            infoLog('抓取平台执行脚本接口请求基础接口执行脚本接口返回', $data['data']);
             $res = $data['data'];
         }
+        infoLog('抓取平台执行脚本接口完成');
         return $this->resObjectGet($res, 'crawl_task.execute', $request->path());
     }
 
@@ -181,16 +191,22 @@ class CrawlTaskController extends Controller
      */
     public function startup(Request $request)
     {
+        infoLog('抓取平台启动任务接口启动', $request);
         $validator = Validator::make($request->all(), [
             'id' => 'integer|required',
         ]);
+        infoLog('抓取平台启动任务接口参数验证', $validator);
 
         if ($validator->fails()) {
+            infoLog('抓取平台启动任务接口参数验证失败', $validator->fails());
             $errors = $validator->errors();
+            infoLog('抓取平台启动任务接口参数验证失败错误信息', $errors);
             foreach ($errors->all() as $value) {
-                return response($value, 401);
+                infoLog('抓取平台启动任务接口参数验证失败错误值', $value);
+                return  response($value, 401);
             }
         }
+        infoLog('抓取平台启动任务接口参数验证结束');
         $params = [
             'id' => intval($request->get('id')),
         ];
