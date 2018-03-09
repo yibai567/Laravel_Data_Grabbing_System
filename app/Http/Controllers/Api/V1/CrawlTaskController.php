@@ -65,31 +65,42 @@ class CrawlTaskController extends Controller
      */
     public function updateStatus(Request $request)
     {
+        infoLog('抓取平台更新状态接口启动', $request);
         $validator = Validator::make($request->all(), [
             'id' => 'integer|required',
             'status' => 'integer|required',
         ]);
-
+        infoLog('抓取平台更新状态接口参数验证', $request->all());
         if ($validator->fails()) {
+            infoLog('抓取平台更新状态参数验证失败', $validator->fails());
             $errors = $validator->errors();
+            infoLog('抓取平台更新状态参数验证失败', $errors);
             foreach ($errors->all() as $value) {
+                infoLog('抓取平台更新状态参数验证错误信息', $value);
                 return  response($value, 401);
             }
+            infoLog('抓取平台更新状态接口参数验证结束', $request);
         }
+        infoLog('抓取平台更新状态接口准备参数');
         $params = [
             'id' => intval($request->get('id')),
             'status' => intval($request->get('status')),
         ];
-
+        infoLog('抓取平台更新状态接口调用更新任务状态接口', $params);
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/crawl/task/status', $params);
+        infoLog('抓取平台更新状态接口调用更新任务状态接口返回成功', $data);
         if ($data['status_code'] == 401) {
+            infoLog('抓取平台更新状态接口调用更新任务状态接口返回错误码', $data['status_code']);
             return response('参数错误', 401);
         }
+        infoLog('抓取平台更新状态接口调用更新任务状态接口正常情况', $data);
         $result = [];
         if ($data['data']) {
+            infoLog('抓取平台更新状态接口调用更新任务状态接口返回数据', $data['data']);
             $result = $data['data'];
         }
+        infoLog('抓取平台更新状态接口完成', $result);
         return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 
@@ -151,7 +162,7 @@ class CrawlTaskController extends Controller
     /**
      * 启动任务
      * @param Request $request
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     * @return 启动任务
      */
     public function startup(Request $request)
     {

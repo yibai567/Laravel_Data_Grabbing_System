@@ -147,7 +147,7 @@ class CrawlNodeTaskController extends Controller
         $params = ['id' => $res['crawl_task_id'], 'status' => CrawlTask::IS_PAUSE];
         $dispatcher = app('Dingo\Api\Dispatcher');
         $dispatcher->post('internal_api/crawl/task/status', $params);
-        
+
         return $this->resObjectGet($result, 'crawl_node_task.start', $request->path());
     }
 }
