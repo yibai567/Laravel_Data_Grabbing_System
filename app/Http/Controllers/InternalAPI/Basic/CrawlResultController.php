@@ -64,32 +64,82 @@ class CrawlResultController extends Controller
      */
     public function pushByList(Request $request)
     {
-        $data = $request->get('data');
+        //infoLog('[pushByList] start');
+        $newData = $request->all();
+        return infoLog('[pushByList] $params', json_encode($newData));
+        $validator = Validator::make($request->all(), [
+            'crawl_task_id' => 'numeric|nullable',
+            'task_start_time' => 'date|nullable',
+            'task_end_time' => 'date|nullable',
+            'original_data' => 'nullable',
+            'format_data' => 'nullable',
+            'task_url' => 'string|nullable',
+            'setting_selectors' => 'string|nullable',
+            'setting_keywords' => 'string|nullable',
+            'setting_data_type' => 'numeric|nullable',
+        ]);
+        //infoLog('[pushByList] $request->all()', $request->all());
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                //infoLog('[pushByList] $validator->fails()', $value);
+                return response($value, 401);
+            }
+        }
+        $params = [
+            'crawl_task_id' => $request->crawl_task_id,
+            'task_start_time' => $request->task_start_time,
+            'task_end_time' => $request->task_end_time,
+            'task_url' => $request->task_url,
+            'setting_selectors' => $request->setting_selectors,
+            'setting_keywords' => $request->setting_keywords,
+            'setting_data_type' => $request->setting_data_type,
+            'original_data' => $request->original_data,
+            'format_data' => $request->format_data,
+        ];
+        $result = [];
+        infoLog('[pushByList] $params["format_data"] == ' . json_encode($params));
+        if (empty($params['format_data'])) {
+            infoLog('[pushByList] $params["format_data"] empty!');
+            return $this->resObjectGet($result, 'crawl_result', $request->path());
+        }
         $items = [];
-        DB::beginTransaction();
-        foreach ($data as $item) {
-            if (!$this->isTaskExist($item['crawl_task_id'], $item['task_url'])) {
+        infoLog('[pushByList] insert');
+        try{
+            foreach (json_decode($params['format_data'], true) as $item) {
+            //if (!$this->isTaskExist($params['crawl_task_id'], $item[1])) {
                 $items[] = [
-                    'crawl_task_id' => $item['crawl_task_id'],
-                    'original_data' => $item['original_data'],
-                    'task_start_time' => $item['task_start_time'],
-                    'task_end_time' => $item['task_end_time'],
-                    'task_url' => $item['task_url'],
-                    'format_data' => $item['format_data'],
-                    'setting_selectors' => $item['setting_selectors'],
-                    'setting_keywords' => $item['setting_keywords'],
-                    'setting_data_type' => $item['setting_data_type'],
+                    'crawl_task_id' => $params['crawl_task_id'],
+                    'original_data' => $params['original_data'],
+                    'task_start_time' => $params['task_start_time'],
+                    'task_end_time' => $params['task_end_time'],
+                    'task_url' => $item['url'],
+                    'format_data' => json_encode($item),
+                    'setting_selectors' => $params['setting_selectors'],
+                    'setting_keywords' => $params['setting_keywords'],
+                    'setting_data_type' => $params['setting_data_type'],
                     'status' => CrawlResult::IS_UNTREATED,
                 ];
-            }
+           // }
 
+            }
+        } catch(Exception $e) {
+            infoLog('error',$e);
         }
+
+
+
+        DB::beginTransaction();
+
         $result = CrawlResult::insert($items);
+
         DB::commit();
         if (!$result) {
             DB::rollBack();
+            //infoLog('[pushByList] insert fail');
             return response('更新失败', 402);
         }
+        //infoLog('[pushByList] end');
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
 
