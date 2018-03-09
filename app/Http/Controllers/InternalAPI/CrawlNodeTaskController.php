@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\InternalAPI;
 
 use App\Models\CrawlNodeTask;
+use App\Models\CrawlTask;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -67,6 +68,7 @@ class CrawlNodeTaskController extends Controller
             'start_on' => null,
             'end_on' => null,
         ];
+        //创建节点任务
         $dispatcher = app('Dingo\Api\Dispatcher');
         $res = $dispatcher->post('internal_api/basic/crawl/node_task', $data);
         $data = [];
@@ -76,6 +78,10 @@ class CrawlNodeTaskController extends Controller
             $params = ['id', $data['id']];
             $dispatcher = app('Dingo\Api\Dispatcher');
             $dispatcher->post('internal_api/crawl/node_task/start', $params);
+            // 更新任务状态为启动中
+            $params = ['id' => $data['crawl_task_id'], 'status' => CrawlTask::IS_START_UP];
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $dispatcher->post('internal_api/crawl/task/status', $params);
         }
         return $this->resObjectGet($data, 'node_task.create', $request->path());
     }
@@ -137,6 +143,11 @@ class CrawlNodeTaskController extends Controller
         }
         $command = $res['cmd_startup'];
         exec($command, $result);
+        // 更新任务状态为停止
+        $params = ['id' => $res['crawl_task_id'], 'status' => CrawlTask::IS_PAUSE];
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $dispatcher->post('internal_api/crawl/task/status', $params);
+        
         return $this->resObjectGet($result, 'crawl_node_task.start', $request->path());
     }
 }

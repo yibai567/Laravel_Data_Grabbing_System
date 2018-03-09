@@ -167,11 +167,6 @@ class CrawlTaskController extends Controller
             return response('参数错误', 401);
         }
 
-        //创建节点任务
-        $params = ['crawl_task_id' => $taskId];
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal_api/crawl_node', $params);
-
         $task = $data['data'];
         if (!file_exists($task['script_file'])) {
             return response('脚本文件不存在', 401);
@@ -179,5 +174,38 @@ class CrawlTaskController extends Controller
         $command = 'casperjs ' . $task['script_file'] . ' --env=test';
         $output = shell_exec($command);
         return $this->resObjectGet($output, 'crawl_task.execute', $request->path());
+    }
+
+    /**
+     * 启动任务
+     * @param Request $request
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function startup(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'integer|required',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return response($value, 401);
+            }
+        }
+        // 获取任务详情
+        $taskId = intval($request->get('id'));
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $data = $dispatcher->get('internal_api/basic/crawl/task?id=' . $taskId);
+        if ($data['status_code'] == 401) {
+            return response('参数错误', 401);
+        }
+        $task = $data['data'];
+
+        //创建节点任务
+        $params = ['crawl_task_id' => $task['id']];
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $dispatcher->post('internal_api/crawl/node_task', $params);
+        return $this->resObjectGet($data, 'crawl_task.execute', $request->path());
     }
 }

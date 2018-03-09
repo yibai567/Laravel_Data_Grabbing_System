@@ -147,4 +147,33 @@ class CrawlTaskController extends Controller
         }
         return $this->resObjectGet($res, 'crawl_task.execute', $request->path());
     }
+
+    /**
+     * 启动任务
+     * @param Request $request
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function startup(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'integer|required',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return response($value, 401);
+            }
+        }
+        $params = [
+            'id' => intval($request->get('id')),
+        ];
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $data = $dispatcher->post('internal_api/crawl/task/startup', $params);
+        $res = [];
+        if ($data['data']) {
+            $res = $data['data'];
+        }
+        return $this->resObjectGet($res, 'crawl_task.startup', $request->path());
+    }
 }

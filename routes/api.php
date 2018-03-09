@@ -13,6 +13,7 @@ $api->version(
             $api->post('/crawl/result/push_list', 'CrawlResultController@pushList');
             $api->post('/crawl/task/generate_script', 'CrawlTaskController@generateScript');
             $api->post('/crawl/task/execute', 'CrawlTaskController@execute');
+            $api->post('/crawl/task/startup', 'CrawlTaskController@startup');
 
             $api->post('/crawl/node_task', 'CrawlNodeTaskController@create');
 
