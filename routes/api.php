@@ -47,8 +47,7 @@ $api->version(
             $api->post('/crawl/task/status','CrawlTaskController@updateStatus');
             $api->post('/crawl/result', 'CrawlResultController@create');
             $api->post('/crawl/result/list', 'CrawlResultController@pushList');
-
-            $api->post('/crawl/node_task', 'CrawlNodeTaskController@create');
+            $api->post('/crawl/task/startup','CrawlTaskController@startup');
         });
     }
 );

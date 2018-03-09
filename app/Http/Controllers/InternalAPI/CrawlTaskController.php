@@ -141,11 +141,10 @@ class CrawlTaskController extends Controller
             $content = str_replace('{{{URL}}}', $task['resource_url'], $content);
         }
 
-        if (generateScript($task['script_file'], $content)) {
-            return response('脚本生成成功', 200);
-        } else {
+        if (!generateScript($task['script_file'], $content)) {
             return response('脚本生成失败', 402);
         }
+        return $this->resObjectGet('脚本生成成功', 'crawl_task.generate_script', $request->path());
         infoLog('抓取平台生成脚本文件接口完成');
     }
 

@@ -130,7 +130,6 @@ class CrawlTaskController extends Controller
         $params = [
             'id' => intval($request->get('id')),
         ];
-
         infoLog('抓取平台生成脚本文件接口调用基础业务接口参数准备', $params);
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal_api/crawl/task/generate_script', $params);
