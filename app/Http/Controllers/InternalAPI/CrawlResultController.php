@@ -83,7 +83,7 @@ class CrawlResultController extends Controller
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                infoLog('[internalIpi/pushList] validator params', json_encode($value);
+                infoLog('[internalIpi/pushList] validator params', json_encode($value));
                 return response($value, 401);
             }
         }

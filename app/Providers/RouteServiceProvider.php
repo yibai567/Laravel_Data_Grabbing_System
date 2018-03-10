@@ -36,9 +36,9 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function map(Router $router)
     {
-        $this->mapWebRoutes();
-        $this->mapApiRoutes();
         $this->mapInternalApiRoutes();
+        $this->mapApiRoutes();
+        $this->mapWebRoutes();
     }
 
     /**
@@ -62,25 +62,26 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function mapApiRoutes()
+    protected function mapInternalApiRoutes()
     {
-        Route::middleware('api')
-             ->namespace($this->namespace)
-             ->group(base_path('routes/api.php'));
+        Route::group(
+            ['domain' => env('API_DOMAIN')],
+            function () {
+                Route::middleware('internal_api')->namespace($this->namespace)->group(base_path('routes/internal_api.php'));
+            }
+        );
     }
 
     /**
-     * Define the "api" routes for the application.
-     *
-     * These routes are typically stateless.
-     *
-     * @return void
+     * 业务api路由
      */
-    protected function mapInternalApiRoutes()
+    protected function mapApiRoutes()
     {
-        Route::prefix('internal')
-            ->middleware('internal_api')
-            ->namespace($this->namespace)
-            ->group(base_path('routes/internal_api.php'));
+        Route::group(
+            ['domain' => env('API_DOMAIN')],
+            function () {
+                Route::middleware('api')->namespace($this->namespace)->group(base_path('routes/api.php'));
+            }
+        );
     }
 }
