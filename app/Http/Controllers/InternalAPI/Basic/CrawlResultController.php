@@ -64,7 +64,7 @@ class CrawlResultController extends Controller
      */
     public function pushList(Request $request)
     {
-        infoLog('[internalApi/Basic/pushList] start');
+        infoLog('抓取平台结果返回增加基础API开始', $request->all());
         $params = $request->all();
         $validator = Validator::make($params, [
             'crawl_task_id' => 'numeric|nullable',
@@ -79,9 +79,11 @@ class CrawlResultController extends Controller
         ]);
 
         if ($validator->fails()) {
+            infoLog('抓取平台结果返回增加基础API参数验证失败 $validator->fails()', $validator->fails());
             $errors = $validator->errors();
+            infoLog('抓取平台结果返回增加基础API参数验证失败 $validator->errors()', $validator->errors());
             foreach ($errors->all() as $value) {
-                infoLog('[internalApi/Basic/pushList] $validator params ', json_encode($value));
+                infoLog('抓取平台结果返回增加基础API参数验证失败 $value', $value);
                 return response($value, 401);
             }
         }
@@ -89,12 +91,12 @@ class CrawlResultController extends Controller
         $result = [];
 
         if (empty($params['format_data'])) {
-            infoLog('[internalApi/Basic/pushList] $params["format_data"] empty!');
+            infoLog('抓取平台结果返回增加基础API $params["format_data"] empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
 
         $items = [];
-        infoLog('[internalApi/Basic/pushList] insert');
+        infoLog('抓取平台结果返回增加基础API 处理数据是否存在', $params['format_data']);
         foreach (json_decode($params['format_data'], true) as $item) {
             //if (!$this->isTaskExist($params['crawl_task_id'], $item[1])) {
             $items[] = [
@@ -113,17 +115,17 @@ class CrawlResultController extends Controller
         }
 
         if (empty($items)) {
-            infoLog('[internalApi/Basic/pushList] items empty!');
+            infoLog('抓取平台结果返回增加基础API $items empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
 
-        infoLog('[internalApi/Basic/pushList] insert start');
+        infoLog('抓取平台结果返回增加基础API insert start', $items);
         $result = CrawlResult::insert($items);
         if (!$result) {
-            infoLog('[internalApi/Basic/pushList] insert fail');
+            infoLog('抓取平台结果返回增加基础API insert fail', $items);
             return response('插入失败', 402);
         }
-        infoLog('[internalApi/Basic/pushList] insert success end');
+        infoLog('抓取平台结果返回增加基础API insert end', $result);
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
 

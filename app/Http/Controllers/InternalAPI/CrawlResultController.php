@@ -66,7 +66,7 @@ class CrawlResultController extends Controller
     */
     public function pushList(Request $request)
     {
-        infoLog('[internalIpi/pushList] start');
+        infoLog('抓取平台结果添加业务API开始', $request->all());
         $params = $request->all();
         $validator = Validator::make($params, [
             'data' => 'nullable',
@@ -81,50 +81,55 @@ class CrawlResultController extends Controller
         ]);
 
         if ($validator->fails()) {
+            infoLog('抓取平台结果添加业务API参数验证失败 $validator->fails()', $validator->fails());
             $errors = $validator->errors();
+            infoLog('抓取平台结果添加业务API参数验证失败 $errors->all()', $errors->all());
             foreach ($errors->all() as $value) {
-                infoLog('[internalIpi/pushList] validator params', json_encode($value));
+                infoLog('抓取平台结果添加业务API参数验证失败 $value', $value);
                 return response($value, 401);
             }
         }
 
         $result = [];
         if (empty($params['data'])) {
-            infoLog('[internalIpi/pushList] $params["data"] empty!');
+            infoLog('抓取平台结果添加业务API $params["data"] empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
 
         $params['original_data'] = $params['data'];
         $newData = [];
+        infoLog('抓取平台结果添加业务API 匹配关键词');
         foreach ($params['data'] as $key => $value) {
-            $matchingResult  = strpos($value['text'] , $params['setting_keywords']);
+            $matchingResult  = strpos($value['text'], $params['setting_keywords']);
             if ($matchingResult !== false){
                 $newData[] = $value;
             }
         }
 
         if (empty($newData)) {
-            infoLog('[internalIpi/pushList] $newData empty!');
+            infoLog('抓取平台结果添加业务API 匹配关键词结果为空');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
 
         $params['format_data'] = json_encode($newData);
+
         if ($env == self::ENV_TEST) {
-            infoLog('[internalIpi/pushList] 如果env是测试类型则直接返回');
+            infoLog('抓取平台结果添加业务API env是测试类型', $env);
             return $this->resObjectGet($params, 'crawl_result', $request->path());
         }
         $dispatcher = app('Dingo\Api\Dispatcher');
 
-        infoLog('[internalIpi/pushList] internal_api/pushList 接口调用 start');
+        infoLog('抓取平台结果添加请求基础API开始');
         $resultData = $dispatcher->post('internal_api/basic/crawl/result/push_by_list', $params);
         if ($resultData['status_code'] == 401) {
-            infoLog('[internalIpi/pushList] internal_api/crawl/result/push_list msg', json_encode($resultData));
+            infoLog('抓取平台结果添加请求基础API参数错误', $params);
             return response('参数错误', 401);
         }
         if ($resultData['data']) {
+            infoLog('抓取平台结果添加请求基础API成功返回结果', $resultData);
             $result = $resultData['data'];
         }
-        infoLog('[internalIpi/pushList] internal_api/pushList 接口调用 end', json_encode($result));
+        infoLog('抓取平台结果添加请求基础API结束');
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
 }
