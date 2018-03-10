@@ -59,6 +59,11 @@ class CrawlResultController extends Controller
     //     return $this->resObjectGet($result, 'crawl_result', $request->path());
     // }
 
+    /**
+     * 支持单条，批量插入数据
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+    */
     public function pushList(Request $request)
     {
         infoLog('[internalIpi/pushList] start');
