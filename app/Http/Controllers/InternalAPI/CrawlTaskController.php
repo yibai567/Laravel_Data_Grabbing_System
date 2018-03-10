@@ -213,6 +213,7 @@ class CrawlTaskController extends Controller
         $taskId = intval($request->get('id'));
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->get('internal/basic/crawl/task?id=' . $taskId);
+
         if ($data['status_code'] == 401) {
             return $this->resError(401, '参数错误');
         }
