@@ -92,7 +92,11 @@ class CrawlResultController extends Controller
         }
         $dispatcher = app('Dingo\Api\Dispatcher');
         infoLog('抓取平台结果添加请求业务API开始');
-        $resultData = $dispatcher->post('internal_api/crawl/result/push_list', $params);
+        //测试参数
+        $newParams['id'] = 1;
+        $newParams['title'] = '测试测试';
+        //end
+        $resultData = $dispatcher->post('internal/crawl/result/push_list', $newParams);
         if ($resultData['status_code'] == 401) {
             infoLog('抓取平台结果添加请求业务API参数错误', $params);
             return response('参数错误', 401);

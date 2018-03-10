@@ -66,8 +66,8 @@ class CrawlResultController extends Controller
     */
     public function pushList(Request $request)
     {
-        infoLog('抓取平台结果添加业务API开始', $request->all());
         $params = $request->all();
+        infoLog('抓取平台结果添加业务API开始', json_encode($params));exit;
         $validator = Validator::make($params, [
             'data' => 'nullable',
             'crawl_task_id' => 'numeric|nullable',
@@ -120,7 +120,7 @@ class CrawlResultController extends Controller
         $dispatcher = app('Dingo\Api\Dispatcher');
 
         infoLog('抓取平台结果添加请求基础API开始');
-        $resultData = $dispatcher->post('internal_api/basic/crawl/result/push_by_list', $params);
+        $resultData = $dispatcher->post('internal/basic/crawl/result/push_list', $params);
         if ($resultData['status_code'] == 401) {
             infoLog('抓取平台结果添加请求基础API参数错误', $params);
             return response('参数错误', 401);
