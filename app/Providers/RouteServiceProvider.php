@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
@@ -33,14 +34,11 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function map()
+    public function map(Router $router)
     {
-        $this->mapApiRoutes();
-
         $this->mapWebRoutes();
-
+        $this->mapApiRoutes();
         $this->mapInternalApiRoutes();
-        //
     }
 
     /**
@@ -69,11 +67,19 @@ class RouteServiceProvider extends ServiceProvider
         Route::middleware('api')
              ->namespace($this->namespace)
              ->group(base_path('routes/api.php'));
-
     }
+
+    /**
+     * Define the "api" routes for the application.
+     *
+     * These routes are typically stateless.
+     *
+     * @return void
+     */
     protected function mapInternalApiRoutes()
     {
-        Route::middleware('api')
+        Route::prefix('internal')
+            ->middleware('internal_api')
             ->namespace($this->namespace)
             ->group(base_path('routes/internal_api.php'));
     }
