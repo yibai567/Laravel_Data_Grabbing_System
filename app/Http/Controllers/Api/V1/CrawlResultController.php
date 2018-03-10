@@ -57,7 +57,7 @@ class CrawlResultController extends Controller
 
     public function pushList(Request $request)
     {
-        //infoLog('[apiPushList] start');
+        infoLog('[apiPushList] start');
         $validator = Validator::make($request->all(), [
             'data' => 'nullable',
             'crawl_task_id' => 'numeric|nullable',

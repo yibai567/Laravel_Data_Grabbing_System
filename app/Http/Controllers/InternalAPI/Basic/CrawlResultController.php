@@ -62,7 +62,7 @@ class CrawlResultController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function pushByList(Request $request)
+    public function pushList(Request $request)
     {
         //infoLog('[pushByList] start');
         $newData = $request->all();
