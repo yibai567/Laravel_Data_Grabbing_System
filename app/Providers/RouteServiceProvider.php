@@ -73,9 +73,8 @@ class RouteServiceProvider extends ServiceProvider
     }
     protected function mapInternalApiRoutes()
     {
-        Route::middleware('internal_api')
-             ->namespace($this->namespace)
-             ->group(base_path('routes/internal_api.php'));
-
+        Route::middleware('api')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/internal_api.php'));
     }
 }
