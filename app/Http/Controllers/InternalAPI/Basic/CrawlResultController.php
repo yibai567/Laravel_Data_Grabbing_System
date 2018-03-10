@@ -16,58 +16,57 @@ class CrawlResultController extends Controller
      * @param CrawlResultCreateRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function create(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'crawl_task_id' => 'string|nullable',
-            'original_data' => 'string|nullable',
-            'task_start_time' => 'date|nullable',
-            'task_end_time' => 'date|nullable',
-            'task_url' => 'string|nullable',
-            'format_data' => 'string|nullable',
-            'setting_selectors' => 'string|nullable',
-            'setting_keywords' => 'string|nullable',
-            'setting_data_type' => 'string|nullable',
-        ]);
+    // public function create(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'crawl_task_id' => 'string|nullable',
+    //         'original_data' => 'string|nullable',
+    //         'task_start_time' => 'date|nullable',
+    //         'task_end_time' => 'date|nullable',
+    //         'task_url' => 'string|nullable',
+    //         'format_data' => 'string|nullable',
+    //         'setting_selectors' => 'string|nullable',
+    //         'setting_keywords' => 'string|nullable',
+    //         'setting_data_type' => 'string|nullable',
+    //     ]);
 
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            foreach ($errors->all() as $value) {
-                return response($value, 401);
-            }
-        }
-        $data = [
-            'crawl_task_id' => $request->crawl_task_id,
-            'original_data' => $request->original_data,
-            'task_start_time' => $request->task_start_time,
-            'task_end_time' => $request->task_end_time,
-            'task_url' => $request->task_url,
-            'format_data' => $request->format_data,
-            'setting_selectors' => $request->setting_selectors,
-            'setting_keywords' => $request->setting_keywords,
-            'setting_data_type' => $request->setting_data_type,
-        ];
-        if (empty($data)) {
-            return $this->resObjectGet($data, 'crawl_result', $request->path());
-        }
-        if ($this->isTaskExist($data['crawl_task_id'], $data['task_url'])) {
-            return $this->resObjectGet($data['crawl_task_id'], 'crawl_result', $request->path());
-        }
-        $result = CrawlResult::create($data);
-        return $this->resObjectGet($result, 'crawl_result', $request->path());
-    }
+    //     if ($validator->fails()) {
+    //         $errors = $validator->errors();
+    //         foreach ($errors->all() as $value) {
+    //             return response($value, 401);
+    //         }
+    //     }
+    //     $data = [
+    //         'crawl_task_id' => $request->crawl_task_id,
+    //         'original_data' => $request->original_data,
+    //         'task_start_time' => $request->task_start_time,
+    //         'task_end_time' => $request->task_end_time,
+    //         'task_url' => $request->task_url,
+    //         'format_data' => $request->format_data,
+    //         'setting_selectors' => $request->setting_selectors,
+    //         'setting_keywords' => $request->setting_keywords,
+    //         'setting_data_type' => $request->setting_data_type,
+    //     ];
+    //     if (empty($data)) {
+    //         return $this->resObjectGet($data, 'crawl_result', $request->path());
+    //     }
+    //     if ($this->isTaskExist($data['crawl_task_id'], $data['task_url'])) {
+    //         return $this->resObjectGet($data['crawl_task_id'], 'crawl_result', $request->path());
+    //     }
+    //     $result = CrawlResult::create($data);
+    //     return $this->resObjectGet($result, 'crawl_result', $request->path());
+    // }
 
     /**
-     * 批量插入数据
+     * 支持单条，批量插入数据
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function pushList(Request $request)
     {
-        //infoLog('[pushByList] start');
-        $newData = $request->all();
-        return infoLog('[pushByList] $params', json_encode($newData));
-        $validator = Validator::make($request->all(), [
+        infoLog('[internalApi/Basic/pushList] start');
+        $params = $request->all();
+        $validator = Validator::make($params, [
             'crawl_task_id' => 'numeric|nullable',
             'task_start_time' => 'date|nullable',
             'task_end_time' => 'date|nullable',
@@ -78,68 +77,53 @@ class CrawlResultController extends Controller
             'setting_keywords' => 'string|nullable',
             'setting_data_type' => 'numeric|nullable',
         ]);
-        //infoLog('[pushByList] $request->all()', $request->all());
+
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                //infoLog('[pushByList] $validator->fails()', $value);
+                infoLog('[internalApi/Basic/pushList] $validator params ', json_encode($value));
                 return response($value, 401);
             }
         }
-        $params = [
-            'crawl_task_id' => $request->crawl_task_id,
-            'task_start_time' => $request->task_start_time,
-            'task_end_time' => $request->task_end_time,
-            'task_url' => $request->task_url,
-            'setting_selectors' => $request->setting_selectors,
-            'setting_keywords' => $request->setting_keywords,
-            'setting_data_type' => $request->setting_data_type,
-            'original_data' => $request->original_data,
-            'format_data' => $request->format_data,
-        ];
+
         $result = [];
-        infoLog('[pushByList] $params["format_data"] == ' . json_encode($params));
+
         if (empty($params['format_data'])) {
-            infoLog('[pushByList] $params["format_data"] empty!');
+            infoLog('[internalApi/Basic/pushList] $params["format_data"] empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
+
         $items = [];
-        infoLog('[pushByList] insert');
-        try{
-            foreach (json_decode($params['format_data'], true) as $item) {
+        infoLog('[internalApi/Basic/pushList] insert');
+        foreach (json_decode($params['format_data'], true) as $item) {
             //if (!$this->isTaskExist($params['crawl_task_id'], $item[1])) {
-                $items[] = [
-                    'crawl_task_id' => $params['crawl_task_id'],
-                    'original_data' => $params['original_data'],
-                    'task_start_time' => $params['task_start_time'],
-                    'task_end_time' => $params['task_end_time'],
-                    'task_url' => $item['url'],
-                    'format_data' => json_encode($item),
-                    'setting_selectors' => $params['setting_selectors'],
-                    'setting_keywords' => $params['setting_keywords'],
-                    'setting_data_type' => $params['setting_data_type'],
-                    'status' => CrawlResult::IS_UNTREATED,
-                ];
+            $items[] = [
+                'crawl_task_id' => $params['crawl_task_id'],
+                'original_data' => $params['original_data'],
+                'task_start_time' => $params['task_start_time'],
+                'task_end_time' => $params['task_end_time'],
+                'task_url' => $item['url'],
+                'format_data' => $item,
+                'setting_selectors' => $params['setting_selectors'],
+                'setting_keywords' => $params['setting_keywords'],
+                'setting_data_type' => $params['setting_data_type'],
+                'status' => CrawlResult::IS_UNTREATED,
+            ];
            // }
-
-            }
-        } catch(Exception $e) {
-            infoLog('error',$e);
         }
 
+        if (empty($items)) {
+            infoLog('[internalApi/Basic/pushList] items empty!');
+            return $this->resObjectGet($result, 'crawl_result', $request->path());
+        }
 
-
-        DB::beginTransaction();
-
+        infoLog('[internalApi/Basic/pushList] insert start');
         $result = CrawlResult::insert($items);
-
-        DB::commit();
         if (!$result) {
-            DB::rollBack();
-            //infoLog('[pushByList] insert fail');
-            return response('更新失败', 402);
+            infoLog('[internalApi/Basic/pushList] insert fail');
+            return response('插入失败', 402);
         }
-        //infoLog('[pushByList] end');
+        infoLog('[internalApi/Basic/pushList] insert success end');
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
 
