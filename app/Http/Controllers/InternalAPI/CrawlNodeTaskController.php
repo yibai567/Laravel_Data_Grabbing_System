@@ -30,15 +30,15 @@ class CrawlNodeTaskController extends Controller
         $params = ['crawl_task_id' => $taskId];
         //停止指定任务id当前在运行的任务
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post('internal_api/basic/crawl/node_task/get_startuped_task_by_task_id', $params);
+        $res = $dispatcher->post('internal/basic/crawl/node_task/get_startuped_task_by_task_id', $params);
         if ($res['data']) {
             $item = $res['data'];
             $params = ['id' => $item['id']];
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $dispatcher->post('internal_api/crawl/node_task/stop', $params);
+            $dispatcher->post('internal/crawl/node_task/stop', $params);
         }
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->get('internal_api/basic/crawl/node/get_usable_node');
+        $res = $dispatcher->get('internal/basic/crawl/node/get_usable_node');
         if ($res['status_code'] === 401) {
             return $this->resError(401, '没有可用Node节点');
         }
@@ -47,7 +47,7 @@ class CrawlNodeTaskController extends Controller
             return $this->resError(401, '没有可用Node节点');
         }
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->get('internal_api/basic/crawl/task?id=' . $taskId);
+        $res = $dispatcher->get('internal/basic/crawl/task?id=' . $taskId);
         if ($res['status_code'] === 401 ) {
             return $this->resError(401, '任务不存在');
         }
@@ -71,18 +71,18 @@ class CrawlNodeTaskController extends Controller
         ];
         //创建节点任务
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post('internal_api/basic/crawl/node_task', $data);
+        $res = $dispatcher->post('internal/basic/crawl/node_task', $data);
         $data = [];
         if ($res['data']) {
             $data = $res['data'];
             //启动任务
             $params = ['id' => $data['id']];
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->post('internal_api/basic/crawl/node_task/start', $params);
+            $res = $dispatcher->post('internal/basic/crawl/node_task/start', $params);
             // 更新任务状态为启动中
             $params = ['id' => $data['crawl_task_id'], 'status' => CrawlTask::IS_START_UP];
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $dispatcher->post('internal_api/crawl/task/status', $params);
+            $dispatcher->post('internal/crawl/task/status', $params);
         }
         return $this->resObjectGet($data, 'node_task.create', $request->path());
     }
@@ -106,7 +106,7 @@ class CrawlNodeTaskController extends Controller
         }
         $params = ['id' => intval($request->id)];
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->get('internal_api/basic/crawl/node_task/start', $params);
+        $data = $dispatcher->get('internal/basic/crawl/node_task/start', $params);
         $res = [];
         if ($data['data']) {
             $res = $data['data'];
@@ -135,7 +135,7 @@ class CrawlNodeTaskController extends Controller
         }
         $params = ['id' => intval($request->id)];
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post('internal_api/basic/crawl/node_task/stop', $params);
+        $res = $dispatcher->post('internal/basic/crawl/node_task/stop', $params);
         if ($res['status_code'] === 401) {
             return $this->resError(401, '没有可用Node节点');
         }
@@ -147,7 +147,7 @@ class CrawlNodeTaskController extends Controller
         // 更新任务状态为停止
         $params = ['id' => $res['crawl_task_id'], 'status' => CrawlTask::IS_PAUSE];
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post('internal_api/crawl/task/status', $params);
+        $res = $dispatcher->post('internal/crawl/task/status', $params);
 
         return $this->resObjectGet($result, 'crawl_node_task.start', $request->path());
     }

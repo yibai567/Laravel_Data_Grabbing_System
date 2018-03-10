@@ -43,13 +43,13 @@ class CrawlTaskController extends Controller
         ];
         infoLog('抓取平台任务添加业务API参数过滤', $params);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal_api/crawl/task', $params);
-        infoLog('抓取平台任务添加业务API调用内部创建任务接口internal_api/crawl/task', $params);
+        $data = $dispatcher->post('internal/crawl/task', $params);
+        infoLog('抓取平台任务添加业务API调用内部创建任务接口internal/crawl/task', $params);
         if ($data['status_code'] == 401) {
-            infoLog('抓取平台任务添加业务API调用内部创建任务接口internal_api/crawl/task失败', $data);
+            infoLog('抓取平台任务添加业务API调用内部创建任务接口internal/crawl/task失败', $data);
             return $this->resError(401, '参数错误');
         }
-        infoLog('抓取平台任务添加业务API调用内部创建任务接口internal_api/crawl/task完成', $data);
+        infoLog('抓取平台任务添加业务API调用内部创建任务接口internal/crawl/task完成', $data);
         $result = [];
         if ($data['data']) {
             $result = $data['data'];
@@ -88,7 +88,7 @@ class CrawlTaskController extends Controller
         ];
         infoLog('抓取平台更新状态接口调用更新任务状态接口', $params);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal_api/crawl/task/status', $params);
+        $data = $dispatcher->post('internal/crawl/task/status', $params);
         infoLog('抓取平台更新状态接口调用更新任务状态接口返回成功', $data);
         if ($data['status_code'] == 401) {
             infoLog('抓取平台更新状态接口调用更新任务状态接口返回错误码', $data['status_code']);
@@ -132,7 +132,7 @@ class CrawlTaskController extends Controller
         ];
         infoLog('抓取平台生成脚本文件接口调用基础业务接口参数准备', $params);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal_api/crawl/task/generate_script', $params);
+        $data = $dispatcher->post('internal/crawl/task/generate_script', $params);
         if ($data['status_code'] == 401) {
             return $this->resError(401, '生成脚本失败');
         }
@@ -173,7 +173,7 @@ class CrawlTaskController extends Controller
         ];
         infoLog('抓取平台执行脚本接口请求基础接口执行脚本接口', $params);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal_api/crawl/task/execute', $params);
+        $data = $dispatcher->post('internal/crawl/task/execute', $params);
         infoLog('抓取平台执行脚本接口请求基础接口执行脚本接口返回', $data);
         $res = [];
         if ($data['data']) {
@@ -212,7 +212,7 @@ class CrawlTaskController extends Controller
         ];
         infoLog('抓取平台启动任务接口调用业务基础接口启动任务', $params);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal_api/crawl/task/startup', $params);
+        $data = $dispatcher->post('internal/crawl/task/startup', $params);
         infoLog('抓取平台启动任务接口调用业务基础接口启动任务返回', $data);
         $res = [];
         if ($data['data']) {
@@ -251,7 +251,7 @@ class CrawlTaskController extends Controller
         ];
         infoLog('抓取平台停止任务接口调用基础业务接口停止任务', $params);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal_api/crawl/task/stop', $params);
+        $data = $dispatcher->post('internal/crawl/task/stop', $params);
         infoLog('抓取平台停止任务接口调用基础业务接口停止任务返回数据', $data);
         $res = [];
         if ($data['data']) {

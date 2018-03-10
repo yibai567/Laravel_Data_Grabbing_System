@@ -40,7 +40,7 @@ class CrawlTaskController extends Controller
         ];
 
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal_api/basic/crawl/task', $params);
+        $data = $dispatcher->post('internal/basic/crawl/task', $params);
         if ($data['status_code'] == 401) {
             return $this->resError(401, '参数错误');
         }
@@ -75,11 +75,11 @@ class CrawlTaskController extends Controller
             // 生成脚本
             $params = ['id' => $taskId];
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $dispatcher->post('internal_api/crawl/task/generate_script', $params);
+            $dispatcher->post('internal/crawl/task/generate_script', $params);
         }
         $params = ['id' => $taskId, 'status' => $status];
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal_api/basic/crawl/task/status', $params);
+        $data = $dispatcher->post('internal/basic/crawl/task/status', $params);
         if ($data['status_code'] !== 200) {
             return $this->resError($data['status_code'], '更新失败');
         }
@@ -119,14 +119,14 @@ class CrawlTaskController extends Controller
 
         $params = ['id' => $params['id']];
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal_api/basic/crawl/task/update_script_file', $params);
+        $data = $dispatcher->post('internal/basic/crawl/task/update_script_file', $params);
         if ($data['status_code'] == 401) {
             return $this->resError(401, '更新脚本失败');
         }
 
         //调用基础接口获取任务详情
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->get('internal_api/basic/crawl/task?id=' . $params['id']);
+        $data = $dispatcher->get('internal/basic/crawl/task?id=' . $params['id']);
         if ($data['status_code'] == 401) {
             return $this->resError(401, '参数错误');
         }
@@ -179,7 +179,7 @@ class CrawlTaskController extends Controller
         // 获取任务详情
         $taskId = intval($request->get('id'));
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->get('internal_api/basic/crawl/task?id=' . $taskId);
+        $data = $dispatcher->get('internal/basic/crawl/task?id=' . $taskId);
         if ($data['status_code'] == 401) {
             return $this->resError(401, '参数错误');
         }
@@ -212,7 +212,7 @@ class CrawlTaskController extends Controller
         // 获取任务详情
         $taskId = intval($request->get('id'));
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->get('internal_api/basic/crawl/task?id=' . $taskId);
+        $data = $dispatcher->get('internal/basic/crawl/task?id=' . $taskId);
         if ($data['status_code'] == 401) {
             return $this->resError(401, '参数错误');
         }
@@ -220,7 +220,7 @@ class CrawlTaskController extends Controller
         //创建节点任务
         $params = ['crawl_task_id' => $task['id']];
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $dispatcher->post('internal_api/crawl/node_task', $params);
+        $dispatcher->post('internal/crawl/node_task', $params);
         return $this->resObjectGet($data, 'crawl_task.execute', $request->path());
     }
 
@@ -244,17 +244,17 @@ class CrawlTaskController extends Controller
         $params = ['crawl_task_id' => $taskId];
         //停止指定任务id当前在运行的任务
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post('internal_api/basic/crawl/node_task/get_startuped_task_by_task_id', $params);
+        $res = $dispatcher->post('internal/basic/crawl/node_task/get_startuped_task_by_task_id', $params);
         if ($res['data']) {
             $item = $res['data'];
             $params = ['id' => $item['id']];
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $dispatcher->post('internal_api/crawl/node_task/stop', $params);
+            $dispatcher->post('internal/crawl/node_task/stop', $params);
         }
         // 更新任务状态为停止
         $params = ['id' => $taskId, 'status' => CrawlTask::IS_PAUSE];
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post('internal_api/crawl/task/status', $params);
+        $res = $dispatcher->post('internal/crawl/task/status', $params);
         return $this->resObjectGet('任务停止成功', 'crawl_task.execute', $request->path());
     }
 }

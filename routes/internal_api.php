@@ -67,7 +67,7 @@ $api->version(
 );
 $api->version(
     'v1',
-    ['namespace' => 'App\Http\Controllers\InternalAPI\Basic', 'prefix' => 'basic'],
+    ['namespace' => 'App\Http\Controllers\InternalAPI\Basic', 'prefix' => 'internal/basic'],
     function (Dingo\Api\Routing\Router $api) {
                 $api->get('/crawl/task', 'CrawlTaskController@retrieve');
                 $api->post('/crawl/task', 'CrawlTaskController@create');
