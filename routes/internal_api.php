@@ -12,7 +12,7 @@ $api->version(
         $api->get('/crawl/task', 'CrawlTaskController@retrieve');
         $api->post('/crawl/task', 'CrawlTaskController@create');
         $api->post('/crawl/task/status','CrawlTaskController@updateStatus');
-        $api->post('/crawl/task/script_file', 'CrawlTaskController@updateScriptFile');
+        $api->post('/crawl/task/script', 'CrawlTaskController@updateScriptFile');
 
         $api->get('/crawl/node/usable', 'CrawlNodeController@getUsableNode');
 
