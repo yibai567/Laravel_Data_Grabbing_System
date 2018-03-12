@@ -35,7 +35,7 @@ class CrawlNodeTaskController extends Controller
         //停止指定任务id当前在运行的任务
         $dispatcher = app('Dingo\Api\Dispatcher');
         infoLog('[create] request internal/basic/ started start.', $params);
-        $res = $dispatcher->post('internal/basic/crawl/node_task/started', $params);
+        $res = $dispatcher->get('internal/basic/crawl/node_task/started', $params);
         if ($res['data']) {
             $item = $res['data'];
             $params = ['id' => $item['id']];
@@ -106,88 +106,6 @@ class CrawlNodeTaskController extends Controller
         }
         infoLog('[create] end.');
         return $this->resObjectGet($data, 'node_task.create', $request->path());
-    }
-
-    /**
-     * 启动指定id任务
-     * @param Request $request
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
-     */
-    public function startTask(Request $request)
-    {
-        infoLog('[startTask] start.',  $request->all());
-        $validator = Validator::make($request->all(), [
-            'id' => 'integer|nullable',
-        ]);
-        infoLog('[startTask] params validator start.');
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            foreach ($errors->all() as $value) {
-                errorLog('[startTask] params validator fail.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-        infoLog('[startTask] params validator end.');
-        $params = ['id' => intval($request->id)];
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        infoLog('[startTask] internal/basic/crawl/node_task/start start.', $params);
-        $data = $dispatcher->get('internal/basic/crawl/node_task/start', $params);
-        $res = [];
-        if ($data['data']) {
-            $res = $data['data'];
-        }
-
-        $command = $res['cmd_startup'];
-        exec($command, $result);
-        infoLog('[startTask] internal/basic/crawl/node_task/start end.');
-        infoLog('[startTask] end.');
-        return $this->resObjectGet($result, 'crawl_node_task.start', $request->path());
-    }
-
-    /**
-     * 停止指定id任务
-     * @param Request $request
-     * @return array
-     */
-    public function stopTask(Request $request)
-    {
-        infoLog('[stopTask] start.', $request->all());
-        $validator = Validator::make($request->all(), [
-            'id' => 'integer|nullable',
-        ]);
-        infoLog('[stopTask] params validator start.');
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            foreach ($errors->all() as $value) {
-                errorLog('[stopTask] params validator fail.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-        infoLog('[stopTask] params validator end.');
-        $params = ['id' => intval($request->id)];
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        infoLog('[stopTask] internal/basic/crawl/node_task/stop start.', $params);
-        $res = $dispatcher->post('internal/basic/crawl/node_task/stop', $params);
-        if ($res['status_code'] === 401) {
-            errorLog('[stopTask] request internal/basic/crawl/node_task/stop error.', $res);
-            return $this->resError(401, '没有可用Node节点');
-        }
-        if ($res['data']) {
-            $res = $res['data'];
-        }
-        $command = $res['cmd_startup'];
-        exec($command, $result);
-        infoLog('[stopTask] internal/basic/crawl/node_task/stop end.');
-        // 更新任务状态为停止
-        $params = ['id' => $res['crawl_task_id'], 'status' => CrawlTask::IS_PAUSE];
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        infoLog('[stopTask] internal/crawl/task/status start.', $params);
-        $res = $dispatcher->post('internal/crawl/task/status', $params);
-        infoLog('[stopTask] internal/crawl/task/status end.');
-
-        infoLog('[stopTask] end.');
-
-        return $this->resObjectGet($result, 'crawl_node_task.start', $request->path());
     }
 
     /**
