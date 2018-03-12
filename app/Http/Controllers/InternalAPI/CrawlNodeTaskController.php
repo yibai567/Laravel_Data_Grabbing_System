@@ -47,7 +47,7 @@ class CrawlNodeTaskController extends Controller
         $dispatcher = app('Dingo\Api\Dispatcher');
         infoLog('[create] request internal/basic/crawl/node/usable.', $params);
         $res = $dispatcher->get('internal/basic/crawl/node/usable');
-        if ($res['status_code'] === 401) {
+        if ($res['status_code'] !== 200) {
             errorLog('[create] request internal/basic/crawl/node/get_usable_node error', $res);
             return $this->resError(401, '没有可用Node节点');
         }

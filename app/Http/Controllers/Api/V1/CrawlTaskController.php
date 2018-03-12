@@ -176,7 +176,7 @@ class CrawlTaskController extends Controller
             'id' => $params['id'],
         ];
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post('internal/crawl/task/generate_script', $data);
+        $res = $dispatcher->post('internal/crawl/task/script', $data);
         if ($res['status_code'] !== 200) {
             errorLog('[createScript] edit task error.');
             return $this->resError($res['status_code'], $res['message']);
@@ -217,7 +217,7 @@ class CrawlTaskController extends Controller
         ];
         infoLog('[preview] prepare data', $data);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post('internal/crawl/task/execute', $params);
+        $res = $dispatcher->post('internal/crawl/task/preview', $params);
 
         if ($res['status_code'] !== 200) {
             errorLog('[preview] edit task error.');
@@ -270,6 +270,6 @@ class CrawlTaskController extends Controller
             $result = $res['data'];
         }
         infoLog('[start] validate end.', $result);
-        return $this->resObjectGet($res, 'crawl_task.startup', $request->path());
+        return $this->resObjectGet($res, 'crawl_task.start', $request->path());
     }
 }
