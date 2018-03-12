@@ -64,16 +64,16 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapInternalApiRoutes()
     {
-        Route::middleware('internal_api')
-            ->namespace($this->namespace)
-            ->group(base_path('routes/internal_api.php'));
+//        Route::middleware('internal_api')
+//            ->namespace($this->namespace)
+//            ->group(base_path('routes/internal_api.php'));
 
-//        Route::group(
-//            ['domain' => env('API_DOMAIN')],
-//            function () {
-//                Route::middleware('internal_api')->namespace($this->namespace)->group(base_path('routes/internal_api.php'));
-//            }
-//        );
+        Route::group(
+            ['domain' => env('API_DOMAIN')],
+            function () {
+                Route::middleware('internal_api')->namespace($this->namespace)->group(base_path('routes/internal_api.php'));
+            }
+        );
     }
 
     /**
@@ -81,14 +81,14 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapApiRoutes()
     {
-        Route::middleware('internal_api')
-            ->namespace($this->namespace)
-            ->group(base_path('routes/api.php'));
-//        Route::group(
-//            ['domain' => env('API_DOMAIN')],
-//            function () {
-//                Route::middleware('api')->namespace($this->namespace)->group(base_path('routes/api.php'));
-//            }
-//        );
+//        Route::middleware('internal_api')
+//            ->namespace($this->namespace)
+//            ->group(base_path('routes/api.php'));
+        Route::group(
+            ['domain' => env('API_DOMAIN')],
+            function () {
+                Route::middleware('api')->namespace($this->namespace)->group(base_path('routes/api.php'));
+            }
+        );
     }
 }

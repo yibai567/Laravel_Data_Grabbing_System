@@ -49,7 +49,7 @@ class CrawlTaskController extends Controller
         try{
             infoLog('[create] prepare data.', $data);
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->post('internal/basic/crawl/task', $data);
+            $res = $dispatcher->post(config('api.basic_api_base_url') . '/internal/basic/crawl/task', $data);
             infoLog('[create] create task.', $res);
             if ($res['status_code'] !== 200) {
                 errorLog($res['message'], $res['status_code']);
@@ -63,7 +63,7 @@ class CrawlTaskController extends Controller
             $data = ['id'=> $task['id']];
             infoLog('[create] prepare data.', $data);
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->post('internal/crawl/task/script', $data);
+            $res = $dispatcher->post(config('api.basic_api_base_url') . '/internal/crawl/task/script', $data);
             infoLog('[create] create script.', $res);
             if ($res['status_code'] !== 200) {
                 errorLog($res['message'], $res['status_code']);
@@ -73,7 +73,7 @@ class CrawlTaskController extends Controller
             $data = ['id'=> $task['id']];
             infoLog('[create] prepare data.', $data);
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->post('internal/crawl/task/preview', $data);
+            $res = $dispatcher->post(config('api.basic_api_base_url') . '/internal/crawl/task/preview', $data);
             infoLog('[create] test script.', $res);
             if ($data['status_code'] !== 200) {
                 errorLog($res['message'], $res['status_code']);
@@ -83,7 +83,7 @@ class CrawlTaskController extends Controller
             $data = ['id'=> $task['id']];
             infoLog('[create] prepare data.', $data);
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->post('internal/crawl/task/start', $params);
+            $res = $dispatcher->post(config('api.basic_api_base_url') . '/internal/crawl/task/start', $params);
             infoLog('[create] start script.', $res);
             if ($res['status_code'] !== 200) {
                 errorLog($res['message'], $res['status_code']);
@@ -92,7 +92,7 @@ class CrawlTaskController extends Controller
             $data = ['id'=> $result['id'], 'status' => CrawlTask::IS_START_UP];
             infoLog('[create] prepare data.', $data);
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->post('internal/crawl/task/status', $params);
+            $res = $dispatcher->post(config('api.basic_api_base_url') . '/internal/crawl/task/status', $params);
             infoLog('[create] start script.', $res);
             if ($res['status_code'] !== 200) {
                 errorLog($res['message'], $res['status_code']);
@@ -130,11 +130,11 @@ class CrawlTaskController extends Controller
             // 生成脚本
             $params = ['id' => $taskId];
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $dispatcher->post('internal/crawl/task/generate_script', $params);
+            $dispatcher->post(config('api.basic_api_base_url') . '/internal/crawl/task/generate_script', $params);
         }
         $params = ['id' => $taskId, 'status' => $status];
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal/basic/crawl/task/status', $params);
+        $data = $dispatcher->post(config('api.basic_api_base_url') . '/internal/basic/crawl/task/status', $params);
         if ($data['status_code'] !== 200) {
             return $this->resError($data['status_code'], 'update fail');
         }
@@ -166,17 +166,17 @@ class CrawlTaskController extends Controller
         $params = ['crawl_task_id' => $taskId];
         //停止指定任务id当前在运行的任务
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post('internal/basic/crawl/node_task/get_startuped_task_by_task_id', $params);
+        $res = $dispatcher->post(config('api.basic_api_base_url') . '/internal/basic/crawl/node_task/get_startuped_task_by_task_id', $params);
         if ($res['data']) {
             $item = $res['data'];
             $params = ['id' => $item['id']];
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $dispatcher->post('internal/crawl/node_task/stop', $params);
+            $dispatcher->post(config('api.basic_api_base_url') . '/internal/crawl/node_task/stop', $params);
         }
         // 更新任务状态为停止
         $params = ['id' => $taskId, 'status' => CrawlTask::IS_PAUSE];
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post('internal/crawl/task/status', $params);
+        $res = $dispatcher->post(config('api.basic_api_base_url') . '/internal/crawl/task/status', $params);
         return $this->resObjectGet('task stop success', 'crawl_task.execute', $request->path());
     }
 
@@ -210,7 +210,7 @@ class CrawlTaskController extends Controller
             ];
 
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->post('internal/basic/crawl/task/script', $data);
+            $res = $dispatcher->post(config('api.basic_api_base_url') . '/internal/basic/crawl/task/script', $data);
             
             if ($res['status_code'] !== 200) {
                 errorLog($res['messsage']);
@@ -219,7 +219,7 @@ class CrawlTaskController extends Controller
 
             //调用基础接口获取任务详情
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->get('internal/basic/crawl/task?id=' . $params['id']);
+            $res = $dispatcher->get(config('api.basic_api_base_url') . '/internal/basic/crawl/task?id=' . $params['id']);
             if ($res['status_code'] !== 200) {
                 errorLog($res['messsage']);
                 throw new Exception($res['messsage'], $res['status_code']);
@@ -274,7 +274,7 @@ class CrawlTaskController extends Controller
 
         // 获取任务详情
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->get('internal/basic/crawl/task?id=' . $params['id']);
+        $res = $dispatcher->get(config('api.basic_api_base_url') . '/internal/basic/crawl/task?id=' . $params['id']);
         if ($res['status_code'] !== 200) {
                 errorLog($res['messsage']);
                 throw new Exception($res['messsage'], $res['status_code']);
@@ -315,7 +315,7 @@ class CrawlTaskController extends Controller
         try {
             // 获取任务详情
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->get('internal/basic/crawl/task?id=' . $params['id']);
+            $res = $dispatcher->get(config('api.basic_api_base_url') . '/internal/basic/crawl/task?id=' . $params['id']);
             if ($res['status_code'] !== 200) {
                 errorLog($res['messsage']);
                 throw new Exception($res['messsage'], $res['status_code']);
@@ -325,7 +325,7 @@ class CrawlTaskController extends Controller
             $params = ['crawl_task_id' => $task['id']];
 
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->post('internal/crawl/node_task', $params);
+            $res = $dispatcher->post(config('api.basic_api_base_url') . '/internal/crawl/node_task', $params);
             if ($res['status_code'] !== 200) {
                 errorLog($res['messsage']);
                 throw new Exception($res['messsage'], $res['status_code']);
