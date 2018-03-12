@@ -125,6 +125,7 @@ class CrawlResultController extends Controller
         if ($resultData['data']) {
             $result = $resultData['data'];
         }
+        infoLog('[createByBatch] request internal/basic createByBatch end');
         infoLog('[createByBatch] end.', $result);
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
