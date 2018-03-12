@@ -33,7 +33,7 @@ if (!function_exists('infoLog')) {
 }
 
 if (!function_exists('errorLog')) {
-    function infoLog($message, $params = [])
+    function errorLog($message, $params = [])
     {
         new Log();
         $extend = array(
