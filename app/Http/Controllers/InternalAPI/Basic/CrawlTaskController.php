@@ -151,38 +151,38 @@ class CrawlTaskController extends Controller
         return $this->resObjectGet($data, 'crawl_task', $request->path());
     }
 
-    /**
-     * 更新脚本最后更新时间
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function updateScriptLastGenerateTime(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            "id" => "integer|required",
-            "script_last_generate_time" => "integer|required"
-        ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            foreach ($errors->all() as $value) {
-                return $this->resError(401, $value);
-            }
-        }
-
-        $taskId = intval($request->get('id'));
-        $scriptLastGenerateTime = intval($request->get('script_last_generate_time'));
-        if (empty($scriptLastGenerateTime)) {
-            $scriptLastGenerateTime = time();
-        }
-        $scriptFile = CrawlTask::SCRIPT_PATH . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $taskId . '_' . $scriptLastGenerateTime . '.js';
-        $task = CrawlTask::findOrFail($taskId);
-        $task->script_last_generate_time = $scriptLastGenerateTime;
-        $task->script_file = $scriptFile;
-        $task->save();
-        $data = $task->toArray();
-        return $this->resObjectGet($data, 'crawl_task', $request->path());
-    }
+//    /**
+//     * 更新脚本最后更新时间
+//     * @param Request $request
+//     * @return \Illuminate\Http\JsonResponse
+//     */
+//    public function updateScriptLastGenerateTime(Request $request)
+//    {
+//        $validator = Validator::make($request->all(), [
+//            "id" => "integer|required",
+//            "script_last_generate_time" => "integer|required"
+//        ]);
+//
+//        if ($validator->fails()) {
+//            $errors = $validator->errors();
+//            foreach ($errors->all() as $value) {
+//                return $this->resError(401, $value);
+//            }
+//        }
+//
+//        $taskId = intval($request->get('id'));
+//        $scriptLastGenerateTime = intval($request->get('script_last_generate_time'));
+//        if (empty($scriptLastGenerateTime)) {
+//            $scriptLastGenerateTime = time();
+//        }
+//        $scriptFile = CrawlTask::SCRIPT_PATH . '/' . CrawlTask::SCRIPT_PREFIX . '_' . $taskId . '_' . $scriptLastGenerateTime . '.js';
+//        $task = CrawlTask::findOrFail($taskId);
+//        $task->script_last_generate_time = $scriptLastGenerateTime;
+//        $task->script_file = $scriptFile;
+//        $task->save();
+//        $data = $task->toArray();
+//        return $this->resObjectGet($data, 'crawl_task', $request->path());
+//    }
 
     /**
      * 更新脚本文件

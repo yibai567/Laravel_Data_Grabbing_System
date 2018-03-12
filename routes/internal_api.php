@@ -21,7 +21,7 @@ $api->version(
         $api->post('/crawl/node_task/get_startuped_task_by_task_id', 'CrawlNodeTaskController@getStartupedTaskByTaskId');
 
         // 新增
-        $api->post('/crawl/batch_result', 'CrawlResultController@createByBatch');
+        $api->post('/crawl/result/batch_result', 'CrawlResultController@createByBatch');
         $api->post('/crawl/task/script_file', 'CrawlTaskController@updateScriptFile');
 
         $api->get('/crawl/node/usable', 'CrawlNodeController@getUsableNode');
@@ -50,7 +50,7 @@ $api->version(
         $api->post('/crawl/node_task/start', 'CrawlNodeTaskController@startTask');
 
         // 新增
-        $api->post('/crawl/batch_result', 'CrawlResultController@createByBatch');
+        $api->post('/crawl/result/batch_result', 'CrawlResultController@createByBatch');
         $api->post('/crawl/task/script', 'CrawlTaskController@createScript');
         $api->post('/crawl/task/preview', 'CrawlTaskController@preview');
         $api->post('/crawl/task/start', 'CrawlTaskController@start');
