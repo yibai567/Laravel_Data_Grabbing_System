@@ -261,4 +261,122 @@ class CrawlTaskController extends Controller
         infoLog('抓取平台停止任务接口');
         return $this->resObjectGet($res, 'crawl_task.stop', $request->path());
     }
+
+    /**
+     * 生成脚本接口
+     * @param Request $request
+     * @return array
+     */
+    public function createScript(Request $request)
+    {
+        infoLog('抓取平台生成脚本文件接口启动', $request);
+        $validator = Validator::make($request->all(), [
+            'id' => 'integer|required',
+        ]);
+        infoLog('抓取平台生成脚本文件接口参数验证', $validator);
+
+        if ($validator->fails()) {
+            infoLog('抓取平台生成脚本文件接口参数验证失败', $validator->fails());
+            $errors = $validator->errors();
+            infoLog('抓取平台生成脚本文件接口参数验证失败错误信息', $errors);
+            foreach ($errors->all() as $value) {
+                infoLog('抓取平台生成脚本文件接口参数验证失败错误值', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        infoLog('抓取平台生成脚本文件接口参数验证结束');
+        $params = [
+            'id' => intval($request->get('id')),
+        ];
+        infoLog('抓取平台生成脚本文件接口调用基础业务接口参数准备', $params);
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $data = $dispatcher->post('internal/crawl/task/generate_script', $params);
+        if ($data['status_code'] == 401) {
+            return $this->resError(401, '生成脚本失败');
+        }
+        $result = [];
+        if ($data['data']) {
+            $result = $data['data'];
+            infoLog('抓取平台生成脚本文件接口调用基础业务接口返回数据', $result);
+        }
+        infoLog('抓取平台生成脚本文件接口完成');
+        return $this->resObjectGet($result, 'crawl_task.generate_script', $request->path());
+    }
+
+    /**
+     * 执行脚本接口
+     * @param Request $request
+     * @return mixed
+     */
+    public function preview(Request $request)
+    {
+        infoLog('抓取平台执行脚本接口启动', $request);
+        $validator = Validator::make($request->all(), [
+            'id' => 'integer|required',
+        ]);
+        infoLog('抓取平台执行脚本接口参数验证', $validator);
+
+        if ($validator->fails()) {
+            infoLog('抓取平台执行脚本接口参数验证失败', $validator->fails());
+            $errors = $validator->errors();
+            infoLog('抓取平台执行脚本接口参数验证失败错误信息', $errors);
+            foreach ($errors->all() as $value) {
+                infoLog('抓取平台执行脚本接口参数验证失败错误值', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        infoLog('抓取平台执行脚本接口参数验证结束');
+        $params = [
+            'id' => intval($request->get('id')),
+        ];
+        infoLog('抓取平台执行脚本接口请求基础接口执行脚本接口', $params);
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $data = $dispatcher->post('internal/crawl/task/execute', $params);
+        infoLog('抓取平台执行脚本接口请求基础接口执行脚本接口返回', $data);
+        $res = [];
+        if ($data['data']) {
+            infoLog('抓取平台执行脚本接口请求基础接口执行脚本接口返回', $data['data']);
+            $res = $data['data'];
+        }
+        infoLog('抓取平台执行脚本接口完成');
+        return $this->resObjectGet($res, 'crawl_task.execute', $request->path());
+    }
+
+    /**
+     * 启动任务
+     * @param Request $request
+     * @return 启动任务
+     */
+    public function start(Request $request)
+    {
+        infoLog('[start] start.', $request);
+        infoLog('[start] validate.', $request->all());
+        $validator = Validator::make($request->all(), [
+            'id' => 'integer|required',
+        ]);
+        infoLog('[start] validate.', $validator);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                infoLog('[start] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        infoLog('抓取平台启动任务接口参数验证结束');
+        $params = [
+            'id' => intval($request->get('id')),
+        ];
+        infoLog('抓取平台启动任务接口调用业务基础接口启动任务', $params);
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $data = $dispatcher->post('internal/crawl/task/start', $params);
+        infoLog('抓取平台启动任务接口调用业务基础接口启动任务返回', $data);
+        $res = [];
+        if ($data['data']) {
+            $res = $data['data'];
+            infoLog('抓取平台启动任务接口调用业务基础接口启动任务返回', $res);
+        }
+        infoLog('抓取平台启动任务接口完成');
+        return $this->resObjectGet($res, 'crawl_task.startup', $request->path());
+    }
 }
