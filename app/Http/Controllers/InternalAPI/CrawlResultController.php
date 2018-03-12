@@ -85,7 +85,7 @@ class CrawlResultController extends Controller
                 return response($value, 401);
             }
         }
-        infoLog('[params validator] end.');
+        infoLog('[createByBatch] params validator end.');
         $result = [];
         if (empty($params['data'])) {
             infoLog('[createByBatch] data empty!');
