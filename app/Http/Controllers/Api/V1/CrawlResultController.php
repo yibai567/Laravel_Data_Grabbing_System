@@ -73,29 +73,29 @@ class CrawlResultController extends Controller
             'setting_selectors' => 'string|nullable',
             'setting_keywords' => 'string|nullable',
             'setting_data_type' => 'numeric|nullable',
-            'env' => 'numeric|nullable',
+            'effect' => 'numeric|nullable',
         ]);
-        infoLog('[params validator start]', $params);
+        infoLog('[createByBatch] params validator start', $params);
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                errorLog('[params validator] fail', $value);
+                errorLog('[createByBatch] params validator fail', $value);
                 return response($value, 401);
             }
         }
         infoLog('[params validator] end.');
         $result = [];
         if (empty($params['data'])) {
-            infoLog('[data] empty!');
+            infoLog('[createByBatch] data empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
         $dispatcher = app('Dingo\Api\Dispatcher');
-        infoLog('[request internalApi createList] start', $params);
-        $params['env'] = self::EFFECT_DEFAULT;
+        infoLog('[createByBatch] request internalApi createByBatch start', $params);
+        $params['effect'] = self::EFFECT_DEFAULT;
 
         $resultData = $dispatcher->json($params)->post('internal/crawl/result/batch_result');
         if ($resultData['status_code'] != 200) {
-            errorLog('[request internalApi createList result error]', $resultData);
+            errorLog('[createByBatch] request internalApi createByBatch result error', $resultData);
             return response($resultData['message'], $resultData['status_code']);
         }
         if ($resultData['data']) {

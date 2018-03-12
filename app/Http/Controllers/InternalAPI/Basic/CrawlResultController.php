@@ -77,11 +77,11 @@ class CrawlResultController extends Controller
             'setting_keywords' => 'string|nullable',
             'setting_data_type' => 'numeric|nullable',
         ]);
-        infoLog('[params validator start]', $params);
+        infoLog('[createByBatch] params validator start', $params);
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                errorLog('[params validator] fail', $value);
+                errorLog('[createByBatch] params validator fail', $value);
                 return response($value, 401);
             }
         }
@@ -89,7 +89,7 @@ class CrawlResultController extends Controller
         $result = [];
 
         if (empty($params['format_data'])) {
-            infoLog('[format_data] empty!');
+            infoLog('[createByBatch] format_data empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
         $items = [];
@@ -104,17 +104,17 @@ class CrawlResultController extends Controller
         }
 
         if (empty($items)) {
-            infoLog('[params] empty!');
+            infoLog('[createByBatch] items empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
 
-        infoLog('[insert] start.', $items);
+        infoLog('[createByBatch] insert start.', $items);
         $result = CrawlResult::insert($items);
         if (!$result) {
-            errorLog('[insert] fail.', $items);
+            errorLog('[createByBatch] insert fail.', $items);
             return response('插入失败', 402);
         }
-        infoLog('[insert] end.', $result);
+        infoLog('[createByBatch] insert end.', $result);
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
 
