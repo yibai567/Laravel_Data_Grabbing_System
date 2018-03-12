@@ -34,8 +34,8 @@ class CrawlNodeTaskController extends Controller
         $params = ['crawl_task_id' => $taskId];
         //停止指定任务id当前在运行的任务
         $dispatcher = app('Dingo\Api\Dispatcher');
-        infoLog('[create] request internal/basic get_startuped_task_by_task_id start.', $params);
-        $res = $dispatcher->post('internal/basic/crawl/node_task/get_startuped_task_by_task_id', $params);
+        infoLog('[create] request internal/basic/ started start.', $params);
+        $res = $dispatcher->post('internal/basic/crawl/node_task/started', $params);
         if ($res['data']) {
             $item = $res['data'];
             $params = ['id' => $item['id']];
@@ -45,8 +45,8 @@ class CrawlNodeTaskController extends Controller
             infoLog('[create] request internal/crawl/node_task/stop end.');
         }
         $dispatcher = app('Dingo\Api\Dispatcher');
-        infoLog('[create] request internal/basic/crawl/node/get_usable_node.', $params);
-        $res = $dispatcher->get('internal/basic/crawl/node/get_usable_node');
+        infoLog('[create] request internal/basic/crawl/node/usable.', $params);
+        $res = $dispatcher->get('internal/basic/crawl/node/usable');
         if ($res['status_code'] === 401) {
             errorLog('[create] request internal/basic/crawl/node/get_usable_node error', $res);
             return $this->resError(401, '没有可用Node节点');
@@ -211,9 +211,10 @@ class CrawlNodeTaskController extends Controller
         }
         infoLog('[start] params validator end.');
         $params = ['id' => intval($request->id)];
+
         $dispatcher = app('Dingo\Api\Dispatcher');
         infoLog('[start] request internal/basic/crawl/node_task/start start.', $params);
-        $data = $dispatcher->get('internal/basic/crawl/node_task/start', $params);
+        $data = $dispatcher->post('internal/basic/crawl/node_task/start', $params);
         $res = [];
         if ($data['data']) {
             $res = $data['data'];

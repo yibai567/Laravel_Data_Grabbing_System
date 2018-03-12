@@ -18,70 +18,90 @@ class CrawlTaskController extends Controller
      */
     public function create(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        infoLog('[create] start.', $request);
+        $params = $request->all();
+        infoLog('[create] validate.', $params);
+        $validator = Validator::make($params, [
             'name' => 'string|nullable',
             'description' => 'string|nullable',
-            'resource_url' => 'string|nullable',
+            'resource_url' => 'required|string|nullable',
             'cron_type' => 'integer|nullable',
             'selectors' => 'string|nullable',
         ]);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
+            errorLog('[create] validate fail.', $errors);
             foreach ($errors->all() as $value) {
-                return  response($value, 401);
+                errorLog('[create] validate fail message.', $value);
+                return $this->resError(401, $value);
             }
         }
-        $params = [
-            'name' => $request->name,
-            'description' => $request->description,
-            'resource_url' => $request->resource_url,
-            'cron_type' => intval($request->cron_type),
-            'selectors' => $request->selectors,
+        infoLog('[create] validate end.', $params);
+        $data = [
+            'name' => $params['name'],
+            'description' => $params['description'],
+            'resource_url' => $params['resource_url'],
+            'cron_type' => $params['cron_type'],
+            'selectors' => $params['selectors'],
         ];
+        infoLog('[create] prepare data.', $data);
         try{
+            infoLog('[create] prepare data.', $data);
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $data = $dispatcher->post('internal/basic/crawl/task', $params);
-            if ($data['status_code'] == 401) {
-                throw new Exception('参数错误', 401);
+            $res = $dispatcher->post('internal/basic/crawl/task', $data);
+            infoLog('[create] create task.', $res);
+            if ($res['status_code'] !== 200) {
+                errorLog($res['message'], $res['status_code']);
+                throw new Exception($res['message'], $res['status_code']);
             }
             $result = [];
-            if ($data['data']) {
-                $result = $data['data'];
+            if ($res['data']) {
+                $task = $res['data'];
+            }
+            infoLog('[create] create success.', $task);
+            $data = ['id'=> $task['id']];
+            infoLog('[create] prepare data.', $data);
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $res = $dispatcher->post('internal/crawl/task/script', $data);
+            infoLog('[create] create script.', $res);
+            if ($res['status_code'] !== 200) {
+                errorLog($res['message'], $res['status_code']);
+                throw new Exception($res['message'], $res['status_code']);
             }
 
-            $params = ['id'=> $result['id']];
-
+            $data = ['id'=> $task['id']];
+            infoLog('[create] prepare data.', $data);
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $data = $dispatcher->post('internal/crawl/task/script', $params);
+            $res = $dispatcher->post('internal/crawl/task/preview', $data);
+            infoLog('[create] test script.', $res);
             if ($data['status_code'] !== 200) {
-                throw new Exception('生成脚本失败', 401);
+                errorLog($res['message'], $res['status_code']);
+                throw new Exception($res['message'], $res['status_code']);
             }
 
-            $params = ['id'=> $result['id']];
+            $data = ['id'=> $task['id']];
+            infoLog('[create] prepare data.', $data);
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $data = $dispatcher->post('internal/crawl/task/preview', $params);
-            if ($data['status_code'] !== 200) {
-                throw new Exception('测试失败', 401);
+            $res = $dispatcher->post('internal/crawl/task/start', $params);
+            infoLog('[create] start script.', $res);
+            if ($res['status_code'] !== 200) {
+                errorLog($res['message'], $res['status_code']);
+                throw new Exception($res['message'], $res['status_code']);
             }
-
-            $params = ['id'=> $result['id']];
-            infoLog('抓取平台启动任务接口调用业务基础接口启动任务', $params);
+            $data = ['id'=> $result['id'], 'status' => CrawlTask::IS_START_UP];
+            infoLog('[create] prepare data.', $data);
             $dispatcher = app('Dingo\Api\Dispatcher');
-            $data = $dispatcher->post('internal/crawl/task/start', $params);
-            if ($data['status_code'] !== 200) {
-                throw new Exception('启动失败', 401);
-            }
-            $params = ['id'=> $result['id'], 'status' => CrawlTask::IS_START_UP];
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $data = $dispatcher->post('internal/crawl/task/status', $params);
-            if ($data['status_code'] !== 200) {
-                throw new Exception('启动失败', 401);
+            $res = $dispatcher->post('internal/crawl/task/status', $params);
+            infoLog('[create] start script.', $res);
+            if ($res['status_code'] !== 200) {
+                errorLog($res['message'], $res['status_code']);
+                throw new Exception($res['message'], $res['status_code']);
             }
         }catch(Exception $e){
             return $this->resError($e->getMessage(), $e->getCode());
         }
-        return $this->resObjectGet($result, 'crawl_task', $request->path());
+        return $this->resObjectGet('[create] create success', 'crawl_task', $request->path());
     }
 
     /**
@@ -267,29 +287,44 @@ class CrawlTaskController extends Controller
      */
     public function start(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        infoLog('[start] start.', $request);
+        $params = $request->all();
+        infoLog('[start] validate.', $params);
+        $validator = Validator::make($params, [
             'id' => 'integer|required',
         ]);
+        infoLog('[start] validate.', $validator);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
+                infoLog('[start] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        // 获取任务详情
-        $taskId = intval($request->get('id'));
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->get('internal/basic/crawl/task?id=' . $taskId);
+        infoLog('[start] validate end.');
+        try {
+            // 获取任务详情
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $res = $dispatcher->get('internal/basic/crawl/task?id=' . $params['id']);
+            if ($res['status_code'] !== 200) {
+                errorLog($res['messsage']);
+                throw new Exception($res['messsage'], $res['status_code']);
+            }
+            $task = $res['data'];
+            //创建节点任务
+            $params = ['crawl_task_id' => $task['id']];
 
-        if ($data['status_code'] == 401) {
-            return $this->resError(401, '参数错误');
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $res = $dispatcher->post('internal/crawl/node_task', $params);
+            if ($res['status_code'] !== 200) {
+                errorLog($res['messsage']);
+                throw new Exception($res['messsage'], $res['status_code']);
+            }
+        } catch (Exception $e) {
+            return $this->resError($res['status_code'], $res['message']);
         }
-        $task = $data['data'];
-        //创建节点任务
-        $params = ['crawl_task_id' => $task['id']];
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        $dispatcher->post('internal/crawl/node_task', $params);
-        return $this->resObjectGet($data, 'crawl_task.execute', $request->path());
+        infoLog('[start] end.');
+        return $this->resObjectGet($task, 'crawl_task.execute', $request->path());
     }
 }
