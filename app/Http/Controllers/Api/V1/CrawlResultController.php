@@ -83,16 +83,15 @@ class CrawlResultController extends Controller
                 return response($value, 401);
             }
         }
-        infoLog('[params validator] end.');
         $result = [];
+        infoLog('[params validator] end.');
         if (empty($params['data'])) {
             infoLog('[createByBatch] data empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
-        $dispatcher = app('Dingo\Api\Dispatcher');
         infoLog('[createByBatch] request internalApi createByBatch start', $params);
+        $dispatcher = app('Dingo\Api\Dispatcher');
         $params['effect'] = self::EFFECT_DEFAULT;
-
         $resultData = $dispatcher->json($params)->post('internal/crawl/result/batch_result');
         if ($resultData['status_code'] != 200) {
             errorLog('[createByBatch] request internalApi createByBatch result error', $resultData);
@@ -101,6 +100,7 @@ class CrawlResultController extends Controller
         if ($resultData['data']) {
             $result = $resultData['data'];
         }
+        infoLog('[createByBatch] request internalApi createByBatch end');
         infoLog('[createByBatch] end.', $result);
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
