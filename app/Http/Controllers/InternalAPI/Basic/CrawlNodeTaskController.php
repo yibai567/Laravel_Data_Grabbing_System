@@ -17,9 +17,9 @@ class CrawlNodeTaskController extends Controller
      */
     public function create(Request $request)
     {
-        infoLog('create start.', $request);
+        infoLog('[create] start.', $request);
         $params = $request->all();
-        infoLog('create validate.', $params);
+        infoLog('[create] validate.', $params);
         $validator = Validator::make($params, [
             'node_id' => 'integer|nullable',
             'crawl_task_id' => 'integer|nullable',
@@ -33,13 +33,13 @@ class CrawlNodeTaskController extends Controller
 
         if ($validator->fails()) {
             $errors = $validator->errors();
-            errorLog('create validate fail.', $errors);
+            errorLog('[create] validate fail.', $errors);
             foreach ($errors->all() as $value) {
-                errorLog('create validate fail message.', $value);
+                errorLog('[create] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        infoLog('create validate end.', $params);
+        infoLog('[create] validate end.', $params);
         $data = [
             'node_id' => $params['node_id'],
             'crawl_task_id' => $params['crawl_task_id'],
@@ -50,9 +50,9 @@ class CrawlNodeTaskController extends Controller
             'start_on' => $params['start_on'],
             'end_on' => $params['end_on'],
         ];
-        infoLog('create prepare data.', $data);
+        infoLog('[create] prepare data.', $data);
         $nodeTask = CrawlNodeTask::create($data);
-        infoLog('create create success.', $nodeTask);
+        infoLog('[create] create success.', $nodeTask);
         return $this->resObjectGet($nodeTask, 'crawl_node_task', $request->path());
     }
 
@@ -63,26 +63,26 @@ class CrawlNodeTaskController extends Controller
      */
     public function getStartedTaskByTaskId(Request $request)
     {
-        infoLog('getStartedTaskByTaskId start.', $request);
+        infoLog('[getStartedTaskByTaskId] start.', $request);
         $params = $request->all();
-        infoLog('getStartedTaskByTaskId validate.', $params);
+        infoLog('[getStartedTaskByTaskId] validate.', $params);
         $validator = Validator::make($params, [
             'crawl_task_id' => 'integer|nullable',
         ]);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
-            errorLog('getStartedTaskByTaskId validate fail.', $errors);
+            errorLog('[getStartedTaskByTaskId] validate fail.', $errors);
             foreach ($errors->all() as $value) {
-                errorLog('getStartedTaskByTaskId validate fail message.', $value);
+                errorLog('[getStartedTaskByTaskId] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        infoLog('getStartedTaskByTaskId validate end.', $params);
+        infoLog('[getStartedTaskByTaskId] validate end.', $params);
         $crawlTaskId = $params['crawl_task_id'];
-        infoLog('getStartedTaskByTaskId validate end.', $params);
+        infoLog('[getStartedTaskByTaskId] validate end.', $params);
         $task = CrawlNodeTask::where('status', CrawlNodeTask::IS_STARTUP)->where('crawl_task_id', $crawlTaskId)->first();
-        infoLog('getStartedTaskByTaskId get startup task.', $params);
+        infoLog('[getStartedTaskByTaskId] get startup task.', $params);
         return $this->resObjectGet($task, 'crawl_node_task.list_startuped_task', $request->path());
     }
 
@@ -93,35 +93,35 @@ class CrawlNodeTaskController extends Controller
      */
     public function stop(Request $request)
     {
-        infoLog('stop start.', $request);
+        infoLog('[stop] start.', $request);
         $params = $request->all();
-        infoLog('stop validate.', $params);
+        infoLog('[stop] validate.', $params);
         $validator = Validator::make($params, [
             'id' => 'integer|nullable',
         ]);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
-            errorLog('stop validate fail.', $errors);
+            errorLog('[stop] validate fail.', $errors);
             foreach ($errors->all() as $value) {
-                errorLog('stop validate fail message.', $value);
+                errorLog('[stop] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        infoLog('stop validate end.', $params);
+        infoLog('[stop] validate end.', $params);
         try {
-            infoLog('stop get node task.');
+            infoLog('[stop] get node task.');
             $nodeTask = CrawlNodeTask::find($params['id']);
-            infoLog('stop get node task.', $nodeTask);
+            infoLog('[stop] get node task.', $nodeTask);
             if (empty($nodeTask)) {
-                infoLog('stop node task not exist.');
+                infoLog('[stop] node task not exist.');
                 throw new Exception('找不到节点信息', 401);
             }
-            infoLog('stop node task change status.');
+            infoLog('[stop] node task change status.');
             if ($nodeTask['status'] !== CrawlNodeTask::IS_STOP) {
                 $nodeTask->status = CrawlNodeTask::IS_STOP;
                 if (!$nodeTask->save()) {
-                    infoLog('stop node task save fail.');
+                    infoLog('[stop] node task save fail.');
                     throw new Exception('node save fail', 401);
                 }
             }
@@ -129,7 +129,7 @@ class CrawlNodeTaskController extends Controller
             return errorLog($e->getMessage(), $e->getCode());
         }
 
-        infoLog('stop end.', $params);
+        infoLog('[stop] end.', $params);
         return $this->resObjectGet($nodeTask, 'crawl_node_task.stop', $request->path());
     }
 
@@ -140,35 +140,35 @@ class CrawlNodeTaskController extends Controller
      */
     public function start(Request $request)
     {
-        infoLog('start start.', $request);
+        infoLog('[start] start.', $request);
         $params = $request->all();
-        infoLog('start validate.', $params);
+        infoLog('[start] validate.', $params);
         $validator = Validator::make($params, [
             'id' => 'integer|nullable',
         ]);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
-            errorLog('start validate fail.', $errors);
+            errorLog('[start] validate fail.', $errors);
             foreach ($errors->all() as $value) {
-                errorLog('start validate fail message.', $value);
+                errorLog('[start] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        infoLog('start validate end.', $params);
+        infoLog('[start] validate end.', $params);
         try {
-            infoLog('start get node task.');
+            infoLog('[start] get node task.');
             $nodeTask = CrawlNodeTask::find($params['id']);
-            infoLog('start get node task.', $nodeTask);
+            infoLog('[start] get node task.', $nodeTask);
             if (empty($nodeTask)) {
-                infoLog('start node task not exist.');
+                infoLog('[start] node task not exist.');
                 throw new Exception('找不到节点信息', 401);
             }
-            infoLog('start node task change status.');
+            infoLog('[start] node task change status.');
             if ($nodeTask['status'] !== CrawlNodeTask::IS_STARTUP) {
                 $nodeTask->status = CrawlNodeTask::IS_STARTUP;
                 if (!$nodeTask->save()) {
-                    infoLog('start node task save fail.');
+                    infoLog('[start] node task save fail.');
                     throw new Exception('node save fail', 401);
                 }
             }

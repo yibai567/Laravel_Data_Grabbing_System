@@ -17,9 +17,9 @@ class CrawlTaskController extends Controller
      */
     public function create(Request $request)
     {
-        infoLog('create start.', $request);
+        infoLog('[create] start.', $request);
         $params = $request->all();
-        infoLog('create validate.', $params);
+        infoLog('[create] validate.', $params);
         $validator = Validator::make($params, [
             'name' => 'string|nullable',
             'description' => 'string|nullable',
@@ -30,13 +30,13 @@ class CrawlTaskController extends Controller
 
         if ($validator->fails()) {
             $errors = $validator->errors();
-            errorLog('create validate fail.', $errors);
+            errorLog('[create] validate fail.', $errors);
             foreach ($errors->all() as $value) {
-                errorLog('create validate fail message.', $value);
+                errorLog('[create] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        infoLog('create validate end.', $params);
+        infoLog('[create] validate end.', $params);
         $data = [
             'name' => $params['name'],
             'description' => $params['description'],
@@ -50,10 +50,10 @@ class CrawlTaskController extends Controller
             'test_time' => null,
             'test_result' => '',
         ];
-        infoLog('create prepare data.', $data);
+        infoLog('[create] prepare data.', $data);
         $task = CrawlTask::create($data);
-        infoLog('create create task.', $task);
-        infoLog('create end.', $task);
+        infoLog('[create] create task.', $task);
+        infoLog('[create] end.', $task);
         return $this->resObjectGet($task, 'crawl_task', $request->path());
     }
 
@@ -65,9 +65,9 @@ class CrawlTaskController extends Controller
      */
     public function updateStatus(Request $request)
     {
-        infoLog('updateStatus start.', $request);
+        infoLog('[updateStatus] start.', $request);
         $params = $request->all();
-        infoLog('updateStatus validate.', $params);
+        infoLog('[updateStatus] validate.', $params);
         $validator = Validator::make($params, [
             "id" => "integer|required",
             "status" => "integer|required"
@@ -75,13 +75,13 @@ class CrawlTaskController extends Controller
 
         if ($validator->fails()) {
             $errors = $validator->errors();
-            errorLog('updateStatus validate fail.', $errors);
+            errorLog('[updateStatus] validate fail.', $errors);
             foreach ($errors->all() as $value) {
-                errorLog('updateStatus validate fail message.', $value);
+                errorLog('[updateStatus] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        infoLog('updateStatus validate end.', $params);
+        infoLog('[updateStatus] validate end.', $params);
         try {
             $taskId = $params['id'];
             $status = $params['status'];
@@ -93,20 +93,20 @@ class CrawlTaskController extends Controller
                 CrawlTask::IS_PAUSE,
                 CrawlTask::IS_ARCHIEVE,
             ];
-            infoLog('updateStatus check the params.', $status);
+            infoLog('[updateStatus] check the params.', $status);
             if (!in_array($status, $statusArr)) {
-                throw new Exception('updateStatus status param error', 401);
+                throw new Exception('[updateStatus] status param error', 401);
             }
-            infoLog('updateStatus get the task.', $taskId);
+            infoLog('[updateStatus] get the task.', $taskId);
             $task = CrawlTask::find($taskId);
-            infoLog('updateStatus get the task.', $task);
+            infoLog('[updateStatus] get the task.', $task);
             $data = [];
             if (empty($task)) {
-                throw new Exception('updateStatus task not exist.', 401);
+                throw new Exception('[updateStatus] task not exist.', 401);
             }
             $task->status = $status;
             if (!$task->save()) {
-                infoLog('updateStatus save fail.', $task);
+                infoLog('[updateStatus] save fail.', $task);
                 throw new Exception('save failed.', 401);
             }
             $data = $task->toArray();
@@ -124,29 +124,29 @@ class CrawlTaskController extends Controller
      */
     public function retrieve(Request $request)
     {
-        infoLog('retrieve start.', $request);
+        infoLog('[retrieve] start.', $request);
         $params = $request->all();
-        infoLog('retrieve validate.', $params);
+        infoLog('[retrieve] validate.', $params);
         $validator = Validator::make($params, [
             "id" => "integer|required",
         ]);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
-            errorLog('retrieve validate fail.', $errors);
+            errorLog('[retrieve] validate fail.', $errors);
             foreach ($errors->all() as $value) {
-                errorLog('retrieve validate fail message.', $value);
+                errorLog('[retrieve] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        infoLog('retrieve validate end.', $params);
+        infoLog('[retrieve] validate end.', $params);
         $task = CrawlTask::with('setting')->find($params['id']);
-        infoLog('retrieve get data of task.', $task);
+        infoLog('[retrieve] get data of task.', $task);
         $data = [];
         if ($task) {
             $data = $task->toArray();
         }
-        infoLog('retrieve end.', $data);
+        infoLog('[retrieve] end.', $data);
         return $this->resObjectGet($data, 'crawl_task', $request->path());
     }
 
@@ -157,28 +157,28 @@ class CrawlTaskController extends Controller
      */
     public function updateScriptFile(Request $request)
     {
-        infoLog('updateScriptFile start.', $request);
+        infoLog('[updateScriptFile] start.', $request);
         $params = $request->all();
-        infoLog('updateScriptFile validate.', $params);
+        infoLog('[updateScriptFile] validate.', $params);
         $validator = Validator::make($params, [
             "id" => "integer|required",
         ]);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
-            errorLog('updateScriptFile validate fail.', $errors);
+            errorLog('[updateScriptFile] validate fail.', $errors);
             foreach ($errors->all() as $value) {
-                errorLog('updateScriptFile validate fail message.', $value);
+                errorLog('[updateScriptFile] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        infoLog('updateScriptFile validate end.', $params);
+        infoLog('[updateScriptFile] validate end.', $params);
         try {
             $taskId = $params['id'];
             $scriptFile = CrawlTask::SCRIPT_PREFIX . '_' . $taskId . '_' . date('YmdHis') . '.js';
-            infoLog('updateScriptFile get script file name', [$taskId, $scriptFile]);
+            infoLog('[updateScriptFile] get script file name', [$taskId, $scriptFile]);
             $task = CrawlTask::find($taskId);
-            infoLog('updateScriptFile get task', $task);
+            infoLog('[updateScriptFile] get task', $task);
             if (empty($task)) {
                 throw new Exception('task not exist', 401);
             }
@@ -187,16 +187,16 @@ class CrawlTaskController extends Controller
             }
             $task->script_file = $scriptFile;
             if (!$task->save()) {
-                errorLog('updateScriptFile save fail', $task);
-                throw new Exception('task save fail', 401);
+                errorLog('[updateScriptFile] save fail', $task);
+                throw new Exception('[updateScriptFile] task save fail', 401);
             }
-            infoLog('updateScriptFile save success', $task);
+            infoLog('[updateScriptFile] save success', $task);
         } catch (Exception $e) {
             errorLog($e->getMessage());
             return $this->resError($e->getCode(), $e->getMessage());
         }
 
-        infoLog('updateScriptFile end', $task);
+        infoLog('[updateScriptFile] end', $task);
         return $this->resObjectGet($task, 'crawl_task', $request->path());
     }
 }
