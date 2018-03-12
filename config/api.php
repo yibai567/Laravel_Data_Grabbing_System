@@ -70,7 +70,8 @@ return [
     */
 
     'domain' => env('API_DOMAIN', null),
-
+    'basic_api_base_url' => env('API_BASIC_BASE_DOMAIN', null),
+    'api_base_url' => env('API_BASE_DOMAIN', null),
     /*
     |--------------------------------------------------------------------------
     | Name

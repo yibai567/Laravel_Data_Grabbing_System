@@ -46,7 +46,7 @@ class CrawlTaskController extends Controller
 
         infoLog('[create] prepare data.', $data);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $task = $dispatcher->post('internal/crawl/task', $data);
+        $task = $dispatcher->post(config('api.api_base_url') . '/internal/crawl/task', $data);
         infoLog('[create] create task.', $task);
         if ($task['status_code'] !== 200) {
             errorLog($task['message'], $task['status_code']);
@@ -92,7 +92,7 @@ class CrawlTaskController extends Controller
         ];
         infoLog('[updateStatus] prepare data.', $data);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $task = $dispatcher->post('internal/crawl/task/status', $data);
+        $task = $dispatcher->post(config('api.api_base_url') . '/internal/crawl/task/status', $data);
         infoLog('[updateStatus] edit task.', $data);
         if ($task['status_code'] !== 200) {
             errorLog('[updateStatus] edit task error.');
@@ -135,7 +135,7 @@ class CrawlTaskController extends Controller
         ];
         infoLog('[stop] execute stop base api', $data);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post('internal/crawl/task/stop', $data);
+        $res = $dispatcher->post(config('api.api_base_url') . '/internal/crawl/task/stop', $data);
         infoLog('[stop] execute stop base api back', $res);
         if ($res['status'] !== 200) {
             errorLog('[stop] edit task error.');
@@ -177,7 +177,7 @@ class CrawlTaskController extends Controller
         ];
 
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post('internal/crawl/task/script', $data);
+        $res = $dispatcher->post(config('api.api_base_url') . '/internal/crawl/task/script', $data);
         
         if ($res['status_code'] !== 200) {
             errorLog('[createScript] edit task error.');
@@ -219,7 +219,7 @@ class CrawlTaskController extends Controller
         ];
         infoLog('[preview] prepare data', $data);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post('internal/crawl/task/preview', $params);
+        $res = $dispatcher->post(config('api.api_base_url') . '/internal/crawl/task/preview', $params);
 
         if ($res['status_code'] !== 200) {
             errorLog('[preview] edit task error.');
@@ -262,7 +262,7 @@ class CrawlTaskController extends Controller
         ];
         infoLog('[start] execute base api', $data);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post('internal/crawl/task/start', $data);
+        $res = $dispatcher->post(config('api.api_base_url') . '/internal/crawl/task/start', $data);
         if ($res['status_code'] !== 200) {
             errorLog('[start] start task error.');
             return $this->resError($res['status_code'], $res['message']);

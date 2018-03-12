@@ -6,6 +6,9 @@ $api->version(
     'v1',
     ['namespace' => 'App\Http\Controllers\InternalAPI\Basic', 'prefix' => 'internal/basic'],
     function (Dingo\Api\Routing\Router $api) {
+        $api->get('/test', function(){
+            echo 'test';
+        });
         $api->post('/crawl/result', 'CrawlResultController@create');
         $api->post('/crawl/result/batch_result', 'CrawlResultController@createByBatch');
 
@@ -28,6 +31,9 @@ $api->version(
     'v1',
     ['namespace' => 'App\Http\Controllers\InternalAPI', 'prefix' => 'internal'],
     function (Dingo\Api\Routing\Router $api) {
+        $api->get('/test', function(){
+            echo 'test';
+        });
         $api->post('/crawl/task', 'CrawlTaskController@create');
         $api->post('/crawl/task/status','CrawlTaskController@updateStatus');
         $api->post('/crawl/task/stop', 'CrawlTaskController@stop');
