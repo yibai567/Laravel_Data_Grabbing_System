@@ -5,6 +5,7 @@ namespace App\Http\Controllers\InternalAPI;
 use App\Http\Requests\CrawlTaskCreateRequest;
 use App\Models\CrawlSetting;
 use App\Models\CrawlTask;
+use Dompdf\Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -38,15 +39,39 @@ class CrawlTaskController extends Controller
             'cron_type' => intval($request->cron_type),
             'selectors' => $request->selectors,
         ];
+        try{
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $data = $dispatcher->post('internal/basic/crawl/task', $params);
+            if ($data['status_code'] == 401) {
+                throw new Exception('参数错误', 401);
+            }
+            $result = [];
+            if ($data['data']) {
+                $result = $data['data'];
+            }
+            $params = ['id'=> $result['id']];
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $data = $dispatcher->post('/crawl/task/generate_script', $params);
+            if ($data['status_code'] !== 200) {
+                throw new Exception('生成脚本失败', 401);
+            }
 
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal/basic/crawl/task', $params);
-        if ($data['status_code'] == 401) {
-            return $this->resError(401, '参数错误');
-        }
-        $result = [];
-        if ($data['data']) {
-            $result = $data['data'];
+            $params = ['id'=> $result['id']];
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $data = $dispatcher->post('/crawl/task/execute', $params);
+            if ($data['status_code'] !== 200) {
+                throw new Exception('测试失败', 401);
+            }
+
+            $params = ['id'=> $result['id']];
+            infoLog('抓取平台启动任务接口调用业务基础接口启动任务', $params);
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $data = $dispatcher->post('internal/crawl/task/startup', $params);
+            if ($data['status_code'] !== 200) {
+                throw new Exception('启动失败', 401);
+            }
+        }catch(Exception $e){
+            return $this->resError($e->getMessage(), $e->getCode());
         }
         return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
