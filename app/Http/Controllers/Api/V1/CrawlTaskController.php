@@ -15,46 +15,49 @@ class CrawlTaskController extends Controller
      */
     public function create(Request $request)
     {
-        infoLog('抓取平台任务添加业务API开始', $request);
-        $validator = Validator::make($request->all(), [
+        infoLog('[create] start.', $request);
+        $params = $request->all();
+        infoLog('[create] validate.', $params);
+        $validator = Validator::make($params, [
             'name' => 'string|nullable',
             'description' => 'string|nullable',
             'resource_url' => 'required|string|nullable',
             'cron_type' => 'integer|nullable',
             'selectors' => 'string|nullable',
         ]);
-        infoLog('抓取平台任务添加业务API参数验证', $validator);
+
         if ($validator->fails()) {
-            infoLog('抓取平台任务添加业务API参数验证失败', $validator->fails());
             $errors = $validator->errors();
-            infoLog('抓取平台任务添加业务API参数验证失败', $errors);
+            errorLog('[create] validate fail.', $errors);
             foreach ($errors->all() as $value) {
-                infoLog('抓取平台任务添加业务API参数验证失败', $value);
+                errorLog('[create] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        infoLog('抓取平台任务添加业务API参数验证结束');
-        $params = [
-            'name' => $request->name,
-            'description' => $request->description,
-            'resource_url' => $request->resource_url,
-            'cron_type' => intval($request->cron_type),
-            'selectors' => $request->selectors,
+        infoLog('[create] validate end.', $params);
+
+        $data = [
+            'name' => $params['name'],
+            'description' => $params['description'],
+            'resource_url' => $params['resource_url'],
+            'cron_type' => $params['cron_type'],
+            'selectors' => $params['selectors'],
         ];
-        infoLog('抓取平台任务添加业务API参数过滤', $params);
+
+        infoLog('[create] prepare data.', $data);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal/crawl/task', $params);
-        infoLog('抓取平台任务添加业务API调用内部创建任务接口internal/crawl/task', $params);
-        if ($data['status_code'] == 401) {
-            infoLog('抓取平台任务添加业务API调用内部创建任务接口internal/crawl/task失败', $data);
-            return $this->resError(401, '参数错误');
+        $task = $dispatcher->post('internal/crawl/task', $data);
+        infoLog('[create] create task.', $task);
+        if ($task['status_code'] !== 200) {
+            errorLog($task['message'], $task['status_code']);
+            return $this->resError($task['status_code'], $task['message']);
         }
-        infoLog('抓取平台任务添加业务API调用内部创建任务接口internal/crawl/task完成', $data);
+        infoLog('[create] create task success.', $task);
         $result = [];
-        if ($data['data']) {
-            $result = $data['data'];
+        if ($task['data']) {
+            $result = $task['data'];
         }
-        infoLog('抓取平台任务添加业务API完成', $result);
+        infoLog('[create] create end.', $result);
         return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 
@@ -65,201 +68,85 @@ class CrawlTaskController extends Controller
      */
     public function updateStatus(Request $request)
     {
-        infoLog('抓取平台更新状态接口启动', $request);
-        $validator = Validator::make($request->all(), [
+        infoLog('[updateStatus] start.', $request);
+        $params = $request->all();
+        infoLog('[updateStatus] validate.', $params);
+        $validator = Validator::make($params, [
             'id' => 'integer|required',
             'status' => 'integer|required',
         ]);
-        infoLog('抓取平台更新状态接口参数验证', $request->all());
+
         if ($validator->fails()) {
-            infoLog('抓取平台更新状态参数验证失败', $validator->fails());
             $errors = $validator->errors();
-            infoLog('抓取平台更新状态参数验证失败', $errors);
+            errorLog('[updateStatus] validate fail.', $errors);
             foreach ($errors->all() as $value) {
-                infoLog('抓取平台更新状态参数验证错误信息', $value);
+                errorLog('[updateStatus] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
-            infoLog('抓取平台更新状态接口参数验证结束', $request);
         }
-        infoLog('抓取平台更新状态接口准备参数');
-        $params = [
-            'id' => intval($request->get('id')),
-            'status' => intval($request->get('status')),
+        infoLog('[updateStatus] validate end.', $params);
+
+        $data = [
+            'id' => $params['id'],
+            'status' => $params['status'],
         ];
-        infoLog('抓取平台更新状态接口调用更新任务状态接口', $params);
+        infoLog('[updateStatus] prepare data.', $data);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal/crawl/task/status', $params);
-        infoLog('抓取平台更新状态接口调用更新任务状态接口返回成功', $data);
-        if ($data['status_code'] == 401) {
-            infoLog('抓取平台更新状态接口调用更新任务状态接口返回错误码', $data['status_code']);
-            return $this->resError(401, '参数错误');
+        $task = $dispatcher->post('internal/crawl/task/status', $data);
+        infoLog('[updateStatus] edit task.', $data);
+        if ($task['status_code'] !== 200) {
+            errorLog('[updateStatus] edit task error.');
+            return $this->resError($task['status_code'], $task['message']);
         }
-        infoLog('抓取平台更新状态接口调用更新任务状态接口正常情况', $data);
         $result = [];
-        if ($data['data']) {
-            infoLog('抓取平台更新状态接口调用更新任务状态接口返回数据', $data['data']);
-            $result = $data['data'];
+        if ($task['data']) {
+            $result = $task['data'];
         }
-        infoLog('抓取平台更新状态接口完成', $result);
+        infoLog('[updateStatus] end.', $result);
         return $this->resObjectGet($result, 'crawl_task', $request->path());
-    }
-
-    /**
-     * 生成脚本接口
-     * @param Request $request
-     * @return array
-     */
-    public function generateScript(Request $request)
-    {
-        infoLog('抓取平台生成脚本文件接口启动', $request);
-        $validator = Validator::make($request->all(), [
-            'id' => 'integer|required',
-        ]);
-        infoLog('抓取平台生成脚本文件接口参数验证', $validator);
-
-        if ($validator->fails()) {
-            infoLog('抓取平台生成脚本文件接口参数验证失败', $validator->fails());
-            $errors = $validator->errors();
-            infoLog('抓取平台生成脚本文件接口参数验证失败错误信息', $errors);
-            foreach ($errors->all() as $value) {
-                infoLog('抓取平台生成脚本文件接口参数验证失败错误值', $value);
-                return $this->resError(401, $value);
-            }
-        }
-        infoLog('抓取平台生成脚本文件接口参数验证结束');
-        $params = [
-            'id' => intval($request->get('id')),
-        ];
-        infoLog('抓取平台生成脚本文件接口调用基础业务接口参数准备', $params);
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal/crawl/task/generate_script', $params);
-        if ($data['status_code'] == 401) {
-            return $this->resError(401, '生成脚本失败');
-        }
-        $result = [];
-        if ($data['data']) {
-            $result = $data['data'];
-            infoLog('抓取平台生成脚本文件接口调用基础业务接口返回数据', $result);
-        }
-        infoLog('抓取平台生成脚本文件接口完成');
-        return $this->resObjectGet($result, 'crawl_task.generate_script', $request->path());
-    }
-
-    /**
-     * 执行脚本接口
-     * @param Request $request
-     * @return mixed
-     */
-    public function execute(Request $request)
-    {
-        infoLog('抓取平台执行脚本接口启动', $request);
-        $validator = Validator::make($request->all(), [
-            'id' => 'integer|required',
-        ]);
-        infoLog('抓取平台执行脚本接口参数验证', $validator);
-
-        if ($validator->fails()) {
-            infoLog('抓取平台执行脚本接口参数验证失败', $validator->fails());
-            $errors = $validator->errors();
-            infoLog('抓取平台执行脚本接口参数验证失败错误信息', $errors);
-            foreach ($errors->all() as $value) {
-                infoLog('抓取平台执行脚本接口参数验证失败错误值', $value);
-                return $this->resError(401, $value);
-            }
-        }
-        infoLog('抓取平台执行脚本接口参数验证结束');
-        $params = [
-            'id' => intval($request->get('id')),
-        ];
-        infoLog('抓取平台执行脚本接口请求基础接口执行脚本接口', $params);
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal/crawl/task/execute', $params);
-        infoLog('抓取平台执行脚本接口请求基础接口执行脚本接口返回', $data);
-        $res = [];
-        if ($data['data']) {
-            infoLog('抓取平台执行脚本接口请求基础接口执行脚本接口返回', $data['data']);
-            $res = $data['data'];
-        }
-        infoLog('抓取平台执行脚本接口完成');
-        return $this->resObjectGet($res, 'crawl_task.execute', $request->path());
-    }
-
-    /**
-     * 启动任务
-     * @param Request $request
-     * @return 启动任务
-     */
-    public function startup(Request $request)
-    {
-        infoLog('抓取平台启动任务接口启动', $request);
-        $validator = Validator::make($request->all(), [
-            'id' => 'integer|required',
-        ]);
-        infoLog('抓取平台启动任务接口参数验证', $validator);
-
-        if ($validator->fails()) {
-            infoLog('抓取平台启动任务接口参数验证失败', $validator->fails());
-            $errors = $validator->errors();
-            infoLog('抓取平台启动任务接口参数验证失败错误信息', $errors);
-            foreach ($errors->all() as $value) {
-                infoLog('抓取平台启动任务接口参数验证失败错误值', $value);
-                return $this->resError(401, $value);
-            }
-        }
-        infoLog('抓取平台启动任务接口参数验证结束');
-        $params = [
-            'id' => intval($request->get('id')),
-        ];
-        infoLog('抓取平台启动任务接口调用业务基础接口启动任务', $params);
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal/crawl/task/startup', $params);
-        infoLog('抓取平台启动任务接口调用业务基础接口启动任务返回', $data);
-        $res = [];
-        if ($data['data']) {
-            $res = $data['data'];
-            infoLog('抓取平台启动任务接口调用业务基础接口启动任务返回', $res);
-        }
-        infoLog('抓取平台启动任务接口完成');
-        return $this->resObjectGet($res, 'crawl_task.startup', $request->path());
     }
 
     /**
      * 停止任务接口
      * @param Request $request
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     * @return array
      */
     public function stop(Request $request)
     {
-        infoLog('抓取平台停止任务接口启动', $request);
-        $validator = Validator::make($request->all(), [
+        infoLog('[stop] start.', $request);
+        $params = $request->all();
+        infoLog('[stop] validate.', $params);
+        $validator = Validator::make($params, [
             'id' => 'integer|required',
         ]);
-        infoLog('抓取平台停止任务接口参数验证', $validator);
 
         if ($validator->fails()) {
-            infoLog('抓取平台停止任务接口参数验证失败', $validator->fails());
             $errors = $validator->errors();
-            infoLog('抓取平台停止任务接口参数验证失败错误信息', $errors);
+            errorLog('[stop] validate fail.', $errors);
             foreach ($errors->all() as $value) {
-                infoLog('抓取停止任务任务接口参数验证失败错误值', $value);
+                errorLog('[stop] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        infoLog('抓取平台停止任务接口参数验证结束');
-        $params = [
-            'id' => intval($request->get('id')),
+        infoLog('[stop] validate end.', $params);
+
+        $data = [
+            'id' => $params['id'],
         ];
-        infoLog('抓取平台停止任务接口调用基础业务接口停止任务', $params);
+        infoLog('[stop] execute stop base api', $data);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal/crawl/task/stop', $params);
-        infoLog('抓取平台停止任务接口调用基础业务接口停止任务返回数据', $data);
-        $res = [];
-        if ($data['data']) {
-            $res = $data['data'];
-            infoLog('抓取平台停止任务接口调用基础业务接口停止任务返回数据', $res);
+        $res = $dispatcher->post('internal/crawl/task/stop', $data);
+        infoLog('[stop] execute stop base api back', $res);
+        if ($res['status'] !== 200) {
+            errorLog('[stop] edit task error.');
+            return $this->resError($res['status_code'], $res['message']);
         }
-        infoLog('抓取平台停止任务接口');
-        return $this->resObjectGet($res, 'crawl_task.stop', $request->path());
+        $result = [];
+        if ($res['data']) {
+            $result = $res['data'];
+        }
+        infoLog('[stop] end', $result);
+        return $this->resObjectGet($result, 'crawl_task.stop', $request->path());
     }
 
     /**
@@ -269,37 +156,36 @@ class CrawlTaskController extends Controller
      */
     public function createScript(Request $request)
     {
-        infoLog('抓取平台生成脚本文件接口启动', $request);
-        $validator = Validator::make($request->all(), [
+        infoLog('[createScript] start.', $request);
+        $params = $request->all();
+        infoLog('[createScript] validate.', $params);
+        $validator = Validator::make($params, [
             'id' => 'integer|required',
         ]);
-        infoLog('抓取平台生成脚本文件接口参数验证', $validator);
 
         if ($validator->fails()) {
-            infoLog('抓取平台生成脚本文件接口参数验证失败', $validator->fails());
             $errors = $validator->errors();
-            infoLog('抓取平台生成脚本文件接口参数验证失败错误信息', $errors);
+            errorLog('[createScript] validate fail.', $errors);
             foreach ($errors->all() as $value) {
-                infoLog('抓取平台生成脚本文件接口参数验证失败错误值', $value);
+                errorLog('[createScript] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        infoLog('抓取平台生成脚本文件接口参数验证结束');
-        $params = [
-            'id' => intval($request->get('id')),
+        infoLog('[createScript] validate end.', $params);
+        $data = [
+            'id' => $params['id'],
         ];
-        infoLog('抓取平台生成脚本文件接口调用基础业务接口参数准备', $params);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal/crawl/task/generate_script', $params);
-        if ($data['status_code'] == 401) {
-            return $this->resError(401, '生成脚本失败');
+        $res = $dispatcher->post('internal/crawl/task/generate_script', $data);
+        if ($res['status_code'] !== 200) {
+            errorLog('[createScript] edit task error.');
+            return $this->resError($res['status_code'], $res['message']);
         }
         $result = [];
-        if ($data['data']) {
-            $result = $data['data'];
-            infoLog('抓取平台生成脚本文件接口调用基础业务接口返回数据', $result);
+        if ($res['data']) {
+            $result = $res['data'];
         }
-        infoLog('抓取平台生成脚本文件接口完成');
+        infoLog('[createScript] validate end.', $result);
         return $this->resObjectGet($result, 'crawl_task.generate_script', $request->path());
     }
 
@@ -310,35 +196,38 @@ class CrawlTaskController extends Controller
      */
     public function preview(Request $request)
     {
-        infoLog('抓取平台执行脚本接口启动', $request);
-        $validator = Validator::make($request->all(), [
+        infoLog('[preview] start.', $request);
+        $params = $request->all();
+        infoLog('[preview] validate.', $params);
+        $validator = Validator::make($params, [
             'id' => 'integer|required',
         ]);
-        infoLog('抓取平台执行脚本接口参数验证', $validator);
 
         if ($validator->fails()) {
-            infoLog('抓取平台执行脚本接口参数验证失败', $validator->fails());
             $errors = $validator->errors();
-            infoLog('抓取平台执行脚本接口参数验证失败错误信息', $errors);
+            errorLog('[preview] validate fail.', $errors);
             foreach ($errors->all() as $value) {
-                infoLog('抓取平台执行脚本接口参数验证失败错误值', $value);
+                errorLog('[preview] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        infoLog('抓取平台执行脚本接口参数验证结束');
-        $params = [
-            'id' => intval($request->get('id')),
+        infoLog('[preview] validate end.', $params);
+        $data = [
+            'id' => $params['id'],
         ];
-        infoLog('抓取平台执行脚本接口请求基础接口执行脚本接口', $params);
+        infoLog('[preview] prepare data', $data);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal/crawl/task/execute', $params);
-        infoLog('抓取平台执行脚本接口请求基础接口执行脚本接口返回', $data);
-        $res = [];
-        if ($data['data']) {
-            infoLog('抓取平台执行脚本接口请求基础接口执行脚本接口返回', $data['data']);
-            $res = $data['data'];
+        $res = $dispatcher->post('internal/crawl/task/execute', $params);
+
+        if ($res['status_code'] !== 200) {
+            errorLog('[preview] edit task error.');
+            return $this->resError($res['status_code'], $res['message']);
         }
-        infoLog('抓取平台执行脚本接口完成');
+        $result = [];
+        if ($res['data']) {
+            $result = $res['data'];
+        }
+        infoLog('[preview] validate end.', $result);
         return $this->resObjectGet($res, 'crawl_task.execute', $request->path());
     }
 
@@ -350,8 +239,9 @@ class CrawlTaskController extends Controller
     public function start(Request $request)
     {
         infoLog('[start] start.', $request);
-        infoLog('[start] validate.', $request->all());
-        $validator = Validator::make($request->all(), [
+        $params = $request->all();
+        infoLog('[start] validate.', $params);
+        $validator = Validator::make($params, [
             'id' => 'integer|required',
         ]);
         infoLog('[start] validate.', $validator);
@@ -363,20 +253,23 @@ class CrawlTaskController extends Controller
                 return $this->resError(401, $value);
             }
         }
-        infoLog('抓取平台启动任务接口参数验证结束');
-        $params = [
-            'id' => intval($request->get('id')),
+        infoLog('[start] validate end.');
+
+        $data = [
+            'id' => $params['id'],
         ];
-        infoLog('抓取平台启动任务接口调用业务基础接口启动任务', $params);
+        infoLog('[start] execute base api', $data);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal/crawl/task/start', $params);
-        infoLog('抓取平台启动任务接口调用业务基础接口启动任务返回', $data);
-        $res = [];
-        if ($data['data']) {
-            $res = $data['data'];
-            infoLog('抓取平台启动任务接口调用业务基础接口启动任务返回', $res);
+        $res = $dispatcher->post('internal/crawl/task/start', $data);
+        if ($res['status_code'] !== 200) {
+            errorLog('[start] start task error.');
+            return $this->resError($res['status_code'], $res['message']);
         }
-        infoLog('抓取平台启动任务接口完成');
+        $result = [];
+        if ($res['data']) {
+            $result = $res['data'];
+        }
+        infoLog('[start] validate end.', $result);
         return $this->resObjectGet($res, 'crawl_task.startup', $request->path());
     }
 }

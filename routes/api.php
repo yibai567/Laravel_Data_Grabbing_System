@@ -16,17 +16,16 @@ $api->version(
     'v1',
     ['namespace' => 'App\Http\Controllers\Api\V1', 'prefix'=>'v1'],
     function (Dingo\Api\Routing\Router $api) {
-        $api->post('/crawl/task/generate_script', 'CrawlTaskController@generateScript');
         $api->post('/crawl/task', 'CrawlTaskController@create');
-        $api->post('/crawl/task/execute', 'CrawlTaskController@execute');
         $api->post('/crawl/task/status', 'CrawlTaskController@updateStatus');
-        $api->post('/crawl/result', 'CrawlResultController@create');
-        $api->post('/crawl/result/batch_result', 'CrawlResultController@createByBatch');
-        $api->post('/crawl/task/startup', 'CrawlTaskController@startup');
         $api->post('/crawl/task/stop', 'CrawlTaskController@stop');
-
         $api->post('/crawl/task/script', 'CrawlTaskController@createScript');
         $api->post('/crawl/task/preview', 'CrawlTaskController@preview');
         $api->post('/crawl/task/start','CrawlTaskController@start');
+
+        $api->post('/crawl/result', 'CrawlResultController@create');
+        $api->post('/crawl/result/batch_result', 'CrawlResultController@createByBatch');
+
+
     }
 );
