@@ -62,10 +62,10 @@ class CrawlResultController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function pushList(Request $request)
+    public function createByBatch(Request $request)
     {
-        infoLog('抓取平台结果返回增加基础API开始', $request->all());
         $params = $request->all();
+        infoLog("[createByBatch] start.", $params);
         $validator = Validator::make($params, [
             'crawl_task_id' => 'numeric|nullable',
             'task_start_time' => 'date|nullable',
@@ -77,55 +77,44 @@ class CrawlResultController extends Controller
             'setting_keywords' => 'string|nullable',
             'setting_data_type' => 'numeric|nullable',
         ]);
-
+        infoLog('[params validator start]', $params);
         if ($validator->fails()) {
-            infoLog('抓取平台结果返回增加基础API参数验证失败 $validator->fails()', $validator->fails());
             $errors = $validator->errors();
-            infoLog('抓取平台结果返回增加基础API参数验证失败 $validator->errors()', $validator->errors());
             foreach ($errors->all() as $value) {
-                infoLog('抓取平台结果返回增加基础API参数验证失败 $value', $value);
+                errorLog('[params validator] fail', $value);
                 return response($value, 401);
             }
         }
-
+        infoLog('[params validator] end.');
         $result = [];
 
         if (empty($params['format_data'])) {
-            infoLog('抓取平台结果返回增加基础API $params["format_data"] empty!');
+            infoLog('[format_data] empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
-
         $items = [];
-        infoLog('抓取平台结果返回增加基础API 处理数据是否存在', $params['format_data']);
-        foreach (json_decode($params['format_data'], true) as $item) {
-            //if (!$this->isTaskExist($params['crawl_task_id'], $item[1])) {
-            $items[] = [
-                'crawl_task_id' => $params['crawl_task_id'],
-                'original_data' => $params['original_data'],
-                'task_start_time' => $params['task_start_time'],
-                'task_end_time' => $params['task_end_time'],
-                'task_url' => $item['url'],
-                'format_data' => $item,
-                'setting_selectors' => $params['setting_selectors'],
-                'setting_keywords' => $params['setting_keywords'],
-                'setting_data_type' => $params['setting_data_type'],
-                'status' => CrawlResult::IS_UNTREATED,
-            ];
-           // }
+        foreach ($params['format_data'] as $item) {
+            if (!$this->isTaskExist($params['crawl_task_id'], $item['url'])) {
+                $params['task_url'] = $item['url'];
+                $params['format_data'] = json_encode($item);
+                $params['original_data'] = json_encode($params['original_data']);
+                $params['status'] = CrawlResult::IS_UNTREATED;
+                $items[] = $params;
+            }
         }
 
         if (empty($items)) {
-            infoLog('抓取平台结果返回增加基础API $items empty!');
+            infoLog('[params] empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
 
-        infoLog('抓取平台结果返回增加基础API insert start', $items);
+        infoLog('[insert] start.', $items);
         $result = CrawlResult::insert($items);
         if (!$result) {
-            infoLog('抓取平台结果返回增加基础API insert fail', $items);
+            errorLog('[insert] fail.', $items);
             return response('插入失败', 402);
         }
-        infoLog('抓取平台结果返回增加基础API insert end', $result);
+        infoLog('[insert] end.', $result);
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
 
@@ -135,7 +124,7 @@ class CrawlResultController extends Controller
      * @param $taskUrl
      * @return bool
      */
-    protected function isTaskExist($taskId, $taskUrl)
+    private function isTaskExist($taskId, $taskUrl)
     {
         $crawlResult = CrawlResult::where(['task_url' => $taskUrl, 'crawl_task_id' => $taskId])
             ->first();
