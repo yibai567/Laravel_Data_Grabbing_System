@@ -22,7 +22,6 @@ $api->version(
         $api->post('/crawl/task/script', 'CrawlTaskController@createScript');
         $api->post('/crawl/task/preview', 'CrawlTaskController@preview');
         $api->post('/crawl/task/start','CrawlTaskController@start');
-
         $api->post('/crawl/result', 'CrawlResultController@create');
         $api->post('/crawl/result/batch_result', 'CrawlResultController@createByBatch');
 

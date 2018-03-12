@@ -208,9 +208,10 @@ class CrawlTaskController extends Controller
             $data = [
                 'id' => $params['id'],
             ];
+
             $dispatcher = app('Dingo\Api\Dispatcher');
             $res = $dispatcher->post('internal/basic/crawl/task/script', $data);
-            dd($res);
+            
             if ($res['status_code'] !== 200) {
                 errorLog($res['messsage']);
                 throw new Exception($res['messsage'], $res['status_code']);
@@ -234,8 +235,6 @@ class CrawlTaskController extends Controller
             } else {
                 $content = $task['setting']['content'];
                 $content = str_replace('{{{crawl_task_id}}}', $task['id'], $content);
-    //            $content = str_replace('{{{task_start_time}}}', '', $content);
-    //            $content = str_replace('{{{task_end_time}}}', '', $content);
                 $content = str_replace('{{{setting_selectors}}}', $task['setting']['selectors'], $content);
                 $content = str_replace('{{{setting_keywords}}}', $task['setting']['keywords'], $content);
                 $content = str_replace('{{{setting_data_type}}}', $task['setting']['data_type'], $content);
