@@ -9,10 +9,11 @@ use Illuminate\Support\Facades\Validator;
 
 class CrawlResultController extends Controller
 {
-
+    const EFFECT_DEFAULT = 1;
+    const EFFECT_TEST = 2;
     // public function create(Request $request)
     // {
-    //     infoLog('[apiCreate] start');
+    //infoLog('[apiCreate] start');
     //     $result = [];
     //     $params = $request->all();
     //     $validator = Validator::make($params, [
@@ -29,21 +30,21 @@ class CrawlResultController extends Controller
     //     if ($validator->fails()) {
     //         $errors = $validator->errors();
     //         foreach ($errors->all() as $value) {
-    //             infoLog('[apiCreate] validator params', json_encode($value));
+    //infoLog('[apiCreate] validator params', json_encode($value));
     //             return response($value, 401);
     //         }
     //     }
 
     //     if (empty($params['data'])) {
-    //         infoLog('[apiCreate] $params["data"] empty!');
+    //infoLog('[apiCreate] $params["data"] empty!');
     //         return $this->resObjectGet($result, 'crawl_result', $request->path());
     //     }
 
     //     $dispatcher = app('Dingo\Api\Dispatcher');
-    //     infoLog('[apiPushList] internal_api/create 接口调用 start');
+    //infoLog('[apiPushList] internal_api/create 接口调用 start');
     //     $resultData = $dispatcher->post('internal_api/crawl/result', $params);
     //     if ($resultData['status_code'] == 401) {
-    //         infoLog('[apiPushList] internal_api/create 返回错误', json_encode($resultData));
+    //infoLog('[apiPushList] internal_api/create 返回错误', json_encode($resultData));
     //         return response('参数错误', 401);
     //     }
 
@@ -59,10 +60,10 @@ class CrawlResultController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
     */
-    public function pushList(Request $request)
+    public function createByBatch(Request $request)
     {
-        infoLog('抓取平台结果添加外部API开始', $request->all());
         $params = $request->all();
+        infoLog("[createByBatch] start.", $params);
         $validator = Validator::make($params, [
             'data' => 'nullable',
             'crawl_task_id' => 'numeric|nullable',
@@ -72,40 +73,35 @@ class CrawlResultController extends Controller
             'setting_selectors' => 'string|nullable',
             'setting_keywords' => 'string|nullable',
             'setting_data_type' => 'numeric|nullable',
-            'env' => 'numeric|nullable',
+            'effect' => 'numeric|nullable',
         ]);
-        infoLog('抓取平台结果添加外部API参数验证', $validator);
+        infoLog('[createByBatch] params validator start', $params);
         if ($validator->fails()) {
-            infoLog('抓取平台结果添加外部API参数验证失败 $validator->fails()', $validator->fails());
             $errors = $validator->errors();
-            infoLog('抓取平台结果添加外部API参数验证失败 $errors', $errors);
             foreach ($errors->all() as $value) {
-                infoLog('抓取平台结果添加外部API参数验证失败 $value', $value);
+                errorLog('[createByBatch] params validator fail', $value);
                 return response($value, 401);
             }
         }
+        infoLog('[params validator] end.');
         $result = [];
-        infoLog('抓取平台结果添加外部API $params["data"]参数验证', $params['data']);
         if (empty($params['data'])) {
-            infoLog('抓取平台结果添加外部API $params["data"] empty!');
+            infoLog('[createByBatch] data empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
         $dispatcher = app('Dingo\Api\Dispatcher');
-        infoLog('抓取平台结果添加请求业务API开始');
-        //测试参数
-        $newParams['id'] = 1;
-        $newParams['title'] = '测试测试';
-        //end
-        $resultData = $dispatcher->post('internal/crawl/result/push_list', $newParams);
-        if ($resultData['status_code'] == 401) {
-            infoLog('抓取平台结果添加请求业务API参数错误', $params);
-            return response('参数错误', 401);
+        infoLog('[createByBatch] request internalApi createByBatch start', $params);
+        $params['effect'] = self::EFFECT_DEFAULT;
+
+        $resultData = $dispatcher->json($params)->post('internal/crawl/result/batch_result');
+        if ($resultData['status_code'] != 200) {
+            errorLog('[createByBatch] request internalApi createByBatch result error', $resultData);
+            return response($resultData['message'], $resultData['status_code']);
         }
         if ($resultData['data']) {
-            infoLog('抓取平台结果添加请求业务API成功返回结果', $resultData);
             $result = $resultData['data'];
         }
-        infoLog('抓取平台结果添加请求业务API结束');
+        infoLog('[createByBatch] end.', $result);
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
 

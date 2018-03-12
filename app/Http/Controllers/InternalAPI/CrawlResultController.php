@@ -10,10 +10,8 @@ use Illuminate\Support\Facades\Validator;
 
 class CrawlResultController extends Controller
 {
-     // 1，默认，2测试
-    const ENV_DEFAULT = 1;
-    const ENV_TEST = 2;
-
+    const EFFECT_DEFAULT = 1;
+    const EFFECT_TEST = 2;
     // public function create(Request $request)
     // {
     //     infoLog('[internalIpi/create] start');
@@ -64,10 +62,10 @@ class CrawlResultController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
     */
-    public function pushList(Request $request)
+    public function createByBatch(Request $request)
     {
         $params = $request->all();
-        infoLog('抓取平台结果添加业务API开始', json_encode($params));exit;
+        infoLog('[createByBatch] start.', $params);
         $validator = Validator::make($params, [
             'data' => 'nullable',
             'crawl_task_id' => 'numeric|nullable',
@@ -77,59 +75,57 @@ class CrawlResultController extends Controller
             'setting_selectors' => 'string|nullable',
             'setting_keywords' => 'string|nullable',
             'setting_data_type' => 'numeric|nullable',
-            'env' => 'numeric|nullable',
+            'effect' => 'numeric|nullable',
         ]);
-
+        infoLog('[createByBatch] params validator start.');
         if ($validator->fails()) {
-            infoLog('抓取平台结果添加业务API参数验证失败 $validator->fails()', $validator->fails());
             $errors = $validator->errors();
-            infoLog('抓取平台结果添加业务API参数验证失败 $errors->all()', $errors->all());
             foreach ($errors->all() as $value) {
-                infoLog('抓取平台结果添加业务API参数验证失败 $value', $value);
+                errorLog('[createByBatch] params validator fail.', $value);
                 return response($value, 401);
             }
         }
-
+        infoLog('[params validator] end.');
         $result = [];
         if (empty($params['data'])) {
-            infoLog('抓取平台结果添加业务API $params["data"] empty!');
+            infoLog('[createByBatch] data empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
 
         $params['original_data'] = $params['data'];
         $newData = [];
-        infoLog('抓取平台结果添加业务API 匹配关键词');
+        infoLog('[createByBatch] setting_keywords matching start',  $params['setting_keywords']);
         foreach ($params['data'] as $key => $value) {
             $matchingResult  = strpos($value['text'], $params['setting_keywords']);
             if ($matchingResult !== false){
                 $newData[] = $value;
             }
         }
-
+        infoLog('[createByBatch] setting_keywords matching end', $newData);
         if (empty($newData)) {
-            infoLog('抓取平台结果添加业务API 匹配关键词结果为空');
+            infoLog('[createByBatch] newData empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
+        $params['format_data'] = $newData;
 
-        $params['format_data'] = json_encode($newData);
-
-        if ($env == self::ENV_TEST) {
-            infoLog('抓取平台结果添加业务API env是测试类型', $env);
-            return $this->resObjectGet($params, 'crawl_result', $request->path());
+        if ($params['effect'] == self::EFFECT_TEST) {
+            infoLog('[createByBatch] effect is test', $newData);
+            return $this->resObjectGet($newData, 'crawl_result', $request->path());
         }
+
+        unset($params['data'], $params['effect']);
         $dispatcher = app('Dingo\Api\Dispatcher');
 
-        infoLog('抓取平台结果添加请求基础API开始');
-        $resultData = $dispatcher->post('internal/basic/crawl/result/push_list', $params);
-        if ($resultData['status_code'] == 401) {
-            infoLog('抓取平台结果添加请求基础API参数错误', $params);
-            return response('参数错误', 401);
+        infoLog('[createByBatch] request internal/basic createByBatch start', $params);
+        $resultData = $dispatcher->json($params)->post('internal/basic/crawl/result/batch_result');
+        if ($resultData['status_code'] != 200) {
+            errorLog('[createByBatch] request internal/basic createByBatch result error', $resultData);
+            return response($resultData['message'], $resultData['status_code']);
         }
         if ($resultData['data']) {
-            infoLog('抓取平台结果添加请求基础API成功返回结果', $resultData);
             $result = $resultData['data'];
         }
-        infoLog('抓取平台结果添加请求基础API结束');
+        infoLog('[createByBatch] end.', $result);
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
-}
+ }
