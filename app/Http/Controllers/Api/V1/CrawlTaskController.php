@@ -175,8 +175,10 @@ class CrawlTaskController extends Controller
         $data = [
             'id' => $params['id'],
         ];
+
         $dispatcher = app('Dingo\Api\Dispatcher');
         $res = $dispatcher->post('internal/crawl/task/script', $data);
+        
         if ($res['status_code'] !== 200) {
             errorLog('[createScript] edit task error.');
             return $this->resError($res['status_code'], $res['message']);

@@ -111,7 +111,9 @@ class CrawlTaskController extends Controller
      */
     public function updateStatus(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        infoLog('[createScript] start.', $request);
+        $params = $request->all();
+        $validator = Validator::make($params, [
             "id" => "integer|required",
             "status" => "integer|required"
         ]);
@@ -122,8 +124,8 @@ class CrawlTaskController extends Controller
                 return $this->resError(401, $value);
             }
         }
-        $taskId = intval($request->get('id'));
-        $status = intval($request->get('status'));
+        $taskId = $params['id'];
+        $status = $params['status'];
         if ($status == CrawlTask::IS_INIT) {
             // 生成脚本
             $params = ['id' => $taskId];
@@ -134,7 +136,7 @@ class CrawlTaskController extends Controller
         $dispatcher = app('Dingo\Api\Dispatcher');
         $data = $dispatcher->post('internal/basic/crawl/task/status', $params);
         if ($data['status_code'] !== 200) {
-            return $this->resError($data['status_code'], '更新失败');
+            return $this->resError($data['status_code'], 'update fail');
         }
         $res = [];
         if ($data['data']) {
@@ -175,7 +177,7 @@ class CrawlTaskController extends Controller
         $params = ['id' => $taskId, 'status' => CrawlTask::IS_PAUSE];
         $dispatcher = app('Dingo\Api\Dispatcher');
         $res = $dispatcher->post('internal/crawl/task/status', $params);
-        return $this->resObjectGet('任务停止成功', 'crawl_task.execute', $request->path());
+        return $this->resObjectGet('task stop success', 'crawl_task.execute', $request->path());
     }
 
 
@@ -185,61 +187,66 @@ class CrawlTaskController extends Controller
      */
     public function createScript(Request $request)
     {
-        infoLog('抓取平台生成脚本文件接口启动', $request);
-        $validator = Validator::make($request->all(), [
+        infoLog('[createScript] start.', $request);
+        $params = $request->all();
+        infoLog('[createScript] validate.', $params);
+        $validator = Validator::make($params, [
             'id' => 'integer|required',
         ]);
-        infoLog('抓取平台生成脚本文件接口参数验证', $validator);
+        infoLog('[createScript] validate.', $validator);
 
         if ($validator->fails()) {
-            infoLog('抓取平台生成脚本文件接口参数验证失败', $validator->fails());
             $errors = $validator->errors();
-            infoLog('抓取平台生成脚本文件接口参数验证失败错误信息', $errors);
             foreach ($errors->all() as $value) {
-                infoLog('抓取平台生成脚本文件接口参数验证失败错误值', $value);
+                infoLog('[createScript] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        infoLog('抓取平台生成脚本文件接口参数验证结束');
-        $params = [
-            'id' => intval($request->get('id')),
-        ];
+        infoLog('[createScript] validate end.');
 
-        $params = ['id' => $params['id']];
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post('internal/basic/crawl/task/script', $params);
-        if ($data['status_code'] == 401) {
-            return $this->resError(401, '更新脚本失败');
-        }
+        try {
+            $data = [
+                'id' => $params['id'],
+            ];
 
-        //调用基础接口获取任务详情
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->get('internal/basic/crawl/task?id=' . $params['id']);
-        if ($data['status_code'] == 401) {
-            return $this->resError(401, '参数错误');
-        }
-        if (empty($data['data'])) {
-            return $this->resError(401, '任务不存在');
-        }
-        $task = $data['data'];
-        if ($task['setting']['type'] == CrawlSetting::TYPE_CUSTOM) {
-            //自定义模版类型
-            $content = '';
-        } else {
-            $content = $task['setting']['content'];
-            $content = str_replace('{{{crawl_task_id}}}', $task['id'], $content);
-//            $content = str_replace('{{{task_start_time}}}', '', $content);
-//            $content = str_replace('{{{task_end_time}}}', '', $content);
-            $content = str_replace('{{{setting_selectors}}}', $task['setting']['selectors'], $content);
-            $content = str_replace('{{{setting_keywords}}}', $task['setting']['keywords'], $content);
-            $content = str_replace('{{{setting_data_type}}}', $task['setting']['data_type'], $content);
-        }
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $res = $dispatcher->post('internal/basic/crawl/task/script', $data);
+            
+            if ($res['status_code'] !== 200) {
+                errorLog($res['messsage']);
+                throw new Exception($res['messsage'], $res['status_code']);
+            }
 
-        if (!generateScript($task['script_file'], $content)) {
-            return $this->resError(402, '脚本生成失败');
+            //调用基础接口获取任务详情
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $res = $dispatcher->get('internal/basic/crawl/task?id=' . $params['id']);
+            if ($res['status_code'] !== 200) {
+                errorLog($res['messsage']);
+                throw new Exception($res['messsage'], $res['status_code']);
+            }
+            $task = [];
+            if ($res['data']) {
+                $task = $res['data'];
+            }
+
+            if ($task['setting']['type'] == CrawlSetting::TYPE_CUSTOM) {
+                //自定义模版类型
+                $content = '';
+            } else {
+                $content = $task['setting']['content'];
+                $content = str_replace('{{{crawl_task_id}}}', $task['id'], $content);
+                $content = str_replace('{{{setting_selectors}}}', $task['setting']['selectors'], $content);
+                $content = str_replace('{{{setting_keywords}}}', $task['setting']['keywords'], $content);
+                $content = str_replace('{{{setting_data_type}}}', $task['setting']['data_type'], $content);
+            }
+
+            if (!generateScript($task['script_file'], $content)) {
+                return $this->resError(402, 'script generate fail');
+            }
+        } catch(Exception $e) {
+            return $this->resError($res['status_code'], $res['message']);
         }
-        return $this->resObjectGet('脚本生成成功', 'crawl_task.generate_script', $request->path());
-        infoLog('抓取平台生成脚本文件接口完成');
+        return $this->resObjectGet('script generate success', 'crawl_task.generate_script', $request->path());
     }
 
     /**
@@ -248,32 +255,34 @@ class CrawlTaskController extends Controller
      */
     public function preview(Request $request)
     {
-        infoLog('抓取平台执行接口启动', $request);
-        $validator = Validator::make($request->all(), [
+        infoLog('[preview] start.', $request);
+        $params = $request->all();
+        infoLog('[preview] validate.', $params);
+        $validator = Validator::make($params, [
             'id' => 'integer|required',
         ]);
-        infoLog('抓取平台执行接口参数验证', $validator);
+        infoLog('[preview] validate.', $validator);
 
         if ($validator->fails()) {
-            infoLog('抓取平台执行接口参数验证失败', $validator->fails());
             $errors = $validator->errors();
-            infoLog('抓取平台执行接口参数验证失败错误信息', $errors);
             foreach ($errors->all() as $value) {
-                infoLog('抓取平台执行接口参数验证失败错误值', $value);
+                infoLog('[preview] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        infoLog('抓取平台生成脚本文件接口参数验证结束');
+        infoLog('[start] validate end.');
+
         // 获取任务详情
-        $taskId = intval($request->get('id'));
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->get('internal/basic/crawl/task?id=' . $taskId);
-        if ($data['status_code'] == 401) {
-            return $this->resError(401, '参数错误');
+        $res = $dispatcher->get('internal/basic/crawl/task?id=' . $params['id']);
+        if ($res['status_code'] !== 200) {
+                errorLog($res['messsage']);
+                throw new Exception($res['messsage'], $res['status_code']);
         }
-        $task = $data['data'];
+
+        $task = $res['data'];
         if (!file_exists($task['script_file'])) {
-            return $this->resError(401, '脚本文件不存在');
+            return $this->resError(401, 'script file not exist');
         }
         $command = 'casperjs ' . $task['script_file'] . ' --env=test';
         $output = shell_exec($command);
