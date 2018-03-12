@@ -32,6 +32,17 @@ if (!function_exists('infoLog')) {
     }
 }
 
+if (!function_exists('errorLog')) {
+    function infoLog($message, $params = [])
+    {
+        new Log();
+        $extend = array(
+            'params' => $params,
+        );
+        Log::error($message, $extend);
+    }
+}
+
 if (!function_exists('otherLog')) {
     function otherLog($type = 'debug', $message)
     {

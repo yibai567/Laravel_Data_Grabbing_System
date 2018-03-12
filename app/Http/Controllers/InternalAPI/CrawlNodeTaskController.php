@@ -151,4 +151,69 @@ class CrawlNodeTaskController extends Controller
 
         return $this->resObjectGet($result, 'crawl_node_task.start', $request->path());
     }
+
+    /**
+     * 启动指定id任务
+     * @param Request $request
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function start(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'integer|nullable',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return $this->resError(401, $value);
+            }
+        }
+        $params = ['id' => intval($request->id)];
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $data = $dispatcher->get('internal/basic/crawl/node_task/start', $params);
+        $res = [];
+        if ($data['data']) {
+            $res = $data['data'];
+        }
+        $command = $res['cmd_startup'];
+        exec($command, $result);
+        return $this->resObjectGet($result, 'crawl_node_task.start', $request->path());
+    }
+
+    /**
+     * 停止指定id任务
+     * @param Request $request
+     * @return array
+     */
+    public function stop(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'integer|nullable',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return $this->resError(401, $value);
+            }
+        }
+        $params = ['id' => intval($request->id)];
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $res = $dispatcher->post('internal/basic/crawl/node_task/stop', $params);
+        if ($res['status_code'] === 401) {
+            return $this->resError(401, '没有可用Node节点');
+        }
+        if ($res['data']) {
+            $res = $res['data'];
+        }
+        $command = $res['cmd_startup'];
+        exec($command, $result);
+        // 更新任务状态为停止
+        $params = ['id' => $res['crawl_task_id'], 'status' => CrawlTask::IS_PAUSE];
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $res = $dispatcher->post('internal/crawl/task/status', $params);
+
+        return $this->resObjectGet($result, 'crawl_node_task.start', $request->path());
+    }
 }

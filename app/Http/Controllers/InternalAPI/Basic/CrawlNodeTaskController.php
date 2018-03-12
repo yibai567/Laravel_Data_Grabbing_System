@@ -131,4 +131,66 @@ class CrawlNodeTaskController extends Controller
         $task = CrawlNodeTask::where('status', CrawlNodeTask::IS_STARTUP)->where('crawl_task_id', $crawlTaskId)->first();
         return $this->resObjectGet($task, 'crawl_node_task.list_startuped_task', $request->path());
     }
+
+    /**
+     * 更改节点任务状态为停用
+     * @param Request $request
+     * @return array
+     */
+    public function stop(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'integer|nullable',
+        ]);
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return $this->resError(401, $value);
+            }
+        }
+        $data = [
+            'id' => intval($request->id),
+        ];
+        $nodeTask = CrawlNodeTask::find($data['id']);
+        if (empty($nodeTask)) {
+            return $this->resError(401, '找不到节点信息');
+        }
+        if ($nodeTask['status'] !== CrawlNodeTask::IS_STOP) {
+            $nodeTask->status = CrawlNodeTask::IS_STOP;
+            $nodeTask->save();
+        }
+        return $this->resObjectGet($nodeTask, 'crawl_node_task.stop', $request->path());
+    }
+
+    /**
+     * 更改节点任务状态为启动
+     * @param Request $request
+     * @return array
+     */
+    public function start(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'integer|nullable',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return $this->resError(401, $value);
+            }
+        }
+        $data = [
+            'id' => intval($request->id),
+        ];
+
+        $node = CrawlNodeTask::find($data['id']);
+        if (empty($node)) {
+            return $this->resError(401, '找不到节点信息');
+        }
+        if ($node['status'] !== CrawlNodeTask::IS_STARTUP) {
+            $node->status = CrawlNodeTask::IS_STARTUP;
+            $node->save();
+        }
+        return $this->resObjectGet($node, 'crawl_node_task.start', $request->path());
+    }
 }
