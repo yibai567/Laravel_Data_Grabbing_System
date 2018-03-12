@@ -358,7 +358,7 @@
 	    |
 	    */
 	    public function hook_after_add($id) {
-            $url = env('JIN_WEBMAGIC_URL') . 'v1/crawl/task/script';
+            $url = env('API_DOMAIN') . '/v1/crawl/task/script';
             $params['id'] = $id;
             $this->post($params, $url);
 	        //Your code here
@@ -379,7 +379,7 @@
                 //return Redirect::to('admin/t_crawl_task');
             }
             $postdata['status'] = self::STATUS_NO_STARTING;
-            $url = env('JIN_WEBMAGIC_URL') . 'v1/crawl/task/script';
+            $url = env('API_DOMAIN') . '/v1/crawl/task/script';
             $params['id'] = $id;
             $this->post($params, $url);
 	        //Your code here
@@ -443,7 +443,7 @@
         public function getTestResult($id)
         {
             //获取任务信息，调用任务采集接口，返回结果
-            $url = env('JIN_WEBMAGIC_URL') . 'v1/crawl/task/execute';
+            $url = env('API_DOMAIN') . '/v1/crawl/task/execute';
             $client = new GuzzleHttp\Client();
             $params['id'] = $id;
             $result = $this->post($params, $url);
@@ -464,7 +464,7 @@
         public function getStartUp($id,$status)
         {
             $params['id'] = $id;
-            $url = env('JIN_WEBMAGIC_URL') . 'v1/crawl/task/start';
+            $url = env('API_DOMAIN') . '/v1/crawl/task/start';
             $result = $this->post($params, $url);
             if (empty($result) || $result->status_code != 200 )
             {
@@ -477,7 +477,7 @@
         public function getStopUp($id)
         {
             $params['id'] = $id;
-            $url = env('JIN_WEBMAGIC_URL') . 'v1/crawl/task/stop';
+            $url = env('API_DOMAIN') . '/v1/crawl/task/stop';
             $result = $this->post($params, $url);
             if (empty($result) || $result->status_code != 200 )
             {
