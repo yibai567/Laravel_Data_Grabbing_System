@@ -56,6 +56,7 @@ class CrawlTaskController extends Controller
             if ($res['data']) {
                 $task = $res['data'];
             }
+
             infoLog('[create] create success.', $task);
             $params = ['id'=> $task['id']];
             infoLog('[create] prepare data.', $params);

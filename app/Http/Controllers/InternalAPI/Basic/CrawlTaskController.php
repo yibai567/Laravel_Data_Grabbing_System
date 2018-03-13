@@ -30,9 +30,9 @@ class CrawlTaskController extends Controller
             'response_url' => 'string|nullable',
             'keywords' => 'string|nullable',
             'response_param' => 'string|nullable',
-            'setting_id' => 'integer',
+            'setting_id' => 'integer|nullable',
         ]);
-
+        
         if ($validator->fails()) {
             $errors = $validator->errors();
             errorLog('[create] validate fail.', $errors);
@@ -44,8 +44,9 @@ class CrawlTaskController extends Controller
         if (empty($params['setting_id'])) {
             $params['setting_id'] = 1;
         }
+
         infoLog('[create] validate end.', $params);
-        $fieldList = ['name', 'description', 'resource_url', 'cron_type', 'selectors'];
+        $fieldList = ['name', 'description', 'resource_url', 'cron_type', 'selectors', 'setting_id'];
         $data = array_only($params, $fieldList);
         $data['status'] = CrawlTask::IS_INIT;
         $data['response_type'] = CrawlTask::RESPONSE_TYPE_API;
