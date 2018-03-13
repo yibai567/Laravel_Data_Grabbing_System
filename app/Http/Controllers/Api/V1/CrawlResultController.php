@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Log;
 use App\Models\CrawlResult;
 use Illuminate\Support\Facades\Validator;
-use App\Services\APIService;
 
 class CrawlResultController extends Controller
 {

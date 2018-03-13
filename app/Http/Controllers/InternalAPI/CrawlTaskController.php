@@ -91,7 +91,7 @@ class CrawlTaskController extends Controller
                 throw new Exception($res['message'], $res['status_code']);
             }
         }catch(Exception $e){
-            return $this->resError($e->getMessage(), $e->getCode());
+            return $this->resError($e->getCode(), $e->getMessage());
         }
         return $this->resObjectGet('[create] create success', 'crawl_task', $request->path());
     }

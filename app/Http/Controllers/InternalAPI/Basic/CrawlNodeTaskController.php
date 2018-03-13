@@ -126,7 +126,7 @@ class CrawlNodeTaskController extends Controller
                 }
             }
         } catch (Exception $e) {
-            return errorLog($e->getMessage(), $e->getCode());
+            return $this->resError($e->getMessage(), $e->getCode());
         }
 
         infoLog('[stop] end.', $params);
@@ -159,10 +159,10 @@ class CrawlNodeTaskController extends Controller
         try {
             infoLog('[start] get node task.');
             $nodeTask = CrawlNodeTask::find($params['id']);
-            infoLog('[start] get node task.', $nodeTask);
+
             if (empty($nodeTask)) {
                 infoLog('[start] node task not exist.');
-                throw new Exception('找不到节点信息', 401);
+                throw new Exception('task can not found', 401);
             }
             infoLog('[start] node task change status.');
             if ($nodeTask['status'] !== CrawlNodeTask::IS_STARTUP) {
@@ -173,7 +173,7 @@ class CrawlNodeTaskController extends Controller
                 }
             }
         } catch (Exception $e) {
-            return errorLog($e->getMessage(), $e->getCode());
+            return $this->resError($res['status_code'], $res['message']);
         }
         return $this->resObjectGet($nodeTask, 'crawl_node_task.start', $request->path());
     }
