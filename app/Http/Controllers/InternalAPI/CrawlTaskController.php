@@ -281,8 +281,21 @@ class CrawlTaskController extends Controller
             }
             $command = 'casperjs ' . $scriptFile . ' --env=test';
             exec($command, $output, $returnvar);
+            $params = ['id' => $task['id']];
             if ($returnvar == 1) {
+                $params['status'] = CrawlTask::IS_TEST_ERROR;
+                $dispatcher = app('Dingo\Api\Dispatcher');
+                $data = $dispatcher->post(config('url.jinse_internal_url') . '/internal/basic/crawl/task/status', $params);
+                if ($data['status_code'] !== 200) {
+                    throw new Exception('[preview] ' . $data['status_code'] . 'update fail', 401);
+                }
                 throw new Exception('[preview] command ' . $command . ' execute fail', 401);
+            }
+            $params['status'] = CrawlTask::IS_TEST_SUCCESS;
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $data = $dispatcher->post(config('url.jinse_internal_url') . '/internal/basic/crawl/task/status', $params);
+            if ($data['status_code'] !== 200) {
+                throw new Exception('[preview] ' . $data['status_code'] . 'update fail', 401);
             }
         } catch(Exception $e) {
             return $this->resError($e->getCode(), $e->getMessage());
@@ -331,6 +344,12 @@ class CrawlTaskController extends Controller
             if ($res['status_code'] !== 200) {
                 errorLog($res['messsage']);
                 throw new Exception($res['messsage'], $res['status_code']);
+            }
+            $params = ['id' => $taskId, 'status' => CrawlTask::IS_START_UP];
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $data = $dispatcher->post(config('url.jinse_internal_url') . '/internal/basic/crawl/task/status', $params);
+            if ($data['status_code'] !== 200) {
+                throw new Exception('[preview] ' . $data['status_code'] . 'start fail', 401);
             }
         } catch (Exception $e) {
             return $this->resError($res['status_code'], $res['message']);
