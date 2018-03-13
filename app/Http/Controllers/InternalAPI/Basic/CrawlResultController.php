@@ -69,7 +69,7 @@ class CrawlResultController extends Controller
             return response('插入失败', 402);
         }
         infoLog('[createByBatch] insert end.', $result);
-        infoLog('[createByBatch] end.', $result);
+        infoLog('[createByBatch] end.');
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
 
