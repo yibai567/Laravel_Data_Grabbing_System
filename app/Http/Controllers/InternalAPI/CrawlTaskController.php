@@ -28,7 +28,6 @@ class CrawlTaskController extends Controller
             'cron_type' => 'integer|nullable',
             'selectors' => 'string|nullable',
         ]);
-
         if ($validator->fails()) {
             $errors = $validator->errors();
             errorLog('[create] validate fail.', $errors);
@@ -239,8 +238,8 @@ class CrawlTaskController extends Controller
                 $content = str_replace('{{{setting_keywords}}}', $task['setting']['keywords'], $content);
                 $content = str_replace('{{{setting_data_type}}}', $task['setting']['data_type'], $content);
             }
-
-            if (!generateScript($task['script_file'], $content)) {
+            $filepath = CrawlTask::SCRIPT_PATH . '/' . $task['script_file'];
+            if (!generateScript($filepath, $content)) {
                 return $this->resError(402, 'script generate fail');
             }
         } catch(Exception $e) {
@@ -271,21 +270,30 @@ class CrawlTaskController extends Controller
             }
         }
         infoLog('[start] validate end.');
+        try {
+            // 获取任务详情
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $res = $dispatcher->get(config('api.basic_api_base_url') . '/internal/basic/crawl/task?id=' . $params['id']);
+            if ($res['status_code'] !== 200) {
+                    errorLog($res['messsage']);
+                    throw new Exception($res['messsage'], $res['status_code']);
+            }
 
-        // 获取任务详情
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->get(config('api.basic_api_base_url') . '/internal/basic/crawl/task?id=' . $params['id']);
-        if ($res['status_code'] !== 200) {
-                errorLog($res['messsage']);
-                throw new Exception($res['messsage'], $res['status_code']);
-        }
+            $task = $res['data'];
+            $scriptFile = CrawlTask::SCRIPT_PATH . '/' . $task['script_file'];
 
-        $task = $res['data'];
-        if (!file_exists($task['script_file'])) {
-            return $this->resError(401, 'script file not exist');
+            if (!file_exists($scriptFile)) {
+                throw new Exception('[preview] script file not exist', 401);
+            }
+            $command = 'casperjs ' . $scriptFile . ' --env=test';
+            exec($command, $output, $returnvar);
+            if ($returnvar == 1) {
+                throw new Exception('[preview] command ' . $command . ' execute fail', 401);
+            }
+        } catch(Exception $e) {
+            return $this->resError($e->getCode(), $e->getMessage());
         }
-        $command = 'casperjs ' . $task['script_file'] . ' --env=test';
-        $output = shell_exec($command);
+        
         return $this->resObjectGet($output, 'crawl_task.execute', $request->path());
     }
 

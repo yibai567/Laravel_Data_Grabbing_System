@@ -37,19 +37,9 @@ class CrawlTaskController extends Controller
             }
         }
         infoLog('[create] validate end.', $params);
-        $data = [
-            'name' => $params['name'],
-            'description' => $params['description'],
-            'resource_url' => $params['resource_url'],
-            'cron_type' => $params['cron_type'],
-            'selectors' => $params['selectors'],
-            'status' => CrawlTask::IS_INIT,
-            'response_type' => CrawlTask::RESPONSE_TYPE_API,
-            'response_url' => '',
-            'response_params' => '',
-            'test_time' => null,
-            'test_result' => '',
-        ];
+        $data = $params;
+        $data['status'] = CrawlTask::IS_INIT;
+        $data['response_type'] = CrawlTask::RESPONSE_TYPE_API;
         infoLog('[create] prepare data.', $data);
         $task = CrawlTask::create($data);
         infoLog('[create] create task.', $task);
