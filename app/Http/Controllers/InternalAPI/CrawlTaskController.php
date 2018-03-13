@@ -237,7 +237,7 @@ class CrawlTaskController extends Controller
                 $content = str_replace('{{{setting_data_type}}}', $task['setting']['data_type'], $content);
             }
             
-            $filepath = CrawlTask::SCRIPT_PATH . '/' . $task['script_file'];
+            $filepath = config('path.jinse_script_path') . '/' . $task['script_file'];
             if (!generateScript($filepath, $content)) {
                 return $this->resError(402, 'script generate fail');
             }
@@ -277,7 +277,7 @@ class CrawlTaskController extends Controller
             }
 
             $task = $res['data'];
-            $scriptFile = CrawlTask::SCRIPT_PATH . '/' . $task['script_file'];
+            $scriptFile = config('path.jinse_script_path') . '/' . $task['script_file'];
 
             if (!file_exists($scriptFile)) {
                 throw new Exception('[preview] script file not exist', 401);

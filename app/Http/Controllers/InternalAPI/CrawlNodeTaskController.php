@@ -69,7 +69,7 @@ class CrawlNodeTaskController extends Controller
             return $this->resError(401, '任务不存在');
         }
         $task = $res['data'];
-        $scriptFile = CrawlTask::SCRIPT_PATH . '/' . $task['script_file'];
+        $scriptFile = config('path.jinse_script_path') . '/' . $task['script_file'];
         if (!file_exists($scriptFile)) {
             infoLog('[create] request internal/basic/crawl/task?id error.', $task);
             return $this->resError(401, '脚本文件不存在');
