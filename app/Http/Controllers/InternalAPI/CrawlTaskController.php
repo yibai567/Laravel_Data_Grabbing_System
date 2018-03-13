@@ -5,6 +5,8 @@ namespace App\Http\Controllers\InternalAPI;
 use App\Http\Requests\CrawlTaskCreateRequest;
 use App\Models\CrawlSetting;
 use App\Models\CrawlTask;
+use App\Services\APIService;
+use Dingo\Api\Facade\API;
 use Dompdf\Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -28,6 +30,7 @@ class CrawlTaskController extends Controller
             'cron_type' => 'integer|nullable',
             'selectors' => 'string|nullable',
         ]);
+
         if ($validator->fails()) {
             $errors = $validator->errors();
             errorLog('[create] validate fail.', $errors);
@@ -36,27 +39,26 @@ class CrawlTaskController extends Controller
                 return $this->resError(401, $value);
             }
         }
+
         infoLog('[create] validate end.', $params);
         $data = $params;
         infoLog('[create] prepare data.', $data);
         try{
             infoLog('[create] prepare data.', $data);
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->post(config('url.jinse_internal_url') . '/internal/basic/crawl/task', $data);
+            $res = APIService::basePost('/internal/basic/crawl/task', $data);
             infoLog('[create] create task.', $res);
             if ($res['status_code'] !== 200) {
                 errorLog($res['message'], $res['status_code']);
                 throw new Exception($res['message'], $res['status_code']);
             }
-            $result = [];
+            $task = [];
             if ($res['data']) {
                 $task = $res['data'];
             }
             infoLog('[create] create success.', $task);
             $data = ['id'=> $task['id']];
             infoLog('[create] prepare data.', $data);
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->post(config('url.jinse_base_url') . '/internal/crawl/task/script', $data);
+            $res = APIService::internalPost('/internal/crawl/task/script', $data);
             infoLog('[create] create script.', $res);
             if ($res['status_code'] !== 200) {
                 errorLog($res['message'], $res['status_code']);
@@ -65,8 +67,7 @@ class CrawlTaskController extends Controller
 
             $data = ['id'=> $task['id']];
             infoLog('[create] prepare data.', $data);
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->post(config('url.jinse_base_url') . '/internal/crawl/task/preview', $data);
+            $res = APIService::internalPost('/internal/crawl/task/preview', $data);
             infoLog('[create] test script.', $res);
             if ($data['status_code'] !== 200) {
                 errorLog($res['message'], $res['status_code']);
@@ -75,17 +76,15 @@ class CrawlTaskController extends Controller
 
             $data = ['id'=> $task['id']];
             infoLog('[create] prepare data.', $data);
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->post(config('url.jinse_base_url') . '/internal/crawl/task/start', $params);
+            $res = APIService::internalPost('/internal/crawl/task/start', $params);
             infoLog('[create] start script.', $res);
             if ($res['status_code'] !== 200) {
                 errorLog($res['message'], $res['status_code']);
                 throw new Exception($res['message'], $res['status_code']);
             }
-            $data = ['id'=> $result['id'], 'status' => CrawlTask::IS_START_UP];
+            $data = ['id'=> $task['id'], 'status' => CrawlTask::IS_START_UP];
             infoLog('[create] prepare data.', $data);
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->post(config('url.jinse_base_url') . '/internal/crawl/task/status', $params);
+            $res = APIService::internalPost('/internal/crawl/task/status', $params);
             infoLog('[create] start script.', $res);
             if ($res['status_code'] !== 200) {
                 errorLog($res['message'], $res['status_code']);
@@ -122,12 +121,10 @@ class CrawlTaskController extends Controller
         if ($status == CrawlTask::IS_INIT) {
             // 生成脚本
             $params = ['id' => $taskId];
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $dispatcher->post(config('url.jinse_base_url') . '/internal/crawl/task/script', $params);
+            $res = APIService::internalPost('/internal/crawl/task/script', $params);
         }
         $params = ['id' => $taskId, 'status' => $status];
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        $data = $dispatcher->post(config('url.jinse_internal_url') . '/internal/basic/crawl/task/status', $params);
+        $data = APIService::internalPost('/internal/basic/crawl/task/status', $params);
         if ($data['status_code'] !== 200) {
             return $this->resError($data['status_code'], 'update fail');
         }
@@ -145,7 +142,8 @@ class CrawlTaskController extends Controller
      */
     public function stop(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $params = $request->all();
+        $validator = Validator::make($params, [
             'id' => 'integer|required',
         ]);
 
@@ -155,21 +153,27 @@ class CrawlTaskController extends Controller
                 return $this->resError(401, $value);
             }
         }
-        $taskId = intval($request->id);
+        $taskId = $params['id'];
         $params = ['crawl_task_id' => $taskId];
         //停止指定任务id当前在运行的任务
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post(config('url.jinse_internal_url') . '/internal/basic/crawl/node_task/started', $params);
+        $res = APIService::basePost('/internal/basic/crawl/node_task/started', $params);
         if ($res['data']) {
             $item = $res['data'];
             $params = ['id' => $item['id']];
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $dispatcher->post(config('url.jinse_base_url') . '/internal/crawl/node_task/stop', $params);
+            $res = APIService::internalPost('/internal/crawl/node_task/stop', $params);
+            if ($res['status_code'] !== 200) {
+                errorLog($res['messsage']);
+                throw new Exception($res['messsage'], $res['status_code']);
+            }
         }
         // 更新任务状态为停止
         $params = ['id' => $taskId, 'status' => CrawlTask::IS_PAUSE];
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        $res = $dispatcher->post(config('url.jinse_base_url') . '/internal/crawl/task/status', $params);
+        $res = APIService::internalPost('/internal/crawl/task/status', $params);
+        if ($res['status_code'] !== 200) {
+            errorLog($res['messsage']);
+            throw new Exception($res['messsage'], $res['status_code']);
+        }
+
         return $this->resObjectGet('task stop success', 'crawl_task.execute', $request->path());
     }
 
@@ -186,7 +190,6 @@ class CrawlTaskController extends Controller
         $validator = Validator::make($params, [
             'id' => 'integer|required',
         ]);
-        infoLog('[createScript] validate.', $validator);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -202,8 +205,7 @@ class CrawlTaskController extends Controller
                 'id' => $params['id'],
             ];
 
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->post(config('url.jinse_internal_url') . '/internal/basic/crawl/task/script', $data);
+            $res = APIService::basePost('/internal/basic/crawl/task/script', $data);
 
             if ($res['status_code'] !== 200) {
                 errorLog($res['messsage']);
@@ -211,8 +213,7 @@ class CrawlTaskController extends Controller
             }
 
             //调用基础接口获取任务详情
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->get(config('url.jinse_internal_url') . '/internal/basic/crawl/task?id=' . $params['id']);
+            $res = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
             if ($res['status_code'] !== 200) {
                 errorLog($res['messsage']);
                 throw new Exception($res['messsage'], $res['status_code']);
@@ -254,7 +255,6 @@ class CrawlTaskController extends Controller
         $validator = Validator::make($params, [
             'id' => 'integer|required',
         ]);
-        infoLog('[preview] validate.', $validator);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -266,11 +266,10 @@ class CrawlTaskController extends Controller
         infoLog('[start] validate end.');
         try {
             // 获取任务详情
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->get(config('url.jinse_internal_url') . '/internal/basic/crawl/task?id=' . $params['id']);
+            $res = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
             if ($res['status_code'] !== 200) {
-                    errorLog($res['messsage']);
-                    throw new Exception($res['messsage'], $res['status_code']);
+                errorLog($res['messsage']);
+                throw new Exception($res['messsage'], $res['status_code']);
             }
 
             $task = $res['data'];
@@ -284,16 +283,14 @@ class CrawlTaskController extends Controller
             $params = ['id' => $task['id']];
             if ($returnvar == 1) {
                 $params['status'] = CrawlTask::IS_TEST_ERROR;
-                $dispatcher = app('Dingo\Api\Dispatcher');
-                $data = $dispatcher->post(config('url.jinse_internal_url') . '/internal/basic/crawl/task/status', $params);
+                $data = APIService::basePost('/internal/basic/crawl/task/status', $params);
                 if ($data['status_code'] !== 200) {
                     throw new Exception('[preview] ' . $data['status_code'] . 'update fail', 401);
                 }
                 throw new Exception('[preview] command ' . $command . ' execute fail', 401);
             }
             $params['status'] = CrawlTask::IS_TEST_SUCCESS;
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $data = $dispatcher->post(config('url.jinse_internal_url') . '/internal/basic/crawl/task/status', $params);
+            $data = APIService::basePost('/internal/basic/crawl/task/status', $params);
             if ($data['status_code'] !== 200) {
                 throw new Exception('[preview] ' . $data['status_code'] . 'update fail', 401);
             }
@@ -317,7 +314,6 @@ class CrawlTaskController extends Controller
         $validator = Validator::make($params, [
             'id' => 'integer|required',
         ]);
-        infoLog('[start] validate.', $validator);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -327,10 +323,10 @@ class CrawlTaskController extends Controller
             }
         }
         infoLog('[start] validate end.');
+
         try {
             // 获取任务详情
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->get(config('url.jinse_internal_url') . '/internal/basic/crawl/task?id=' . $params['id']);
+            $res = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
             if ($res['status_code'] !== 200) {
                 errorLog($res['messsage']);
                 throw new Exception($res['messsage'], $res['status_code']);
@@ -339,16 +335,16 @@ class CrawlTaskController extends Controller
             //创建节点任务
             $params = ['crawl_task_id' => $task['id']];
 
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $res = $dispatcher->post(config('url.jinse_base_url') . '/internal/crawl/node_task', $params);
+            $res = APIService::internalPost('/internal/crawl/node_task', $params);
             if ($res['status_code'] !== 200) {
                 errorLog($res['messsage']);
                 throw new Exception($res['messsage'], $res['status_code']);
             }
-            $params = ['id' => $taskId, 'status' => CrawlTask::IS_START_UP];
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $data = $dispatcher->post(config('url.jinse_internal_url') . '/internal/basic/crawl/task/status', $params);
+
+            $params = ['id' => $task['id'], 'status' => CrawlTask::IS_START_UP];
+            $data = APIService::basePost('/internal/basic/crawl/task/status', $params);
             if ($data['status_code'] !== 200) {
+                errorLog($res['messsage']);
                 throw new Exception('[preview] ' . $data['status_code'] . 'start fail', 401);
             }
         } catch (Exception $e) {
@@ -357,9 +353,9 @@ class CrawlTaskController extends Controller
         infoLog('[start] end.');
         return $this->resObjectGet($task, 'crawl_task.execute', $request->path());
     }
+
     /**
      * 修改抓取返回结果
-     *
      */
     public function updateResult(Request $request)
     {
@@ -370,7 +366,6 @@ class CrawlTaskController extends Controller
             'id' => 'integer|required',
             'test_result' => 'nullable',
         ]);
-        infoLog('[updateResult] validate.', $validator);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -386,8 +381,7 @@ class CrawlTaskController extends Controller
             return $this->resObjectGet($result, 'crawl_task.result', $request->path());
         }
         infoLog('[updateResult] execute base api', $params);
-        $dispatcher = app('Dingo\Api\Dispatcher');
-        $resultData = $dispatcher->post(config('url.api_base_url') . '/internal/basic/crawl/task/result', $params);
+        $resultData = APIService::basePost('/internal/basic/crawl/task/result', $params);
         if ($resultData['status_code'] !== 200) {
             errorLog('[updateResult] result task error.');
             return $this->resError($resultData['status_code'], $resultData['message']);
@@ -398,5 +392,4 @@ class CrawlTaskController extends Controller
         infoLog('[updateResult] end.', $result);
         return $this->resObjectGet($result, 'crawl_task.result', $request->path());
     }
-
 }

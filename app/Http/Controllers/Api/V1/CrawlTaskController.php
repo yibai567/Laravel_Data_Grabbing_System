@@ -37,7 +37,7 @@ class CrawlTaskController extends Controller
         }
         infoLog('[create] validate end.');
 
-        $data = APIService::basePost('/internal/crawl/task', $params);
+        $data = APIService::internalPost('/internal/crawl/task', $params);
         if ($data['status_code'] !== 200) {
             errorLog($data['message'], $data['status_code']);
             return $this->resError($data['status_code'], $data['message']);
@@ -76,7 +76,7 @@ class CrawlTaskController extends Controller
         }
 
         infoLog('[updateStatus] prepare data.', $params);
-        $data = APIService::basePost('/internal/crawl/task/status', $params);
+        $data = APIService::internalPost('/internal/crawl/task/status', $params);
         infoLog('[updateStatus] edit task.', $data);
         if ($data['status_code'] !== 200) {
             errorLog('[updateStatus] edit task error.');
@@ -115,8 +115,8 @@ class CrawlTaskController extends Controller
         }
         infoLog('[stop] validate end.');
 
-        $data = APIService::basePost('/internal/crawl/task/stop', $params);
-        infoLog('[stop] execute stop base api back', $data);
+        $data = APIService::internalPost('/internal/crawl/task/stop', $params);
+        infoLog('[stop] execute stop internal api back', $data);
         if ($data['status'] !== 200) {
             errorLog('[stop] edit task error.');
             return $this->resError($data['status_code'], $data['message']);
@@ -153,7 +153,7 @@ class CrawlTaskController extends Controller
         }
 
         infoLog('[createScript] validate end.');
-        $data = APIService::basePost('/internal/crawl/task/script', $params);
+        $data = APIService::internalPost('/internal/crawl/task/script', $params);
         if ($data['status_code'] !== 200) {
             errorLog('[createScript] edit task error.');
             return $this->resError($data['status_code'], $data['message']);
@@ -191,7 +191,7 @@ class CrawlTaskController extends Controller
         }
         infoLog('[preview] validate end');
 
-        $data = APIService::basePost('/internal/crawl/task/preview', $params);
+        $data = APIService::internalPost('/internal/crawl/task/preview', $params);
         if ($data['status_code'] !== 200) {
             errorLog('[preview] edit task error.');
             return $this->resError($data['status_code'], $data['message']);
@@ -228,7 +228,7 @@ class CrawlTaskController extends Controller
         }
         infoLog('[start] validate end.');
 
-        $data = APIService::basePost('/internal/crawl/task/start', $params);
+        $data = APIService::internalPost('/internal/crawl/task/start', $params);
         if ($data['status_code'] !== 200) {
             errorLog('[start] start task error.');
             return $this->resError($data['status_code'], $data['message']);
@@ -269,7 +269,7 @@ class CrawlTaskController extends Controller
             infoLog('[updateResult] test_result empty.');
             return $this->resObjectGet($result, 'crawl_task.result', $request->path());
         }
-        $data = APIService::basePost('/internal/crawl/task/result', $params);
+        $data = APIService::internalPost('/internal/crawl/task/result', $params);
         if ($data['status_code'] !== 200) {
             errorLog('[updateResult] result task error.');
             return $this->resError($data['status_code'], $data['message']);
