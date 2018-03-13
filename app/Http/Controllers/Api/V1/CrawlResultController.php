@@ -46,7 +46,7 @@ class CrawlResultController extends Controller
             infoLog('[createByBatch] data empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
-        
+
         infoLog('[createByBatch] request internalApi createByBatch start', $params);
         $params['effect'] = CrawlResult::EFFECT_DEFAULT;
         $data = APIService::basePost('/internal/crawl/result/batch_result');

@@ -18,8 +18,8 @@ class CrawlResultController extends Controller
     */
     public function createByBatch(Request $request)
     {
+        infoLog('[createByBatch] start.');
         $params = $request->all();
-        infoLog('[createByBatch] start.', $params);
         $validator = Validator::make($params, [
             'data' => 'nullable',
             'crawl_task_id' => 'numeric|nullable',

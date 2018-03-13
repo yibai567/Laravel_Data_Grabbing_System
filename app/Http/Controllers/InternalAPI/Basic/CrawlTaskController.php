@@ -17,7 +17,7 @@ class CrawlTaskController extends Controller
      */
     public function create(Request $request)
     {
-        infoLog('[create] start.', $request);
+        infoLog('[create] start.');
         $params = $request->all();
         infoLog('[create] validate.', $params);
         $validator = Validator::make($params, [
@@ -56,7 +56,7 @@ class CrawlTaskController extends Controller
      */
     public function updateStatus(Request $request)
     {
-        infoLog('[updateStatus] start.', $request);
+        infoLog('[updateStatus] start.');
         $params = $request->all();
         infoLog('[updateStatus] validate.', $params);
         $validator = Validator::make($params, [
@@ -147,7 +147,7 @@ class CrawlTaskController extends Controller
      */
     public function updateScriptFile(Request $request)
     {
-        infoLog('[updateScriptFile] start.', $request);
+        infoLog('[updateScriptFile] start.');
         $params = $request->all();
         infoLog('[updateScriptFile] validate.', $params);
         $validator = Validator::make($params, [
@@ -195,7 +195,7 @@ class CrawlTaskController extends Controller
      */
     public function updateResult(Request $request)
     {
-        infoLog('[updateResult] start.', $request);
+        infoLog('[updateResult] start.');
         $params = $request->all();
         infoLog('[updateResult] validate.', $params);
         $validator = Validator::make($params, [
