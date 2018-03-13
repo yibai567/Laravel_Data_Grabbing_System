@@ -17,7 +17,7 @@ class CrawlNodeTaskController extends Controller
      */
     public function create(Request $request)
     {
-        infoLog('[create] start.', $request);
+        infoLog('[create] start.');
         $params = $request->all();
         infoLog('[create] validate.', $params);
         $validator = Validator::make($params, [
@@ -63,7 +63,7 @@ class CrawlNodeTaskController extends Controller
      */
     public function getStartedTaskByTaskId(Request $request)
     {
-        infoLog('[getStartedTaskByTaskId] start.', $request);
+        infoLog('[getStartedTaskByTaskId] start.');
         $params = $request->all();
         infoLog('[getStartedTaskByTaskId] validate.', $params);
         $validator = Validator::make($params, [
@@ -93,7 +93,7 @@ class CrawlNodeTaskController extends Controller
      */
     public function stop(Request $request)
     {
-        infoLog('[stop] start.', $request);
+        infoLog('[stop] start.');
         $params = $request->all();
         infoLog('[stop] validate.', $params);
         $validator = Validator::make($params, [
@@ -140,7 +140,7 @@ class CrawlNodeTaskController extends Controller
      */
     public function start(Request $request)
     {
-        infoLog('[start] start.', $request);
+        infoLog('[start] start.');
         $params = $request->all();
         infoLog('[start] validate.', $params);
         $validator = Validator::make($params, [
@@ -155,7 +155,7 @@ class CrawlNodeTaskController extends Controller
                 return $this->resError(401, $value);
             }
         }
-        infoLog('[start] validate end.', $params);
+        infoLog('[start] validate end.');
         try {
             infoLog('[start] get node task.');
             $nodeTask = CrawlNodeTask::find($params['id']);

@@ -39,22 +39,23 @@ class CrawlResultController extends Controller
                 return response($value, 401);
             }
         }
-        $result = [];
         infoLog('[params validator] end.');
+
+        $result = [];
         if (empty($params['data'])) {
             infoLog('[createByBatch] data empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
+
         infoLog('[createByBatch] request internalApi createByBatch start', $params);
-        $dispatcher = app('Dingo\Api\Dispatcher');
         $params['effect'] = CrawlResult::EFFECT_DEFAULT;
-        $resultData = $dispatcher->json($params)->post(config('url.jinse_base_url')  . '/internal/crawl/result/batch_result');
-        if ($resultData['status_code'] != 200) {
-            errorLog('[createByBatch] request internalApi createByBatch result error', $resultData);
-            return response($resultData['message'], $resultData['status_code']);
+        $data = APIService::basePost('/internal/crawl/result/batch_result');
+        if ($data['status_code'] != 200) {
+            errorLog('[createByBatch] request internalApi createByBatch result error', $data);
+            return response($data['message'], $data['status_code']);
         }
-        if ($resultData['data']) {
-            $result = $resultData['data'];
+        if ($data['data']) {
+            $result = $data['data'];
         }
         infoLog('[createByBatch] request internalApi createByBatch end');
         infoLog('[createByBatch] end.', $result);
