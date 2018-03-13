@@ -9,7 +9,7 @@ $api->version(
         $api->get('/test', function(){
             echo 'test';
         });
-        $api->post('/crawl/result', 'CrawlResultController@create');
+        //$api->post('/crawl/result', 'CrawlResultController@create');
         $api->post('/crawl/result/batch_result', 'CrawlResultController@createByBatch');
 
         $api->get('/crawl/task', 'CrawlTaskController@retrieve');
@@ -42,7 +42,7 @@ $api->version(
         $api->post('/crawl/task/preview', 'CrawlTaskController@preview');
         $api->post('/crawl/task/start', 'CrawlTaskController@start');
 
-        $api->post('/crawl/result', 'CrawlResultController@create');
+        //$api->post('/crawl/result', 'CrawlResultController@create');
         $api->post('/crawl/result/batch_result', 'CrawlResultController@createByBatch');
 
         $api->post('/crawl/node_task', 'CrawlNodeTaskController@create');

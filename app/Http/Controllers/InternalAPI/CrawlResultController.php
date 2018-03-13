@@ -11,51 +11,6 @@ use Illuminate\Support\Facades\Validator;
 
 class CrawlResultController extends Controller
 {
-    // public function create(Request $request)
-    // {
-    //     infoLog('[internalIpi/create] start');
-    //     $params = $request->all();
-    //     $validator = Validator::make($params, [
-    //         'data' => 'nullable',
-    //         'crawl_task_id' => 'string|nullable',
-    //         'task_start_time' => 'date|nullable',
-    //         'task_end_time' => 'date|nullable',
-    //         'task_url' => 'string|nullable',
-    //         'setting_selectors' => 'string|nullable',
-    //         'setting_keywords' => 'string|nullable',
-    //         'setting_data_type' => 'string|nullable',
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         $errors = $validator->errors();
-    //         foreach ($errors->all() as $value) {
-    //             infoLog('[internalIpi/create] validator params', json_encode($value);
-    //             return response($value, 401);
-    //         }
-    //     }
-
-    //     $result = [];
-    //     $newData = [];
-    //     foreach ($params['data'] as $key => $value) {
-    //         $matchingResult  = strpos($value['text'] , $params['setting_keywords']);
-    //         if ($matchingResult !== false){
-    //             $newData[] = $value;
-    //         }
-    //     }
-
-
-    //     $dispatcher = app('Dingo\Api\Dispatcher');
-    //     $data = $dispatcher->post('internal_api/basic/crawl/result', $params);
-    //     if ($data['status_code'] == 401) {
-    //         return response('参数错误', 401);
-    //     }
-
-    //     if ($data['data']) {
-    //         $result = $data['data'];
-    //     }
-    //     return $this->resObjectGet($result, 'crawl_result', $request->path());
-    // }
-
     /**
      * 支持单条，批量插入数据
      * @param Request $request
