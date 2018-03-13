@@ -190,4 +190,45 @@ class CrawlTaskController extends Controller
         infoLog('[updateScriptFile] end', $task);
         return $this->resObjectGet($task, 'crawl_task', $request->path());
     }
+    /**
+     * 修改抓取返回结果
+     *
+     */
+    public function updateResult(Request $request)
+    {
+        infoLog('[updateResult] start.', $request);
+        $params = $request->all();
+        infoLog('[updateResult] validate.', $params);
+        $validator = Validator::make($params, [
+            'id' => 'integer|required',
+            'test_result' => 'nullable',
+        ]);
+        infoLog('[updateResult] validate.', $validator);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                infoLog('[start] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        infoLog('[updateResult] validate end.');
+        $result = [];
+        if (empty($params['test_result'])) {
+            infoLog('[updateResult] test_result empty.');
+            return $this->resObjectGet($result, 'crawl_task.result', $request->path());
+        }
+        try {
+            $taskId = $params['id'];
+            $data['test_time'] = date('Y-m-d H:i:s');
+            $data['test_result'] = $params['test_result'];
+            $result = CrawlTask::where('id', $taskId)->update($data);
+
+        } catch (Exception $e) {
+            errorLog($e->getMessage(), $e->getCode());
+            return $this->resError($e->getCode(), $e->getMessage());
+        }
+        return $this->resObjectGet($result, 'crawl_task', $request->path());
+
+    }
 }

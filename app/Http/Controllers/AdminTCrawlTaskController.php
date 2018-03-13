@@ -443,20 +443,22 @@
         public function getTestResult($id)
         {
             //获取任务信息，调用任务采集接口，返回结果
-            $url = '/v1/crawl/task/preview';
-            //$client = new GuzzleHttp\Client();
+            $exec_url = '/v1/crawl/task/preview';
             $params['id'] = $id;
-            $result = $this->post($params,$url);
-           // $result = $this->post($params, $url);
+            $result = $this->post($params,$exec_url);
             if (!empty($result)) {
-                if ( $result->status_code == 200 ){
-                    $status = self::STATUS_TEST_SUCCESS;
+                if ($result->status_code == 200) {
+                    $result_url = '/v1/crawl/task/result';
+                    $params['test_result'] = $result->test_result;
+                    $crawlResult = $this->post($params,$result_url);
+                    if (empty($crawlResult) || $crawlResult != 200) {
+                        errorLog('request /v1/crawl/task/result fail', $crawlResult);
+                        CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"系统错误，请重试","info");
+                    }
                 } else {
-                    $status = self::STATUS_TEST_FAIL;
+                    errorLog('request /v1/crawl/task/preview fail', $result);
+                    CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"系统错误，请重试","info");
                 }
-                $test_time = date('Y-m-d H:i:s');
-                DB::table('t_crawl_task')->where('id',$id)->update(['test_result'=>$result->data, 'test_time'=>$test_time]);
-                //$this->getUpdateStatus($id,$status,$result->data,$test_time);
             }
             return Redirect::to('admin/t_crawl_task/detail/'.$id);
 
@@ -471,7 +473,6 @@
             {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"系统错误，请重试","info");
             }
-            //$this->getUpdateStatus($id,$status);
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"开启成功","info");
         }
 
@@ -484,7 +485,6 @@
             {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"系统错误，请重试","info");
             }
-            //$this->getUpdateStatus($id,$status);
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"停止成功","info");
         }
         public function getArchived($id,$status)
