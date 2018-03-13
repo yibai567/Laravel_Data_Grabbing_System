@@ -71,7 +71,7 @@ class CrawlResultController extends Controller
         $dispatcher = app('Dingo\Api\Dispatcher');
 
         infoLog('[createByBatch] request internal/basic createByBatch start', $params);
-        $resultData = $dispatcher->json($params)->post(config('api.basic_api_base_url') . '/internal/basic/crawl/result/batch_result');
+        $resultData = $dispatcher->json($params)->post(config('url.jinse_internal_url') . '/internal/basic/crawl/result/batch_result');
         if ($resultData['status_code'] != 200) {
             errorLog('[createByBatch] request internal/basic createByBatch result error', $resultData);
             return response($resultData['message'], $resultData['status_code']);
