@@ -5,13 +5,12 @@ namespace App\Http\Controllers\InternalAPI;
 use App\Http\Requests\CrawlResultCreateRequest;
 use App\Http\Controllers\InternalAPI\Controller;
 use Illuminate\Http\Request;
+use App\Models\CrawlResult;
 use Illuminate\Support\Facades\Validator;
 
 
 class CrawlResultController extends Controller
 {
-    const EFFECT_DEFAULT = 1;
-    const EFFECT_TEST = 2;
     // public function create(Request $request)
     // {
     //     infoLog('[internalIpi/create] start');
@@ -108,7 +107,7 @@ class CrawlResultController extends Controller
         }
         $params['format_data'] = $newData;
 
-        if ($params['effect'] == self::EFFECT_TEST) {
+        if ($params['effect'] == CrawlResult::EFFECT_TEST) {
             infoLog('[createByBatch] effect is test', $newData);
             return $this->resObjectGet($newData, 'crawl_result', $request->path());
         }

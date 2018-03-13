@@ -5,12 +5,11 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Requests\CrawlResultCreateRequest;
 use Illuminate\Http\Request;
 use Log;
+use App\Models\CrawlResult;
 use Illuminate\Support\Facades\Validator;
 
 class CrawlResultController extends Controller
 {
-    const EFFECT_DEFAULT = 1;
-    const EFFECT_TEST = 2;
     // public function create(Request $request)
     // {
     //infoLog('[apiCreate] start');
@@ -91,7 +90,7 @@ class CrawlResultController extends Controller
         }
         infoLog('[createByBatch] request internalApi createByBatch start', $params);
         $dispatcher = app('Dingo\Api\Dispatcher');
-        $params['effect'] = self::EFFECT_DEFAULT;
+        $params['effect'] = CrawlResult::EFFECT_DEFAULT;
         $resultData = $dispatcher->json($params)->post(config('api.api_base_url') . '/internal/crawl/result/batch_result');
         if ($resultData['status_code'] != 200) {
             errorLog('[createByBatch] request internalApi createByBatch result error', $resultData);

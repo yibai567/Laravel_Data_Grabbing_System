@@ -358,7 +358,7 @@
 	    |
 	    */
 	    public function hook_after_add($id) {
-            $url = env('JIN_WEBMAGIC_URL') . 'v1/crawl/task/script';
+            $url = '/v1/crawl/task/script';
             $params['id'] = $id;
             $this->post($params, $url);
 	        //Your code here
@@ -379,7 +379,7 @@
                 //return Redirect::to('admin/t_crawl_task');
             }
             $postdata['status'] = self::STATUS_NO_STARTING;
-            $url = env('JIN_WEBMAGIC_URL') . 'v1/crawl/task/script';
+            $url = '/v1/crawl/task/script';
             $params['id'] = $id;
             $this->post($params, $url);
 	        //Your code here
@@ -435,18 +435,19 @@
 
         public function post($params,$url)
         {
-            $client = new GuzzleHttp\Client();
-            $result = $client->request('POST', $url, ['form_params' => $params]);
-
-            return json_decode($result->getBody()->getContents());
+            $url = config('api.api_base_url').$url;
+            $dispatcher = app('Dingo\Api\Dispatcher');
+            $resultData = $dispatcher->json($params)->post($url);
+            return $resultData;
         }
         public function getTestResult($id)
         {
             //获取任务信息，调用任务采集接口，返回结果
-            $url = env('JIN_WEBMAGIC_URL') . 'v1/crawl/task/execute';
-            $client = new GuzzleHttp\Client();
+            $url = '/v1/crawl/task/preview';
+            //$client = new GuzzleHttp\Client();
             $params['id'] = $id;
-            $result = $this->post($params, $url);
+            $result = $this->post($params,$url);
+           // $result = $this->post($params, $url);
             if (!empty($result)) {
                 if ( $result->status_code == 200 ){
                     $status = self::STATUS_TEST_SUCCESS;
@@ -454,7 +455,7 @@
                     $status = self::STATUS_TEST_FAIL;
                 }
                 $test_time = date('Y-m-d H:i:s');
-                DB::table('t_crawl_task')->where('id',$id)->update(['status'=>$status, 'test_result'=>$result->data, 'test_time'=>$test_time]);
+                DB::table('t_crawl_task')->where('id',$id)->update(['test_result'=>$result->data, 'test_time'=>$test_time]);
                 //$this->getUpdateStatus($id,$status,$result->data,$test_time);
             }
             return Redirect::to('admin/t_crawl_task/detail/'.$id);
@@ -464,7 +465,7 @@
         public function getStartUp($id,$status)
         {
             $params['id'] = $id;
-            $url = env('JIN_WEBMAGIC_URL') . 'v1/crawl/task/start';
+            $url = '/v1/crawl/task/start';
             $result = $this->post($params, $url);
             if (empty($result) || $result->status_code != 200 )
             {
@@ -477,7 +478,7 @@
         public function getStopUp($id)
         {
             $params['id'] = $id;
-            $url = env('JIN_WEBMAGIC_URL') . 'v1/crawl/task/stop';
+            $url = '/v1/crawl/task/stop';
             $result = $this->post($params, $url);
             if (empty($result) || $result->status_code != 200 )
             {
