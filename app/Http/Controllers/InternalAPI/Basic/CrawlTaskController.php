@@ -115,7 +115,7 @@ class CrawlTaskController extends Controller
      */
     public function retrieve(Request $request)
     {
-        infoLog('[retrieve] start.', $request);
+        infoLog('[retrieve] start.');
         $params = $request->all();
         infoLog('[retrieve] validate.', $params);
         $validator = Validator::make($params, [
@@ -132,7 +132,6 @@ class CrawlTaskController extends Controller
         }
         infoLog('[retrieve] validate end.', $params);
         $task = CrawlTask::with('setting')->find($params['id']);
-        infoLog('[retrieve] get data of task.', $task);
         $data = [];
         if ($task) {
             $data = $task->toArray();

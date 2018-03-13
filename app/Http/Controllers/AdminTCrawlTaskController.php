@@ -434,17 +434,13 @@
             return Redirect::to('admin/t_crawl_task');
         }
 
-        public function post($params, $url)
-        {
-            $result = APIService::internalPost($url, $params);
-            dd($result);
-        }
         public function getTestResult($id)
         {
             //获取任务信息，调用任务采集接口，返回结果
             $exec_url = '/v1/crawl/task/preview';
             $params['id'] = $id;
-            $result = $this->post($params,$exec_url);
+            $result = APIService::openPost($exec_url, $params);
+            dd($result);
             if (!empty($result)) {
                 if ($result['status_code'] == 200) {
                     $result_url = '/v1/crawl/task/result';

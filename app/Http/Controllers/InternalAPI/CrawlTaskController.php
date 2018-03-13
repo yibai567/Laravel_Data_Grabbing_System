@@ -248,7 +248,7 @@ class CrawlTaskController extends Controller
      */
     public function preview(Request $request)
     {
-        infoLog('[preview] start.', $request);
+        infoLog('[preview] start.');
         $params = $request->all();
         infoLog('[preview] validate.', $params);
         $validator = Validator::make($params, [
