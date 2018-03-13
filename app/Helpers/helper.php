@@ -19,25 +19,27 @@ if (!function_exists('generateScript')) {
 /**
  * 记录信息日志
  * @message 内容描述
- * @params 参数
+ * @fields 参数
  */
 if (!function_exists('infoLog')) {
-    function infoLog($message, $params = [])
+    function infoLog($message, $fields = [])
     {
         new Log();
         $extend = array(
-            'params' => $params,
+            'fields' => $fields,
+            'application_name' => config('logging.application_name'),
         );
         Log::info($message, $extend);
     }
 }
 
 if (!function_exists('errorLog')) {
-    function errorLog($message, $params = [])
+    function errorLog($message, $fields = [])
     {
         new Log();
         $extend = array(
-            'params' => $params,
+            'fields' => $fields,
+            'application_name' => config('logging.application_name'),
         );
         Log::error($message, $extend);
     }

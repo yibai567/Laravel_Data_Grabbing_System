@@ -7,6 +7,7 @@ use App\Http\Controllers\InternalAPI\Controller;
 use Illuminate\Http\Request;
 use App\Models\CrawlResult;
 use Illuminate\Support\Facades\Validator;
+use App\Services\APIService;
 
 
 class CrawlResultController extends Controller
@@ -71,7 +72,7 @@ class CrawlResultController extends Controller
         $dispatcher = app('Dingo\Api\Dispatcher');
 
         infoLog('[createByBatch] request internal/basic createByBatch start', $params);
-        $resultData = $dispatcher->json($params)->post(config('url.jinse_internal_url') . '/internal/basic/crawl/result/batch_result');
+        $resultData = APIService::basePost('/internal/basic/crawl/result/batch_result', $params, 'json');
         if ($resultData['status_code'] != 200) {
             errorLog('[createByBatch] request internal/basic createByBatch result error', $resultData);
             return response($resultData['message'], $resultData['status_code']);
@@ -80,7 +81,7 @@ class CrawlResultController extends Controller
             $result = $resultData['data'];
         }
         infoLog('[createByBatch] request internal/basic createByBatch end');
-        infoLog('[createByBatch] end.', $result);
+        infoLog('[createByBatch] end.');
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
  }

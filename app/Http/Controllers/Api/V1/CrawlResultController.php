@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Log;
 use App\Models\CrawlResult;
 use Illuminate\Support\Facades\Validator;
+use App\Services\APIService;
 
 class CrawlResultController extends Controller
 {
@@ -50,7 +51,7 @@ class CrawlResultController extends Controller
 
         infoLog('[createByBatch] request internalApi createByBatch start', $params);
         $params['effect'] = CrawlResult::EFFECT_DEFAULT;
-        $data = APIService::basePost('/internal/crawl/result/batch_result');
+        $data = APIService::internalPost('/internal/crawl/result/batch_result', $params);
         if ($data['status_code'] != 200) {
             errorLog('[createByBatch] request internalApi createByBatch result error', $data);
             return response($data['message'], $data['status_code']);
@@ -59,7 +60,7 @@ class CrawlResultController extends Controller
             $result = $data['data'];
         }
         infoLog('[createByBatch] request internalApi createByBatch end');
-        infoLog('[createByBatch] end.', $result);
+        infoLog('[createByBatch] end.');
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
 

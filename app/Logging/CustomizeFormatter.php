@@ -26,6 +26,7 @@ class CustomizeFormatter
                     )
                 )
             );
+            $handler->pushProcessor(new \Monolog\Processor\UidProcessor());
         }
     }
 }
