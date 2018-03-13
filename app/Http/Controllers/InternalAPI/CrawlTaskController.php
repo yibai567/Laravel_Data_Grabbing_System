@@ -29,6 +29,7 @@ class CrawlTaskController extends Controller
             'resource_url' => 'required|string|nullable',
             'cron_type' => 'integer|nullable',
             'selectors' => 'string|nullable',
+            'setting_id' => 'integer',
         ]);
 
         if ($validator->fails()) {
@@ -230,10 +231,11 @@ class CrawlTaskController extends Controller
             } else {
                 $content = $task['setting']['content'];
                 $content = str_replace('{{{crawl_task_id}}}', $task['id'], $content);
-                $content = str_replace('{{{setting_selectors}}}', $task['setting']['selectors'], $content);
-                $content = str_replace('{{{setting_keywords}}}', $task['setting']['keywords'], $content);
+                $content = str_replace('{{{setting_selectors}}}', $task['selectors'], $content);
+                $content = str_replace('{{{setting_keywords}}}', $task['keywords'], $content);
                 $content = str_replace('{{{setting_data_type}}}', $task['setting']['data_type'], $content);
             }
+            
             $filepath = CrawlTask::SCRIPT_PATH . '/' . $task['script_file'];
             if (!generateScript($filepath, $content)) {
                 return $this->resError(402, 'script generate fail');

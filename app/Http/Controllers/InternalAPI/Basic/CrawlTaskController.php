@@ -26,6 +26,11 @@ class CrawlTaskController extends Controller
             'resource_url' => 'required|string|nullable',
             'cron_type' => 'integer|nullable',
             'selectors' => 'string|nullable',
+            'response_type' => 'string|nullable',
+            'response_url' => 'string|nullable',
+            'keywords' => 'string|nullable',
+            'response_param' => 'string|nullable',
+            'setting_id' => 'integer',
         ]);
 
         if ($validator->fails()) {
@@ -35,6 +40,9 @@ class CrawlTaskController extends Controller
                 errorLog('[create] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
+        }
+        if (empty($params['setting_id'])) {
+            $params['setting_id'] = 1;
         }
         infoLog('[create] validate end.', $params);
         $fieldList = ['name', 'description', 'resource_url', 'cron_type', 'selectors'];

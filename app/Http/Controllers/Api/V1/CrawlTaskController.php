@@ -25,6 +25,7 @@ class CrawlTaskController extends Controller
             'resource_url' => 'required|string|nullable',
             'cron_type' => 'integer|nullable',
             'selectors' => 'string|nullable',
+            'setting_id' => 'integer',
         ]);
 
         if ($validator->fails()) {
