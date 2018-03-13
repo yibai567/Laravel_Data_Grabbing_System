@@ -1,11 +1,12 @@
-<?php namespace App\Http\Controllers;
-
+<?php
+    namespace App\Http\Controllers;
 	use Session;
 	use Request;
 	use DB;
 	use CRUDBooster;
     use Redirect;
     use GuzzleHttp;
+    use App\Services\APIService;
 
 	class AdminTCrawlTaskController extends \crocodicstudio\crudbooster\controllers\CBController {
 
@@ -433,12 +434,10 @@
             return Redirect::to('admin/t_crawl_task');
         }
 
-        public function post($params,$url)
+        public function post($params, $url)
         {
-            $url = config('url.api_base_url').$url;
-            $dispatcher = app('Dingo\Api\Dispatcher');
-            $resultData = $dispatcher->json($params)->post($url);
-            return $resultData;
+            $result = APIService::internalPost($url, $params);
+            dd($result);
         }
         public function getTestResult($id)
         {
