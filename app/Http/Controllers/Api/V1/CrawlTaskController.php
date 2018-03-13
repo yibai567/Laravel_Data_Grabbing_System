@@ -75,14 +75,12 @@ class CrawlTaskController extends Controller
             }
         }
 
-        infoLog('[updateStatus] prepare data.', $params);
         $data = APIService::internalPost('/internal/crawl/task/status', $params);
         infoLog('[updateStatus] edit task.', $data);
         if ($data['status_code'] !== 200) {
             errorLog('[updateStatus] edit task error.');
             return $this->resError($data['status_code'], $data['message']);
         }
-
         $result = [];
         if ($data['data']) {
             $result = $data['data'];
@@ -121,12 +119,8 @@ class CrawlTaskController extends Controller
             errorLog('[stop] edit task error.');
             return $this->resError($data['status_code'], $data['message']);
         }
-        $result = [];
-        if ($data['data']) {
-            $result = $data['data'];
-        }
         infoLog('[stop] end');
-        return $this->resObjectGet($result, 'crawl_task.stop', $request->path());
+        return $this->resObjectGet('task stop success', 'crawl_task.stop', $request->path());
     }
 
     /**

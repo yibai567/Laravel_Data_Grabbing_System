@@ -56,25 +56,25 @@ class CrawlTaskController extends Controller
                 $task = $res['data'];
             }
             infoLog('[create] create success.', $task);
-            $data = ['id'=> $task['id']];
-            infoLog('[create] prepare data.', $data);
-            $res = APIService::internalPost('/internal/crawl/task/script', $data);
+            $params = ['id'=> $task['id']];
+            infoLog('[create] prepare data.', $params);
+            $res = APIService::internalPost('/internal/crawl/task/script', $params);
             infoLog('[create] create script.', $res);
             if ($res['status_code'] !== 200) {
                 errorLog($res['message'], $res['status_code']);
                 throw new Exception($res['message'], $res['status_code']);
             }
 
-            $data = ['id'=> $task['id']];
+            $params = ['id'=> $task['id']];
             infoLog('[create] prepare data.', $data);
-            $res = APIService::internalPost('/internal/crawl/task/preview', $data);
+            $res = APIService::internalPost('/internal/crawl/task/preview', $params);
             infoLog('[create] test script.', $res);
-            if ($data['status_code'] !== 200) {
+            if ($res['status_code'] !== 200) {
                 errorLog($res['message'], $res['status_code']);
                 throw new Exception($res['message'], $res['status_code']);
             }
 
-            $data = ['id'=> $task['id']];
+            $params = ['id'=> $task['id']];
             infoLog('[create] prepare data.', $data);
             $res = APIService::internalPost('/internal/crawl/task/start', $params);
             infoLog('[create] start script.', $res);
@@ -82,7 +82,7 @@ class CrawlTaskController extends Controller
                 errorLog($res['message'], $res['status_code']);
                 throw new Exception($res['message'], $res['status_code']);
             }
-            $data = ['id'=> $task['id'], 'status' => CrawlTask::IS_START_UP];
+            $params = ['id'=> $task['id'], 'status' => CrawlTask::IS_START_UP];
             infoLog('[create] prepare data.', $data);
             $res = APIService::internalPost('/internal/crawl/task/status', $params);
             infoLog('[create] start script.', $res);
@@ -156,7 +156,8 @@ class CrawlTaskController extends Controller
         $taskId = $params['id'];
         $params = ['crawl_task_id' => $taskId];
         //停止指定任务id当前在运行的任务
-        $res = APIService::basePost('/internal/basic/crawl/node_task/started', $params);
+        $res = APIService::baseGet('/internal/basic/crawl/node_task/started?crawl_task_id=' . $params['crawl_task_id']);
+        
         if ($res['data']) {
             $item = $res['data'];
             $params = ['id' => $item['id']];
