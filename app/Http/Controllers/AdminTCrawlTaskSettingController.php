@@ -4,6 +4,7 @@
 	use Request;
 	use DB;
 	use CRUDBooster;
+    use Illuminate\Support\Facades\Route;
 
 	class AdminTCrawlTaskSettingController extends \crocodicstudio\crudbooster\controllers\CBController {
 
@@ -397,7 +398,46 @@
 
 	    }
 
-
+        public function getDetail($id) {
+            $this->cbLoader();
+             $row = DB::table('t_crawl_task_setting')->where('id', $id)->first();
+             if ( $row->data_type == self::DATA_TYPE_HTML) {
+                    $row->data_type = 'html';
+                } else if( $row->data_type == self::DATA_TYPE_JSON) {
+                    $row->data_type = 'json';
+             }
+             if ( $row->content_type == self::CONTENT_TYPE_LIST) {
+                    $row->content_type = 'list';
+                } else if( $row->content_type == self::CONTENT_TYPE_CONTENT) {
+                    $row->content_type = 'content';
+            }
+            if ( $row->status == self::STATUS_SHOW) {
+                $row->status = '可用';
+                } else if( $row->status == self::STATUS_HIDE) {
+                $row->status = '不可用';
+            }
+            if ( $row->type == self::TEMPLATE_GENERAL_PURPOSE) {
+                $row->type = '通用';
+            } else if( $row->type == self::TEMPLATE_CUSTOM) {
+                $row->type = '自定义';
+            }
+            if ( $row->is_proxy == self::IS_PROXY_YES) {
+                $row->is_proxy = 'html';
+            } else if( $row->is_proxy == self::IS_PROXY_NO) {
+                $row->is_proxy = 'json';
+            }
+            // $row->test_result = implode(" ", json_decode($row->test_result));
+            // dd($row);
+            if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
+                    CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
+                    CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
+                }
+                $page_menu  = Route::getCurrentRoute()->getActionName();
+                $page_title = trans("crudbooster.detail_data_page_title",['module'=>$module->name,'name'=>$row->{$this->title_field}]);
+                $command    = 'detail';
+                Session::put('current_row_id',$id);
+                return view('crudbooster::default.form',compact('row','page_menu','page_title','command','id'));
+        }
 
 	    //By the way, you can still create your own method in here... :)
 

@@ -4,6 +4,8 @@
 	use Request;
 	use DB;
 	use CRUDBooster;
+    use Illuminate\Support\Facades\Route;
+
 
 	class AdminTCrawlResultController extends \crocodicstudio\crudbooster\controllers\CBController {
         const DATA_TYPE_HTML = 1;
@@ -353,7 +355,29 @@
 	        //Your code here
 
 	    }
-
+        public function getDetail($id) {
+            $this->cbLoader();
+            $row = DB::table('t_crawl_result')->where('id', $id)->first();
+             if ( $row->setting_data_type == self::DATA_TYPE_HTML) {
+                    $row->setting_data_type = 'html';
+                } else if( $row->setting_data_type == self::DATA_TYPE_JSON) {
+                    $row->setting_data_type = 'json';
+                }
+            if ( $row->status == self::STATUS_UNTREATED) {
+                    $row->status = '未处理';
+                } else if( $row->status == self::STATUS_ALREADYA_PROCESSED) {
+                    $row->status = '已处理';
+            }
+            if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
+                    CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
+                    CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
+                }
+                $page_menu  = Route::getCurrentRoute()->getActionName();
+                $page_title = trans("crudbooster.detail_data_page_title",['module'=>$module->name,'name'=>$row->{$this->title_field}]);
+                $command    = 'detail';
+                Session::put('current_row_id',$id);
+                return view('crudbooster::default.form',compact('row','page_menu','page_title','command','id'));
+        }
 
 
 	    //By the way, you can still create your own method in here... :)

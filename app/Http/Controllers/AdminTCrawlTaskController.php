@@ -7,6 +7,7 @@
     use Redirect;
     use GuzzleHttp;
     use App\Services\APIService;
+    use Illuminate\Support\Facades\Route;
 
 	class AdminTCrawlTaskController extends \crocodicstudio\crudbooster\controllers\CBController {
 
@@ -166,7 +167,7 @@
             $this->addaction[] = ['label'=>'log日志', 'url'=>CRUDBooster::mainpath('log-list')];
             $this->addaction[] = ['label'=>'统计'];
 
-            $this->sub_module[] = ['label'=>'节点任务','path'=>'t_crawl_node_task','foreign_key'=>'crawl_task_id','button_color'=>'success','button_icon'=>'fa fa-bars', 'parent_columns'=>'name'];
+            $this->sub_module[] = ['label'=>'节点任务', 'path'=>'t_crawl_node_task', 'foreign_key'=>'crawl_task_id', 'button_color'=>'success', 'button_icon'=>'fa fa-bars', 'parent_columns'=>'name'];
 
 	        /*
 	        | ----------------------------------------------------------------------
@@ -359,9 +360,10 @@
 	    |
 	    */
 	    public function hook_after_add($id) {
-            $url = '/v1/crawl/task/script';
+            $uri = '/v1/crawl/task/script';
             $params['id'] = $id;
-            $this->post($params, $url);
+            APIService::openPost($uri, $params);
+
 	        //Your code here
 
 	    }
@@ -374,15 +376,14 @@
 	    | @id       = current id
 	    |
 	    */
-	    public function hook_before_edit(&$postdata,$id) {
+	    public function hook_before_edit(&$postdata, $id) {
             if ($postdata['status'] == self::STATUS_START_UP) {
-                CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"状态启动中不能修改，请返回","info");
-                //return Redirect::to('admin/t_crawl_task');
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "状态启动中不能修改，请返回", "info");
             }
             $postdata['status'] = self::STATUS_NO_STARTING;
-            $url = '/v1/crawl/task/script';
+            $uri = '/v1/crawl/task/script';
             $params['id'] = $id;
-            $this->post($params, $url);
+            APIService::openPost($uri, $params);
 	        //Your code here
 
 	    }
@@ -424,7 +425,7 @@
 	    }
         //修改任务状态
         private function getUpdateStatus($id,$status) {
-            DB::table('t_crawl_task')->where('id',$id)->update(['status'=>$status]);
+            DB::table('t_crawl_task')->where('id', $id)->update(['status' => $status]);
         }
 
         public function getLogList()
@@ -440,55 +441,77 @@
             $exec_url = '/v1/crawl/task/preview';
             $params['id'] = $id;
             $result = APIService::openPost($exec_url, $params);
-            dd($result);
             if (!empty($result)) {
                 if ($result['status_code'] == 200) {
                     $result_url = '/v1/crawl/task/result';
                     $params['test_result'] = json_encode($result['data']);
-                    $crawlResult = $this->post($params,$result_url);
+                    $crawlResult = APIService::openPost($result_url, $params);
                     if (empty($crawlResult) || $crawlResult['status_code'] != 200) {
                         errorLog('request /v1/crawl/task/result fail', $crawlResult);
-                        CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"系统错误，请重试","info");
+                        CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试","info");
                     }
                 } else {
                     errorLog('request /v1/crawl/task/preview fail', $result);
-                    CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"系统错误，请重试","info");
+                    CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
                 }
             }
-            return Redirect::to('admin/t_crawl_task/detail/'.$id);
+            return Redirect::to('admin/t_crawl_task/detail/' . $id);
 
         }
 
         public function getStartUp($id,$status)
         {
+            $uri = '/v1/crawl/task/start';
             $params['id'] = $id;
-            $url = '/v1/crawl/task/start';
-            $result = $this->post($params, $url);
-            if (empty($result) || $result->status_code != 200 )
+            $result = APIService::openPost($uri, $params);
+            if (empty($result) || $result['status_code'] != 200 )
             {
-                CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"系统错误，请重试","info");
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
             }
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"开启成功","info");
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "开启成功", "info");
         }
 
         public function getStopUp($id)
         {
+            $uri = '/v1/crawl/task/stop';
             $params['id'] = $id;
-            $url = '/v1/crawl/task/stop';
-            $result = $this->post($params, $url);
-            if (empty($result) || $result->status_code != 200 )
+            $result = APIService::openPost($uri, $params);
+            if (empty($result) || $result['status_code'] != 200 )
             {
-                CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"系统错误，请重试","info");
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
             }
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"停止成功","info");
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "停止成功", "info");
         }
-        public function getArchived($id,$status)
+        public function getArchived($id, $status)
         {
-            $this->getUpdateStatus($id,$status);
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"归档成功","info");
+            $this->getUpdateStatus($id, $status);
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "归档成功", "info");
         }
 
 	    //By the way, you can still create your own method in here... :)
-
+        public function getDetail($id) {
+            $this->cbLoader();
+             $row = DB::table('t_crawl_task')->where('id', $id)->first();
+             if ( $row->cron_type == self::CRON_MINUTE) {
+                    $row->cron_type = '每分钟执行一次';
+                } else if( $row->cron_type == self::CRON_HOUR) {
+                    $row->cron_type = '每小时执行一次';
+                } else if( $row->cron_type == self::CRON_DAY) {
+                    $row->cron_type = '每天执行一次';
+                } else if ($row->cron_type == self::CRON_SUSTAINED_EXECUTE) {
+                    $row->cron_type = '持续执行';
+                }
+            // $row->test_result = implode(" ", json_decode($row->test_result));
+            // dd($row);
+            if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
+                    CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
+                    CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
+                }
+                $page_menu  = Route::getCurrentRoute()->getActionName();
+                $page_title = trans("crudbooster.detail_data_page_title",['module'=>$module->name,'name'=>$row->{$this->title_field}]);
+                $command    = 'detail';
+                Session::put('current_row_id',$id);
+                return view('crudbooster::default.form',compact('row','page_menu','page_title','command','id'));
+        }
 
 	}
