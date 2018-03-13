@@ -435,7 +435,7 @@
 
         public function post($params,$url)
         {
-            $url = config('api.api_base_url').$url;
+            $url = config('url.api_base_url').$url;
             $dispatcher = app('Dingo\Api\Dispatcher');
             $resultData = $dispatcher->json($params)->post($url);
             return $resultData;
@@ -447,11 +447,11 @@
             $params['id'] = $id;
             $result = $this->post($params,$exec_url);
             if (!empty($result)) {
-                if ($result->status_code == 200) {
+                if ($result['status_code'] == 200) {
                     $result_url = '/v1/crawl/task/result';
-                    $params['test_result'] = $result->test_result;
+                    $params['test_result'] = json_encode($result['data']);
                     $crawlResult = $this->post($params,$result_url);
-                    if (empty($crawlResult) || $crawlResult != 200) {
+                    if (empty($crawlResult) || $crawlResult['status_code'] != 200) {
                         errorLog('request /v1/crawl/task/result fail', $crawlResult);
                         CRUDBooster::redirect($_SERVER['HTTP_REFERER'],"系统错误，请重试","info");
                     }
