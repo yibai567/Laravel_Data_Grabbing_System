@@ -223,7 +223,7 @@ class CrawlTaskController extends Controller
             $result = $res['data'];
         }
         infoLog('[preview] validate end.', $result);
-        return $this->resObjectGet($res, 'crawl_task.execute', $request->path());
+        return $this->resObjectGet($result, 'crawl_task.preview', $request->path());
     }
 
     /**
