@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Log;
+use Config;
 
 class APIService extends Service
 {
@@ -12,6 +13,7 @@ class APIService extends Service
 
     public static function openPost($path, $params = [], $contentType = '')
     {
+        Config::set('logging.application_name', 'open_api');
         $url = config('url.jinse_open_url') . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');
 
@@ -26,6 +28,7 @@ class APIService extends Service
 
     public static function openGet($path, $params = [])
     {
+        Config::set('logging.application_name', 'open_api');
         $url = config('url.jinse_open_url') . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');
 
@@ -38,6 +41,7 @@ class APIService extends Service
 
     public static function internalPost($path, $params = [], $contentType = '')
     {
+        Config::set('logging.application_name', 'internal_api');
         $url = config('url.jinse_internal_url') . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');
 
@@ -52,6 +56,7 @@ class APIService extends Service
 
     public static function internalGet($path, $params = [])
     {
+        Config::set('logging.application_name', 'internal_api');
         $url = config('url.jinse_internal_url') . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');
 
@@ -64,6 +69,7 @@ class APIService extends Service
 
     public static function basePost($path, $params = [], $contentType = '')
     {
+        Config::set('logging.application_name', 'base_api');
         $url = config('url.jinse_base_url') . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');
 
@@ -78,6 +84,7 @@ class APIService extends Service
 
     public static function baseGet($path, $params = [])
     {
+        Config::set('logging.application_name', 'base_api');
         $url = config('url.jinse_base_url') . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');
 

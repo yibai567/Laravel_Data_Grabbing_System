@@ -4,8 +4,10 @@ namespace App\Http\Controllers\InternalAPI;
 
 use App\Services\FilterService;
 use App\Http\Controllers\Controller as BaseController;
+
 class Controller extends BaseController
 {
+
     /**
      * 格式化单条数据
      * @param $object

@@ -4,9 +4,14 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller as BaseController;
 use App\Services\FilterService;
+use Config;
 
 class Controller extends BaseController
 {
+    public function __construct()
+    {
+        Config::set('logging.application_name', 'open_api');
+    }
     /**
      * 格式化单条数据
      * @param $object
