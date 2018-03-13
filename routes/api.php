@@ -21,11 +21,11 @@ $api->version(
         });
         $api->post('/crawl/task', 'CrawlTaskController@create');
         $api->post('/crawl/task/status', 'CrawlTaskController@updateStatus');
+        $api->post('/crawl/task/result', 'CrawlTaskController@updateResult');
         $api->post('/crawl/task/stop', 'CrawlTaskController@stop');
         $api->post('/crawl/task/script', 'CrawlTaskController@createScript');
         $api->post('/crawl/task/preview', 'CrawlTaskController@preview');
         $api->post('/crawl/task/start','CrawlTaskController@start');
-        //$api->post('/crawl/result', 'CrawlResultController@create');
         $api->post('/crawl/result/batch_result', 'CrawlResultController@createByBatch');
     }
 );

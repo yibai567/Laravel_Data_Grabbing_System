@@ -204,7 +204,7 @@ class CrawlTaskController extends Controller
 
             $dispatcher = app('Dingo\Api\Dispatcher');
             $res = $dispatcher->post(config('url.jinse_internal_url') . '/internal/basic/crawl/task/script', $data);
-            
+
             if ($res['status_code'] !== 200) {
                 errorLog($res['messsage']);
                 throw new Exception($res['messsage'], $res['status_code']);
@@ -287,7 +287,7 @@ class CrawlTaskController extends Controller
         } catch(Exception $e) {
             return $this->resError($e->getCode(), $e->getMessage());
         }
-        
+
         return $this->resObjectGet($output, 'crawl_task.execute', $request->path());
     }
 
@@ -338,4 +338,46 @@ class CrawlTaskController extends Controller
         infoLog('[start] end.');
         return $this->resObjectGet($task, 'crawl_task.execute', $request->path());
     }
+    /**
+     * 修改抓取返回结果
+     *
+     */
+    public function updateResult(Request $request)
+    {
+        infoLog('[updateResult] start.', $request);
+        $params = $request->all();
+        infoLog('[updateResult] validate.', $params);
+        $validator = Validator::make($params, [
+            'id' => 'integer|required',
+            'test_result' => 'nullable',
+        ]);
+        infoLog('[updateResult] validate.', $validator);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                infoLog('[start] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        infoLog('[updateResult] validate end.');
+        $result = [];
+        if (empty($params['test_result'])) {
+            infoLog('[updateResult] test_result empty.');
+            return $this->resObjectGet($result, 'crawl_task.result', $request->path());
+        }
+        infoLog('[updateResult] execute base api', $params);
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $resultData = $dispatcher->post(config('url.api_base_url') . '/internal/basic/crawl/task/result', $params);
+        if ($resultData['status_code'] !== 200) {
+            errorLog('[updateResult] result task error.');
+            return $this->resError($resultData['status_code'], $resultData['message']);
+        }
+        if ($resultData['data']) {
+            $result = $resultData['data'];
+        }
+        infoLog('[updateResult] end.', $result);
+        return $this->resObjectGet($result, 'crawl_task.result', $request->path());
+    }
+
 }

@@ -171,7 +171,7 @@ class CrawlTaskController extends Controller
 
         $dispatcher = app('Dingo\Api\Dispatcher');
         $res = $dispatcher->post(config('url.jinse_base_url')  . '/internal/crawl/task/script', $data);
-        
+
         if ($res['status_code'] !== 200) {
             errorLog('[createScript] edit task error.');
             return $this->resError($res['status_code'], $res['message']);
@@ -266,5 +266,46 @@ class CrawlTaskController extends Controller
         }
         infoLog('[start] validate end.', $result);
         return $this->resObjectGet($res, 'crawl_task.start', $request->path());
+    }
+    /**
+     * 修改抓取返回结果
+     *
+     */
+    public function updateResult(Request $request)
+    {
+        infoLog('[updateResult] start.', $request);
+        $params = $request->all();
+        infoLog('[updateResult] validate.', $params);
+        $validator = Validator::make($params, [
+            'id' => 'integer|required',
+            'test_result' => 'nullable',
+        ]);
+        infoLog('[updateResult] validate.', $validator);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                infoLog('[start] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        infoLog('[updateResult] validate end.');
+        $result = [];
+        if (empty($params['test_result'])) {
+            infoLog('[updateResult] test_result empty.');
+            return $this->resObjectGet($result, 'crawl_task.result', $request->path());
+        }
+        infoLog('[updateResult] execute internal api', $params);
+        $dispatcher = app('Dingo\Api\Dispatcher');
+        $resultData = $dispatcher->post(config('url.api_base_url') . '/internal/crawl/task/result', $params);
+        if ($resultData['status_code'] !== 200) {
+            errorLog('[updateResult] result task error.');
+            return $this->resError($resultData['status_code'], $resultData['message']);
+        }
+        if ($resultData['data']) {
+            $result = $resultData['data'];
+        }
+        infoLog('[updateResult] end.', $result);
+        return $this->resObjectGet($result, 'crawl_task.result', $request->path());
     }
 }
