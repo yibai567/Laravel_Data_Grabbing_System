@@ -34,7 +34,7 @@ class CrawlTaskController extends Controller
             'is_http' => 'integer|nullable',
             'is_https' => 'integer|nullable',
         ]);
-        
+
         if ($validator->fails()) {
             $errors = $validator->errors();
             errorLog('[create] validate fail.', $errors);
@@ -105,6 +105,9 @@ class CrawlTaskController extends Controller
             $data = [];
             if (empty($task)) {
                 throw new Exception('[updateStatus] task not exist.', 401);
+            }
+            if ($status == CrawlTask::IS_START_UP) {
+                $task->start_time = date('Y-m-d H:i:s');
             }
             $task->status = $status;
             if (!$task->save()) {
@@ -240,5 +243,44 @@ class CrawlTaskController extends Controller
         }
         return $this->resObjectGet($result, 'crawl_task', $request->path());
 
+    }
+    /**
+     * 任务列表
+     * @param Request $request
+     * @return 任务列表
+     */
+    public function all(Request $request)
+    {
+        infoLog('[all] start.');
+        $params = $request->all();
+        infoLog('[all] validate.', $params);
+        $validator = Validator::make($params, [
+            'limit' => 'integer|nullable',
+            'offset' => 'integer|nullable',
+            'protocol' => 'integer|nullable',
+            'cron_type' => 'integer|nullable',
+        ]);
+        infoLog('[all] validate.', $validator);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                infoLog('[start] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        infoLog('[all] validate end.');
+        $items = CrawlTask::where('status', CrawlTask::IS_START_UP)
+                            ->where('cron_type', $params['cron_type'])
+                            ->where('protocol', $params['protocol'])
+                            ->take($params['limit'])
+                            ->skip($params['offset'])
+                            ->orderBy('start_time', 'asc')
+                            ->get();
+        $data = [];
+        if (!empty($items)) {
+            $data = $items->toArray();
+        }
+        return $this->resObjectGet($data, 'crawl_task', $request->path());
     }
 }

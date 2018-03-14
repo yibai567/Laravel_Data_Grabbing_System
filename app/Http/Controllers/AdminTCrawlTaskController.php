@@ -360,10 +360,6 @@
 	    |
 	    */
 	    public function hook_after_add($id) {
-            $uri = '/v1/crawl/task/script';
-            $params['id'] = $id;
-            APIService::openPost($uri, $params);
-
 	        //Your code here
 
 	    }
@@ -380,10 +376,6 @@
             if ($postdata['status'] == self::STATUS_START_UP) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "状态启动中不能修改，请返回", "info");
             }
-            $postdata['status'] = self::STATUS_NO_STARTING;
-            $uri = '/v1/crawl/task/script';
-            $params['id'] = $id;
-            APIService::openPost($uri, $params);
 	        //Your code here
 
 	    }
@@ -459,7 +451,7 @@
 
         }
 
-        public function getStartUp($id,$status)
+        public function getStartUp($id, $status)
         {
             $uri = '/v1/crawl/task/start';
             $params['id'] = $id;
@@ -471,7 +463,7 @@
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "开启成功", "info");
         }
 
-        public function getStopUp($id)
+        public function getStopUp($id, $status)
         {
             $uri = '/v1/crawl/task/stop';
             $params['id'] = $id;
@@ -501,8 +493,15 @@
                 } else if ($row->cron_type == self::CRON_SUSTAINED_EXECUTE) {
                     $row->cron_type = '持续执行';
                 }
-            // $row->test_result = implode(" ", json_decode($row->test_result));
-            // dd($row);
+
+            $test_result = json_decode($row->test_result);
+            foreach ($test_result as $key => $value) {
+                $str = str_replace('[32;1m', '', $value);
+                $strr .= str_replace('[0m', '', $str) . "\r";
+                //echo "<pre>";print_r($value);
+            }
+            $row->test_result = $strr;
+            //dd($strr);
             if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
                     CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
                     CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));

@@ -114,12 +114,17 @@ class CrawlTaskController extends Controller
 
         $data = APIService::internalPost('/internal/crawl/task/stop', $params);
         infoLog('[stop] execute stop internal api back', $data);
-        if ($data['status'] !== 200) {
+        if ($data['status_code'] != 200) {
             errorLog('[stop] edit task error.');
             return $this->resError($data['status_code'], $data['message']);
         }
+        $result = [];
+        if ($data['data']) {
+            $result = $data['data']['data'];
+        }
+
         infoLog('[stop] end');
-        return $this->resObjectGet('task stop success', 'crawl_task.stop', $request->path());
+        return $this->resObjectGet($result, 'crawl_task.stop', $request->path());
     }
 
     /**
@@ -228,11 +233,12 @@ class CrawlTaskController extends Controller
         }
         $result = [];
         if ($data['data']) {
-            $result = $data['data'];
+            $result = $data['data']['data'];
         }
         infoLog('[start] validate end.');
         return $this->resObjectGet($result, 'crawl_task.start', $request->path());
     }
+
     /**
      * 修改抓取返回结果
      *
@@ -274,4 +280,45 @@ class CrawlTaskController extends Controller
         infoLog('[updateResult] end.');
         return $this->resObjectGet($result, 'crawl_task.result', $request->path());
     }
+    /**
+     * 任务列表
+     * @param Request $request
+     * @return 任务列表
+     */
+    public function all(Request $request)
+    {
+        infoLog('[all] start.');
+        $params = $request->all();
+        infoLog('[all] validate.', $params);
+        $validator = Validator::make($params, [
+            'limit' => 'integer|nullable',
+            'offset' => 'integer|nullable',
+            'protocol' => 'integer|nullable',
+            'cron_type' => 'integer|nullable',
+        ]);
+
+        infoLog('[all] validate.', $validator);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                infoLog('[start] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        infoLog('[all] validate end.');
+        $data = APIService::internalGet('/internal/crawl/tasks', $params);
+        if ($data['status_code'] !== 200) {
+            errorLog('[all] result task error.');
+            return $this->resError($data['status_code'], $data['message']);
+        }
+
+        if ($data['data']) {
+            $result = $data['data'];
+        }
+        infoLog('[all] end.');
+        return $this->resObjectGet($result, 'crawl_task.result', $request->path());
+    }
+
+
 }
