@@ -35,7 +35,7 @@ class CrawlNodeTaskController extends Controller
         infoLog('[create] params validator end.');
 
         //停止指定任务id当前在运行的任务
-        infoLog('[create] request internal/basic/ started start.', $params);
+        infoLog('[create] request internal/basic/ started start.');
         $data = APIService::internalGet('/internal/basic/crawl/node_task/started', $params);
         if ($data['data']) {
             $item = $data['data'];

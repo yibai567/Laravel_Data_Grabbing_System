@@ -48,17 +48,12 @@ class CrawlTaskController extends Controller
             $params['setting_id'] = 1;
         }
 
-        if (substr($params['resource_url'], 0, 7) == 'http://') {
-            $params['is_http'] = CrawlTask::IS_HTTP_TRUE;
-            $params['is_https'] = CrawlTask::IS_HTTPS_FALSE;
-        } elseif (substr($params['resource_url'], 0, 8) == 'https://') {
-            $params['is_https'] = CrawlTask::IS_HTTPS_TRUE;
-            $params['is_http'] = CrawlTask::IS_HTTP_FALSE;
+        if (substr($params['resource_url'], 0, 8) == 'https://') {
+            $params['protocol'] = CrawlTask::PROTOCOL_HTTPS;
         } else {
-            $params['is_http'] = CrawlTask::IS_HTTP_FALSE;
-            $params['is_https'] = CrawlTask::IS_HTTPS_FALSE;
+            $params['protocol'] = CrawlTask::PROTOCOL_HTTP;
         }
-
+        
         $data = $params;
         infoLog('[create] prepare data.', $data);
         try{

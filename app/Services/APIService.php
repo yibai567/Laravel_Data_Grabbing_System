@@ -91,4 +91,28 @@ class APIService extends Service
         return $dispatcher->get($url, $params);
     }
 
+    /**
+     * base API
+     */
+
+    public static function httpPost($url, $params = [], $contentType = '')
+    {
+        $dispatcher = app('Dingo\Api\Dispatcher');
+
+        if ($contentType == 'json') {
+            $dispatcher->json($params);
+        } else {
+            $dispatcher->with($params);
+        }
+
+        return $dispatcher->post($url);
+    }
+
+    public static function httpGet($url, $params = [])
+    {
+        $dispatcher = app('Dingo\Api\Dispatcher');
+
+        return $dispatcher->get($url, $params);
+    }
+
 }

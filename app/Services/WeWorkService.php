@@ -11,15 +11,65 @@ namespace App\Services;
 
 class WeWorkService extends Service
 {
+    const BASE_URI = 'https://qyapi.weixin.qq.com/cgi-bin/';
+    const TIME_OUT = 10.0;
+
+    private $corpId = null;
+    private $corpSecret = null;
+    private $agentId = null;
+    private $accessToken = null;
+
+    public function __construct()
+    {
+        $this->corpId = config('wework.corp_id');
+        $this->corpSecret = config('wework.corp_secret');
+        $this->agentId = config('wework.corp_app_config.agent_id');
+
+        if ($this->__checkAccessToken()) {
+            $this->accessToken = session('wework_access_token');
+        } else {
+            $this->accessToken = $this->getAccessToken();
+            $this->__setAccessToken($this->accessToken);
+        }
+    }
+
     public function index()
     {
-        $departments = $this->getDepartment();
-        $users = [];
-
-        foreach ($departments as $department) {
-            $userlist = $this->getUserByDepId($department['id']);
-            $users = array_merge($users, $userlist);
+//        $departments = $this->getDepartment();
+//        $users = [];
+//
+//        foreach ($departments as $department) {
+//            $userlist = $this->getUserByDepId($department['id']);
+//            $users = array_merge($users, $userlist);
+//        }
+        $userId = 'yuwenbin@jinse.com';
+        $content = '测试消息：node节点已满，请及时添加';
+        if ($this->sendMsgToUser($userId, $content)) {
+            return 'success';
+        } else {
+            return 'error';
         }
+    }
+
+    public function sendMsgToUser($userId, $content)
+    {
+        $toParty = '';
+        $toTag = '';
+        $safe = '';
+        $toUser = $userId;
+        $msgType = 'text';
+        $content = $content;
+        $agentId = config('wework.corpAppConfig.agentId');
+        $res = $this->pushMessage(
+            $agentId,
+            $msgType,
+            $content,
+            $toUser,
+            $toParty,
+            $toTag,
+            $safe
+        );
+        return $res;
     }
 
     /**
@@ -29,59 +79,17 @@ class WeWorkService extends Service
      * @param agentId
      * @return string
      */
-    public function getAccessToken($agentId)
+    public function getAccessToken()
     {
-        $corpId = config('wework.corpId');
+        $url = self::BASE_URI . 'gettoken?corpid=' . $this->corpId . '&corpsecret=' . $this->corpSecret;
+        $data = json_decode($this->http_get($url)["content"], true);
+        dd($data);
 
-        //如果agentId为txl secret 设置为corpTxlSecret，否则设置为corpSecret
-        if ($agentId == 'txl') {
-            $secret = config('wework.corpTxlSecret');
-        } else {
-            $config = $this->getConfigByAgentId($agentId);
-
-            if (!empty($config)) {
-                $secret = $config['secret'];
-            } else {
-                return 0;
-            }
+        if (!empty($data['errcode'])) {
+            throw new Exception($data['errmsg'], $data['errcode']);
         }
 
-        $accessToken = DB::table('wework_access_tokens')
-            ->select('wework_access_tokens.access_token as access_token', 'weworks.id as wework_id')
-            ->join('weworks', 'weworks.id', '=', 'wework_access_tokens.wework_id')
-            ->where('weworks.corp_id', $corpId)
-            ->where('wework_access_tokens.agent_id', $agentId)
-            ->where('wework_access_tokens.expired_at', '>=', Carbon::now('+0.5 hour'))
-            ->first();
-
-        //判断数据库中是否存在未过期的access_toekn，若不存在则重新获取
-        if (!$accessToken) {
-            $url = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=" . $corpId . "&corpsecret=" . $secret;
-
-            $res = json_decode($this->http_get($url)["content"]);
-            if ($res) {
-                $accessToken = $res->access_token;
-            }
-
-            $wework = Wework::select('id', 'corp_id')
-                ->where('corp_id', $corpId)
-                ->first();
-
-            if(isset($accessToken)) {
-                $data['expired_at'] = Carbon::now('+2 days');
-                $data['access_token'] = $accessToken;
-                $data['wework_id'] = $wework->id;
-                $data['agent_id'] = $agentId;
-
-                if (!AccessToken::insert($data)) {
-                    return 0;
-                }
-            }
-        } else {
-            $accessToken = $accessToken->access_token;
-        }
-
-        return $accessToken;
+        return $data['access_token'];
     }
 
     /**
@@ -120,8 +128,7 @@ class WeWorkService extends Service
      */
     public function getDepartment($departmentId = null)
     {
-        $accessToken = $this->getAccessToken('txl');
-        $url = "https://qyapi.weixin.qq.com/cgi-bin/department/list?access_token=" . $accessToken;
+        $url = "https://qyapi.weixin.qq.com/cgi-bin/department/list?access_token=" . $this->accessToken;
         if ($departmentId) {
             if ($departmentId > 0) {
                 $url .= "&id=" . $departmentId;
@@ -147,8 +154,7 @@ class WeWorkService extends Service
      */
     public function getUser($userId)
     {
-        $accessToken = $this->getAccessToken('txl');
-        $url = "https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=" . $accessToken;
+        $url = "https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=" . $this->accessToken;
         if ($userId) {
             $url .= "&userid=" . $userId;
         } else {
@@ -167,14 +173,13 @@ class WeWorkService extends Service
      * @return mixed|string
      */
     public function getUserByDepId($departmentId, $fetchChild = 1, $simple = 1){
-        $accessToken = $this->getAccessToken('txl');
         if ($departmentId > 0) {
             if ($simple == 1) {
                 $interface = "simplelist";
             } else {
                 $interface = "list";
             }
-            $url = "https://qyapi.weixin.qq.com/cgi-bin/user/$interface?access_token=$accessToken&department_id=$departmentId&fetch_child=$fetchChild";
+            $url = "https://qyapi.weixin.qq.com/cgi-bin/user/$interface?access_token={$this->accessToken}&department_id=$departmentId&fetch_child=$fetchChild";
             $data = json_decode($this->http_get($url)["content"], true);
             if ($data['errcode'] == 0) {
                 return $data['userlist'];
@@ -200,8 +205,7 @@ class WeWorkService extends Service
      */
     public function pushMessage($agentId, $msgType = 'text', $content = "", $toUser='', $toParty = '', $toTag='', $safe=0)
     {
-        $accessToken = $this->getAccessToken($agentId);
-        if ($accessToken) {
+        if ($this->accessToken) {
             if (empty($content)) {
                 return 0;
             }
@@ -311,7 +315,7 @@ class WeWorkService extends Service
                     break;
             }
 
-            $url = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" . $accessToken;
+            $url = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" . $this->accessToken;
             return $this->http_post($url, $msg)["content"];
         } else {
             return 0;
@@ -445,6 +449,29 @@ class WeWorkService extends Service
         }
 
         return $config;
+    }
+
+    /**
+     * 设置AccessToken
+     * @param $accessToken
+     */
+    private function __setAccessToken($accessToken)
+    {
+        $expired_at = time() + 7200;
+        session('wework_access_token', $this->accessToken);
+        session('wework_access_token_expired_at', $expired_at);
+    }
+
+    /**
+     * 判断accessToken是否过期
+     * @return bool
+     */
+    private function __checkAccessToken()
+    {
+        if (session('wework_access_token') && session('wework_access_token_expired_at') >= time()) {
+            return true;
+        }
+        return false;
     }
 
 }
