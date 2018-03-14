@@ -17,8 +17,7 @@ $api->version(
     ['namespace' => 'App\Http\Controllers\Api\V1', 'prefix'=>'v1'],
     function (Dingo\Api\Routing\Router $api) {
         $api->get('/test', function(){
-            $weworkService = new \App\Services\WeWorkService();
-            $weworkService->index();
+            return 'test';
         });
         $api->post('/crawl/task', 'CrawlTaskController@create');
         $api->post('/crawl/task/status', 'CrawlTaskController@updateStatus');

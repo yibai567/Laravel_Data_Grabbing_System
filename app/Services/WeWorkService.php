@@ -12,7 +12,6 @@ namespace App\Services;
 class WeWorkService extends Service
 {
     const BASE_URI = 'https://qyapi.weixin.qq.com/cgi-bin/';
-    const TIME_OUT = 10.0;
 
     private $corpId = null;
     private $corpSecret = null;
@@ -23,7 +22,7 @@ class WeWorkService extends Service
     {
         $this->corpId = config('wework.corp_id');
         $this->corpSecret = config('wework.corp_secret');
-        $this->agentId = config('wework.corp_app_config.agent_id');
+        $this->agentId = config('wework.agent_id');
 
         if ($this->__checkAccessToken()) {
             $this->accessToken = session('wework_access_token');
@@ -33,57 +32,16 @@ class WeWorkService extends Service
         }
     }
 
-    public function index()
-    {
-//        $departments = $this->getDepartment();
-//        $users = [];
-//
-//        foreach ($departments as $department) {
-//            $userlist = $this->getUserByDepId($department['id']);
-//            $users = array_merge($users, $userlist);
-//        }
-        $userId = 'yuwenbin@jinse.com';
-        $content = '测试消息：node节点已满，请及时添加';
-        if ($this->sendMsgToUser($userId, $content)) {
-            return 'success';
-        } else {
-            return 'error';
-        }
-    }
-
-    public function sendMsgToUser($userId, $content)
-    {
-        $toParty = '';
-        $toTag = '';
-        $safe = '';
-        $toUser = $userId;
-        $msgType = 'text';
-        $content = $content;
-        $agentId = config('wework.corpAppConfig.agentId');
-        $res = $this->pushMessage(
-            $agentId,
-            $msgType,
-            $content,
-            $toUser,
-            $toParty,
-            $toTag,
-            $safe
-        );
-        return $res;
-    }
-
     /**
      * 获取access_token
      * 根据传入的agentId
      *
-     * @param agentId
      * @return string
      */
     public function getAccessToken()
     {
         $url = self::BASE_URI . 'gettoken?corpid=' . $this->corpId . '&corpsecret=' . $this->corpSecret;
         $data = json_decode($this->http_get($url)["content"], true);
-        dd($data);
 
         if (!empty($data['errcode'])) {
             throw new Exception($data['errmsg'], $data['errcode']);
@@ -93,42 +51,13 @@ class WeWorkService extends Service
     }
 
     /**
-     * 向特定用户发送消息
-     *
-     * @param Request $request
-     * @param $agentId
-     * @return int
-     */
-    public function sendMsg(Request $request, $agentId)
-    {
-        $toParty = $request -> to_party;
-        $toTag = $request -> to_tag;
-        $safe = $request -> safe;
-        $toUser = $request -> partyId;
-        $msgType = $request -> msg_type;
-        $content = $request -> content;
-
-        $res = $this->pushMessage(
-            $agentId,
-            $msgType,
-            $content,
-            $toUser,
-            $toParty,
-            $toTag,
-            $safe
-        );
-
-        return $res;
-    }
-
-    /**
      * 获取部门信息
      *
      * @param $instance
      */
     public function getDepartment($departmentId = null)
     {
-        $url = "https://qyapi.weixin.qq.com/cgi-bin/department/list?access_token=" . $this->accessToken;
+        $url = self::BASE_URI . 'list?access_token=' . $this->accessToken;
         if ($departmentId) {
             if ($departmentId > 0) {
                 $url .= "&id=" . $departmentId;
@@ -154,7 +83,7 @@ class WeWorkService extends Service
      */
     public function getUser($userId)
     {
-        $url = "https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=" . $this->accessToken;
+        $url = self::BASE_URI . '/user/get?access_token=' . $this->accessToken;
         if ($userId) {
             $url .= "&userid=" . $userId;
         } else {
@@ -179,7 +108,7 @@ class WeWorkService extends Service
             } else {
                 $interface = "list";
             }
-            $url = "https://qyapi.weixin.qq.com/cgi-bin/user/$interface?access_token={$this->accessToken}&department_id=$departmentId&fetch_child=$fetchChild";
+            $url = self::BASE_URI . "user/$interface?access_token={$this->accessToken}&department_id=$departmentId&fetch_child=$fetchChild";
             $data = json_decode($this->http_get($url)["content"], true);
             if ($data['errcode'] == 0) {
                 return $data['userlist'];
@@ -191,6 +120,67 @@ class WeWorkService extends Service
         }
     }
 
+    /**
+     * 向用户发送文本消息
+     * @param $userId
+     * @param string $title
+     * @param string $content
+     * @return int
+     */
+    public function sendTextToUser($toUser, $content='')
+    {
+        if (empty($toUser) || empty($content)) {
+            return 0;
+        }
+        if (!is_array($toUser)) {
+            $toUser = [$toUser];
+        }
+
+        $toUser = implode('|', $toUser);
+
+        $data = $this->pushMessage('text', $content, $toUser);
+        if (!empty($data['errcode'])) {
+            throw new Exception($data['errmsg'], $data['errcode']);
+        }
+        return 'send success';
+    }
+
+    /**
+     * 向用户发送文本卡片消息
+     * @param $userId
+     * @param string $title
+     * @param string $content
+     * @return int
+     */
+    public function sendTextCardToUser($toUser, $title='', $description='', $url = '', $btntxt='更多')
+    {
+//        {
+//            "title" : "领奖通知",
+//        "description" : "<div class=\"gray\">2016年9月26日</div> <div class=\"normal\">恭喜你抽中iPhone 7一台，领奖码：xxxx</div><div class=\"highlight\">请于2016年10月10日前联系行政同事领取</div>",
+//        "url" : "URL",
+//        "btntxt":"更多"
+//        }
+        if (empty($toUser)) {
+            return 0;
+        }
+        if (!is_array($toUser)) {
+            $toUser = [$toUser];
+        }
+
+        $toUser = implode('|', $toUser);
+
+        $data = [
+            'title' => $title,
+            'content' => $description,
+            'url' => $url,
+            'btntxt' => $btntxt,
+        ];
+        $data = $this->pushMessage('textcard', $data, $toUser);
+        if (!empty($data['errcode'])) {
+            throw new Exception($data['errmsg'], $data['errcode']);
+        }
+        return 'send success';
+    }
 
     /**
      * 企业主动向用户推送消息
@@ -203,7 +193,7 @@ class WeWorkService extends Service
      * @param string $content
      * @return int
      */
-    public function pushMessage($agentId, $msgType = 'text', $content = "", $toUser='', $toParty = '', $toTag='', $safe=0)
+    public function pushMessage($msgType = 'text', $content = "", $toUser='', $toParty = '', $toTag='', $safe=0)
     {
         if ($this->accessToken) {
             if (empty($content)) {
@@ -215,7 +205,7 @@ class WeWorkService extends Service
                 'toparty'=>$toParty,
                 'totag'=>$toTag,
                 'msgtype'=>$msgType,
-                'agentid'=>$agentId,
+                'agentid'=>$this->agentId,
             ];
 
             switch ($msgType) {
@@ -280,42 +270,15 @@ class WeWorkService extends Service
                     $msg['safe'] = 0;
                     break;
                 case 'news':
-                    /**
-                     * {
-                    "articles" : [
-                    {
-                    "title" : "中秋节礼品领取",
-                    "description" : "今年中秋节公司有豪礼相送",
-                    "url" : "URL",
-                    "picurl" : "http://res.mail.qq.com/node/ww/wwopenmng/images/independent/doc/test_pic_msg1.png",
-                    "btntxt":"更多"
-                    }
-                    ]
-                    }
-                     */
                     $msg['news'] = $content;
                     break;
                 case 'mpnews':
-                    /**
-                     * {
-                    "articles":[
-                    {
-                    "title": "Title",
-                    "thumb_media_id": "MEDIA_ID",
-                    "author": "Author",
-                    "content_source_url": "URL",
-                    "content": "Content",
-                    "digest": "Digest description"
-                    }
-                    ]
-                    }
-                     */
                     $msg['mpnews'] = $content;
                     $msg['safe'] = 0;
                     break;
             }
 
-            $url = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" . $this->accessToken;
+            $url = self::BASE_URI . "/message/send?access_token=" . $this->accessToken;
             return $this->http_post($url, $msg)["content"];
         } else {
             return 0;
@@ -347,6 +310,7 @@ class WeWorkService extends Service
 
         return $sContent;
     }
+
     /**
      * POST 请求
      * @param string $url
@@ -434,21 +398,6 @@ class WeWorkService extends Service
     //给URL地址追加参数
     protected function appendParamter($url,$key,$value){
         return strrpos($url,"?",0) > -1 ? "$url&$key=$value" : "$url?$key=$value";
-    }
-
-
-    //根据应用ID获取应用配置
-    protected function getConfigByAgentId($id){
-        $config = [];
-        $configs = config('wework');
-        foreach ($configs['corpAppConfig'] as $item) {
-            if($item['agentId'] == $id){
-                $config = $item;
-                break;
-            }
-        }
-
-        return $config;
     }
 
     /**
