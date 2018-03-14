@@ -64,9 +64,9 @@ class CrawlResultController extends Controller
             if (!empty($value['format_data'])) {
                 foreach ($value['format_data'] as $formatKey => $formatValue) {
                     $newParams['task_url'] = $formatValue['url'];
-                    $newParams['format_data'] = $value['format_data'];
+                    $newParams['format_data'] = $formatValue['text'];
                     $newParams['original_data'] = $value;
-                    $newParams['status'] = CrawlResult::IS_UNTREATED;
+                    $newParams['status'] = CrawlResult::IS_PROCESSED;
                     $newParams['crawl_task_id'] = $value['crawl_task_id'];
                     $newParams['task_start_time'] = $value['task_start_time'];
                     $newParams['task_end_time'] = $value['task_end_time'];
@@ -77,8 +77,16 @@ class CrawlResultController extends Controller
                 }
             }
         }
-
         if ($is_test == CrawlResult::EFFECT_TEST) {
+            $resultArr = [];
+            $resultArr['is_test'] = $is_test;
+            foreach ($formatData['data'] as $key => $value) {
+                $newArr['title'] = $value['format_data'];
+                $newArr['url'] = $value['task_url'];
+                $newArr['task_id'] = $value['crawl_task_id'];
+                $resultArr['result'][] = $newArr;
+            }
+            //请求第三方接口
             infoLog('[createByBatch] is_test is test', $formatData);
             return $this->resObjectGet($formatData, 'crawl_result', $request->path());
         }

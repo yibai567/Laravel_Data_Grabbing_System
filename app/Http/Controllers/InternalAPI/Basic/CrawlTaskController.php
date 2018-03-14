@@ -270,21 +270,18 @@ class CrawlTaskController extends Controller
             }
         }
         infoLog('[all] validate end.');
+        $query = CrawlTask::where('protocol', $params['protocol'])
+             ->where('cron_type', $params['cron_type']);
         if (!empty($params['task_id'])) {
-            $items = CrawlTask::where('status', CrawlTask::IS_START_UP)
-                            ->where('cron_type', $params['cron_type'])
-                            ->where('protocol', $params['protocol'])
-                            ->where('id', $params['task_id'])
-                            ->get();
+                $query->where('status', '<>', CrawlTask::IS_START_UP);
+                $query->where('id', $params['task_id']);
         } else {
-            $items = CrawlTask::where('status', CrawlTask::IS_START_UP)
-                            ->where('cron_type', $params['cron_type'])
-                            ->where('protocol', $params['protocol'])
-                            ->take($params['limit'])
-                            ->skip($params['offset'])
-                            ->orderBy('start_time', 'asc')
-                            ->get();
+                $query->where('status', CrawlTask::IS_START_UP);
+                $query->take($params['limit']);
+                $query->skip($params['offset']);
+                $query->orderBy('start_time', 'asc');
         }
+        $items = $query->get();
 
         $data = [];
         if (!empty($items)) {

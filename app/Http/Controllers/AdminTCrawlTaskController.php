@@ -28,10 +28,16 @@
         const RESPONSE_TYPE_ENTERPRISE_WECHAT = 4;
 
         //cron类型 1、一分钟，2、一小时，3一天,4持续执行
-        const CRON_MINUTE = 1;
-        const CRON_HOUR = 2;
-        const CRON_DAY = 3;
-        const CRON_SUSTAINED_EXECUTE = 4;
+        const CRON_MINUTE = 2;
+        const CRON_HOUR = 3;
+        const CRON_DAY = 4;
+        const CRON_SUSTAINED_EXECUTE = 1;
+
+        const PROTOCOL_HTTP = 1;
+        const PROTOCOL_HTTPS = 2;
+        //是否代理支持 1、需要，2、不需要
+        const IS_PROXY_YES = 1;
+        const IS_PROXY_NO = 2;
 
 	    public function cbInit() {
 
@@ -108,7 +114,9 @@
 			$this->form[] = ['label'=>'任务描述','name'=>'description','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'资源URL','name'=>'resource_url','type'=>'text','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'关键词','name'=>'keywords','type'=>'textarea','width'=>'col-sm-9'];
-			$this->form[] = ['label'=>'Cron类型','name'=>'cron_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|每分钟执行一次;2|每小时执行一次;3|每天执行一次;4|持续执行','value'=>'1'];
+			$this->form[] = ['label'=>'Cron类型','name'=>'cron_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'2|每分钟执行一次;3|每小时执行一次;4|每天执行一次;1|持续执行','value'=>'1'];
+            $this->form[] = ['label'=>'是否支持协议','name'=>'protocol','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|http;2|https','value'=>'1'];
+            $this->form[] = ['label'=>'是否使用代理','name'=>'is_proxy','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|使用;2|不使用','value'=>'1'];
 			$this->form[] = ['label'=>'选择器','name'=>'selectors','type'=>'textarea','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'响应类型','name'=>'response_type','type'=>'hidden','validation'=>'required','width'=>'col-sm-10','value'=>'1'];
 			$this->form[] = ['label'=>'发送地址','name'=>'response_url','type'=>'text','validation'=>'','width'=>'col-sm-10'];
@@ -468,8 +476,8 @@
 	    //By the way, you can still create your own method in here... :)
         public function getDetail($id) {
             $this->cbLoader();
-             $row = DB::table('t_crawl_task')->where('id', $id)->first();
-             if ( $row->cron_type == self::CRON_MINUTE) {
+            $row = DB::table('t_crawl_task')->where('id', $id)->first();
+            if ( $row->cron_type == self::CRON_MINUTE) {
                     $row->cron_type = '每分钟执行一次';
                 } else if( $row->cron_type == self::CRON_HOUR) {
                     $row->cron_type = '每小时执行一次';
@@ -478,15 +486,25 @@
                 } else if ($row->cron_type == self::CRON_SUSTAINED_EXECUTE) {
                     $row->cron_type = '持续执行';
                 }
+            if ( $row->protocol == self::PROTOCOL_HTTP) {
+                    $row->protocol = 'http';
+                } else if( $row->cron_type == self::PROTOCOL_HTTPS) {
+                    $row->protocol = 'https';
+                }
+            if ( $row->is_proxy == self::IS_PROXY_YES) {
+                    $row->is_proxy = '使用';
+                } else if( $row->is_proxy == self::IS_PROXY_NO) {
+                    $row->is_proxy = '未使用';
+                }
             if (!empty($test_result)) {
                 $test_result = json_decode($row->test_result);
                 foreach ($test_result as $key => $value) {
                     $str = str_replace('[32;1m', '', $value);
                     $strr .= str_replace('[0m', '', $str) . "\r";
-                    //echo "<pre>";print_r($value);
                 }
                 $row->test_result = $strr;
             }
+
 
             if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
                     CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
