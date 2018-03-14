@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use App\Models\CrawlTask;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -11,7 +10,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class TaskPreview
+class Event
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -20,9 +19,9 @@ class TaskPreview
      *
      * @return void
      */
-    public function __construct($id)
+    public function __construct()
     {
-        $this->id = $id;
+        //
     }
 
     /**

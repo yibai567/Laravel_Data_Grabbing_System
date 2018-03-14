@@ -18,7 +18,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         'App\Events\TaskPreview' => [
             // 任务测试
-            'App\Listeners\TaskPreview',
+            'App\Listeners\TaskPreviewListener',
         ],
     ];
 

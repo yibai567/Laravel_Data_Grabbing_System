@@ -53,8 +53,8 @@ class CrawlTaskController extends Controller
         } else {
             $params['protocol'] = CrawlTask::PROTOCOL_HTTP;
         }
-
         $data = $params;
+
         infoLog('[create] prepare data.', $data);
         try{
             infoLog('[create] prepare data.', $data);
@@ -79,7 +79,7 @@ class CrawlTaskController extends Controller
 //                throw new Exception($res['message'], $res['status_code']);
 //            }
             // 异步触发TaskPreview事件
-             event(new TaskPreview($task['id']));
+             event(new TaskPreview($task['id']);
 //            $res = APIService::internalPost('/internal/crawl/task/preview', $params);
 //            infoLog('[create] test script.', $res);
 //            if ($res['status_code'] !== 200) {

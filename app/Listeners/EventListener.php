@@ -2,11 +2,11 @@
 
 namespace App\Listeners;
 
-use App\Models\CrawlTask;
+use App\Events\Event;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class TaskPreview implements ShouldQueue
+class EventListener
 {
     /**
      * Create the event listener.
@@ -21,13 +21,11 @@ class TaskPreview implements ShouldQueue
     /**
      * Handle the event.
      *
-     * @param  object  $event
+     * @param  Event  $event
      * @return void
      */
-    public function handle(\App\Events\TaskPreview $event)
+    public function handle(Event $event)
     {
-        $id = $event->id;
-        $task = CrawlTask::find($id);
-        // Todo
+        //
     }
 }
