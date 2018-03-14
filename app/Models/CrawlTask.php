@@ -40,8 +40,7 @@ class CrawlTask extends Model
         'script_file',
         'last_script_file',
         'status',
-        'is_http',
-        'is_https',
+        'protocol',
         'is_proxy',
         'start_time',
     ];

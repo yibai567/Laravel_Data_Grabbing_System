@@ -507,6 +507,7 @@ class CrawlTaskController extends Controller
             'offset' => 'integer|nullable',
             'protocol' => 'integer|nullable',
             'cron_type' => 'integer|nullable',
+            'task_id' => 'integer|nullable',
         ]);
         infoLog('[all] validate.', $validator);
         if ($validator->fails()) {
@@ -523,7 +524,7 @@ class CrawlTaskController extends Controller
             $params['offset'] = 0;
         }
         if (empty($params['protocol'])) {
-            $params['is_http'] = 1;
+            $params['protocol'] = 1;
         }
         if (empty($params['cron_type'])) {
             $params['cron_type'] = 1;
@@ -537,7 +538,10 @@ class CrawlTaskController extends Controller
         }
 
         if ($data['data']) {
-            $result = $data['data'];
+            foreach ($data['data'] as $key => $value) {
+                unset($value['test_result']);
+                $result[] = $value;
+            }
         }
         infoLog('[all] end.');
         return $this->resObjectGet($result, 'crawl_task.result', $request->path());

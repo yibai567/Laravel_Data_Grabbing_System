@@ -296,6 +296,7 @@ class CrawlTaskController extends Controller
             'offset' => 'integer|nullable',
             'protocol' => 'integer|nullable',
             'cron_type' => 'integer|nullable',
+            'task_id' => 'integer|nullable',
         ]);
 
         infoLog('[all] validate.', $validator);

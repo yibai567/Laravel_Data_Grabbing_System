@@ -259,6 +259,7 @@ class CrawlTaskController extends Controller
             'offset' => 'integer|nullable',
             'protocol' => 'integer|nullable',
             'cron_type' => 'integer|nullable',
+            'task_id' => 'integer|nullable',
         ]);
         infoLog('[all] validate.', $validator);
 
@@ -270,13 +271,22 @@ class CrawlTaskController extends Controller
             }
         }
         infoLog('[all] validate end.');
-        $items = CrawlTask::where('status', CrawlTask::IS_START_UP)
+        if (!empty($params['task_id'])) {
+            $items = CrawlTask::where('status', CrawlTask::IS_START_UP)
+                            ->where('cron_type', $params['cron_type'])
+                            ->where('protocol', $params['protocol'])
+                            ->where('id', $params['task_id'])
+                            ->get();
+        } else {
+            $items = CrawlTask::where('status', CrawlTask::IS_START_UP)
                             ->where('cron_type', $params['cron_type'])
                             ->where('protocol', $params['protocol'])
                             ->take($params['limit'])
                             ->skip($params['offset'])
                             ->orderBy('start_time', 'asc')
                             ->get();
+        }
+
         $data = [];
         if (!empty($items)) {
             $data = $items->toArray();
