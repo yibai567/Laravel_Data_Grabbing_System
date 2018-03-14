@@ -21,16 +21,17 @@ class CrawlResultController extends Controller
     {
         infoLog('[createByBatch] start.');
         $params = $request->all();
+        //$params['data'] = json_decode($params['data']);
         $validator = Validator::make($params, [
             'data' => 'nullable',
-            'crawl_task_id' => 'numeric|nullable',
-            'task_start_time' => 'date|nullable',
-            'task_end_time' => 'date|nullable',
-            'task_url' => 'string|nullable',
-            'setting_selectors' => 'string|nullable',
-            'setting_keywords' => 'string|nullable',
-            'setting_data_type' => 'numeric|nullable',
-            'effect' => 'numeric|nullable',
+            // 'crawl_task_id' => 'numeric|nullable',
+            // 'task_start_time' => 'date|nullable',
+            // 'task_end_time' => 'date|nullable',
+            // 'task_url' => 'string|nullable',
+            // 'setting_selectors' => 'string|nullable',
+            // 'setting_keywords' => 'string|nullable',
+            // 'setting_data_type' => 'numeric|nullable',
+            // 'effect' => 'numeric|nullable',
         ]);
         infoLog('[createByBatch] params validator start.');
         if ($validator->fails()) {
@@ -40,39 +41,51 @@ class CrawlResultController extends Controller
                 return response($value, 401);
             }
         }
-        infoLog('[createByBatch] params validator end.');
+        infoLog('[createByBatch123] params validator end.', $params['data']);
         $result = [];
         if (empty($params['data'])) {
             infoLog('[createByBatch] data empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
-
-        $params['original_data'] = $params['data'];
-        $newData = [];
-        infoLog('[createByBatch] setting_keywords matching start',  $params['setting_keywords']);
+        $formatData = [];
         foreach ($params['data'] as $key => $value) {
-            $matchingResult  = strpos($value['text'], $params['setting_keywords']);
-            if ($matchingResult !== false){
-                $newData[] = $value;
+            foreach ($value['data'] as $valueKey => $data) {
+                if (!empty($value['setting_keywords'])) {
+                    $matchingResult  = strpos($data['text'], $value['setting_keywords']);
+                    if ($matchingResult !== false){
+                        $newData[] = $data;
+                    }
+                } else {
+                    $newData[] = $data;
+                }
+            }
+            $is_test = $value['is_test'];
+            $value['format_data'] = $newData;
+            if (!empty($value['format_data'])) {
+                foreach ($value['format_data'] as $formatKey => $formatValue) {
+                    $newParams['task_url'] = $formatValue['url'];
+                    $newParams['format_data'] = $value['format_data'];
+                    $newParams['original_data'] = $value;
+                    $newParams['status'] = CrawlResult::IS_UNTREATED;
+                    $newParams['crawl_task_id'] = $value['crawl_task_id'];
+                    $newParams['task_start_time'] = $value['task_start_time'];
+                    $newParams['task_end_time'] = $value['task_end_time'];
+                    $newParams['setting_selectors'] = $value['setting_selectors'];
+                    $newParams['setting_keywords'] = $value['setting_keywords'];
+                    $newParams['setting_data_type'] = $value['setting_data_type'];
+                    $formatData['data'][] = $newParams;
+                }
             }
         }
-        infoLog('[createByBatch] setting_keywords matching end', $newData);
-        if (empty($newData)) {
-            infoLog('[createByBatch] newData empty!');
-            return $this->resObjectGet($result, 'crawl_result', $request->path());
-        }
-        $params['format_data'] = $newData;
 
-        if ($params['effect'] == CrawlResult::EFFECT_TEST) {
-            infoLog('[createByBatch] effect is test', $newData);
-            return $this->resObjectGet($newData, 'crawl_result', $request->path());
+        if ($is_test == CrawlResult::EFFECT_TEST) {
+            infoLog('[createByBatch] is_test is test', $formatData);
+            return $this->resObjectGet($formatData, 'crawl_result', $request->path());
         }
 
-        unset($params['data'], $params['effect']);
         $dispatcher = app('Dingo\Api\Dispatcher');
-
-        infoLog('[createByBatch] request internal/basic createByBatch start', $params);
-        $resultData = APIService::basePost('/internal/basic/crawl/result/batch_result', $params, 'json');
+        infoLog('[createByBatch] request internal/basic createByBatch start', $formatData);
+        $resultData = APIService::basePost('/internal/basic/crawl/result/batch_result', $formatData, 'json');
         if ($resultData['status_code'] != 200) {
             errorLog('[createByBatch] request internal/basic createByBatch result error', $resultData);
             return response($resultData['message'], $resultData['status_code']);

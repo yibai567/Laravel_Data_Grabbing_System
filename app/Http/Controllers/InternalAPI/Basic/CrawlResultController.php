@@ -19,17 +19,9 @@ class CrawlResultController extends Controller
     public function createByBatch(Request $request)
     {
         $params = $request->all();
-        infoLog("[createByBatch] start.");
+        infoLog("[createByBatch1231] start.");
         $validator = Validator::make($params, [
-            'crawl_task_id' => 'numeric|nullable',
-            'task_start_time' => 'date|nullable',
-            'task_end_time' => 'date|nullable',
-            'original_data' => 'nullable',
-            'format_data' => 'nullable',
-            'task_url' => 'string|nullable',
-            'setting_selectors' => 'string|nullable',
-            'setting_keywords' => 'string|nullable',
-            'setting_data_type' => 'numeric|nullable',
+            'data' => 'nullable',
         ]);
         infoLog('[createByBatch] params validator start', $params);
         if ($validator->fails()) {
@@ -42,18 +34,17 @@ class CrawlResultController extends Controller
         infoLog('[params validator] end.');
         $result = [];
 
-        if (empty($params['format_data'])) {
-            infoLog('[createByBatch] format_data empty!');
+        if (empty($params['data'])) {
+            infoLog('[createByBatch] data empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
         $items = [];
-        foreach ($params['format_data'] as $item) {
-            if (!$this->isTaskExist($params['crawl_task_id'], $item['url'])) {
-                $params['task_url'] = $item['url'];
-                $params['format_data'] = json_encode($item);
-                $params['original_data'] = json_encode($params['original_data']);
-                $params['status'] = CrawlResult::IS_UNTREATED;
-                $items[] = $params;
+        foreach ($params['data'] as $item) {
+
+            if (!$this->isTaskExist($item['crawl_task_id'], $item['task_url'])) {
+                $item['format_data'] = json_encode($item['format_data']);
+                $item['original_data'] = json_encode($item['original_data']);
+                $items[] = $item;
             }
         }
 
@@ -61,7 +52,6 @@ class CrawlResultController extends Controller
             infoLog('[createByBatch] items empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
-
         infoLog('[createByBatch] insert start.', $items);
         $result = CrawlResult::insert($items);
         if (!$result) {
