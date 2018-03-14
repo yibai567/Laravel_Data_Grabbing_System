@@ -10,6 +10,7 @@
     use Illuminate\Support\Facades\Route;
     use App\Events\TaskPreview;
 
+
 	class AdminTCrawlTaskController extends \crocodicstudio\crudbooster\controllers\CBController {
 
         // 状态
@@ -431,25 +432,7 @@
         public function getTestResult($id)
         {
             event(new TaskPreview($id));
-            //获取任务信息，调用任务采集接口，返回结果
-            // $exec_url = '/v1/crawl/task/preview';
-            // $params['id'] = $id;
-            // $result = APIService::openPost($exec_url, $params);
-            // if (!empty($result)) {
-            //     if ($result['status_code'] == 200) {
-            //         $result_url = '/v1/crawl/task/result';
-            //         $params['test_result'] = json_encode($result['data']);
-            //         $crawlResult = APIService::openPost($result_url, $params);
-            //         if (empty($crawlResult) || $crawlResult['status_code'] != 200) {
-            //             errorLog('request /v1/crawl/task/result fail', $crawlResult);
-            //             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试","info");
-            //         }
-            //     } else {
-            //         errorLog('request /v1/crawl/task/preview fail', $result);
-            //         CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
-            //     }
-            // }
-             //return Redirect::to('admin/t_crawl_task/detail/' . $id);
+            return Redirect::to('admin/t_crawl_task/detail/' . $id);
 
         }
 
@@ -495,15 +478,16 @@
                 } else if ($row->cron_type == self::CRON_SUSTAINED_EXECUTE) {
                     $row->cron_type = '持续执行';
                 }
-
-            $test_result = json_decode($row->test_result);
-            foreach ($test_result as $key => $value) {
-                $str = str_replace('[32;1m', '', $value);
-                $strr .= str_replace('[0m', '', $str) . "\r";
-                //echo "<pre>";print_r($value);
+            if (!empty($test_result)) {
+                $test_result = json_decode($row->test_result);
+                foreach ($test_result as $key => $value) {
+                    $str = str_replace('[32;1m', '', $value);
+                    $strr .= str_replace('[0m', '', $str) . "\r";
+                    //echo "<pre>";print_r($value);
+                }
+                $row->test_result = $strr;
             }
-            $row->test_result = $strr;
-            //dd($strr);
+
             if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
                     CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
                     CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
