@@ -31,8 +31,7 @@ class CrawlTaskController extends Controller
             'keywords' => 'string|nullable',
             'response_param' => 'string|nullable',
             'setting_id' => 'integer|nullable',
-            'is_http' => 'integer|nullable',
-            'is_https' => 'integer|nullable',
+            'protocol' => 'integer|nullable',
         ]);
 
         if ($validator->fails()) {
