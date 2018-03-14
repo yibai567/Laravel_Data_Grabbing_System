@@ -26,8 +26,6 @@ $api->version(
         $api->post('/crawl/node_task', 'CrawlNodeTaskController@create');
         $api->post('/crawl/node_task/stop', 'CrawlNodeTaskController@stop');
         $api->get('/crawl/node_task/started', 'CrawlNodeTaskController@getStartedTaskByTaskId');
-
-        $api->get('/crawl/tasks', 'CrawlTaskController@list');
     }
 );
 
