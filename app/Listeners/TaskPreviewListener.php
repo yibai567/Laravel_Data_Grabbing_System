@@ -28,17 +28,34 @@ class TaskPreviewListener
     public function handle(TaskPreview $event)
     {
         $crawlTaskId = $event->id;
-        $crawlTask = CrawlTask::find($crawlTaskId);
-
+        $crawlTask = CrawlTask::with('setting')->find($crawlTaskId);
         $output = 'test fail!';
-        $scriptFile = config('path.jinse_script_path') . '/list_a.js';
+
+        if ($crawlTask->cron_type == 2) {
+            $folder = '/everyMinute/1';
+        } elseif($crawlTask->cron_type == 3) {
+            $folder = '/everyFiveMinutes/1';
+        } elseif($crawlTask->cron_type == 4) {
+            $folder = '/everyTenMinutes/1';
+        } elseif($crawlTask->cron_type == 5) {
+            $folder = '/everyThirtyMinutes/1';
+        } else {
+            $folder = '/keep/1';
+        }
+
+        $file = 'http_tmp_all_a.js';
+
+        $scriptFile = config('path.jinse_script_path') . $folder . '/' . $file;
         $status = CrawlTask::IS_TEST_ERROR;
         if (file_exists($scriptFile) && $crawlTask->status !== CrawlTask::IS_START_UP) {
-            $command = 'casperjs ' . $scriptFile . ' --env=test';
+            $command = 'casperjs ' . $scriptFile . ' --taskid=' . $crawlTaskId;
             exec($command, $output, $returnvar);
             if ($returnvar == 0) {
                 $status = CrawlTask::IS_TEST_SUCCESS;
             }
+        }
+        if (is_array($output)) {
+            $output = json_encode($output);
         }
         $crawlTask->test_time = date('Y-m-d H:i:s');
         $crawlTask->status = $status;

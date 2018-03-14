@@ -440,6 +440,16 @@ class CrawlTaskController extends Controller
             if ($taskData['status'] != CrawlTask::IS_TEST_SUCCESS && $taskData['status'] != CrawlTask::IS_PAUSE) {
                 return $this->resError(401, '当前状态无法启动');
             }
+            
+            //创建节点任务
+            $params = ['crawl_task_id' => $taskData['id']];
+
+            $res = APIService::internalPost('/internal/crawl/node_task', $params);
+            if ($res['status_code'] !== 200) {
+                errorLog($res['messsage']);
+                throw new Exception($res['messsage'], $res['status_code']);
+            }
+
             $params['status'] = CrawlTask::IS_START_UP;
             $data = APIService::basePost('/internal/basic/crawl/task/status', $params);
             if ($data['status_code'] !== 200) {

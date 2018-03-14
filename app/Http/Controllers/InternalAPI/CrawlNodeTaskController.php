@@ -8,6 +8,7 @@ use App\Services\APIService;
 use Dingo\Api\Facade\API;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Services\WeWorkService;
 
 class CrawlNodeTaskController extends Controller
 {
@@ -34,61 +35,64 @@ class CrawlNodeTaskController extends Controller
         }
         infoLog('[create] params validator end.');
 
-        //停止指定任务id当前在运行的任务
-        infoLog('[create] request internal/basic/ started start.');
-        $data = APIService::internalGet('/internal/basic/crawl/node_task/started', $params);
-        if ($data['data']) {
-            $item = $data['data'];
-            $params = ['id' => $item['id']];
-            infoLog('[create] request internal/crawl/node_task/stop start.', $params);
-            $res = APIService::basePost('/internal/crawl/node_task/stop', $params);
-            if ($res['status_code'] !== 200) {
-                errorLog('[create] request internal/crawl/node_task/stop error', $res);
-                return $this->resError(401, '没有可用Node节点');
-            }
-            infoLog('[create] request internal/crawl/node_task/stop end.');
-        }
+        // //停止指定任务id当前在运行的任务
+        // infoLog('[create] request internal/basic/ started start.');
+        // $data = APIService::baseGet('/internal/basic/crawl/node_task/started', $params);
+        // if ($data['data']) {
+        //     $item = $data['data'];
+        //     $params = ['id' => $item['id']];
+        //     infoLog('[create] request internal/crawl/node_task/stop start.', $params);
+        //     $res = APIService::internalPost('/internal/crawl/node_task/stop', $params);
+        //     if ($res['status_code'] !== 200) {
+        //         errorLog('[create] request internal/crawl/node_task/stop error', $res);
+        //         return $this->resError(401, 'task stop fail');
+        //     }
+        //     infoLog('[create] request internal/crawl/node_task/stop end.');
+        // }
 
         infoLog('[create] request internal/basic/crawl/node/usable.', $params);
         $res = APIService::baseGet('/internal/basic/crawl/node/usable');
+        $weWorkService = new WeWorkService();
+        $noticeManager = config('wework.notice_manager');
+        $content = '没有可用Node节点，请及时添加!';
         if ($res['status_code'] !== 200) {
+            $weWorkService->sendTextToUser($noticeManager, $content);
             errorLog('[create] request internal/basic/crawl/node/get_usable_node error', $res);
             return $this->resError(401, '没有可用Node节点');
         }
 
         $node = $res['data'];
         if (empty($node) || empty($node['id'])) {
+            $weWorkService->sendTextToUser($noticeManager, $content);
             errorLog('[create] request internal/basic/crawl/node/get_usable_node error', $node);
             return $this->resError(401, '没有可用Node节点');
         }
 
-        infoLog('[create] request internal/basic/crawl/task?id start.', $taskId);
-        $res = APIService::internalGet('/internal/basic/crawl/task?id=' . $taskId);
-        if ($res['status_code'] === 401 ) {
-            infoLog('[create] request internal/basic/crawl/task?id error.', $res);
-            return $this->resError(401, '任务不存在');
-        }
-        $task = $res['data'];
-        $scriptFile = config('path.jinse_script_path') . '/' . $task['script_file'];
-        if (!file_exists($scriptFile)) {
-            infoLog('[create] request internal/basic/crawl/task?id error.', $task);
-            return $this->resError(401, '脚本文件不存在');
-        }
+        // infoLog('[create] request internal/basic/crawl/task?id start.', $taskId);
+        // $res = APIService::baseGet('/internal/basic/crawl/task?id=' . $taskId);
+        // if ($res['status_code'] === 401 ) {
+        //     infoLog('[create] request internal/basic/crawl/task?id error.', $res);
+        //     return $this->resError(401, '任务不存在');
+        // }
+        // $task = $res['data'];
+        // $scriptFile = config('path.jinse_script_path') . '/' . $task['script_file'];
+        // if (!file_exists($scriptFile)) {
+        //     infoLog('[create] request internal/basic/crawl/task?id error.', $task);
+        //     return $this->resError(401, '脚本文件不存在');
+        // }
 
-        $cmdStartup = 'docker ' . $scriptFile . ' --ip=' . $node['ip'] . ' start';
-        $cmdStop = 'docker ' . $scriptFile . ' --ip=' . $node['ip'] . ' stop';
-        $logPath = '/alidata/logs/crawl/';
+        // $cmdStartup = 'docker ' . $scriptFile . ' --ip=' . $node['ip'] . ' start';
+        // $cmdStop = 'docker ' . $scriptFile . ' --ip=' . $node['ip'] . ' stop';
+        // $logPath = '/alidata/logs/crawl/';
 
         $data = [
             'node_id' => $node['id'],
             'crawl_task_id' => $taskId,
-            'cmd_startup' => $cmdStartup,
-            'cmd_stop' => $cmdStop,
-            'log_path' => $logPath,
             'status' => CrawlNodeTask::IS_STARTUP,
             'start_on' => null,
             'end_on' => null,
         ];
+        
         //创建节点任务
         infoLog('[create] request internal/basic/crawl/node_task start.', $data);
         $res = APIService::internalPost('/internal/basic/crawl/node_task', $data);
@@ -98,22 +102,12 @@ class CrawlNodeTaskController extends Controller
             //启动任务
             $params = ['id' => $data['id']];
             infoLog('[create] request internal/basic/crawl/node_task/start start.', $params);
-            $res = APIService::internalPost('/internal/basic/crawl/node_task/start', $params);
+            $res = APIService::basePost('/internal/basic/crawl/node_task/start', $params);
             infoLog('[create] request internal/basic/crawl/node_task/start end.', $params);
             if ($res['status_code'] !== 200) {
                 errorLog($res['message'], $res['status_code']);
                 return $this->resError($res['status_code'], $res['message']);
             }
-
-            // 更新任务状态为启动中
-            $params = ['id' => $data['crawl_task_id'], 'status' => CrawlTask::IS_START_UP];
-            infoLog('[create] request internal/crawl/task/status start.', $params);
-            $res = APIService::basePost('/internal/crawl/task/status', $params);
-            if ($res['status_code'] !== 200) {
-                errorLog($res['message'], $res['status_code']);
-                return $this->resError($res['status_code'], $res['message']);
-            }
-            infoLog('[create] internal/crawl/task/status end.', $params);
 
         }
         infoLog('[create] end.');
@@ -123,7 +117,7 @@ class CrawlNodeTaskController extends Controller
     /**
      * 启动指定id任务
      * @param Request $request
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     * @return array
      */
     public function start(Request $request)
     {
@@ -149,8 +143,8 @@ class CrawlNodeTaskController extends Controller
             $res = $data['data'];
         }
         infoLog('[start] request internal/basic/crawl/node_task/start end.');
-        $command = $res['cmd_startup'];
-        exec($command, $result);
+        // $command = $res['cmd_startup'];
+        // exec($command, $result);
         infoLog('[start] end.');
         return $this->resObjectGet($result, 'crawl_node_task.start', $request->path());
     }

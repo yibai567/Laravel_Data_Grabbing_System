@@ -137,7 +137,6 @@ class WeWorkService extends Service
         }
 
         $toUser = implode('|', $toUser);
-
         $data = $this->pushMessage('text', $content, $toUser);
         if (!empty($data['errcode'])) {
             throw new Exception($data['errmsg'], $data['errcode']);
