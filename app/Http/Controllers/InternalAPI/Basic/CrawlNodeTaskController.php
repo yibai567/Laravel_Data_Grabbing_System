@@ -173,7 +173,7 @@ class CrawlNodeTaskController extends Controller
                 }
             }
         } catch (Exception $e) {
-            return $this->resError($res['status_code'], $res['message']);
+            return $this->resError($e['status_code'], $e['message']);
         }
         return $this->resObjectGet($nodeTask, 'crawl_node_task.start', $request->path());
     }

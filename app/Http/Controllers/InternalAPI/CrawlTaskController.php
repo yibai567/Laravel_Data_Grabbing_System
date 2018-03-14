@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\InternalAPI;
 
+use App\Events\TaskPreview;
 use App\Http\Requests\CrawlTaskCreateRequest;
 use App\Models\CrawlSetting;
 use App\Models\CrawlTask;
 use App\Services\APIService;
-use Dingo\Api\Facade\API;
 use Dompdf\Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -24,11 +24,9 @@ class CrawlTaskController extends Controller
         $params = $request->all();
         infoLog('[create] validate.', $params);
         $validator = Validator::make($params, [
-            'name' => 'string|nullable',
-            'description' => 'string|nullable',
             'resource_url' => 'required|string|nullable',
             'cron_type' => 'integer|nullable',
-            'selectors' => 'string|nullable',
+            'keywords' => 'string|nullable',
             'setting_id' => 'integer',
         ]);
 
@@ -41,7 +39,26 @@ class CrawlTaskController extends Controller
             }
         }
 
-        infoLog('[create] validate end.', $params);
+        infoLog('[create] validate end.');
+
+        if (empty($params['cron_type'])) {
+            $params['cron_type'] = 1;
+        }
+        if (empty($params['setting_id'])) {
+            $params['setting_id'] = 1;
+        }
+
+        if (substr($params['resource_url'], 0, 7) == 'http://') {
+            $params['is_http'] = CrawlTask::IS_HTTP_TRUE;
+            $params['is_https'] = CrawlTask::IS_HTTPS_FALSE;
+        } elseif (substr($params['resource_url'], 0, 8) == 'https://') {
+            $params['is_https'] = CrawlTask::IS_HTTPS_TRUE;
+            $params['is_http'] = CrawlTask::IS_HTTP_FALSE;
+        } else {
+            $params['is_http'] = CrawlTask::IS_HTTP_FALSE;
+            $params['is_https'] = CrawlTask::IS_HTTPS_FALSE;
+        }
+
         $data = $params;
         infoLog('[create] prepare data.', $data);
         try{
@@ -56,46 +73,46 @@ class CrawlTaskController extends Controller
             if ($res['data']) {
                 $task = $res['data'];
             }
-
+            $params = ['id'=> $task['id']];
             infoLog('[create] create success.', $task);
-            $params = ['id'=> $task['id']];
-            infoLog('[create] prepare data.', $params);
-            $res = APIService::internalPost('/internal/crawl/task/script', $params);
-            infoLog('[create] create script.', $res);
-            if ($res['status_code'] !== 200) {
-                errorLog($res['message'], $res['status_code']);
-                throw new Exception($res['message'], $res['status_code']);
-            }
+//            $params = ['id'=> $task['id']];
+//            infoLog('[create] prepare data.', $params);
+//            $res = APIService::internalPost('/internal/crawl/task/script', $params);
+//            infoLog('[create] create script.', $res);
+//            if ($res['status_code'] !== 200) {
+//                errorLog($res['message'], $res['status_code']);
+//                throw new Exception($res['message'], $res['status_code']);
+//            }
+            // 异步触发TaskPreview事件
+             event(new TaskPreview($task['id']));
+//            $res = APIService::internalPost('/internal/crawl/task/preview', $params);
+//            infoLog('[create] test script.', $res);
+//            if ($res['status_code'] !== 200) {
+//                errorLog($res['message'], $res['status_code']);
+//                throw new Exception($res['message'], $res['status_code']);
+//            }
 
-            $params = ['id'=> $task['id']];
-            infoLog('[create] prepare data.', $data);
-            $res = APIService::internalPost('/internal/crawl/task/preview', $params);
-            infoLog('[create] test script.', $res);
-            if ($res['status_code'] !== 200) {
-                errorLog($res['message'], $res['status_code']);
-                throw new Exception($res['message'], $res['status_code']);
-            }
-
-            $params = ['id'=> $task['id']];
-            infoLog('[create] prepare data.', $data);
-            $res = APIService::internalPost('/internal/crawl/task/start', $params);
-            infoLog('[create] start script.', $res);
-            if ($res['status_code'] !== 200) {
-                errorLog($res['message'], $res['status_code']);
-                throw new Exception($res['message'], $res['status_code']);
-            }
-            $params = ['id'=> $task['id'], 'status' => CrawlTask::IS_START_UP];
-            infoLog('[create] prepare data.', $data);
-            $res = APIService::internalPost('/internal/crawl/task/status', $params);
-            infoLog('[create] start script.', $res);
-            if ($res['status_code'] !== 200) {
-                errorLog($res['message'], $res['status_code']);
-                throw new Exception($res['message'], $res['status_code']);
-            }
+//            $params = ['id'=> $task['id']];
+//            infoLog('[create] prepare data.', $data);
+//            $res = APIService::internalPost('/internal/crawl/task/start', $params);
+//            infoLog('[create] start script.', $res);
+//            if ($res['status_code'] !== 200) {
+//                errorLog($res['message'], $res['status_code']);
+//                throw new Exception($res['message'], $res['status_code']);
+//            }
+//            $params = ['id'=> $task['id'], 'status' => CrawlTask::IS_START_UP];
+//            infoLog('[create] prepare data.', $data);
+//            $res = APIService::internalPost('/internal/crawl/task/status', $params);
+//            infoLog('[create] start script.', $res);
+//            if ($res['status_code'] !== 200) {
+//                errorLog($res['message'], $res['status_code']);
+//                throw new Exception($res['message'], $res['status_code']);
+//            }
+            $result = $params;
         }catch(Exception $e){
             return $this->resError($e->getCode(), $e->getMessage());
         }
-        return $this->resObjectGet('[create] create success', 'crawl_task', $request->path());
+        return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 
     /**
@@ -236,7 +253,7 @@ class CrawlTaskController extends Controller
                 $content = str_replace('{{{setting_keywords}}}', $task['keywords'], $content);
                 $content = str_replace('{{{setting_data_type}}}', $task['setting']['data_type'], $content);
             }
-            
+
             $filepath = config('path.jinse_script_path') . '/' . $task['script_file'];
             if (!generateScript($filepath, $content)) {
                 return $this->resError(402, 'script generate fail');
@@ -335,6 +352,7 @@ class CrawlTaskController extends Controller
                 errorLog($res['messsage']);
                 throw new Exception($res['messsage'], $res['status_code']);
             }
+
             $task = $res['data'];
             //创建节点任务
             $params = ['crawl_task_id' => $task['id']];

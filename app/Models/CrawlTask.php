@@ -18,6 +18,12 @@ class CrawlTask extends Model
     const RESPONSE_TYPE_SMS = 3; //短信响应
     const RESPONSE_TYPE_WEWORK = 4; //企业微信响应
 
+    const IS_HTTP_TRUE = 1;
+    const IS_HTTP_FALSE = 2;
+
+    const IS_HTTPS_TRUE = 1;
+    const IS_HTTPS_FALSE = 2;
+
     const SCRIPT_PREFIX = 'grab';
     const SCRIPT_PATH = '/alidata/www/crawl_platform_script/script';
     protected $table = 't_crawl_task';
@@ -34,10 +40,13 @@ class CrawlTask extends Model
         'setting_id',
         'test_result',
         'test_time',
-        'script_last_generate_time',
         'script_file',
         'last_script_file',
         'status',
+        'is_http',
+        'is_https',
+        'is_proxy',
+        'start_time',
     ];
 
     public function setting()

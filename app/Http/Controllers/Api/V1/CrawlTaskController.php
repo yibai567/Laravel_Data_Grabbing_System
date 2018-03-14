@@ -20,11 +20,9 @@ class CrawlTaskController extends Controller
         $params = $request->all();
         infoLog('[create] validate.', $params);
         $validator = Validator::make($params, [
-            'name' => 'string|nullable',
-            'description' => 'string|nullable',
             'resource_url' => 'required|string|nullable',
             'cron_type' => 'integer|nullable',
-            'selectors' => 'string|nullable',
+            'keywords' => 'string|nullable',
             'setting_id' => 'integer',
         ]);
 

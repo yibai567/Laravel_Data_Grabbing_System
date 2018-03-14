@@ -31,6 +31,8 @@ class CrawlTaskController extends Controller
             'keywords' => 'string|nullable',
             'response_param' => 'string|nullable',
             'setting_id' => 'integer|nullable',
+            'is_http' => 'integer|nullable',
+            'is_https' => 'integer|nullable',
         ]);
         
         if ($validator->fails()) {
@@ -139,7 +141,7 @@ class CrawlTaskController extends Controller
                 return $this->resError(401, $value);
             }
         }
-        infoLog('[retrieve] validate end.', $params);
+
         $task = CrawlTask::with('setting')->find($params['id']);
         $data = [];
         if ($task) {
