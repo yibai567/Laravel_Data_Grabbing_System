@@ -11,9 +11,4 @@ class CrawlNode extends Model
 
     public $table = 't_crawl_node';
 
-    public function crawlNodeTasks()
-    {
-        return $this->hasMany('App\Models\CrawlNodeTask', 'node_id', 'id')
-            ->where('status', '=', CrawlNodeTask::IS_STARTUP);
-    }
 }

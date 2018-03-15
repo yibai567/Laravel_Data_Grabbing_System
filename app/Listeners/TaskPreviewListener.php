@@ -31,19 +31,15 @@ class TaskPreviewListener
         $crawlTask = CrawlTask::with('setting')->find($crawlTaskId);
         $output = 'test fail!';
 
-        if ($crawlTask->cron_type == 2) {
-            $folder = '/everyMinute/1';
-        } elseif($crawlTask->cron_type == 3) {
-            $folder = '/everyFiveMinutes/1';
-        } elseif($crawlTask->cron_type == 4) {
-            $folder = '/everyTenMinutes/1';
-        } elseif($crawlTask->cron_type == 5) {
-            $folder = '/everyThirtyMinutes/1';
+        $folder = '/keep';
+
+        if ($crawlTask->protocol == CrawlTask::IS_HTTPS) {
+            $filePrefix = 'https_';
         } else {
-            $folder = '/keep';
+            $filePrefix = 'http_';
         }
 
-        $file = 'http_tmp_all_a.js';
+        $file = $filePrefix . 'tmp_all_a.js';
 
         $scriptFile = config('path.jinse_script_path') . $folder . '/' . $file;
         $status = CrawlTask::IS_TEST_ERROR;

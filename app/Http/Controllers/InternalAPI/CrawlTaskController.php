@@ -80,7 +80,7 @@ class CrawlTaskController extends Controller
              event(new TaskPreview($task['id']));
 
             $result = $params;
-        }catch(Exception $e){
+        } catch (Exception $e){
             return $this->resError($e->getCode(), $e->getMessage());
         }
         return $this->resObjectGet($result, 'crawl_task', $request->path());
@@ -259,8 +259,10 @@ class CrawlTaskController extends Controller
             if ($taskData['status'] != CrawlTask::IS_TEST_SUCCESS && $taskData['status'] != CrawlTask::IS_PAUSE) {
                 return $this->resError(401, 'task status does not allow to start');
             }
+            // TODO 增加底层接口
             $currentTaskNumber = CrawlTask::where('status', CrawlTask::IS_START_UP)->count();
-            $maxTaskNumber = CrawlNode::select('max_task_num')->where('status', CrawlNode::IS_USABLE)->first();
+            $nodeNumber = CrawlNode::select('max_task_num')->first();
+            $maxTaskNumber = $nodeNumber->max_task_num;
             if ($currentTaskNumber >= $maxTaskNumber) {
                 $weWorkService = new WeWorkService();
                 $noticeManager = config('wework.notice_manager');
