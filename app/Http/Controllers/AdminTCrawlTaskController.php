@@ -112,7 +112,7 @@
 			$this->form = [];
 			$this->form[] = ['label'=>'任务名称','name'=>'name','type'=>'text','validation'=>'required|string|min:1|max:70','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'任务描述','name'=>'description','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'资源URL','name'=>'resource_url','type'=>'text','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'资源URL','name'=>'resource_url','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'关键词','name'=>'keywords','type'=>'textarea','width'=>'col-sm-9'];
 			$this->form[] = ['label'=>'Cron类型','name'=>'cron_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'2|每分钟执行一次;3|每小时执行一次;4|每天执行一次;1|持续执行','value'=>'1'];
             $this->form[] = ['label'=>'是否支持协议','name'=>'protocol','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|http;2|https','value'=>'1'];
