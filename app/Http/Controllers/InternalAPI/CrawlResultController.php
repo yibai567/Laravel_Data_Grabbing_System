@@ -58,6 +58,7 @@ class CrawlResultController extends Controller
                     $newParams['format_data'] = $formatValue['text'];
                     //$newParams['original_data'] = $value;
                     $newParams['status'] = CrawlResult::IS_UNTREATED;
+                    $crawl_task_id = $value['crawl_task_id'];
                     $newParams['crawl_task_id'] = $value['crawl_task_id'];
                     $newParams['task_start_time'] = $value['task_start_time'];
                     $newParams['task_end_time'] = $value['task_end_time'];
@@ -68,6 +69,11 @@ class CrawlResultController extends Controller
                 }
             }
         }
+        if (empty($formatData)) {
+            return $this->resObjectGet($formatData, 'formatData empty.', $request->path());
+        }
+
+
         if ($is_test == CrawlResult::EFFECT_TEST) {
             $resultArr = [];
             $resultArr['is_test'] = $is_test;
@@ -91,21 +97,22 @@ class CrawlResultController extends Controller
         if ($resultData['data']) {
             $result = $resultData['data'];
         }
+                infoLog('测试修改', $result);exit;
+
         infoLog('[createByBatch] request internal/basic createByBatch end');
         infoLog('[createByBatch] end.');
-        //调用第三方接口
-        foreach ($result as $key => $value) {
-            $id = $value['crawl_task_id'];
-            $last_job_at = $value['task_end_time'];
-        }
 
-        $taskParams['id'] = $id;
-        $taskParams['last_job_at'] = $last_job_at;
-        $taskResult = APIService::openPost('/v1/crawl/task/last_job_at', $taskParams, 'json');
+        $taskParams['id'] = $crawl_task_id;
+        $taskParams['last_job_at'] = date('Y-m-d H:i:s');
+        $taskResult = APIService::internalPost('/internal/crawl/task/last_job_at', $taskParams, 'json');
         if ($taskResult['status_code'] != 200) {
-            errorLog('[createByBatch] request /v1/crawl/task/last_job_at createByBatch result error', $taskResult);
+            errorLog('[createByBatch] request /v1/crawl/task/last_job_at createByBatch result error', $taskParams);
             return response($taskResult['message'], $taskResult['status_code']);
         }
+        //调用第三方接口
+        // foreach ($result as $key => $value) {
+
+        // }
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
  }
