@@ -97,7 +97,6 @@ class CrawlResultController extends Controller
         if ($resultData['data']) {
             $result = $resultData['data'];
         }
-                infoLog('测试修改', $result);exit;
 
         infoLog('[createByBatch] request internal/basic createByBatch end');
         infoLog('[createByBatch] end.');
