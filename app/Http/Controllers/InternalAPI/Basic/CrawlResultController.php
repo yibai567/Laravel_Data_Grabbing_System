@@ -19,11 +19,11 @@ class CrawlResultController extends Controller
     public function createByBatch(Request $request)
     {
         $params = $request->all();
-        infoLog("[createByBatch1231] start.");
+        infoLog("[createByBatch] start.");
         $validator = Validator::make($params, [
             'data' => 'nullable',
         ]);
-        infoLog('[createByBatch] params validator start', $params);
+        infoLog('[createByBatch] params validator start');
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
@@ -43,7 +43,8 @@ class CrawlResultController extends Controller
 
             if (!$this->isTaskExist($item['crawl_task_id'], $item['task_url'])) {
                 $item['format_data'] = json_encode($item['format_data']);
-                $item['original_data'] = json_encode($item['original_data']);
+                $item['status'] = CrawlResult::IS_PROCESSED;
+                //$item['original_data'] = json_encode($item['original_data']);
                 $items[] = $item;
             }
         }
@@ -52,7 +53,6 @@ class CrawlResultController extends Controller
             infoLog('[createByBatch] items empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
-        infoLog('[createByBatch] insert start.', $items);
         $result = CrawlResult::insert($items);
         if (!$result) {
             errorLog('[createByBatch] insert fail.', $items);
@@ -60,7 +60,7 @@ class CrawlResultController extends Controller
         }
         infoLog('[createByBatch] insert end.', $result);
         infoLog('[createByBatch] end.');
-        return $this->resObjectGet($result, 'crawl_result', $request->path());
+        return $this->resObjectGet($items, 'crawl_result', $request->path());
     }
 
     /**

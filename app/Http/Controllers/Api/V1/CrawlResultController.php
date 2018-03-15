@@ -20,20 +20,11 @@ class CrawlResultController extends Controller
     public function createByBatch(Request $request)
     {
         $params = $request->all();
-        //$params['data'] = json_decode($params['data']);
-        infoLog("[createByBatch] start.", $params);
+        infoLog("[createByBatch] start.");
         $validator = Validator::make($params, [
             'data' => 'nullable',
-            // 'crawl_task_id' => 'numeric|nullable',
-            // 'task_start_time' => 'date|nullable',
-            // 'task_end_time' => 'date|nullable',
-            // 'task_url' => 'string|nullable',
-            // 'setting_selectors' => 'string|nullable',
-            // 'setting_keywords' => 'string|nullable',
-            // 'setting_data_type' => 'numeric|nullable',
-            // 'effect' => 'numeric|nullable',
         ]);
-        infoLog('[createByBatch] params validator start', $params);
+        infoLog('[createByBatch] params validator start');
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
@@ -49,7 +40,7 @@ class CrawlResultController extends Controller
             return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
 
-        infoLog('[createByBatch] request internalApi createByBatch start', $params);
+        infoLog('[createByBatch] request internalApi createByBatch start');
         $data = APIService::internalPost('/internal/crawl/result/batch_result', $params);
         if ($data['status_code'] != 200) {
             errorLog('[createByBatch] request internalApi createByBatch result error', $data);

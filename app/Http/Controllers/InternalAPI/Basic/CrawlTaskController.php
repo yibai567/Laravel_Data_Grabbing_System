@@ -291,4 +291,36 @@ class CrawlTaskController extends Controller
         }
         return $this->resObjectGet($data, 'crawl_task', $request->path());
     }
+
+    /**
+     * 更新任务最后执行时间
+     * @param Request $request
+     */
+    public function updateLastJobAt(Request $request)
+    {
+        infoLog('[updateLastJobAt] start.');
+        $params = $request->all();
+        infoLog('[updateLastJobAt] validate start.');
+        $validator = Validator::make($params, [
+            'id' => 'integer|required',
+            'last_job_at' => 'required',
+        ]);
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                infoLog('[updateLastJobAt] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        try {
+            $taskId = $params['id'];
+            $data['last_job_at'] = $params['last_job_at'];
+            $result = CrawlTask::where('id', $taskId)->update($data);
+
+        } catch (Exception $e) {
+            errorLog($e->getMessage(), $e->getCode());
+            return $this->resError($e->getCode(), $e->getMessage());
+        }
+        return $this->resObjectGet($result, 'updateLastJobAt', $request->path());
+    }
 }

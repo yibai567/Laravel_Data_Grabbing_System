@@ -23,6 +23,7 @@ $api->version(
         $api->post('/crawl/task/status', 'CrawlTaskController@updateStatus');
         $api->post('/crawl/task/result', 'CrawlTaskController@updateResult');
         $api->post('/crawl/task/stop', 'CrawlTaskController@stop');
+        $api->post('/crawl/task/last_job_at', 'CrawlTaskController@updateLastJobAt');
         $api->post('/crawl/task/script', 'CrawlTaskController@createScript');
         $api->post('/crawl/task/preview', 'CrawlTaskController@preview');
         $api->post('/crawl/task/start','CrawlTaskController@start');

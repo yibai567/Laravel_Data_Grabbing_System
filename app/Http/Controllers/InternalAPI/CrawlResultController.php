@@ -21,17 +21,8 @@ class CrawlResultController extends Controller
     {
         infoLog('[createByBatch] start.');
         $params = $request->all();
-        //$params['data'] = json_decode($params['data']);
         $validator = Validator::make($params, [
             'data' => 'nullable',
-            // 'crawl_task_id' => 'numeric|nullable',
-            // 'task_start_time' => 'date|nullable',
-            // 'task_end_time' => 'date|nullable',
-            // 'task_url' => 'string|nullable',
-            // 'setting_selectors' => 'string|nullable',
-            // 'setting_keywords' => 'string|nullable',
-            // 'setting_data_type' => 'numeric|nullable',
-            // 'effect' => 'numeric|nullable',
         ]);
         infoLog('[createByBatch] params validator start.');
         if ($validator->fails()) {
@@ -41,7 +32,7 @@ class CrawlResultController extends Controller
                 return response($value, 401);
             }
         }
-        infoLog('[createByBatch123] params validator end.', $params['data']);
+        infoLog('[createByBatch123] params validator end.');
         $result = [];
         if (empty($params['data'])) {
             infoLog('[createByBatch] data empty!');
@@ -65,8 +56,8 @@ class CrawlResultController extends Controller
                 foreach ($value['format_data'] as $formatKey => $formatValue) {
                     $newParams['task_url'] = $formatValue['url'];
                     $newParams['format_data'] = $formatValue['text'];
-                    $newParams['original_data'] = $value;
-                    $newParams['status'] = CrawlResult::IS_PROCESSED;
+                    //$newParams['original_data'] = $value;
+                    $newParams['status'] = CrawlResult::IS_UNTREATED;
                     $newParams['crawl_task_id'] = $value['crawl_task_id'];
                     $newParams['task_start_time'] = $value['task_start_time'];
                     $newParams['task_end_time'] = $value['task_end_time'];
@@ -87,12 +78,11 @@ class CrawlResultController extends Controller
                 $resultArr['result'][] = $newArr;
             }
             //请求第三方接口
-            infoLog('[createByBatch] is_test is test', $formatData);
             return $this->resObjectGet($formatData, 'crawl_result', $request->path());
         }
 
         $dispatcher = app('Dingo\Api\Dispatcher');
-        infoLog('[createByBatch] request internal/basic createByBatch start', $formatData);
+        infoLog('[createByBatch] request internal/basic createByBatch start');
         $resultData = APIService::basePost('/internal/basic/crawl/result/batch_result', $formatData, 'json');
         if ($resultData['status_code'] != 200) {
             errorLog('[createByBatch] request internal/basic createByBatch result error', $resultData);
@@ -103,6 +93,19 @@ class CrawlResultController extends Controller
         }
         infoLog('[createByBatch] request internal/basic createByBatch end');
         infoLog('[createByBatch] end.');
+        //调用第三方接口
+        foreach ($result as $key => $value) {
+            $id = $value['crawl_task_id'];
+            $last_job_at = $value['task_end_time'];
+        }
+
+        $taskParams['id'] = $id;
+        $taskParams['last_job_at'] = $last_job_at;
+        $taskResult = APIService::openPost('/v1/crawl/task/last_job_at', $taskParams, 'json');
+        if ($taskResult['status_code'] != 200) {
+            errorLog('[createByBatch] request /v1/crawl/task/last_job_at createByBatch result error', $taskResult);
+            return response($taskResult['message'], $taskResult['status_code']);
+        }
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
  }

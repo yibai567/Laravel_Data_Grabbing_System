@@ -19,7 +19,7 @@ $api->version(
         $api->get('/crawl/tasks', 'CrawlTaskController@all');
 
         $api->post('/crawl/task/script', 'CrawlTaskController@updateScriptFile');
-
+        $api->post('/crawl/task/last_job_at', 'CrawlTaskController@updateLastJobAt');
         $api->get('/crawl/node/usable', 'CrawlNodeController@getUsableNode');
 
         $api->post('/crawl/node_task/start', 'CrawlNodeTaskController@start');
@@ -46,7 +46,7 @@ $api->version(
         $api->post('/crawl/task/start', 'CrawlTaskController@start');
         $api->post('/crawl/task/result', 'CrawlTaskController@updateResult');
         $api->get('/crawl/tasks', 'CrawlTaskController@all');
-
+        $api->post('/crawl/task/last_job_at', 'CrawlTaskController@updateLastJobAt');
         //$api->post('/crawl/result', 'CrawlResultController@create');
         $api->post('/crawl/result/batch_result', 'CrawlResultController@createByBatch');
 

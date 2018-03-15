@@ -59,7 +59,7 @@ class CrawlTaskController extends Controller
             $params['is_proxy'] = 2;
         }
         $data = $params;
-        
+
         infoLog('[create] prepare data.', $data);
         try{
             infoLog('[create] prepare data.', $data);
@@ -153,7 +153,28 @@ class CrawlTaskController extends Controller
             if ($taskData['status'] !== CrawlTask::IS_START_UP) {
                 return $this->resError(401, 'task not start!');
             }
+<<<<<<< Updated upstream
 
+=======
+            // 停止指定任务id当前在运行的任务
+
+            $res = APIService::baseGet('/internal/basic/crawl/node_task/started?crawl_task_id=' . $taskData['id']);
+            if ($res['status_code'] !== 200) {
+                errorLog($res['messsage']);
+                throw new Exception('[stop] ' . $data['status_code'] . 'stop fail', 401);
+            }
+            if (!empty($res['data'])) {
+                $item = $res['data'];
+                if (!empty($item['id'])) {
+                    $params = ['id' => $item['id']];
+                    $res = APIService::internalPost('/internal/crawl/node_task/stop', $params);
+                    if ($res['status_code'] !== 200) {
+                        errorLog($res['messsage']);
+                        throw new Exception($res['messsage'], $res['status_code']);
+                    }
+                }
+            }
+>>>>>>> Stashed changes
             $params = ['id' => $taskData['id'], 'status' => CrawlTask::IS_PAUSE];
             $data = APIService::basePost('/internal/basic/crawl/task/status', $params);
             if ($data['status_code'] !== 200) {
@@ -379,4 +400,37 @@ class CrawlTaskController extends Controller
         infoLog('[all] end.');
         return $this->resObjectGet($result, 'crawl_task.result', $request->path());
     }
+        /**
+     * 更新任务最后执行时间
+     * @param Request $request
+     */
+    public function updateLastJobAt(Request $request)
+    {
+        infoLog('[updateLastJobAt] start.');
+        $params = $request->all();
+        infoLog('[updateLastJobAt] validate start.');
+        $validator = Validator::make($params, [
+            'id' => 'integer|required',
+            'last_job_at' => 'required',
+        ]);
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                infoLog('[updateLastJobAt] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        infoLog('[updateLastJobAt] validate end.');
+        $data = APIService::basePost('/internal/basic/crawl/task/last_job_at', $params);
+        if ($data['status_code'] !== 200) {
+            errorLog('[updateLastJobAt] error.', $data);
+            return $this->resError($data['status_code'], $data['message']);
+        }
+
+        if ($data['data']) {
+            $result = $data['data'];
+        }
+        return $this->resObjectGet($result, 'crawl_task.updateLastJobAt', $request->path());
+    }
+
 }
