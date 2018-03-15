@@ -33,7 +33,7 @@ class TaskPreviewListener
 
         $folder = '/keep';
 
-        if ($crawlTask->protocol == CrawlTask::PROTOCOL_HTTP) {
+        if ($crawlTask->protocol == CrawlTask::PROTOCOL_HTTPS) {
             $filePrefix = 'https_';
         } else {
             $filePrefix = 'http_';
