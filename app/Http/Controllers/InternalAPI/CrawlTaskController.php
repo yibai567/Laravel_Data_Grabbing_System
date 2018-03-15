@@ -56,7 +56,7 @@ class CrawlTaskController extends Controller
             $params['protocol'] = CrawlTask::PROTOCOL_HTTP;
         }
         if (empty($params['is_proxy'])) {
-            $params['is_proxy'] = 1;
+            $params['is_proxy'] = 2;
         }
         $data = $params;
         
