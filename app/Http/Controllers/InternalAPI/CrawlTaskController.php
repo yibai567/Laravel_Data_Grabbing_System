@@ -449,8 +449,7 @@ class CrawlTaskController extends Controller
                 errorLog($res['messsage']);
                 throw new Exception($res['messsage'], $res['status_code']);
             }
-
-            $params['status'] = CrawlTask::IS_START_UP;
+            $params = ['id' => $taskData['id'], 'status' => CrawlTask::IS_START_UP];
             $data = APIService::basePost('/internal/basic/crawl/task/status', $params);
             if ($data['status_code'] !== 200) {
                 errorLog($res['messsage']);
