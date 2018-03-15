@@ -146,7 +146,7 @@ class CrawlNodeTaskController extends Controller
         // $command = $res['cmd_startup'];
         // exec($command, $result);
         infoLog('[start] end.');
-        return $this->resObjectGet($result, 'crawl_node_task.start', $request->path());
+        return $this->resObjectGet($res, 'crawl_node_task.start', $request->path());
     }
 
     /**

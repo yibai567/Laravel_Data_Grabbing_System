@@ -43,6 +43,7 @@ class CrawlTask extends Model
         'protocol',
         'is_proxy',
         'start_time',
+        'last_job_at',
     ];
 
     public function setting()

@@ -297,6 +297,7 @@ class CrawlTaskController extends Controller
             'protocol' => 'integer|nullable',
             'cron_type' => 'integer|nullable',
             'task_id' => 'integer|nullable',
+            'is_proxy' => 'integer|nullable',
         ]);
 
         infoLog('[all] validate.', $validator);
@@ -321,6 +322,4 @@ class CrawlTaskController extends Controller
         infoLog('[all] end.');
         return $this->resObjectGet($result, 'crawl_task.result', $request->path());
     }
-
-
 }

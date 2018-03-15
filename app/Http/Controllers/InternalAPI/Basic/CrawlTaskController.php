@@ -32,6 +32,7 @@ class CrawlTaskController extends Controller
             'response_param' => 'string|nullable',
             'setting_id' => 'integer|nullable',
             'protocol' => 'integer|nullable',
+            'is_proxy' => 'integer|nullable',
         ]);
 
         if ($validator->fails()) {
@@ -47,7 +48,7 @@ class CrawlTaskController extends Controller
         }
 
         infoLog('[create] validate end.', $params);
-        $fieldList = ['name', 'description', 'resource_url', 'cron_type', 'selectors', 'setting_id'];
+        $fieldList = ['name', 'description', 'resource_url', 'cron_type', 'selectors', 'setting_id', 'protocol', 'is_proxy'];
         $data = array_only($params, $fieldList);
         $data['status'] = CrawlTask::IS_INIT;
         $data['response_type'] = CrawlTask::RESPONSE_TYPE_API;
@@ -259,6 +260,7 @@ class CrawlTaskController extends Controller
             'protocol' => 'integer|nullable',
             'cron_type' => 'integer|nullable',
             'task_id' => 'integer|nullable',
+            'is_proxy' => 'integer|nullable',
         ]);
         infoLog('[all] validate.', $validator);
 
