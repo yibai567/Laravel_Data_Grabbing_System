@@ -6,9 +6,6 @@ package-lock.json
 /public/storage
 /storage/*.key
 /storage/uploads/*
-/storage/framework/cache
-/storage/framework/views
-/storage/framework/sessions
 composer.lock
 composer.phar
 /.idea
