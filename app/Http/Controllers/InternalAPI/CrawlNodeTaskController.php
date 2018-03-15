@@ -178,20 +178,10 @@ class CrawlNodeTaskController extends Controller
             errorLog($data['message'], $data['status_code']);
             return $this->resError($data['status_code'], $data['message']);
         }
-        $res = [];
+        $result = [];
         if ($data['data']) {
-            $res = $data['data'];
+            $result = $data['data'];
         }
-        infoLog('[stop] request internal/basic/crawl/node_task/stop end.', $params);
-
-        $command = $res['cmd_startup'];
-        exec($command, $result);
-
-        // 更新任务状态为停止
-        $params = ['id' => $result['crawl_task_id'], 'status' => CrawlTask::IS_PAUSE];
-        infoLog('[stop] request internal/crawl/task/status start.', $params);
-        $res = APIService::basePost('/internal/crawl/task/status', $params);
-        infoLog('[stop] request internal/crawl/task/status end.');
         infoLog('[stop] end.');
         return $this->resObjectGet($result, 'crawl_node_task.start', $request->path());
     }
