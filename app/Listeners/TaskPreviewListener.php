@@ -40,7 +40,7 @@ class TaskPreviewListener
         } elseif($crawlTask->cron_type == 5) {
             $folder = '/everyThirtyMinutes/1';
         } else {
-            $folder = '/keep/1';
+            $folder = '/keep';
         }
 
         $file = 'http_tmp_all_a.js';
