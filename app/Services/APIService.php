@@ -4,6 +4,9 @@ namespace App\Services;
 
 use Log;
 use Config;
+use VDB\Spider\RequestHandler\GuzzleRequestHandler;
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Request;
 
 class APIService extends Service
 {
@@ -108,11 +111,40 @@ class APIService extends Service
         return $dispatcher->post($url);
     }
 
-    public static function httpGet($url, $params = [])
-    {
-        $dispatcher = app('Dingo\Api\Dispatcher');
+    /**
+     * get
+     */
+    public static function get($url, $params = []) {
 
-        return $dispatcher->get($url, $params);
+        try {
+            $requestParams = [
+                'timeout'  => 10000,
+            ];
+            $client = new Client($requestParams);
+            $response = $client->request('GET', $url, ['query' => $params]);
+            $resCode  = $response->getStatusCode();
+            $resBody  = $response->getBody();
+        } catch (Exception $e) {
+            throw $e;
+        }
+        return $resBody;
     }
-
+    /**
+     * post
+     */
+    public static function post($url, $params = []) {
+        try {
+            $requestParams = [
+                'timeout'  => 10000,
+            ];
+            $client = new Client($requestParams);
+            $response = $client->request('POST', $url, ['form_params' => $params]);
+            $resCode  = $response->getStatusCode();
+            $resBody  = $response->getBody();
+            dlogger('[api response body] = ' . json_encode($resBody), 'debug');
+        } catch (Exception $e) {
+            throw $e;
+        }
+        return $resBody;
+    }
 }
