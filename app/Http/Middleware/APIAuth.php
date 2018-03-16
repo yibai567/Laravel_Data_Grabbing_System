@@ -15,9 +15,6 @@ class APiAuth
      */
     public function handle($request, Closure $next)
     {
-        $request['sign'] = sign();
-        $request['access_secret'] = config('api_auth.access_secret');
-        $request['date'] = time();
         return $next($request);
     }
 }

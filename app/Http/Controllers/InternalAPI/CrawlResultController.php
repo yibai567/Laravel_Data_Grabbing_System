@@ -66,9 +66,8 @@ class CrawlResultController extends Controller
         }
 
         if (empty($is_test)) {
-            $is_test = 2;
+            $is_test = 0;
         }
-
         if ($is_test == CrawlResult::EFFECT_TEST) {
             $platformData = [];
             $platformData['is_test'] = $is_test;
@@ -78,11 +77,12 @@ class CrawlResultController extends Controller
                 $newParams['task_id'] = $platformValue['crawl_task_id'];
                 $platformData['result'][] = $newParams;
             }
-
-            //$platformResult = APIService::httpPost('http://boss.lsjpic.com/api/live/put_craw_data', $platformData, 'json');
-            //dd($platformResult);
-            //print_r($platformResult);exit;
-            //请求第三方接口
+            $platformData = sign($platformData);
+            infoLog('日志', $platformData);
+            $platformResult = APIService::post('http://boss.lsjpic.com/api/live/put_craw_data', $platformData);
+            if (!empty($platformResult)) {
+                return response('数据发送异常', 501);
+            }
             return $this->resObjectGet($formatData, 'crawl_result', $request->path());
         }
         //去重复
@@ -110,11 +110,22 @@ class CrawlResultController extends Controller
         $result = [];
         if ($resultData['data']) {
             $result = $resultData['data'];
-            // //调用第三方接口
-            // foreach ($result as $key => $value) {
-            //     $
-            //     print_r($value);
-            // }
+            $platformData = [];
+            $platformData['is_test'] = $is_test;
+            foreach ($result as $platformValue) {
+                $newParams['title'] = json_decode($platformValue['format_data']);
+                $newParams['url'] = $platformValue['task_url'];
+                //$newParams['task_id'] = $platformValue['crawl_task_id'];
+                $newParams['task_id'] = 244;
+                $platformData['result'][] = $newParams;
+            }
+            $platformData = sign($platformData);
+            infoLog('日志', $platformData);
+            $platformResult = APIService::post('http://boss.lsjpic.com/api/live/put_craw_data', $platformData);
+            if (!empty($platformResult)) {
+                return response('数据发送异常', 501);
+            }
+
         }
         infoLog('[createByBatch] request internal/basic createByBatch end');
         infoLog('[createByBatch] end.');
@@ -131,4 +142,5 @@ class CrawlResultController extends Controller
 
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
+
  }

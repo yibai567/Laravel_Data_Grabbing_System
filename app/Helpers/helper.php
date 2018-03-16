@@ -61,20 +61,21 @@ if (!function_exists('decodeUnicode')) {
 }
 
 if (!function_exists('sign')) {
-    function sign() {
+    function sign($data) {
+        $dateTime = time();
         $accessKey = config('api_auth.access_secret');
         $secretKey = config('api_auth.secret');
         $httpParams = [
             'access_key' => $accessKey,
-            'date' => time()
+            'date' => $dateTime,
+            'is_test' => $data['is_test'],
+            'result' => $data['result'],
         ];
-
         $signParams = array_merge($httpParams, array('secret_key' => $secretKey));
 
         ksort($signParams);
         $signString = http_build_query($signParams);
-
-        $sign = strtolower(md5($signString));
-        return $sign;
+        $httpParams['sign'] = strtolower(md5($signString));
+        return $httpParams;
     }
 }

@@ -141,9 +141,12 @@ class APIService extends Service
             $response = $client->request('POST', $url, ['json' => $params]);
             $resCode  = $response->getStatusCode();
             $resBody  = $response->getBody();
+            if ($resBody == "ok" && $resCode == 200) {
+                return [];
+            }
         } catch (Exception $e) {
             throw $e;
         }
-        return $resBody;
+        // return $resBody;
     }
 }
