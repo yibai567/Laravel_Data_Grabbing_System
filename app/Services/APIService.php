@@ -138,10 +138,9 @@ class APIService extends Service
                 'timeout'  => 10000,
             ];
             $client = new Client($requestParams);
-            $response = $client->request('POST', $url, ['form_params' => $params]);
+            $response = $client->request('POST', $url, ['json' => $params]);
             $resCode  = $response->getStatusCode();
             $resBody  = $response->getBody();
-            dlogger('[api response body] = ' . json_encode($resBody), 'debug');
         } catch (Exception $e) {
             throw $e;
         }
