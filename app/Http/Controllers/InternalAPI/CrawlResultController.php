@@ -32,70 +32,82 @@ class CrawlResultController extends Controller
                 return response($value, 401);
             }
         }
-        infoLog('[createByBatch123] params validator end.');
-        $result = [];
+        infoLog('[createByBatch] params validator end.');
         if (empty($params['data'])) {
             infoLog('[createByBatch] data empty!');
-            return $this->resObjectGet($result, 'crawl_result', $request->path());
+            return $this->resObjectGet([], 'crawl_result', $request->path());
         }
         $formatData = [];
-        foreach ($params['data'] as $key => $value) {
-            if (empty($value['data'])) {
-                return $this->resObjectGet($result, 'crawl_result', $request->path());
+        $is_test = $params['data'][0]['is_test'];
+        $crawl_task_id = $params['data'][0]['crawl_task_id'];
+        foreach ($params['data'] as $crawlResult) {
+            if (empty($crawlResult['data'])) {
+                return $this->resObjectGet([], 'crawl_result', $request->path());
             }
-            foreach ($value['data'] as $valueKey => $data) {
-                if (!empty($value['setting_keywords'])) {
-                    $matchingResult  = strpos($data['text'], $value['setting_keywords']);
-                    if ($matchingResult !== false){
-                        $newData[] = $data;
+            foreach ($crawlResult['data'] as $crawlResultValue) {
+                $crawlResult['task_url'] = $crawlResultValue['url'];
+                $crawlResult['format_data'] = $crawlResultValue['text'];
+                unset($crawlResult['data'], $crawlResult['is_test']);
+                if (!empty($crawlResult['setting_keywords'])) {
+                    $setting_keywords = explode(',', $crawlResult['setting_keywords']);
+                    foreach ($setting_keywords as $keywordsValue) {
+                        $matchingResult  = strpos($crawlResultValue['text'], $keywordsValue);
+                        if ($matchingResult !== false){
+                            $formatData['data'][] = $crawlResult;
+                        }
                     }
                 } else {
-                    $newData[] = $data;
-                }
-            }
-            $is_test = $value['is_test'];
-            $value['format_data'] = $newData;
-            if (!empty($value['format_data'])) {
-                foreach ($value['format_data'] as $formatKey => $formatValue) {
-                    $newParams['task_url'] = $formatValue['url'];
-                    $newParams['format_data'] = $formatValue['text'];
-                    //$newParams['original_data'] = $value;
-                    $newParams['status'] = CrawlResult::IS_UNTREATED;
-                    $crawl_task_id = $value['crawl_task_id'];
-                    $newParams['crawl_task_id'] = $value['crawl_task_id'];
-                    $newParams['task_start_time'] = $value['task_start_time'];
-                    $newParams['task_end_time'] = $value['task_end_time'];
-                    $newParams['setting_selectors'] = $value['setting_selectors'];
-                    $newParams['setting_keywords'] = $value['setting_keywords'];
-                    $newParams['setting_data_type'] = $value['setting_data_type'];
-                    $formatData['data'][] = $newParams;
+                    $formatData['data'][] = $crawlResult;
                 }
             }
         }
-        if (empty($formatData)) {
+        if (empty($formatData['data'])) {
             return $this->resObjectGet($formatData, 'formatData empty.', $request->path());
         }
 
+        if (empty($is_test)) {
+            $is_test = 2;
+        }
 
         if ($is_test == CrawlResult::EFFECT_TEST) {
-            $resultArr = [];
-            $resultArr['is_test'] = $is_test;
-            foreach ($formatData['data'] as $key => $value) {
-                $newArr['title'] = $value['format_data'];
-                $newArr['url'] = $value['task_url'];
-                $newArr['task_id'] = $value['crawl_task_id'];
-                $resultArr['result'][] = $newArr;
+            $platformData = [];
+            $platformData['is_test'] = $is_test;
+            foreach ($formatData['data'] as $platformValue) {
+                $newParams['title'] = $platformValue['format_data'];
+                $newParams['url'] = $platformValue['task_url'];
+                $newParams['task_id'] = $platformValue['crawl_task_id'];
+                $platformData['result'][] = $newParams;
             }
+
+            //$platformResult = APIService::httpPost('http://boss.lsjpic.com/api/live/put_craw_data', $platformData, 'json');
+            //dd($platformResult);
+            //print_r($platformResult);exit;
             //请求第三方接口
             return $this->resObjectGet($formatData, 'crawl_result', $request->path());
         }
-
+        //去重复
+        $newFormatData['data'] = [];
+        foreach ($formatData['data'] as $repeatedValue) {
+            $repeatedDada = APIService::baseGet('/internal/basic/crawl/result/is_task_exist', ['id' => $repeatedValue['crawl_task_id'], 'url' => $repeatedValue['task_url']]);
+            if ($repeatedDada['status_code'] != 200) {
+                errorLog('[createByBatch] request /internal/basic/crawl/result/is_task_exist result error', ['id' => $crawlResult['crawl_task_id']]);
+                return response($repeatedDada['message'], $repeatedDada['status_code']);
+            }
+            if (empty($repeatedDada['data'])) {
+                $newFormatData['data'][] = $repeatedValue;
+            }
+        }
+        if (empty($newFormatData['data'])) {
+            infoLog('[createByBatch] repeated data');
+            return $this->resObjectGet([], 'crawl_result', $request->path());
+        }
         infoLog('[createByBatch] request internal/basic createByBatch start');
-        $resultData = APIService::basePost('/internal/basic/crawl/result/batch_result', $formatData, 'json');
+        $resultData = APIService::basePost('/internal/basic/crawl/result/batch_result', $newFormatData, 'json');
         if ($resultData['status_code'] != 200) {
-            errorLog('[createByBatch] request internal/basic createByBatch result error', $resultData);
+            errorLog('[createByBatch] request internal/basic createByBatch result error', $newFormatData);
             return response($resultData['message'], $resultData['status_code']);
         }
+        $result = [];
         if ($resultData['data']) {
             $result = $resultData['data'];
             // //调用第三方接口
