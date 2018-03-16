@@ -20,6 +20,7 @@ $api->version(
 
         $api->post('/crawl/task/script', 'CrawlTaskController@updateScriptFile');
         $api->post('/crawl/task/last_job_at', 'CrawlTaskController@updateLastJobAt');
+        $api->get('/crawl/result/is_task_exist', 'CrawlResultController@isTaskExist');
         $api->get('/crawl/node/usable', 'CrawlNodeController@getUsableNode');
 
         $api->post('/crawl/node_task/start', 'CrawlNodeTaskController@start');

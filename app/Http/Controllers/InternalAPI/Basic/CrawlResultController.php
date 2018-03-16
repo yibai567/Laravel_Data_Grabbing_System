@@ -40,13 +40,10 @@ class CrawlResultController extends Controller
         }
         $items = [];
         foreach ($params['data'] as $item) {
-
-            if (!$this->isTaskExist($item['crawl_task_id'], $item['task_url'])) {
-                $item['format_data'] = json_encode($item['format_data']);
-                $item['status'] = CrawlResult::IS_PROCESSED;
-                //$item['original_data'] = json_encode($item['original_data']);
-                $items[] = $item;
-            }
+            $item['format_data'] = json_encode($item['format_data']);
+            $item['status'] = CrawlResult::IS_PROCESSED;
+            //$item['original_data'] = json_encode($item['original_data']);
+            $items[] = $item;
         }
 
         if (empty($items)) {
@@ -69,13 +66,26 @@ class CrawlResultController extends Controller
      * @param $taskUrl
      * @return bool
      */
-    private function isTaskExist($taskId, $taskUrl)
+    public function isTaskExist(Request $request)
     {
-        $crawlResult = CrawlResult::where(['task_url' => $taskUrl, 'crawl_task_id' => $taskId])
-            ->first();
-        if ($crawlResult) {
-            return true;
+        $params = $request->all();
+        $validator = Validator::make($params, [
+            'id' => 'integer|required',
+            'url' => 'string|required',
+        ]);
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return $this->resError(401, $value);
+            }
         }
-        return false;
+        $result = CrawlResult::where(['task_url' => $params['url'], 'crawl_task_id' => $params['id']])
+            ->first();
+        $data = [];
+        if ($result) {
+            $data = $result->toArray();
+        }
+        return $this->resObjectGet($data, 'crawl_result', $request->path());
     }
+
 }
