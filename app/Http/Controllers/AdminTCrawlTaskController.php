@@ -94,7 +94,7 @@
                     return '已归档';
                 }
             }];
-			//$this->col[] = ["label"=>"响应类型","name"=>"response_type"];
+            //$this->col[] = ["label"=>"响应类型","name"=>"response_type"];
             $this->col[] = ["label"=>"响应类型","name"=>"response_type","callback"=>function ($row) {
                 if ( $row->response_type == self::RESPONSE_TYPE_API) {
                     return 'API';
@@ -106,6 +106,7 @@
                     return '企业微信';
                 }
             }];
+			$this->col[] = ["label"=>"最后执行时间","name"=>"last_job_at"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
@@ -163,16 +164,16 @@
 	        | @label       = Label of action
 	        | @url         = Target URL, you can use field alias. e.g : [id], [name], [title], etc
 	        | @icon        = Font awesome class icon. e.g : fa fa-bars
-	        | @color 	   = Default is primary. (primary, warning, succecss, info)
+	        | @color 	   = Default is primary. (primary, warning, success, info)
 	        | @showIf 	   = If condition when action show. Use field alias. e.g : [id] == 1
 	        |
 	        */
 	        $this->addaction = array();
-            $this->addaction[] = ['label'=>'测试', 'url'=>CRUDBooster::mainpath('test-result/[id]'),'showIf'=>'[status] == ' . self::STATUS_NO_STARTING . '|| [status] == ' . self::STATUS_TEST_FAIL];
+            $this->addaction[] = ['label'=>'测试', 'url'=>CRUDBooster::mainpath('test-result/[id]'),'color'=>'info', 'icon'=>'fa fa-play','showIf'=>'[status] == ' . self::STATUS_NO_STARTING . '|| [status] == ' . self::STATUS_TEST_FAIL];
 
-            $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]/' . self::STATUS_START_UP),'showIf'=>'[status] == ' . self::STATUS_TEST_SUCCESS . '|| [status] == ' . self::STATUS_STOP];
+            $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]/' . self::STATUS_START_UP),'color'=>'success', 'icon'=>'fa fa-play', 'showIf'=>'[status] == ' . self::STATUS_TEST_SUCCESS . '|| [status] == ' . self::STATUS_STOP];
 
-            $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-up/[id]/' . self::STATUS_STOP),'showIf'=>'[status] == ' . self::STATUS_START_UP];
+            $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-up/[id]/' . self::STATUS_STOP),'color'=>'warning', 'icon'=>'fa fa-stop', 'showIf'=>'[status] == ' . self::STATUS_START_UP];
             $this->addaction[] = ['label'=>'归档', 'url'=>CRUDBooster::mainpath('archived/[id]/' . self::STATUS_ARCHIVED),'showIf'=>'[status] == ' . self::STATUS_STOP . '|| [status] == ' . self::STATUS_NO_STARTING . '|| [status] == ' . self::STATUS_TEST_FAIL . '|| [status] == ' . self::STATUS_TEST_SUCCESS ];
             $this->addaction[] = ['label'=>'log日志', 'url'=>CRUDBooster::mainpath('log-list')];
             $this->addaction[] = ['label'=>'统计'];
