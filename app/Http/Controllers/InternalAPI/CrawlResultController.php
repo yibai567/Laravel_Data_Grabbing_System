@@ -40,6 +40,9 @@ class CrawlResultController extends Controller
         }
         $formatData = [];
         foreach ($params['data'] as $key => $value) {
+            if (empty($value['data'])) {
+                return $this->resObjectGet($result, 'crawl_result', $request->path());
+            }
             foreach ($value['data'] as $valueKey => $data) {
                 if (!empty($value['setting_keywords'])) {
                     $matchingResult  = strpos($data['text'], $value['setting_keywords']);
@@ -87,7 +90,6 @@ class CrawlResultController extends Controller
             return $this->resObjectGet($formatData, 'crawl_result', $request->path());
         }
 
-        $dispatcher = app('Dingo\Api\Dispatcher');
         infoLog('[createByBatch] request internal/basic createByBatch start');
         $resultData = APIService::basePost('/internal/basic/crawl/result/batch_result', $formatData, 'json');
         if ($resultData['status_code'] != 200) {
@@ -96,10 +98,16 @@ class CrawlResultController extends Controller
         }
         if ($resultData['data']) {
             $result = $resultData['data'];
+            // //调用第三方接口
+            // foreach ($result as $key => $value) {
+            //     $
+            //     print_r($value);
+            // }
         }
-
         infoLog('[createByBatch] request internal/basic createByBatch end');
         infoLog('[createByBatch] end.');
+
+
 
         $taskParams['id'] = $crawl_task_id;
         $taskParams['last_job_at'] = date('Y-m-d H:i:s');
@@ -108,10 +116,7 @@ class CrawlResultController extends Controller
             errorLog('[createByBatch] request /v1/crawl/task/last_job_at createByBatch result error', $taskParams);
             return response($taskResult['message'], $taskResult['status_code']);
         }
-        //调用第三方接口
-        // foreach ($result as $key => $value) {
 
-        // }
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
  }
