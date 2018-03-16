@@ -59,3 +59,22 @@ if (!function_exists('decodeUnicode')) {
             create_function('$matches', 'return mb_convert_encoding(pack("H*", $matches[1]), "UTF-8", "UCS-2BE");'), $str);
     }
 }
+
+if (!function_exists('sign')) {
+    function sign() {
+        $accessKey = config('api_auth.access_secret');
+        $secretKey = config('api_auth.secret');
+        $httpParams = [
+            'access_key' => $accessKey,
+            'date' => time()
+        ];
+
+        $signParams = array_merge($httpParams, array('secret_key' => $secretKey));
+
+        ksort($signParams);
+        $signString = http_build_query($signParams);
+
+        $sign = strtolower(md5($signString));
+        return $sign;
+    }
+}
