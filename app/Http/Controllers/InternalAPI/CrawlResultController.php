@@ -48,6 +48,7 @@ class CrawlResultController extends Controller
                 $crawlResult['task_url'] = $crawlResultValue['url'];
                 $crawlResult['format_data'] = $crawlResultValue['text'];
                 unset($crawlResult['data'], $crawlResult['is_test']);
+                $crawlResult['setting_keywords'] = '百度,主页';
                 if (!empty($crawlResult['setting_keywords'])) {
                     $setting_keywords = explode(',', $crawlResult['setting_keywords']);
                     foreach ($setting_keywords as $keywordsValue) {
@@ -78,9 +79,10 @@ class CrawlResultController extends Controller
                 $platformData['result'][] = $newParams;
             }
             $platformData = sign($platformData);
-            infoLog('日志', $platformData);
-            $platformResult = APIService::post('http://boss.lsjpic.com/api/live/put_craw_data', $platformData);
+            //平台接口调用
+            $platformResult = APIService::post(config('url.platform_url'), $platformData);
             if (!empty($platformResult)) {
+                infoLog('[createByBatch] request platform API error', $platformData);
                 return response('数据发送异常', 501);
             }
             return $this->resObjectGet($formatData, 'crawl_result', $request->path());
@@ -115,14 +117,14 @@ class CrawlResultController extends Controller
             foreach ($result as $platformValue) {
                 $newParams['title'] = json_decode($platformValue['format_data']);
                 $newParams['url'] = $platformValue['task_url'];
-                //$newParams['task_id'] = $platformValue['crawl_task_id'];
-                $newParams['task_id'] = 244;
+                $newParams['task_id'] = $platformValue['crawl_task_id'];
                 $platformData['result'][] = $newParams;
             }
             $platformData = sign($platformData);
-            infoLog('日志', $platformData);
-            $platformResult = APIService::post('http://boss.lsjpic.com/api/live/put_craw_data', $platformData);
+            //平台接口调用
+            $platformResult = APIService::post(config('url.platform_url'), $platformData);
             if (!empty($platformResult)) {
+                infoLog('[createByBatch] request platform API error', $platformData);
                 return response('数据发送异常', 501);
             }
 
