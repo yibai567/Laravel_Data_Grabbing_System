@@ -40,6 +40,15 @@ class CrawlResultController extends Controller
         $formatData = [];
         $is_test = $params['data'][0]['is_test'];
         $crawl_task_id = $params['data'][0]['crawl_task_id'];
+
+        $taskParams['id'] = $crawl_task_id;
+        $taskParams['last_job_at'] = date('Y-m-d H:i:s');
+        $taskResult = APIService::internalPost('/internal/crawl/task/last_job_at', $taskParams, 'json');
+        if ($taskResult['status_code'] != 200) {
+            errorLog('[createByBatch] request /v1/crawl/task/last_job_at createByBatch result error', $taskParams);
+            return response($taskResult['message'], $taskResult['status_code']);
+        }
+
         foreach ($params['data'] as $crawlResult) {
             if (empty($crawlResult['data'])) {
                 return $this->resObjectGet([], 'crawl_result', $request->path());
@@ -117,15 +126,6 @@ class CrawlResultController extends Controller
         infoLog('[createByBatch] request internal/basic createByBatch end');
         infoLog('[createByBatch] end.');
 
-
-
-        $taskParams['id'] = $crawl_task_id;
-        $taskParams['last_job_at'] = date('Y-m-d H:i:s');
-        $taskResult = APIService::internalPost('/internal/crawl/task/last_job_at', $taskParams, 'json');
-        if ($taskResult['status_code'] != 200) {
-            errorLog('[createByBatch] request /v1/crawl/task/last_job_at createByBatch result error', $taskParams);
-            return response($taskResult['message'], $taskResult['status_code']);
-        }
 
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
