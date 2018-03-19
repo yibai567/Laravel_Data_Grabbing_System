@@ -11,7 +11,7 @@
 |
 */
 
-Route::get('/', function () {
-    infoLog('test');
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     infoLog('test');
+//     return view('welcome');
+// });
