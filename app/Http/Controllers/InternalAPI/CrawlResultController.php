@@ -91,6 +91,7 @@ class CrawlResultController extends Controller
         //去重复
         $newFormatData['data'] = [];
         foreach ($formatData['data'] as $formatValue) {
+            $formatValue['data'] = null;
             $responseDada = APIService::baseGet('/internal/basic/crawl/result/is_task_exist', ['id' => $formatValue['crawl_task_id'], 'url' => $formatValue['task_url']]);
             if ($responseDada['status_code'] != 200) {
                 errorLog('[createByBatch] request /internal/basic/crawl/result/is_task_exist result error', $formatValue);
