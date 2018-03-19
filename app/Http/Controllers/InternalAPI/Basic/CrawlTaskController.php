@@ -262,7 +262,7 @@ class CrawlTaskController extends Controller
             'task_id' => 'integer|nullable',
             'is_proxy' => 'integer|nullable',
         ]);
-        infoLog('[all] validate.', $validator);
+        infoLog('[all] validate start');
 
         if ($validator->fails()) {
             $errors = $validator->errors();
