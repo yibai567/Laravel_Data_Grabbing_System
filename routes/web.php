@@ -11,7 +11,6 @@
 |
 */
 
-// Route::get('/', function () {
-//     infoLog('test');
-//     return view('welcome');
-// });
+Route::get('/', function () {
+    return response('', 404);
+});
