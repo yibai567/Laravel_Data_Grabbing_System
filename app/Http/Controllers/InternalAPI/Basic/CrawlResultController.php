@@ -42,10 +42,9 @@ class CrawlResultController extends Controller
         foreach ($params['data'] as $item) {
             $item['format_data'] = json_encode($item['format_data']);
             $item['status'] = CrawlResult::IS_PROCESSED;
-            //$item['original_data'] = json_encode($item['original_data']);
+            unset($item['data'],$item['is_test']);
             $items[] = $item;
         }
-
         if (empty($items)) {
             infoLog('[createByBatch] items empty!');
             return $this->resObjectGet($result, 'crawl_result', $request->path());

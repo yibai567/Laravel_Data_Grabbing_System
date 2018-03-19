@@ -47,8 +47,6 @@ class CrawlResultController extends Controller
             foreach ($crawlResult['data'] as $crawlResultValue) {
                 $crawlResult['task_url'] = $crawlResultValue['url'];
                 $crawlResult['format_data'] = $crawlResultValue['text'];
-                unset($crawlResult['data'], $crawlResult['is_test']);
-                $crawlResult['setting_keywords'] = '百度,主页';
                 if (!empty($crawlResult['setting_keywords'])) {
                     $setting_keywords = explode(',', $crawlResult['setting_keywords']);
                     foreach ($setting_keywords as $keywordsValue) {
@@ -62,6 +60,7 @@ class CrawlResultController extends Controller
                 }
             }
         }
+        $formatData['data'] = arrayRemovalDuplicate($formatData['data'], 'format_data');
         if (empty($formatData['data'])) {
             return $this->resObjectGet($formatData, 'formatData empty.', $request->path());
         }
@@ -71,14 +70,7 @@ class CrawlResultController extends Controller
         }
         if ($is_test == CrawlResult::EFFECT_TEST) {
             $platformData = [];
-            $platformData['is_test'] = $is_test;
-            foreach ($formatData['data'] as $platformValue) {
-                $newParams['title'] = $platformValue['format_data'];
-                $newParams['url'] = $platformValue['task_url'];
-                $newParams['task_id'] = $platformValue['crawl_task_id'];
-                $platformData['result'][] = $newParams;
-            }
-            $platformData = sign($platformData);
+            $platformData = formatPlarformData($formatData['data'], $is_test);
             //平台接口调用
             $platformResult = APIService::post(config('url.platform_url'), $platformData);
             if (!empty($platformResult)) {
@@ -113,14 +105,7 @@ class CrawlResultController extends Controller
         if ($resultData['data']) {
             $result = $resultData['data'];
             $platformData = [];
-            $platformData['is_test'] = $is_test;
-            foreach ($result as $platformValue) {
-                $newParams['title'] = json_decode($platformValue['format_data']);
-                $newParams['url'] = $platformValue['task_url'];
-                $newParams['task_id'] = $platformValue['crawl_task_id'];
-                $platformData['result'][] = $newParams;
-            }
-            $platformData = sign($platformData);
+            $platformData = formatPlarformData($result, $is_test);
             //平台接口调用
             $platformResult = APIService::post(config('url.platform_url'), $platformData);
             if (!empty($platformResult)) {
