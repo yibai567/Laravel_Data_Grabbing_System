@@ -90,14 +90,14 @@ class CrawlResultController extends Controller
         }
         //去重复
         $newFormatData['data'] = [];
-        foreach ($formatData['data'] as $repeatedValue) {
-            $repeatedDada = APIService::baseGet('/internal/basic/crawl/result/is_task_exist', ['id' => $repeatedValue['crawl_task_id'], 'url' => $repeatedValue['task_url']]);
-            if ($repeatedDada['status_code'] != 200) {
-                errorLog('[createByBatch] request /internal/basic/crawl/result/is_task_exist result error', ['id' => $crawlResult['crawl_task_id']]);
-                return response($repeatedDada['message'], $repeatedDada['status_code']);
+        foreach ($formatData['data'] as $formatValue) {
+            $responseDada = APIService::baseGet('/internal/basic/crawl/result/is_task_exist', ['id' => $formatValue['crawl_task_id'], 'url' => $formatValue['task_url']]);
+            if ($responseDada['status_code'] != 200) {
+                errorLog('[createByBatch] request /internal/basic/crawl/result/is_task_exist result error', $formatValue);
+                return response($responseDada['message'], $responseDada['status_code']);
             }
-            if (empty($repeatedDada['data'])) {
-                $newFormatData['data'][] = $repeatedValue;
+            if (empty($responseDada['data'])) {
+                $newFormatData['data'][] = $formatValue;
             }
         }
         if (empty($newFormatData['data'])) {

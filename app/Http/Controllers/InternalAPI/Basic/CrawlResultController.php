@@ -70,7 +70,7 @@ class CrawlResultController extends Controller
         $params = $request->all();
         $validator = Validator::make($params, [
             'id' => 'integer|required',
-            'url' => 'string|required',
+            'url' => 'string|nullable',
         ]);
         if ($validator->fails()) {
             $errors = $validator->errors();
