@@ -101,7 +101,7 @@ class CrawlResultController extends Controller
         $params =$request->all();
         //数据验证规则
         $validator = Validator::make($request->all(), [
-            "limit" => "nullable|integer|min:1",
+            "limit" => "nullable|integer|min:1|max:500",
             "offset" => "nullable|integer|min:0",
         ]);
 
@@ -150,16 +150,17 @@ class CrawlResultController extends Controller
         }
 
         try {
-            $query = CrawlResult::where('id', '<>', 0);
-            if (!empty($params['id'])) {
-                $query->where('crawl_task_id', $params['task_id']);
-            }
-            if (!empty($params['url'])) {
-                $query->where('task_url', $params['url']);
-            }
+            $items = CrawlResult::where(function ($query) use ($params) {
+                if (!empty($params['id'])) {
+                    $query->where('crawl_task_id', $params['task_id']);
+                }
+                if (!empty($params['url'])) {
+                    $query->where('task_url', $params['url']);
+                }
+            })->get();
+
             //$query->take($params['limit']);
             //$query->skip($params['offset']);
-            $items = $query->get();
             $result = [];
             if ($items) {
                 $result = $items->toArray();
@@ -170,6 +171,4 @@ class CrawlResultController extends Controller
         }
         return $this->resObjectGet($result, 'list', $request->path());
     }
-
-
 }
