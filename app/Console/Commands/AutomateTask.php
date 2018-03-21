@@ -116,9 +116,9 @@ class AutomateTask extends Command
     {
         Redis::connection('queue');
         foreach ($data as $key => $items) {
-            if (Redis::llen($key) <= 0 && count($items) > 0 ) {
+            if (Redis::lLen($key) <= 0 && count($items) > 0 ) {
                 foreach($items as $item) {
-                    $task = array_only($item, ['id', 'resource_url', 'selector']);
+                    $task = array_only($item, ['id', 'resource_url', 'selectors']);
                     Redis::lpush($key, json_encode($task));
                 }
             }
@@ -139,7 +139,7 @@ class AutomateTask extends Command
         $ajax = $this->_ajaxs[$item['is_ajax']];
         $login = $this->_logins[$item['is_login']];
         $cronType = $this->_cronTypes[$item['cron_type']];
-        $key = 'crawl_task|' . $protocol . '|' . $proxy . '|' . $wall . '|' . $ajax . '|' . $login . '|' . $cronType;
+        $key = 'crawl_task_' . $protocol . '_' . $proxy . '_' . $wall . '_' . $ajax . '_' . $login . '_' . $cronType;
         return $key;
     }
 }

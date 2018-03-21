@@ -376,9 +376,8 @@ class CrawlTaskController extends Controller
                 return $this->resError(401, $value);
             }
         }
-
         infoLog('[getByQueueName] validate end.');
-        $data = APIService::internalPost('/internal/crawl/task/queue/name', $params);
+        $data = APIService::internalGet('/internal/crawl/task/queue/name?name=' . $params['name']);
         if ($data['status_code'] !== 200) {
             errorLog('[updateLastJobAt] error.', $data);
             return $this->resError($data['status_code'], $data['message']);
@@ -387,6 +386,6 @@ class CrawlTaskController extends Controller
         if ($data['data']) {
             $result = $data['data'];
         }
-        return $this->resObjectGet($result, 'crawl_task.updateLastJobAt', $request->path());
+        return $this->resObjectGet($result, 'list', $request->path());
     }
 }

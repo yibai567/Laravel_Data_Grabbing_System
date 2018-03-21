@@ -435,9 +435,15 @@ class CrawlTaskController extends Controller
         infoLog('[getByQueueName] validate end.');
         Redis::connection('queue');
         $data = [];
-        for($i=0; $i<5; $i++) {
-            $data[$i] = Redis::rpop($params['name']);
+        if (Redis::lLen($params['name']) > 0 ) {
+            for ($i = 0; $i < 5; $i++) {
+                $value = Redis::rpop($params['name']);
+                if (!isset($value)) {
+                    break;
+                }
+                $data[$i] = $value;
+            }
         }
-        return $data;
+        return $this->resObjectGet($data, 'list', $request->path());
     }
 }
