@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Requests\CrawlTaskCreateRequest;
 use App\Services\APIService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -25,7 +24,8 @@ class CrawlTaskController extends Controller
             'selectors' => 'string|nullable',
             'is_ajax' => 'integer|nullable',
             'is_login' => 'integer|nullable',
-            'is_wall' => 'integer|nullable'
+            'is_wall' => 'integer|nullable',
+            'is_proxy' => 'integer|nullable',
         ]);
 
         if ($validator->fails()) {
@@ -47,8 +47,8 @@ class CrawlTaskController extends Controller
         $result = [];
         if ($data['data']) {
             $task = $data['data'];
+            $result = ['id'=> $task['id']];
         }
-        $result = ['id'=> $task['id']];
         infoLog('[create] create end.');
         return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
@@ -88,7 +88,7 @@ class CrawlTaskController extends Controller
         }
 
         infoLog('[stop] end');
-        return $this->resObjectGet($result, 'crawl_task.stop', $request->path());
+        return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 
     /**
@@ -125,7 +125,7 @@ class CrawlTaskController extends Controller
             $result = $data['data']['data'];
         }
         infoLog('[start] validate end.');
-        return $this->resObjectGet($result, 'crawl_task.start', $request->path());
+        return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 
     /**
@@ -162,7 +162,7 @@ class CrawlTaskController extends Controller
             $result = $data['data']['data'];
         }
         infoLog('[start] validate end.');
-        return $this->resObjectGet($result, 'crawl_task.start', $request->path());
+        return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 
 
@@ -205,7 +205,7 @@ class CrawlTaskController extends Controller
             $result = $data['data'];
         }
         infoLog('[all] end.');
-        return $this->resObjectGet($result, 'crawl_task.result', $request->path());
+        return $this->resObjectGet($result, 'list', $request->path());
     }
 
     /**

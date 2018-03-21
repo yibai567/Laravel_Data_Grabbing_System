@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Requests\CrawlResultCreateRequest;
 use App\Services\APIService;
 use Illuminate\Http\Request;
 use Log;
-use App\Models\CrawlResult;
 use Illuminate\Support\Facades\Validator;
 
 class CrawlResultController extends Controller

@@ -3,12 +3,8 @@
 namespace App\Http\Controllers\InternalAPI;
 
 use App\Events\TaskPreview;
-use App\Http\Requests\CrawlTaskCreateRequest;
-use App\Models\CrawlNode;
-use App\Models\CrawlSetting;
 use App\Models\CrawlTask;
 use App\Services\APIService;
-use App\Services\WeWorkService;
 use Dompdf\Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
@@ -32,7 +28,8 @@ class CrawlTaskController extends Controller
             'selectors' => 'string|nullable|max:150',
             'is_ajax' => 'integer|nullable',
             'is_login' => 'integer|nullable',
-            'is_wall' => 'integer|nullable'
+            'is_wall' => 'integer|nullable',
+            'is_proxy' => 'integer|nullable',
         ]);
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -230,6 +227,7 @@ class CrawlTaskController extends Controller
         $folder = '/keep';
         $status = $taskDetail['data']['status'];
         $protocol = $taskDetail['data']['protocol'];
+        $crawlTaskId = $taskDetail['data']['id'];
         if ($protocol == CrawlTask::PROTOCOL_HTTPS) {
             $filePrefix = 'https_';
         } else {
@@ -238,8 +236,7 @@ class CrawlTaskController extends Controller
         $file = $filePrefix . 'tmp_all_a.js';
 
         $scriptFile = config('path.jinse_script_path') . $folder . '/' . $file;
-        $status = CrawlTask::IS_TEST_ERROR;
-        if (file_exists($scriptFile) && $crawlTask->status !== CrawlTask::IS_START_UP) {
+        if (file_exists($scriptFile) && $status !== CrawlTask::IS_START_UP) {
             $command = 'casperjs ' . $scriptFile . ' --taskid=' . $crawlTaskId;
             exec($command, $output, $returnvar);
             if ($returnvar == 0) {
@@ -324,7 +321,7 @@ class CrawlTaskController extends Controller
             }
         }
         infoLog('[all] end.');
-        return $this->resObjectGet($result, 'crawl_task.result', $request->path());
+        return $this->resObjectGet($result, 'list', $request->path());
     }
     /**
      * 根据队列名获取队列数据

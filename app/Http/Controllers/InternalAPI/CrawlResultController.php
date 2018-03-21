@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\InternalAPI;
 
-use App\Http\Requests\CrawlResultCreateRequest;
-use App\Http\Controllers\InternalAPI\Controller;
 use Illuminate\Http\Request;
 use App\Models\CrawlResult;
 use Illuminate\Support\Facades\Validator;
