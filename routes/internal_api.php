@@ -42,6 +42,8 @@ $api->version(
         $api->post('/crawl/task/status','CrawlTaskController@updateStatus');
         $api->post('/crawl/task/stop', 'CrawlTaskController@stop');
 
+        $api->get('/crawl/task/queue/name', 'CrawlTaskController@getByQueueName');
+
         $api->post('/crawl/task/script', 'CrawlTaskController@createScript');
         $api->post('/crawl/task/preview', 'CrawlTaskController@preview');
         $api->post('/crawl/task/start', 'CrawlTaskController@start');

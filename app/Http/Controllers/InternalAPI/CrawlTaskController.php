@@ -412,6 +412,11 @@ class CrawlTaskController extends Controller
         return $this->resObjectGet($result, 'crawl_task.updateLastJobAt', $request->path());
     }
 
+    /**
+     * 根据队列名获取队列数据
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getByQueueName(Request $request)
     {
         infoLog('[getByQueueName] start.');
@@ -428,7 +433,7 @@ class CrawlTaskController extends Controller
             }
         }
         infoLog('[getByQueueName] validate end.');
-        Redis::connection(1);
+        Redis::connection('queue');
         $data = Redis::rrange($params['name'], 0, 5);
         return $data;
     }

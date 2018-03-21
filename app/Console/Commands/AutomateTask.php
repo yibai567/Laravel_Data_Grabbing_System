@@ -23,7 +23,6 @@ class AutomateTask extends Command
     private $_logins = [CrawlTask::IS_LOGIN_TRUE => 'login', CrawlTask::IS_LOGIN_FALSE => 'nologin'];
     private $_walls = [CrawlTask::IS_WALL_TRUE => 'wall', CrawlTask::IS_WALL_FALSE => 'nowall'];
 
-    private $result = [];
     /**
      * The name and signature of the console command.
      *
@@ -36,9 +35,7 @@ class AutomateTask extends Command
      *
      * @var string
      */
-    protected $description = '自动化执行任务脚本';
-
-    protected $taskService;
+    protected $description = 'automate task process';
 
     /**
      * Create a new command instance.
@@ -82,16 +79,18 @@ class AutomateTask extends Command
      */
     private function _getData()
     {
-        CrawlTask::chunk(10, function ($tasks) {
-            $data = [];
+        $data = [];
+        CrawlTask::chunk(10, function ($tasks) use(&$data) {
             if ($tasks) {
-                $data = $tasks->toArray();
+                $tasks = $tasks->toArray();
+            } else {
+                return false;
             }
-            $result = $this->_formatData($data);
-            $this->result = array_merge_recursive($this->result, $result);
+            $result = $this->_formatData($tasks);
+            $data = array_merge_recursive($data, $result);
             return true;
         });
-        return $this->result;
+        return $data;
     }
 
     /**
@@ -115,16 +114,16 @@ class AutomateTask extends Command
      */
     private function _insert(array $data)
     {
-        Redis::connection(1);
+        Redis::connection('queue');
         foreach ($data as $key => $items) {
             if (Redis::llen($key) <= 0 && count($items) > 0 ) {
                 foreach($items as $item) {
                     $task = array_only($item, ['id', 'resource_url']);
-                    Redis::lpush($key, $task);
-                    //print_r($task);
+                    Redis::lpush($key, json_encode($task));
                 }
             }
         }
+        return true;
     }
 
     /**

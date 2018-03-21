@@ -355,4 +355,37 @@ class CrawlTaskController extends Controller
         }
         return $this->resObjectGet($result, 'crawl_task.updateLastJobAt', $request->path());
     }
+
+    /**
+     * 根据队列名获取列表数据
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getByQueueName(Request $request)
+    {
+        infoLog('[getByQueueName] start.');
+        $params = $request->all();
+        infoLog('[getByQueueName] validate start.');
+        $validator = Validator::make($params, [
+            'name' => 'string|required|max:50',
+        ]);
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                infoLog('[getByQueueName] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        infoLog('[getByQueueName] validate end.');
+        $data = APIService::internalPost('/internal/crawl/task/queue/name', $params);
+        if ($data['status_code'] !== 200) {
+            errorLog('[updateLastJobAt] error.', $data);
+            return $this->resError($data['status_code'], $data['message']);
+        }
+        $result = [];
+        if ($data['data']) {
+            $result = $data['data'];
+        }
+        return $this->resObjectGet($result, 'crawl_task.updateLastJobAt', $request->path());
+    }
 }

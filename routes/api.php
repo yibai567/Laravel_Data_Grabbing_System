@@ -29,5 +29,7 @@ $api->version(
         $api->post('/crawl/task/start','CrawlTaskController@start');
         $api->get('/crawl/tasks','CrawlTaskController@all');
         $api->post('/crawl/result/batch_result', 'CrawlResultController@createByBatch');
+
+        $api->get('/crawl/task/queue/name', 'CrawlTaskController@getByQueueName');
     }
 );
