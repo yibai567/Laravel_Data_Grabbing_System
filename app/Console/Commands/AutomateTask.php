@@ -118,7 +118,7 @@ class AutomateTask extends Command
         foreach ($data as $key => $items) {
             if (Redis::llen($key) <= 0 && count($items) > 0 ) {
                 foreach($items as $item) {
-                    $task = array_only($item, ['id', 'resource_url']);
+                    $task = array_only($item, ['id', 'resource_url', 'selector']);
                     Redis::lpush($key, json_encode($task));
                 }
             }

@@ -434,7 +434,10 @@ class CrawlTaskController extends Controller
         }
         infoLog('[getByQueueName] validate end.');
         Redis::connection('queue');
-        $data = Redis::rrange($params['name'], 0, 5);
+        $data = [];
+        for($i=0; $i<5; $i++) {
+            $data[$i] = Redis::rpop($params['name']);
+        }
         return $data;
     }
 }

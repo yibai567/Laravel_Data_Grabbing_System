@@ -376,6 +376,7 @@ class CrawlTaskController extends Controller
                 return $this->resError(401, $value);
             }
         }
+
         infoLog('[getByQueueName] validate end.');
         $data = APIService::internalPost('/internal/crawl/task/queue/name', $params);
         if ($data['status_code'] !== 200) {
