@@ -450,4 +450,26 @@ class CrawlTaskController extends Controller
         }
         return $this->resObjectGet($data, 'list', $request->path());
     }
+
+    /**
+     * 获取队列名称
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getQueueInfo(Request $request)
+    {
+        try {
+            Redis::connection('queue');
+            $data = [];
+            $keys = Redis::keys('crawl_task*');
+            if (count($keys)) {
+                foreach ($keys as $key) {
+                    $data[] = ['key' => $key, 'count' => Redis::lLen($key)];
+                }
+            }
+        } catch (Exception $e) {
+            return $this->resError($e->getCode(), $e->getMessage());
+        }
+        return $this->resObjectGet($data, 'list', $request->path());
+    }
 }

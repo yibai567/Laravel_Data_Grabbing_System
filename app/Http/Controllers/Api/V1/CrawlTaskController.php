@@ -388,4 +388,23 @@ class CrawlTaskController extends Controller
         }
         return $this->resObjectGet($result, 'list', $request->path());
     }
+
+    /**
+     * 获取队列信息-名字及任务数
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getQueueInfo(Request $request)
+    {
+        $data = APIService::internalGet('/internal/crawl/task/queue/info');
+        if ($data['status_code'] !== 200) {
+            errorLog('[updateLastJobAt] error.', $data);
+            return $this->resError($data['status_code'], $data['message']);
+        }
+        $result = [];
+        if ($data['data']) {
+            $result = $data['data'];
+        }
+        return $this->resObjectGet($result, 'list', $request->path());
+    }
 }
