@@ -323,4 +323,39 @@ class CrawlTaskController extends Controller
         }
         return $this->resObjectGet($result, 'updateLastJobAt', $request->path());
     }
+
+
+    public function search(Request $request)
+    {
+        infoLog('[updateLastJobAt] start.');
+        $params = $request->all();
+        infoLog('[updateLastJobAt] validate start.');
+        $validator = Validator::make($params, [
+            'cron_type' => 'integer|required',
+            'is_proxy' => 'integer|required',
+            'protocol' => 'integer|required',
+        ]);
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                infoLog('[updateLastJobAt] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        try {
+            $items = CrawlTask::select('id,resource_url')
+                                ->where('protocol', $params['protocol'])
+                                ->where('is_proxy', $params['is_proxy'])
+                                ->where('cron_type', $params['protocol'])
+                                ->get();
+            $data = [];
+            if ($items) {
+                $data = $items->toArray();
+            }
+        } catch (Exception $e) {
+            errorLog($e->getMessage(), $e->getCode());
+            return $this->resError($e->getCode(), $e->getMessage());
+        }
+        return $this->resObjectGet($data, 'updateLastJobAt', $request->path());
+    }
 }

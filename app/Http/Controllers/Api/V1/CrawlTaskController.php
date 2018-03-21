@@ -355,5 +355,4 @@ class CrawlTaskController extends Controller
         }
         return $this->resObjectGet($result, 'crawl_task.updateLastJobAt', $request->path());
     }
-
 }

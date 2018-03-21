@@ -11,6 +11,7 @@ use App\Services\APIService;
 use App\Services\WeWorkService;
 use Dompdf\Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Validator;
 
 class CrawlTaskController extends Controller
@@ -411,4 +412,24 @@ class CrawlTaskController extends Controller
         return $this->resObjectGet($result, 'crawl_task.updateLastJobAt', $request->path());
     }
 
+    public function getByQueueName(Request $request)
+    {
+        infoLog('[getByQueueName] start.');
+        $params = $request->all();
+        infoLog('[getByQueueName] validate start.');
+        $validator = Validator::make($params, [
+            'name' => 'string|required|max:50',
+        ]);
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                infoLog('[getByQueueName] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        infoLog('[getByQueueName] validate end.');
+        Redis::connection(1);
+        $data = Redis::rrange($params['name'], 0, 5);
+        return $data;
+    }
 }
