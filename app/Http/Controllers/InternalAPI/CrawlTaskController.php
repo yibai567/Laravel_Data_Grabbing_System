@@ -423,7 +423,7 @@ class CrawlTaskController extends Controller
         $params = $request->all();
         infoLog('[getByQueueName] validate start.');
         $validator = Validator::make($params, [
-            'name' => 'string|required|max:50',
+            'name' => 'string|required|max:100',
         ]);
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -433,16 +433,20 @@ class CrawlTaskController extends Controller
             }
         }
         infoLog('[getByQueueName] validate end.');
-        Redis::connection('queue');
-        $data = [];
-        if (Redis::lLen($params['name']) > 0 ) {
-            for ($i = 0; $i < 5; $i++) {
-                $value = Redis::rpop($params['name']);
-                if (!isset($value)) {
-                    break;
+        try {
+            Redis::connection('queue');
+            $data = [];
+            if (Redis::lLen($params['name']) > 0 ) {
+                for ($i = 0; $i < 5; $i++) {
+                    $value = Redis::rpop($params['name']);
+                    if (is_null($value)) {
+                        break;
+                    }
+                    $data[$i] = $value;
                 }
-                $data[$i] = $value;
             }
+        } catch (Exception $e) {
+            return $this->resError($e->getCode(), $e->getMessage());
         }
         return $this->resObjectGet($data, 'list', $request->path());
     }

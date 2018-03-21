@@ -367,7 +367,7 @@ class CrawlTaskController extends Controller
         $params = $request->all();
         infoLog('[getByQueueName] validate start.');
         $validator = Validator::make($params, [
-            'name' => 'string|required|max:50',
+            'name' => 'string|required|max:100',
         ]);
         if ($validator->fails()) {
             $errors = $validator->errors();
