@@ -62,12 +62,14 @@ class CrawlTask extends Model
         'setting_id',
         'test_result',
         'test_time',
-        'script_file',
-        'last_script_file',
         'status',
         'protocol',
         'is_proxy',
+        'is_ajax',
+        'is_login',
+        'is_wall',
         'start_time',
+        'keywords',
         'last_job_at',
     ];
 

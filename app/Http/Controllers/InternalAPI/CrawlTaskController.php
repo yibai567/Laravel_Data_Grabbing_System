@@ -29,10 +29,11 @@ class CrawlTaskController extends Controller
         $validator = Validator::make($params, [
             'resource_url' => 'required|string|nullable',
             'cron_type' => 'integer|nullable',
-            'keywords' => 'string|nullable',
-            'setting_id' => 'integer',
+            'selectors' => 'string|nullable|max:150',
+            'is_ajax' => 'integer|nullable',
+            'is_login' => 'integer|nullable',
+            'is_wall' => 'integer|nullable'
         ]);
-
         if ($validator->fails()) {
             $errors = $validator->errors();
             errorLog('[create] validate fail.', $errors);
@@ -43,14 +44,34 @@ class CrawlTaskController extends Controller
         }
 
         infoLog('[create] validate end.');
-
+        // if (!empty($params['selectors'])) {
+        //     if (!isset($params['selectors']['range'])) {
+        //         $params['selectors'] = [];
+        //         $params['selectors']['range'] = [];
+        //     }
+        //     // if (isset($params['selectors']['range'])) {
+        //     //     $params['selectors']['range'] = [];
+        //     // }
+        //     // if (!isset($params['selectors']->content)) {
+        //     //     $params['selectors']->content = [];
+        //     // }
+        //     // if (!isset($params['selectors']->tag)) {
+        //     //     $params['selectors']->tag = [];
+        //     // }
+        // }
         if (empty($params['cron_type'])) {
             $params['cron_type'] = 1;
         }
-        if (empty($params['setting_id'])) {
-            $params['setting_id'] = 1;
-        }
 
+        if (empty($params['is_login'])) {
+            $params['is_login'] = 1;
+        }
+        if (empty($params['is_ajax'])) {
+            $params['is_ajax'] = 1;
+        }
+        if (empty($params['is_wall'])) {
+            $params['is_wall'] = 1;
+        }
         if (substr($params['resource_url'], 0, 8) == 'https://') {
             $params['protocol'] = CrawlTask::PROTOCOL_HTTPS;
         } else {
@@ -60,7 +81,6 @@ class CrawlTaskController extends Controller
             $params['is_proxy'] = 2;
         }
         $data = $params;
-
         infoLog('[create] prepare data.', $data);
         try{
             infoLog('[create] prepare data.', $data);
@@ -74,52 +94,16 @@ class CrawlTaskController extends Controller
             if ($res['data']) {
                 $task = $res['data'];
             }
-            $params = ['id'=> $task['id']];
             infoLog('[create] create success.', $task);
 
             // 异步触发TaskPreview事件
              event(new TaskPreview($task['id']));
 
-            $result = $params;
+            $result = $task;
         } catch (Exception $e){
             return $this->resError($e->getCode(), $e->getMessage());
         }
         return $this->resObjectGet($result, 'crawl_task', $request->path());
-    }
-
-    /**
-     * 状态更新
-     * @param Request $request
-     * @return mixed
-     */
-    public function updateStatus(Request $request)
-    {
-        infoLog('[createScript] start.');
-        $params = $request->all();
-        $validator = Validator::make($params, [
-            "id" => "integer|required",
-            "status" => "integer|required"
-        ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            foreach ($errors->all() as $value) {
-                return $this->resError(401, $value);
-            }
-        }
-        $taskId = $params['id'];
-        $status = $params['status'];
-        $params = ['id' => $taskId, 'status' => $status];
-        $data = APIService::internalPost('/internal/basic/crawl/task/status', $params);
-        if ($data['status_code'] !== 200) {
-            return $this->resError($data['status_code'], 'update fail');
-        }
-        $res = [];
-        if ($data['data']) {
-            $res = $data['data'];
-        }
-
-        return $this->resObjectGet($res, 'crawl_task.updateStatus', $request->path());
     }
 
     /**
@@ -155,74 +139,16 @@ class CrawlTaskController extends Controller
                 return $this->resError(401, 'task not start!');
             }
             $params = ['id' => $taskData['id'], 'status' => CrawlTask::IS_PAUSE];
-            $data = APIService::basePost('/internal/basic/crawl/task/status', $params);
-            if ($data['status_code'] !== 200) {
-                errorLog($data['messsage']);
-                throw new Exception('[stop] ' . $data['status_code'] . 'stop fail', 401);
+            $result = APIService::basePost('/internal/basic/crawl/task/update', $params);
+            if ($result['status_code'] !== 200) {
+                errorLog($result['messsage']);
+                throw new Exception('[stop] ' . $result['status_code'] . 'stop fail', 401);
             }
         } catch (Exception $e) {
             return $this->resError($e->getCode(), $e->getMessage());
         }
         infoLog('[stop] end.');
-        return $this->resObjectGet($taskData, 'crawl_task.stop', $request->path());
-    }
-
-    /**
-     * 执行接口-测试使用
-     * @return mixed
-     */
-    public function preview(Request $request)
-    {
-        infoLog('[preview] start.');
-        $params = $request->all();
-        infoLog('[preview] validate.', $params);
-        $validator = Validator::make($params, [
-            'id' => 'integer|required',
-        ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            foreach ($errors->all() as $value) {
-                infoLog('[preview] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-        infoLog('[start] validate end.');
-        try {
-            // 获取任务详情
-            $res = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
-            if ($res['status_code'] !== 200) {
-                errorLog($res['messsage']);
-                throw new Exception($res['messsage'], $res['status_code']);
-            }
-
-            $task = $res['data'];
-            $scriptFile = config('path.jinse_script_path') . '/' . $task['script_file'];
-
-            if (!file_exists($scriptFile)) {
-                throw new Exception('[preview] script file not exist', 401);
-            }
-            $command = 'casperjs ' . $scriptFile . ' --env=test';
-            exec($command, $output, $returnvar);
-            $params = ['id' => $task['id']];
-            if ($returnvar == 1) {
-                $params['status'] = CrawlTask::IS_TEST_ERROR;
-                $data = APIService::basePost('/internal/basic/crawl/task/status', $params);
-                if ($data['status_code'] !== 200) {
-                    throw new Exception('[preview] ' . $data['status_code'] . 'update fail', 401);
-                }
-                throw new Exception('[preview] command ' . $command . ' execute fail', 401);
-            }
-            $params['status'] = CrawlTask::IS_TEST_SUCCESS;
-            $data = APIService::basePost('/internal/basic/crawl/task/status', $params);
-            if ($data['status_code'] !== 200) {
-                throw new Exception('[preview] ' . $data['status_code'] . 'update fail', 401);
-            }
-        } catch(Exception $e) {
-            return $this->resError($e->getCode(), $e->getMessage());
-        }
-
-        return $this->resObjectGet($output, 'crawl_task.execute', $request->path());
+        return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 
     /**
@@ -247,7 +173,6 @@ class CrawlTaskController extends Controller
             }
         }
         infoLog('[start] validate end.');
-
         try {
             //获取任务详情
             $taskDetail = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
@@ -259,18 +184,8 @@ class CrawlTaskController extends Controller
             if ($taskData['status'] != CrawlTask::IS_TEST_SUCCESS && $taskData['status'] != CrawlTask::IS_PAUSE) {
                 return $this->resError(401, 'task status does not allow to start');
             }
-            // TODO 增加底层接口
-            $currentTaskNumber = CrawlTask::where('status', CrawlTask::IS_START_UP)->count();
-            $nodeNumber = CrawlNode::select('max_task_num')->first();
-            $maxTaskNumber = $nodeNumber->max_task_num;
-            if ($currentTaskNumber >= $maxTaskNumber) {
-                $weWorkService = new WeWorkService();
-                $noticeManager = config('wework.notice_manager');
-                $content = '没有可用Node节点，请及时添加!';
-                $weWorkService->sendTextToUser($noticeManager, $content);
-            }
             $params = ['id' => $taskData['id'], 'status' => CrawlTask::IS_START_UP];
-            $data = APIService::basePost('/internal/basic/crawl/task/status', $params);
+            $data = APIService::basePost('/internal/basic/crawl/task/update', $params);
             if ($data['status_code'] !== 200) {
                 errorLog($data['messsage']);
                 throw new Exception('[start] ' . $data['status_code'] . 'start fail', 401);
@@ -279,21 +194,22 @@ class CrawlTaskController extends Controller
             return $this->resError($e->getCode(), $e->getMessage());
         }
         infoLog('[start] end.');
-        return $this->resObjectGet($data, 'crawl_task.start', $request->path());
+        return $this->resObjectGet($data, 'crawl_task', $request->path());
     }
-
     /**
-     * 修改抓取返回结果
+     * 任务测试
+     * @param Request $request
+     * @return 任务测试
      */
-    public function updateResult(Request $request)
+    public function test(Request $request)
     {
-        infoLog('[updateResult] start.');
+        infoLog('[start] start.');
         $params = $request->all();
-        infoLog('[updateResult] validate.', $params);
+        infoLog('[start] validate.', $params);
         $validator = Validator::make($params, [
             'id' => 'integer|required',
-            'test_result' => 'nullable',
         ]);
+        infoLog('[start] validate.', $validator);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -302,23 +218,54 @@ class CrawlTaskController extends Controller
                 return $this->resError(401, $value);
             }
         }
-        infoLog('[updateResult] validate end.');
-        $result = [];
-        if (empty($params['test_result'])) {
-            infoLog('[updateResult] test_result empty.');
-            return $this->resObjectGet($result, 'crawl_task.result', $request->path());
+        infoLog('[start] validate end.');
+        //获取任务详情
+        $taskDetail = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
+        if ($taskDetail['status_code'] !== 200 || empty($taskDetail)) {
+            errorLog($taskDetail['messsage']);
+            throw new Exception($taskDetail['messsage'], $taskDetail['status_code']);
         }
-        infoLog('[updateResult] execute base api', $params);
-        $resultData = APIService::basePost('/internal/basic/crawl/task/result', $params);
-        if ($resultData['status_code'] !== 200) {
-            errorLog('[updateResult] result task error.');
-            return $this->resError($resultData['status_code'], $resultData['message']);
+        $output = 'test fail!';
+
+        $folder = '/keep';
+        $status = $taskDetail['data']['status'];
+        $protocol = $taskDetail['data']['protocol'];
+        if ($protocol == CrawlTask::PROTOCOL_HTTPS) {
+            $filePrefix = 'https_';
+        } else {
+            $filePrefix = 'http_';
         }
-        if ($resultData['data']) {
-            $result = $resultData['data'];
+        $file = $filePrefix . 'tmp_all_a.js';
+
+        $scriptFile = config('path.jinse_script_path') . $folder . '/' . $file;
+        $status = CrawlTask::IS_TEST_ERROR;
+        if (file_exists($scriptFile) && $crawlTask->status !== CrawlTask::IS_START_UP) {
+            $command = 'casperjs ' . $scriptFile . ' --taskid=' . $crawlTaskId;
+            exec($command, $output, $returnvar);
+            if ($returnvar == 0) {
+                if ($status == CrawlTask::IS_INIT || $status == CrawlTask::IS_TEST_ERROR) {
+                    $status = CrawlTask::IS_TEST_SUCCESS;
+                }
+            } else {
+                $status = CrawlTask::IS_TEST_ERROR;
+            }
         }
-        infoLog('[updateResult] end.', $result);
-        return $this->resObjectGet($result, 'crawl_task.result', $request->path());
+        if (is_array($output)) {
+            $output = json_encode($output);
+        }
+        $params['test_time'] = date('Y-m-d H:i:s');
+        $params['status'] = $status;
+        $params['test_result'] = $output;
+        try {
+            $result = APIService::basePost('/internal/basic/crawl/task/update', $params);
+            if ($result['status_code'] !== 200) {
+                errorLog($result['messsage']);
+                throw new Exception('[test] ' . $result['status_code'] . 'stop fail', 401);
+            }
+        } catch (Exception $e) {
+            return $this->resError($e->getCode(), $e->getMessage());
+        }
+        return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 
     /**
@@ -379,39 +326,6 @@ class CrawlTaskController extends Controller
         infoLog('[all] end.');
         return $this->resObjectGet($result, 'crawl_task.result', $request->path());
     }
-        /**
-     * 更新任务最后执行时间
-     * @param Request $request
-     */
-    public function updateLastJobAt(Request $request)
-    {
-        infoLog('[updateLastJobAt] start.');
-        $params = $request->all();
-        infoLog('[updateLastJobAt] validate start.');
-        $validator = Validator::make($params, [
-            'id' => 'integer|required',
-            'last_job_at' => 'required',
-        ]);
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            foreach ($errors->all() as $value) {
-                infoLog('[updateLastJobAt] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-        infoLog('[updateLastJobAt] validate end.');
-        $data = APIService::basePost('/internal/basic/crawl/task/last_job_at', $params);
-        if ($data['status_code'] !== 200) {
-            errorLog('[updateLastJobAt] error.', $data);
-            return $this->resError($data['status_code'], $data['message']);
-        }
-
-        if ($data['data']) {
-            $result = $data['data'];
-        }
-        return $this->resObjectGet($result, 'crawl_task.updateLastJobAt', $request->path());
-    }
-
     /**
      * 根据队列名获取队列数据
      * @param Request $request

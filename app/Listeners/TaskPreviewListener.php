@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\TaskPreview;
 use App\Models\CrawlTask;
+use App\Services\APIService;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -27,35 +28,12 @@ class TaskPreviewListener
      */
     public function handle(TaskPreview $event)
     {
-        $crawlTaskId = $event->id;
-        $crawlTask = CrawlTask::with('setting')->find($crawlTaskId);
-        $output = 'test fail!';
-
-        $folder = '/keep';
-
-        if ($crawlTask->protocol == CrawlTask::PROTOCOL_HTTPS) {
-            $filePrefix = 'https_';
-        } else {
-            $filePrefix = 'http_';
+        $params['id'] = $event->id;
+        $data = APIService::internalPost('/internal/crawl/task/test', $params);
+        if ($data['status_code'] !== 200) {
+            errorLog($data['message'], $data['status_code']);
+            return response()->json($data);
         }
 
-        $file = $filePrefix . 'tmp_all_a.js';
-
-        $scriptFile = config('path.jinse_script_path') . $folder . '/' . $file;
-        $status = CrawlTask::IS_TEST_ERROR;
-        if (file_exists($scriptFile) && $crawlTask->status !== CrawlTask::IS_START_UP) {
-            $command = 'casperjs ' . $scriptFile . ' --taskid=' . $crawlTaskId;
-            exec($command, $output, $returnvar);
-            if ($returnvar == 0) {
-                $status = CrawlTask::IS_TEST_SUCCESS;
-            }
-        }
-        if (is_array($output)) {
-            $output = json_encode($output);
-        }
-        $crawlTask->test_time = date('Y-m-d H:i:s');
-        $crawlTask->status = $status;
-        $crawlTask->test_result = $output;
-        $crawlTask->save();    
     }
 }

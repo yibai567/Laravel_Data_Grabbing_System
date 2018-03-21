@@ -93,20 +93,20 @@ if (!function_exists('arrayRemovalDuplicate')){
 }
 
 if (!function_exists('formatPlarformData')) {
-    function formatPlarformData($result, $is_test) {
-        $platformData = [];
-        $platformData['is_test'] = $is_test;
-        foreach ($result as $platformValue) {
-            $newParams = [];
-            if (empty($is_test)) {
-                $newParams['title'] = json_decode($platformValue['format_data']);
-            } else {
-                $newParams['title'] = $platformValue['format_data'];
-            }
-            $newParams['url'] = $platformValue['task_url'];
-            $newParams['task_id'] = $platformValue['crawl_task_id'];
-            $platformData['result'][] = $newParams;
-        }
-        return sign($platformData);
+    function formatPlarformData($data) {
+        // $platformData = [];
+        // $platformData['is_test'] = $is_test;
+        // foreach ($result as $platformValue) {
+        //     $newParams = [];
+        //     if (empty($is_test)) {
+        //         $newParams['title'] = json_decode($platformValue['format_data']);
+        //     } else {
+        //         $newParams['title'] = $platformValue['format_data'];
+        //     }
+        //     $newParams['url'] = $platformValue['task_url'];
+        //     $newParams['task_id'] = $platformValue['crawl_task_id'];
+        //     $platformData['result'][] = $newParams;
+        // }
+        return sign($data);
     }
 }

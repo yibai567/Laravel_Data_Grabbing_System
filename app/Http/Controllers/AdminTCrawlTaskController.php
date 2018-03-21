@@ -65,7 +65,9 @@
 			$this->col[] = ["label"=>"ID","name"=>"id"];
 			$this->col[] = ["label"=>"任务名称","name"=>"name"];
 			$this->col[] = ["label"=>"任务描述","name"=>"description"];
-			$this->col[] = ["label"=>"资源URL","name"=>"resource_url"];
+            $this->col[] = ["label"=>"资源URL","name"=>"resource_url",'width'=>'300',"callback"=>function ($row) {
+                return '<a href="' . $row->resource_url . '" target="_brank" style="width:300px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->resource_url .'</a>';
+            }];
 			//$this->col[] = ["label"=>"Cron类型","name"=>"cron_type"];
             $this->col[] = ["label"=>"Cron类型","name"=>"cron_type","callback"=>function ($row) {
                 if ( $row->cron_type == self::CRON_MINUTE) {

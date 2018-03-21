@@ -16,27 +16,30 @@ class CrawlResultController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function createByBatch(Request $request)
+    public function createForBatch(Request $request)
     {
         $params = $request->all();
-        infoLog("[createByBatch] start.");
+        infoLog("[basic:createForBatch] start.");
         $validator = Validator::make($params, [
-            'data' => 'nullable',
+            'task_id' => 'required|integer',
+            'is_test' => 'integer|nullable',
+            'start_time' => 'date|nullable',
+            'end_time' => 'date|nullable',
+            'result' => 'nullable',
         ]);
-        infoLog('[createByBatch] params validator start');
+        infoLog('[basic:createForBatch] params validator start');
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                errorLog('[createByBatch] params validator fail', $value);
+                errorLog('[basic:createForBatch] params validator fail', $value);
                 return response($value, 401);
             }
         }
-        infoLog('[params validator] end.');
-        $result = [];
+        infoLog('[basic:createForBatch] params validator end.');
 
-        if (empty($params['data'])) {
-            infoLog('[createByBatch] data empty!');
-            return $this->resObjectGet($result, 'crawl_result', $request->path());
+        if (empty($params['result'])) {
+            infoLog('[basic:createForBatch] result empty!');
+            return $this->resObjectGet($params['task_id'], 'crawl_result', $request->path());
         }
         $items = [];
         foreach ($params['data'] as $item) {
@@ -60,7 +63,7 @@ class CrawlResultController extends Controller
     }
 
     /**
-     * 根据任务id及任务url判断任务是否存在
+     * 任务结果列表
      * @param $taskId
      * @param $taskUrl
      * @return bool
@@ -86,5 +89,87 @@ class CrawlResultController extends Controller
         }
         return $this->resObjectGet($data, 'crawl_result', $request->path());
     }
+    /**
+     * search
+     * 根据条件获取结果纪录
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function all(Request $request)
+    {
+        $params =$request->all();
+        //数据验证规则
+        $validator = Validator::make($request->all(), [
+            "limit" => "nullable|integer|min:1",
+            "offset" => "nullable|integer|min:0",
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return  $this->response->error($value, 401);
+            }
+        }
+        try {
+            $items = CrawlResult::take($params['limit'])
+                                ->skip($params['offset'])
+                                ->orderBy('id', 'desc')
+                                ->get();
+            $result = [];
+            if ($items) {
+                $result = $items->toArray();
+            }
+        } catch (Exception $e) {
+            errorLog($e->getMessage(), $e->getCode());
+            return $this->resError($e->getCode(), $e->getMessage());
+        }
+        return $this->resObjectGet($result, 'list', $request->path());
+    }
+    /**
+     * search
+     * 根据复杂条件获取结果纪录
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function search(Request $request)
+    {
+        $params =$request->all();
+        //数据验证规则
+        $validator = Validator::make($request->all(), [
+            "task_id" => "nullable|integer",
+            "url" => "nullable|string",
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                return  $this->response->error($value, 401);
+            }
+        }
+
+        try {
+            $query = CrawlResult::where('id', '<>', 0);
+            if (!empty($params['id'])) {
+                $query->where('crawl_task_id', $params['task_id']);
+            }
+            if (!empty($params['url'])) {
+                $query->where('task_url', $params['url']);
+            }
+            //$query->take($params['limit']);
+            //$query->skip($params['offset']);
+            $items = $query->get();
+            $result = [];
+            if ($items) {
+                $result = $items->toArray();
+            }
+        } catch (Exception $e) {
+            errorLog($e->getMessage(), $e->getCode());
+            return $this->resError($e->getCode(), $e->getMessage());
+        }
+        return $this->resObjectGet($result, 'list', $request->path());
+    }
+
 
 }
