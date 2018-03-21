@@ -31,5 +31,6 @@ $api->version(
         $api->post('/crawl/result/batch_result', 'CrawlResultController@createByBatch');
 
         $api->get('/crawl/task/queue/name', 'CrawlTaskController@getByQueueName');
+        $api->get('/crawl/task/queue/info', 'CrawlTaskController@getQueueInfo');
     }
 );
