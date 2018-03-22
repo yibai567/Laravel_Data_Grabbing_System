@@ -138,6 +138,9 @@ class CrawlTaskController extends Controller
                 throw new Exception($taskDetail['messsage'], $taskDetail['status_code']);
             }
             $taskData = $taskDetail['data'];
+            if (empty($taskData)) {
+                return $this->resError(401, 'task does not exist!');
+            }
             if ($taskData['status'] !== CrawlTask::IS_START_UP) {
                 return $this->resError(401, 'task not start!');
             }
@@ -184,6 +187,9 @@ class CrawlTaskController extends Controller
                 throw new Exception($taskDetail['messsage'], $taskDetail['status_code']);
             }
             $taskData = $taskDetail['data'];
+            if (empty($taskData)) {
+                return $this->resError(401, 'task does not exist');
+            }
             if ($taskData['status'] != CrawlTask::IS_TEST_SUCCESS && $taskData['status'] != CrawlTask::IS_PAUSE) {
                 return $this->resError(401, 'task status does not allow to start');
             }
