@@ -25,7 +25,7 @@ class CrawlTaskController extends Controller
             'description' => 'string|nullable',
             'resource_url' => 'string|nullable',
             'cron_type' => 'integer|nullable',
-            'selectors' => 'string|nullable',
+            'selectors' => 'nullable',
             'response_type' => 'string|nullable',
             'response_url' => 'string|nullable',
             'keywords' => 'string|nullable',
@@ -46,6 +46,7 @@ class CrawlTaskController extends Controller
                 return $this->resError(401, $value);
             }
         }
+        $params['selectors'] = json_encode($params['selectors']);
         infoLog('[create] validate end.', $params);
         $fieldList = ['name', 'description', 'resource_url', 'cron_type', 'selectors', 'setting_id', 'protocol', 'is_proxy', 'is_ajax', 'is_login', 'is_wall', 'keywords'];
         $data = array_only($params, $fieldList);
