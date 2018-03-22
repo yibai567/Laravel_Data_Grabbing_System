@@ -103,6 +103,7 @@ class CrawlTaskController extends Controller
                 $listName = 'crawl_task_http_test';
             }
             $result = $task;
+            Redis::connection('queue');
             Redis::lpush($listName, json_encode($item));
         } catch (Exception $e){
             return $this->resError($e->getCode(), $e->getMessage());
@@ -248,6 +249,7 @@ class CrawlTaskController extends Controller
         } else {
             $listName = 'crawl_task_http_test';
         }
+        Redis::connection('queue');
         Redis::lpush($listName, json_encode($item));
         return $this->resObjectGet('测试已提交，请稍后查询结果！', 'crawl_task', $request->path());
     }
