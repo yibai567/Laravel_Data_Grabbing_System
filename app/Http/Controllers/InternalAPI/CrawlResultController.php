@@ -32,7 +32,7 @@ class CrawlResultController extends Controller
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
                 errorLog('[internal:createForBatch] params validator fail.', $value);
-                return resError(401, $value);
+                return $this->resError(401, $value);
             }
         }
         infoLog('[internal:createForBatch] params validator end.');
@@ -41,7 +41,7 @@ class CrawlResultController extends Controller
         infoLog('[internal:createForBatch] task detail start.');
         $taskDetail = $this->__taskDetail($params['task_id']);
         if (empty($taskDetail)) {
-            return resError(401, '任务不存在');
+            return $this->resError(401, '任务不存在');
         }
         infoLog('[internal:createForBatch] task detail end.');
 
@@ -119,7 +119,7 @@ class CrawlResultController extends Controller
         $platformResult = APIService::post(config('url.platform_url'), $platformData);
         if (!empty($platformResult)) {
             infoLog('[internal:createForBatch] request platform API error', $platformData);
-            return resError(501, '数据发送异常');
+            return $this->resError(501, '数据发送异常');
         }
     }
 
@@ -141,7 +141,7 @@ class CrawlResultController extends Controller
         $taskResult = APIService::internalPost('/internal/basic/crawl/task/update', $taskParams, 'json');
         if ($taskResult['status_code'] != 200) {
             errorLog('[internal:createForBatch] update t_crawl_task last_job_at error', $taskParams);
-            return resError($taskResult['status_code'], $taskResult['message']);
+            return $this->resError($taskResult['status_code'], $taskResult['message']);
         }
     }
     private function __dataFilter($data,$taskUrl)

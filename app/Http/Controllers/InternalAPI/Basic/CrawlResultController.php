@@ -33,7 +33,7 @@ class CrawlResultController extends Controller
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
                 errorLog('[basic:createForBatch] params validator fail', $value);
-                return resError($value, 401);
+                return $this->resError(401, $value);
             }
         }
         infoLog('[basic:createForBatch] params validator end.');
@@ -56,7 +56,7 @@ class CrawlResultController extends Controller
         $result = CrawlResult::insert($items);
         if (!$result) {
             errorLog('[basic:createByBatch] insert fail.', $items);
-            return resError('插入失败', 402);
+            return $this->resError(402, '插入失败');
         }
         infoLog('[basic:createByBatch] insert end.', $result);
         infoLog('[basic:createByBatch] end.');

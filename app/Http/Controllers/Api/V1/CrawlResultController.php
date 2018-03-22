@@ -31,7 +31,7 @@ class CrawlResultController extends Controller
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
                 errorLog('[v1:createForBatch] params validator fail', $value);
-                return resError(401, $value);
+                return $this->resError(401, $value);
             }
         }
         infoLog('[v1:createForBatch] params validator end.');
