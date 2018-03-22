@@ -103,6 +103,11 @@ class AutomateTask extends Command
         foreach ($data as $item)
         {
             $key = $this->_getKey($item);
+            $item = [
+                'task_id' => $item['id'],
+                'selector' => $item['selectors'],
+                'url' => $item['resource_url'],
+            ];
             $result[$key][] = $item;
         }
         return $result;
@@ -118,8 +123,7 @@ class AutomateTask extends Command
         foreach ($data as $key => $items) {
             if (Redis::lLen($key) <= 0 && count($items) > 0 ) {
                 foreach($items as $item) {
-                    $task = array_only($item, ['id', 'resource_url', 'selectors']);
-                    Redis::lpush($key, json_encode($task));
+                    Redis::lpush($key, json_encode($item));
                 }
             }
         }
