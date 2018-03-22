@@ -99,7 +99,7 @@ class CrawlTaskController extends Controller
             ];
 
             $result = $task;
-            Redis::lpush('crawl_task_test', $item);
+            Redis::lpush('crawl_task_test', json_encode($item));
         } catch (Exception $e){
             return $this->resError($e->getCode(), $e->getMessage());
         }
@@ -230,20 +230,12 @@ class CrawlTaskController extends Controller
             errorLog($taskDetail['messsage']);
             throw new Exception($taskDetail['messsage'], $taskDetail['status_code']);
         }
+        // 初始化output值
         $output = 'test fail!';
 
-        $folder = '/keep';
         $status = $taskDetail['data']['status'];
-        $protocol = $taskDetail['data']['protocol'];
         $crawlTaskId = $taskDetail['data']['id'];
-        if ($protocol == CrawlTask::PROTOCOL_HTTPS) {
-            $filePrefix = 'https_';
-        } else {
-            $filePrefix = 'http_';
-        }
-        $file = $filePrefix . 'tmp_all_a.js';
-
-        $scriptFile = config('path.jinse_script_path') . $folder . '/' . $file;
+        $scriptFile = config('path.jinse_script_path') . '/crawl_no_proxy_script.js';
         if (file_exists($scriptFile) && $status !== CrawlTask::IS_START_UP) {
             $command = 'casperjs ' . $scriptFile . ' --taskid=' . $crawlTaskId;
             exec($command, $output, $returnvar);
