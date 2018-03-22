@@ -24,6 +24,7 @@ $api->version(
         $api->post('/crawl/task/stop', 'CrawlTaskController@stop');
         $api->post('/crawl/task/start','CrawlTaskController@start');
         $api->get('/crawl/tasks','CrawlTaskController@all');
+        $api->get('/crawl/tasks/ids','CrawlTaskController@listByIds');
         $api->get('/crawl/task/queue/name', 'CrawlTaskController@getByQueueName');
         $api->get('/crawl/task/queue/info', 'CrawlTaskController@getQueueInfo');
         $api->post('/crawl/results', 'CrawlResultController@createForBatch');

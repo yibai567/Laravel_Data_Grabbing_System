@@ -237,7 +237,7 @@ class CrawlTaskController extends Controller
             }
         }
         infoLog('[listByIds] validate end.');
-        $data = APIService::internalPost('/internal/crawl/task/ids', $params);
+        $data = APIService::internalGet('/internal/crawl/tasks/ids', $params);
         if ($data['status_code'] !== 200) {
             errorLog('[listByIds] error.', $data);
             return $this->resError($data['status_code'], $data['message']);

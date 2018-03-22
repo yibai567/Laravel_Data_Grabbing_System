@@ -16,6 +16,7 @@ $api->version(
         $api->post('/crawl/task', 'CrawlTaskController@create');
         $api->post('/crawl/task/update','CrawlTaskController@update');
         $api->get('/crawl/tasks', 'CrawlTaskController@all');
+        $api->get('/crawl/tasks/ids','CrawlTaskController@listByIds');
     }
 );
 
@@ -35,6 +36,6 @@ $api->version(
         $api->post('/crawl/task/start', 'CrawlTaskController@start');
         $api->get('/crawl/tasks', 'CrawlTaskController@all');
         $api->post('/crawl/results', 'CrawlResultController@createForBatch');
-
+        $api->get('/crawl/tasks/ids','CrawlTaskController@listByIds');
     }
 );
