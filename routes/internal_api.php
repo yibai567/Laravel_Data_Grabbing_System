@@ -11,7 +11,7 @@ $api->version(
         });
         $api->post('/crawl/results', 'CrawlResultController@createForBatch');
         $api->get('/crawl/results', 'CrawlResultController@all');
-        $api->get('/crawl/result/search', 'CrawlResultController@search');
+        $api->post('/crawl/result/search', 'CrawlResultController@search');
         $api->get('/crawl/task', 'CrawlTaskController@retrieve');
         $api->post('/crawl/task', 'CrawlTaskController@create');
         $api->post('/crawl/task/update','CrawlTaskController@update');

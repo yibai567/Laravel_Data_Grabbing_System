@@ -114,25 +114,26 @@ class CrawlResultController extends Controller
         $validator = Validator::make($request->all(), [
             "task_id" => "nullable|integer",
             "url" => "nullable|string",
+            "original_data" => "nullable|string",
         ]);
-
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
                 return  $this->response->error($value, 401);
             }
         }
-
         try {
             $items = CrawlResult::where(function ($query) use ($params) {
-                if (!empty($params['id'])) {
+                if (!empty($params['task_id'])) {
                     $query->where('crawl_task_id', $params['task_id']);
+                }
+                if (!empty($params['original_data'])) {
+                    $query->where('original_data', $params['original_data']);
                 }
                 if (!empty($params['url'])) {
                     $query->where('task_url', $params['url']);
                 }
             })->get();
-
             //$query->take($params['limit']);
             //$query->skip($params['offset']);
             $result = [];
