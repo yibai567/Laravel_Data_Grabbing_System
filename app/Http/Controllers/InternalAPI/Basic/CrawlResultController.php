@@ -9,6 +9,7 @@ use App\Http\Controllers\InternalAPI\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+
 class CrawlResultController extends Controller
 {
     /**
@@ -32,7 +33,7 @@ class CrawlResultController extends Controller
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
                 errorLog('[basic:createForBatch] params validator fail', $value);
-                return response($value, 401);
+                return resError($value, 401);
             }
         }
         infoLog('[basic:createForBatch] params validator end.');
@@ -41,53 +42,25 @@ class CrawlResultController extends Controller
             infoLog('[basic:createForBatch] result empty!');
             return $this->resObjectGet($params['task_id'], 'crawl_result', $request->path());
         }
+
         $items = [];
-        foreach ($params['data'] as $item) {
-            $item['format_data'] = json_encode($item['format_data']);
-            $item['status'] = CrawlResult::IS_PROCESSED;
-            unset($item['data'],$item['is_test']);
+        foreach ($params['result'] as $value) {
+            $item['format_data'] = json_encode($value);
+            $item['status'] = CrawlResult::IS_UNTREATED;
+            $item['crawl_task_id'] = $params['task_id'];
+            $item['task_start_time'] = $params['start_time'];
+            $item['task_end_time'] = $params['end_time'];
+            $item['task_url'] = $value['url'];
             $items[] = $item;
-        }
-        if (empty($items)) {
-            infoLog('[createByBatch] items empty!');
-            return $this->resObjectGet($result, 'crawl_result', $request->path());
         }
         $result = CrawlResult::insert($items);
         if (!$result) {
-            errorLog('[createByBatch] insert fail.', $items);
-            return response('插入失败', 402);
+            errorLog('[basic:createByBatch] insert fail.', $items);
+            return resError('插入失败', 402);
         }
-        infoLog('[createByBatch] insert end.', $result);
-        infoLog('[createByBatch] end.');
-        return $this->resObjectGet($items, 'crawl_result', $request->path());
-    }
-
-    /**
-     * 任务结果列表
-     * @param $taskId
-     * @param $taskUrl
-     * @return bool
-     */
-    public function isTaskExist(Request $request)
-    {
-        $params = $request->all();
-        $validator = Validator::make($params, [
-            'id' => 'integer|required',
-            'url' => 'string|nullable',
-        ]);
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            foreach ($errors->all() as $value) {
-                return $this->resError(401, $value);
-            }
-        }
-        $result = CrawlResult::where(['task_url' => $params['url'], 'crawl_task_id' => $params['id']])
-            ->first();
-        $data = [];
-        if ($result) {
-            $data = $result->toArray();
-        }
-        return $this->resObjectGet($data, 'crawl_result', $request->path());
+        infoLog('[basic:createByBatch] insert end.', $result);
+        infoLog('[basic:createByBatch] end.');
+        return $this->resObjectGet($params, 'list', $request->path());
     }
     /**
      * search
@@ -124,6 +97,7 @@ class CrawlResultController extends Controller
             errorLog($e->getMessage(), $e->getCode());
             return $this->resError($e->getCode(), $e->getMessage());
         }
+
         return $this->resObjectGet($result, 'list', $request->path());
     }
     /**

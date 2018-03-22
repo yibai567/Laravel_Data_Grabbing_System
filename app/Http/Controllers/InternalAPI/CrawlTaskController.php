@@ -23,7 +23,7 @@ class CrawlTaskController extends Controller
         $params = $request->all();
         infoLog('[create] validate.', $params);
         $validator = Validator::make($params, [
-            'resource_url' => 'required|string|nullable',
+            'resource_url' => 'required|string',
             'cron_type' => 'integer|nullable',
             'selectors' => 'string|nullable|max:150',
             'is_ajax' => 'integer|nullable',
@@ -265,64 +265,6 @@ class CrawlTaskController extends Controller
         return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 
-    /**
-     * 任务列表
-     * @param Request $request
-     * @return 任务列表
-     */
-    public function all(Request $request)
-    {
-        infoLog('[all] start.');
-        $params = $request->all();
-        infoLog('[all] validate.', $params);
-        $validator = Validator::make($params, [
-            'limit' => 'integer|nullable',
-            'offset' => 'integer|nullable',
-            'protocol' => 'integer|nullable',
-            'cron_type' => 'integer|nullable',
-            'task_id' => 'integer|nullable',
-            'is_proxy' => 'integer|nullable',
-        ]);
-        infoLog('[all] validate start.');
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            foreach ($errors->all() as $value) {
-                infoLog('[start] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-        if (empty($params['limit'])) {
-            $params['limit'] = 10;
-        }
-        if (empty($params['offset'])) {
-            $params['offset'] = 0;
-        }
-        if (empty($params['protocol'])) {
-            $params['protocol'] = 1;
-        }
-        if (empty($params['cron_type'])) {
-            $params['cron_type'] = 1;
-        }
-        if (empty($params['is_proxy'])) {
-            $params['is_proxy'] = 2;
-        }
-
-        infoLog('[all] validate end.');
-        $data = APIService::baseGet('/internal/basic/crawl/tasks', $params);
-        if ($data['status_code'] !== 200) {
-            errorLog('[all] result task error.');
-            return $this->resError($data['status_code'], $data['message']);
-        }
-
-        if ($data['data']) {
-            foreach ($data['data'] as $key => $value) {
-                unset($value['test_result']);
-                $result[] = $value;
-            }
-        }
-        infoLog('[all] end.');
-        return $this->resObjectGet($result, 'list', $request->path());
-    }
     /**
      * 根据队列名获取队列数据
      * @param Request $request
