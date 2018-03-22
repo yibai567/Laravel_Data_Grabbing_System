@@ -106,7 +106,7 @@ class CrawlResultController extends Controller
             $value['task_id'] = $params['task_id'];
             $platformParams['result'][] = $value;
         }
-        $platformData = formatPlarformData($platformParams);
+        $platformData = sign($platformParams);
         $platformResult = APIService::post(config('url.platform_url'), $platformData);
         if (!empty($platformResult)) {
             infoLog('[internal:createForBatch] request platform API error', $platformData);

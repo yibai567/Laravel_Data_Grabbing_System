@@ -21,7 +21,7 @@ class CrawlTaskController extends Controller
         $validator = Validator::make($params, [
             'resource_url' => 'required|string',
             'cron_type' => 'integer|nullable',
-            'selectors' => 'string|nullable',
+            'selectors' => 'nullable',
             'is_ajax' => 'integer|nullable',
             'is_login' => 'integer|nullable',
             'is_wall' => 'integer|nullable',

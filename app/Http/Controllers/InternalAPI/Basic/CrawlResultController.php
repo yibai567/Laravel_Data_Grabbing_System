@@ -42,10 +42,10 @@ class CrawlResultController extends Controller
             infoLog('[basic:createForBatch] result empty!');
             return $this->resObjectGet($params['task_id'], 'crawl_result', $request->path());
         }
-
         $items = [];
         foreach ($params['result'] as $value) {
             $item['format_data'] = json_encode($value);
+            $item['original_data'] = md5($item['format_data']);
             $item['status'] = CrawlResult::IS_UNTREATED;
             $item['crawl_task_id'] = $params['task_id'];
             $item['task_start_time'] = $params['start_time'];

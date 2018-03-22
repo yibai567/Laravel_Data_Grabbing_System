@@ -25,7 +25,7 @@ class CrawlTaskController extends Controller
         $validator = Validator::make($params, [
             'resource_url' => 'required|string',
             'cron_type' => 'integer|nullable',
-            'selectors' => 'string|nullable|max:150',
+            'selectors' => 'nullable',
             'is_ajax' => 'integer|nullable',
             'is_login' => 'integer|nullable',
             'is_wall' => 'integer|nullable',
@@ -39,23 +39,29 @@ class CrawlTaskController extends Controller
                 return $this->resError(401, $value);
             }
         }
-
+        if (!isset($params['selectors']['range'])) {
+            $params['selectors']['range'] = '';
+        } else {
+            if (!empty($params['selectors']['range'])) {
+                if (strlen($params['selectors']['range']) > 50) {
+                    return $this->resError(401, 'range 值不能超出50个字符');
+                }
+            }
+        }
+        if (!isset($params['selectors']['content'])) {
+            $params['selectors']['content'] = '';
+        } else {
+            if (!empty($params['selectors']['content'])) {
+                if (strlen($params['selectors']['content']) > 50) {
+                    return $this->resError(401, 'content 值不能超出50个字符');
+                }
+            }
+        }
+        if (!isset($params['selectors']['tags'])) {
+            $params['selectors']['tags'] = [];
+        }
         infoLog('[create] validate end.');
-        // if (!empty($params['selectors'])) {
-        //     if (!isset($params['selectors']['range'])) {
-        //         $params['selectors'] = [];
-        //         $params['selectors']['range'] = [];
-        //     }
-        //     // if (isset($params['selectors']['range'])) {
-        //     //     $params['selectors']['range'] = [];
-        //     // }
-        //     // if (!isset($params['selectors']->content)) {
-        //     //     $params['selectors']->content = [];
-        //     // }
-        //     // if (!isset($params['selectors']->tag)) {
-        //     //     $params['selectors']->tag = [];
-        //     // }
-        // }
+
         if (empty($params['cron_type'])) {
             $params['cron_type'] = 1;
         }
@@ -295,7 +301,7 @@ class CrawlTaskController extends Controller
                     if (is_null($value)) {
                         break;
                     }
-                    $data[$i] = json_decode($value, true);
+                    $data[$i] = $value;
                 }
             }
         } catch (Exception $e) {
