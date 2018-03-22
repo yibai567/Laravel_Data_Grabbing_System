@@ -353,7 +353,7 @@ class CrawlTaskController extends Controller
                     if (is_null($value)) {
                         break;
                     }
-                    $data[$i] = $value;
+                    $data[$i] = json_decode($value, true);
                 }
             }
         } catch (Exception $e) {
