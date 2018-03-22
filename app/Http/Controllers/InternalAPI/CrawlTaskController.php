@@ -39,41 +39,37 @@ class CrawlTaskController extends Controller
                 return $this->resError(401, $value);
             }
         }
-        if (!isset($params['selectors']['range'])) {
-            $params['selectors']['range'] = '';
-        } else {
-            if (!empty($params['selectors']['range'])) {
-                if (strlen($params['selectors']['range']) > 50) {
-                    return $this->resError(401, 'range 值不能超出50个字符');
+        $selectors = ['range' => '','content' => [], 'tags' => []];
+        if (is_array($params['selectors'])) {
+            if (isset($params['selectors']['range'])) {
+                if (mb_strlen($params['selectors']['range']) > 200) {
+                    return $this->resError(401, 'range 不能超过200');
                 }
+                $selectors['range'] = $params['selectors']['range'];
+            }
+            if (isset($params['selectors']['content'])) {
+                $selectors['content'] = $params['selectors']['content'];
+            }
+
+            if  (isset($params['selectors']['tags'])) {
+                $selectors['tags'] = $params['selectors']['tags'];
             }
         }
-        if (!isset($params['selectors']['content'])) {
-            $params['selectors']['content'] = '';
-        } else {
-            if (!empty($params['selectors']['content'])) {
-                if (strlen($params['selectors']['content']) > 50) {
-                    return $this->resError(401, 'content 值不能超出50个字符');
-                }
-            }
-        }
-        if (!isset($params['selectors']['tags'])) {
-            $params['selectors']['tags'] = [];
-        }
+        $params['selectors'] = $selectors;
         infoLog('[create] validate end.');
 
         if (empty($params['cron_type'])) {
-            $params['cron_type'] = 1;
+            $params['cron_type'] = CrawlTask::CRON_TYPE_KEEP;
         }
 
         if (empty($params['is_login'])) {
-            $params['is_login'] = 1;
+            $params['is_login'] = CrawlTask::IS_LOGIN_FALSE;
         }
         if (empty($params['is_ajax'])) {
-            $params['is_ajax'] = 1;
+            $params['is_ajax'] = CrawlTask::IS_AJAX_FALSE;
         }
         if (empty($params['is_wall'])) {
-            $params['is_wall'] = 1;
+            $params['is_wall'] = CrawlTask::IS_WALL_FALSE;
         }
         if (substr($params['resource_url'], 0, 8) == 'https://') {
             $params['protocol'] = CrawlTask::PROTOCOL_HTTPS;
@@ -81,13 +77,13 @@ class CrawlTaskController extends Controller
             $params['protocol'] = CrawlTask::PROTOCOL_HTTP;
         }
         if (empty($params['is_proxy'])) {
-            $params['is_proxy'] = 2;
+            $params['is_proxy'] = CrawlTask::IS_PROXY_FALSE;
         }
         $data = $params;
         infoLog('[create] prepare data.', $data);
         try{
             infoLog('[create] prepare data.', $data);
-            $res = APIService::basePost('/internal/basic/crawl/task', $data);
+            $res = APIService::basePost('/internal/basic/crawl/task', $data, 'json');
             infoLog('[create] create task.', $res);
             if ($res['status_code'] !== 200) {
                 errorLog($res['message'], $res['status_code']);
@@ -98,7 +94,6 @@ class CrawlTaskController extends Controller
                 $task = $res['data'];
             }
             infoLog('[create] create success.', $task);
-
             // 异步触发TaskPreview事件
              event(new TaskPreview($task['id']));
 
@@ -212,22 +207,21 @@ class CrawlTaskController extends Controller
      */
     public function test(Request $request)
     {
-        infoLog('[start] start.');
+        infoLog('[test] start.');
         $params = $request->all();
-        infoLog('[start] validate.', $params);
+        infoLog('[test] validate.', $params);
         $validator = Validator::make($params, [
             'id' => 'integer|required',
         ]);
-        infoLog('[start] validate.', $validator);
-
+        infoLog('[test] validate.', $validator);
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                infoLog('[start] validate fail message.', $value);
+                infoLog('[test] validate fail message.', $value);
                 return $this->resError(401, $value);
             }
         }
-        infoLog('[start] validate end.');
+        infoLog('[test] validate end.');
         //获取任务详情
         $taskDetail = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
         if ($taskDetail['status_code'] !== 200 || empty($taskDetail)) {
@@ -266,10 +260,10 @@ class CrawlTaskController extends Controller
         $params['status'] = $status;
         $params['test_result'] = $output;
         try {
-            $result = APIService::basePost('/internal/basic/crawl/task/update', $params);
+            $result = APIService::basePost('/internal/basic/crawl/task/update', $params, 'json');
             if ($result['status_code'] !== 200) {
                 errorLog($result['messsage']);
-                throw new Exception('[test] ' . $result['status_code'] . 'stop fail', 401);
+                throw new Exception('[test] ' . $result['status_code'] . 'test fail', 401);
             }
         } catch (Exception $e) {
             return $this->resError($e->getCode(), $e->getMessage());
