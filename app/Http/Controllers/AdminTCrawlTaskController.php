@@ -171,7 +171,7 @@
 	        |
 	        */
 	        $this->addaction = array();
-            $this->addaction[] = ['label'=>'测试', 'url'=>CRUDBooster::mainpath('test-result/[id]'),'color'=>'info', 'icon'=>'fa fa-play','showIf'=>'[status] == ' . self::STATUS_NO_STARTING . '|| [status] == ' . self::STATUS_TEST_FAIL];
+            $this->addaction[] = ['label'=>'测试', 'url'=>CRUDBooster::mainpath('test-result/[id]'),'color'=>'info', 'icon'=>'fa fa-play'];
 
             $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]/' . self::STATUS_START_UP),'color'=>'success', 'icon'=>'fa fa-play', 'showIf'=>'[status] == ' . self::STATUS_TEST_SUCCESS . '|| [status] == ' . self::STATUS_STOP];
 
@@ -389,6 +389,7 @@
             if ($postdata['status'] == self::STATUS_START_UP) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "状态启动中不能修改，请返回", "info");
             }
+            $postdata['status'] = 1;
 	        //Your code here
 
 	    }
@@ -442,7 +443,14 @@
 
         public function getTestResult($id)
         {
-            event(new TaskPreview($id));
+            $uri = '/v1/crawl/task/test';
+            $params['id'] = $id;
+            $result = APIService::openPost($uri, $params);
+            if (empty($result) || $result['status_code'] != 200 )
+            {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
+            }
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试提交成功，请稍后查看结果", "info");
             return Redirect::to('admin/t_crawl_task/detail/' . $id);
 
         }
