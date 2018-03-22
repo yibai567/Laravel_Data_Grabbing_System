@@ -26,7 +26,6 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
-        $schedule->command('crawl:task:automate --force')->cron('0/20 * * * *');
     }
 
     /**

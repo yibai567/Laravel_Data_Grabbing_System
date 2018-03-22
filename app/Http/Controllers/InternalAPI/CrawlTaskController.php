@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\InternalAPI;
 
-use App\Events\TaskPreview;
 use App\Models\CrawlTask;
 use App\Services\APIService;
 use Dompdf\Exception;
@@ -99,10 +98,13 @@ class CrawlTaskController extends Controller
             }
             infoLog('[create] create success.', $task);
 
-            // 异步触发TaskPreview事件
-             event(new TaskPreview($task['id']));
-
+            $item = [
+                'task_id' => $task['id'],
+                'url' => $task['resource_url'],
+                'selector' => $task['selectors'],
+            ];
             $result = $task;
+            Redis::lpush('crawl_task_test', $item);
         } catch (Exception $e){
             return $this->resError($e->getCode(), $e->getMessage());
         }
