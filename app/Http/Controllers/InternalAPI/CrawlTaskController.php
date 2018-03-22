@@ -230,39 +230,17 @@ class CrawlTaskController extends Controller
             errorLog($taskDetail['messsage']);
             throw new Exception($taskDetail['messsage'], $taskDetail['status_code']);
         }
-        // 初始化output值
-        $output = 'test fail!';
-
-        $status = $taskDetail['data']['status'];
-        $crawlTaskId = $taskDetail['data']['id'];
-        $scriptFile = config('path.jinse_script_path') . '/crawl_no_proxy_script.js';
-        if (file_exists($scriptFile) && $status !== CrawlTask::IS_START_UP) {
-            $command = 'casperjs ' . $scriptFile . ' --taskid=' . $crawlTaskId;
-            exec($command, $output, $returnvar);
-            if ($returnvar == 0) {
-                if ($status == CrawlTask::IS_INIT || $status == CrawlTask::IS_TEST_ERROR) {
-                    $status = CrawlTask::IS_TEST_SUCCESS;
-                }
-            } else {
-                $status = CrawlTask::IS_TEST_ERROR;
-            }
+        if (empty($taskDetail['data'])) {
+            return $this->resError('task does not exist!');
         }
-        if (is_array($output)) {
-            $output = json_encode($output);
-        }
-        $params['test_time'] = date('Y-m-d H:i:s');
-        $params['status'] = $status;
-        $params['test_result'] = $output;
-        try {
-            $result = APIService::basePost('/internal/basic/crawl/task/update', $params, 'json');
-            if ($result['status_code'] !== 200) {
-                errorLog($result['messsage']);
-                throw new Exception('[test] ' . $result['status_code'] . 'test fail', 401);
-            }
-        } catch (Exception $e) {
-            return $this->resError($e->getCode(), $e->getMessage());
-        }
-        return $this->resObjectGet($result, 'crawl_task', $request->path());
+        $task = $taskDetail['data'];
+        $data = [
+            'task_id'=> $task['id'],
+            'url'=> $task['resource_url'],
+            'selector'=> $task['selectors']
+        ];
+        Redis::lpush('crawl_task_test', json_encode($data));
+        return $this->resObjectGet('测试已提交，请稍后查询结果！', 'crawl_task', $request->path());
     }
 
     /**
