@@ -507,13 +507,9 @@
                 } else if( $row->is_proxy == self::IS_PROXY_NO) {
                     $row->is_proxy = '未使用';
                 }
-            if (!empty($test_result)) {
-                $test_result = json_decode($row->test_result);
-                foreach ($test_result as $key => $value) {
-                    $str = str_replace('[32;1m', '', $value);
-                    $strr .= str_replace('[0m', '', $str) . "\r";
-                }
-                $row->test_result = $strr;
+            if (!empty($row->test_result)) {
+                $test_result = decodeUnicode($row->test_result);
+                $row->test_result = $test_result;
             }
 
 
