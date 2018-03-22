@@ -125,6 +125,8 @@ class AutomateTask extends Command
                 foreach($items as $item) {
                     Redis::lpush($key, json_encode($item));
                 }
+            } else {
+                sleep(1);
             }
         }
         return true;

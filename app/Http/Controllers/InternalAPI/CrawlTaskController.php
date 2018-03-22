@@ -325,4 +325,37 @@ class CrawlTaskController extends Controller
         }
         return $this->resObjectGet($data, 'list', $request->path());
     }
+
+    /**
+     * 根据id列表获取任务列表
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function listByIds(Request $request)
+    {
+        infoLog('[listByIds] start.');
+        $params = $request->all();
+        infoLog('[listByIds] validate start.');
+        $validator = Validator::make($params, [
+            'ids' => 'string|required|max:100',
+        ]);
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                infoLog('[listByIds] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        infoLog('[listByIds] validate end.');
+        $data = APIService::internalPost('/internal/basic/crawl/task/ids', $params);
+        if ($data['status_code'] !== 200) {
+            errorLog('[listByIds] error.', $data);
+            return $this->resError($data['status_code'], $data['message']);
+        }
+        $result = [];
+        if ($data['data']) {
+            $result = $data['data'];
+        }
+        return $this->resObjectGet($result, 'list', $request->path());
+    }
 }
