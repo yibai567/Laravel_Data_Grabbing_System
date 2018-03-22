@@ -97,9 +97,13 @@ class CrawlTaskController extends Controller
                 'url' => $task['resource_url'],
                 'selector' => $task['selectors'],
             ];
-
+            if ($task['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
+                $listName = 'crawl_task_https_test';
+            } else {
+                $listName = 'crawl_task_http_test';
+            }
             $result = $task;
-            Redis::lpush('crawl_task_test', json_encode($item));
+            Redis::lpush($listName, json_encode($item));
         } catch (Exception $e){
             return $this->resError($e->getCode(), $e->getMessage());
         }
@@ -234,12 +238,17 @@ class CrawlTaskController extends Controller
             return $this->resError('task does not exist!');
         }
         $task = $taskDetail['data'];
-        $data = [
+        $item = [
             'task_id'=> $task['id'],
             'url'=> $task['resource_url'],
             'selector'=> $task['selectors']
         ];
-        Redis::lpush('crawl_task_test', json_encode($data));
+        if ($task['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
+            $listName = 'crawl_task_https_test';
+        } else {
+            $listName = 'crawl_task_http_test';
+        }
+        Redis::lpush($listName, json_encode($item));
         return $this->resObjectGet('测试已提交，请稍后查询结果！', 'crawl_task', $request->path());
     }
 

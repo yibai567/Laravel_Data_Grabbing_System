@@ -157,12 +157,8 @@ class CrawlTaskController extends Controller
             errorLog('[start] start task error.');
             return $this->resError($data['status_code'], $data['message']);
         }
-        $result = [];
-        if ($data['data']) {
-            $result = $data['data']['data'];
-        }
         infoLog('[start] validate end.');
-        return $this->resObjectGet($result, 'crawl_task', $request->path());
+        return $this->resObjectGet('测试提交成功，请稍后查看结果！', 'crawl_task', $request->path());
     }
 
     /**
