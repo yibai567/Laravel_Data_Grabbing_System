@@ -89,53 +89,7 @@ class CrawlTaskController extends Controller
         infoLog('[retrieve] end.', $data);
         return $this->resObjectGet($data, 'crawl_task', $request->path());
     }
-    /**
-     * 任务列表
-     * @param Request $request
-     * @return 任务列表
-     */
-    public function all(Request $request)
-    {
-        infoLog('[all] start.');
-        $params = $request->all();
-        infoLog('[all] validate.', $params);
-        $validator = Validator::make($params, [
-            'limit' => 'integer|nullable',
-            'offset' => 'integer|nullable',
-            'protocol' => 'integer|nullable',
-            'cron_type' => 'integer|nullable',
-            'task_id' => 'integer|nullable',
-            'is_proxy' => 'integer|nullable',
-        ]);
-        infoLog('[all] validate start');
 
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            foreach ($errors->all() as $value) {
-                infoLog('[start] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-        infoLog('[all] validate end.');
-        $query = CrawlTask::where('protocol', $params['protocol'])
-             ->where('cron_type', $params['cron_type']);
-        if (!empty($params['task_id'])) {
-                $query->where('status', '<>', CrawlTask::IS_START_UP);
-                $query->where('id', $params['task_id']);
-        } else {
-                $query->where('status', CrawlTask::IS_START_UP);
-                $query->take($params['limit']);
-                $query->skip($params['offset']);
-                $query->orderBy('start_time', 'asc');
-        }
-        $items = $query->get();
-
-        $data = [];
-        if (!empty($items)) {
-            $data = $items->toArray();
-        }
-        return $this->resObjectGet($data, 'crawl_task', $request->path());
-    }
 
     public function search(Request $request)
     {

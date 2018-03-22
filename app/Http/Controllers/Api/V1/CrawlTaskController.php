@@ -19,7 +19,7 @@ class CrawlTaskController extends Controller
         $params = $request->all();
         infoLog('[create] validate.', $params);
         $validator = Validator::make($params, [
-            'resource_url' => 'required|string|nullable',
+            'resource_url' => 'required|string',
             'cron_type' => 'integer|nullable',
             'selectors' => 'string|nullable',
             'is_ajax' => 'integer|nullable',
@@ -163,49 +163,6 @@ class CrawlTaskController extends Controller
         }
         infoLog('[start] validate end.');
         return $this->resObjectGet($result, 'crawl_task', $request->path());
-    }
-
-
-    /**
-     * 任务列表
-     * @param Request $request
-     * @return 任务列表
-     */
-    public function all(Request $request)
-    {
-        infoLog('[all] start.');
-        $params = $request->all();
-        infoLog('[all] validate.', $params);
-        $validator = Validator::make($params, [
-            'limit' => 'integer|nullable',
-            'offset' => 'integer|nullable',
-            'protocol' => 'integer|nullable',
-            'cron_type' => 'integer|nullable',
-            'task_id' => 'integer|nullable',
-            'is_proxy' => 'integer|nullable',
-        ]);
-
-        infoLog('[all] validate.', $validator);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            foreach ($errors->all() as $value) {
-                infoLog('[start] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-        infoLog('[all] validate end.');
-        $data = APIService::internalGet('/internal/crawl/tasks', $params);
-        if ($data['status_code'] !== 200) {
-            errorLog('[all] result task error.');
-            return $this->resError($data['status_code'], $data['message']);
-        }
-
-        if ($data['data']) {
-            $result = $data['data'];
-        }
-        infoLog('[all] end.');
-        return $this->resObjectGet($result, 'list', $request->path());
     }
 
     /**
