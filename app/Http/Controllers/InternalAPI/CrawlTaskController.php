@@ -347,14 +347,21 @@ class CrawlTaskController extends Controller
             }
         }
         infoLog('[listByIds] validate end.');
-        $data = APIService::internalGet('/internal/basic/crawl/tasks/ids', $params);
+        $data = APIService::baseGet('/internal/basic/crawl/tasks/ids', $params);
         if ($data['status_code'] !== 200) {
             errorLog('[listByIds] error.', $data);
             return $this->resError($data['status_code'], $data['message']);
         }
         $result = [];
         if ($data['data']) {
-            $result = $data['data'];
+            $tasks = $data['data'];
+            foreach ($tasks as $task) {
+                $item = [];
+                $item['task_id'] = $task['id'];
+                $item['selector'] = $task['selectors'];
+                $item['url'] = $task['resource_url'];
+                $result[] = $item;
+            }
         }
         return $this->resObjectGet($result, 'list', $request->path());
     }

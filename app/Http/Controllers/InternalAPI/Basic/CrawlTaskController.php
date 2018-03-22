@@ -263,6 +263,6 @@ class CrawlTaskController extends Controller
         if ($tasks) {
             $data = $tasks->toArray();
         }
-        return $this->resObjectList($data, 'crawl_task', $request->path());
+        return $this->resObjectGet($data, 'list', $request->path());
     }
 }
