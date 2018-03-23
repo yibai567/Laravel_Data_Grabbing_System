@@ -179,7 +179,7 @@ class CrawlResultController extends Controller
 
             if ($result['status_code'] != 200) {
                 errorLog('[internal:createForBatch] request /internal/basic/crawl/result/search result error', $value);
-                return response($responseDada['message'], $responseDada['status_code']);
+                continue;
             }
 
             if (empty($result['data'])) {
