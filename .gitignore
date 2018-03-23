@@ -20,3 +20,4 @@ _ide_helper.php
 sftp-config.json
 .vscode/ftp-sync.json
 .ftpconfig
+/upload

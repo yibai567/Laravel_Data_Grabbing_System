@@ -68,7 +68,7 @@ class CrawlResultController extends Controller
         //数据去重
         infoLog('[internal:createForBatch] params filter start.');
 
-        $params['result'] = $this->__dataFilter($params['result']['a'], $taskDetail['resource_url']);
+        $params['result'] = $this->__dataFilter($params['result']['a'], $taskDetail['resource_url'], $params['task_id']);
 
         if (empty($params['result'])) {
             infoLog('[internal::createForBatch] result empty.');
@@ -89,10 +89,12 @@ class CrawlResultController extends Controller
         infoLog('[internal:createForBatch] validator is_test end.');
         infoLog('[internal::createForBatch] request internal/basic createForBatch start');
         $resultData = APIService::basePost('/internal/basic/crawl/results', $params, 'json');
+
         if ($resultData['status_code'] != 200) {
             errorLog('[createForBatch] request internal/basic createForBatch result error', $newFormatData);
             return response($resultData['message'], $resultData['status_code']);
         }
+
         infoLog('[internal::createForBatch] request internal/basic createForBatch end');
 
         $result = [];
@@ -103,6 +105,10 @@ class CrawlResultController extends Controller
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
 
+    /**
+     * 请求平台接口
+     * @param Request $request
+    */
     private function __platformAPI($params)
     {
         $platformParams = [];
@@ -113,7 +119,6 @@ class CrawlResultController extends Controller
             $newArr['url'] = $value['url'];
             $newArr['task_id'] = $params['task_id'];
             $platformParams['result'][] = $newArr;
-
         }
         $platformData = sign($platformParams);
         infoLog('[url.platform_url] '. config('url.platform_url'));
@@ -124,6 +129,11 @@ class CrawlResultController extends Controller
         }
     }
 
+    /**
+     * 获取任务详情
+     * @param Request $request
+     * $taskId 任务id
+    */
     private function __taskDetail($taskId)
     {
         $taskDetail = APIService::baseGet('/internal/basic/crawl/task', ['id' => $taskId], 'json');
@@ -137,6 +147,12 @@ class CrawlResultController extends Controller
         }
         return $result;
     }
+
+    /**
+     * 修改任务信息
+     * @param Request $request
+     * $taskParams 需要修改的任务参数
+    */
     private function __updateTask($taskParams)
     {
         $taskResult = APIService::internalPost('/internal/basic/crawl/task/update', $taskParams, 'json');
@@ -145,17 +161,25 @@ class CrawlResultController extends Controller
             return $this->resError($taskResult['status_code'], $taskResult['message']);
         }
     }
-    private function __dataFilter($data,$taskUrl)
+
+    /**
+     * 数据去重
+     * @param Request $request
+     * $data(原始数据) $taskUrl(任务url) $taskId(任务id)
+    */
+    private function __dataFilter($data, $taskUrl, $taskId)
     {
         $formatData = [];
         foreach ($data as $value) {
-            if (empty($value['text']) || $value['text'] == 'undefined' || empty($value['url']) || $value['url'] == 'undefined') {
+            if (empty($value['text']) || $value['text'] == 'undefined' || empty($value['url']) || $value['url'] == 'undefined' || $value['url'] == 'javascript:;') {
                     continue;
                }
-            $result = APIService::basePost('/internal/basic/crawl/result/search', ['task_id' => $params['task_id'],'original_data' => md5(json_encode($value)) ], 'json');
+
+            $result = APIService::basePost('/internal/basic/crawl/result/search', ['task_id' => $taskId, 'original_data' => md5(json_encode($value))], 'json');
+
             if ($result['status_code'] != 200) {
                 errorLog('[internal:createForBatch] request /internal/basic/crawl/result/search result error', $value);
-                return response($responseDada['message'], $responseDada['status_code']);
+                continue;
             }
 
             if (empty($result['data'])) {
