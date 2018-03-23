@@ -148,7 +148,7 @@ class CrawlResultController extends Controller
         $taskDetail = APIService::baseGet('/internal/basic/crawl/task', ['id' => $taskId], 'json');
 
         if ($taskDetail['status_code'] != 200) {
-            return $this->resError('get task detail error!', 401);
+            return $this->resError(401, 'get task detail error!');
         }
 
         $result = [];
