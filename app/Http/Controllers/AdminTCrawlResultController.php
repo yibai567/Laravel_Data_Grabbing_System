@@ -373,9 +373,8 @@
                     $row->status = '已处理';
             }
 
-            $row->original_data = decodeUnicode($row->original_data);
-
-            $row->format_data = json_decode($row->format_data);
+            // $row->original_data = decodeUnicode($row->original_data);
+            $row->format_data = decodeUnicode($row->format_data);
             if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
                     CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
                     CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));

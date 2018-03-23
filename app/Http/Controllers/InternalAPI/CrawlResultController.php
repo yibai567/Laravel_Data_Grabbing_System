@@ -116,6 +116,7 @@ class CrawlResultController extends Controller
 
         }
         $platformData = sign($platformParams);
+        infoLog('[url.platform_url] '. config('url.platform_url'));
         $platformResult = APIService::post(config('url.platform_url'), $platformData);
         if (!empty($platformResult)) {
             infoLog('[internal:createForBatch] request platform API error', $platformData);
