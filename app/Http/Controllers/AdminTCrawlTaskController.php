@@ -65,7 +65,9 @@
 			$this->col[] = ["label"=>"ID","name"=>"id"];
 			$this->col[] = ["label"=>"任务名称","name"=>"name"];
 			$this->col[] = ["label"=>"任务描述","name"=>"description"];
-			$this->col[] = ["label"=>"资源URL","name"=>"resource_url"];
+            $this->col[] = ["label"=>"资源URL","name"=>"resource_url",'width'=>'300',"callback"=>function ($row) {
+                return '<a href="' . $row->resource_url . '" target="_brank" style="width:300px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->resource_url .'</a>';
+            }];
 			//$this->col[] = ["label"=>"Cron类型","name"=>"cron_type"];
             $this->col[] = ["label"=>"Cron类型","name"=>"cron_type","callback"=>function ($row) {
                 if ( $row->cron_type == self::CRON_MINUTE) {
@@ -169,7 +171,7 @@
 	        |
 	        */
 	        $this->addaction = array();
-            $this->addaction[] = ['label'=>'测试', 'url'=>CRUDBooster::mainpath('test-result/[id]'),'color'=>'info', 'icon'=>'fa fa-play','showIf'=>'[status] == ' . self::STATUS_NO_STARTING . '|| [status] == ' . self::STATUS_TEST_FAIL];
+            $this->addaction[] = ['label'=>'测试', 'url'=>CRUDBooster::mainpath('test-result/[id]'),'color'=>'info', 'icon'=>'fa fa-play'];
 
             $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]/' . self::STATUS_START_UP),'color'=>'success', 'icon'=>'fa fa-play', 'showIf'=>'[status] == ' . self::STATUS_TEST_SUCCESS . '|| [status] == ' . self::STATUS_STOP];
 
@@ -387,6 +389,7 @@
             if ($postdata['status'] == self::STATUS_START_UP) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "状态启动中不能修改，请返回", "info");
             }
+            $postdata['status'] = 1;
 	        //Your code here
 
 	    }
@@ -440,7 +443,14 @@
 
         public function getTestResult($id)
         {
-            event(new TaskPreview($id));
+            $uri = '/v1/crawl/task/test';
+            $params['id'] = $id;
+            $result = APIService::openPost($uri, $params);
+            if (empty($result) || $result['status_code'] != 200 )
+            {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
+            }
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试提交成功，请稍后查看结果", "info");
             return Redirect::to('admin/t_crawl_task/detail/' . $id);
 
         }
@@ -497,13 +507,9 @@
                 } else if( $row->is_proxy == self::IS_PROXY_NO) {
                     $row->is_proxy = '未使用';
                 }
-            if (!empty($test_result)) {
-                $test_result = json_decode($row->test_result);
-                foreach ($test_result as $key => $value) {
-                    $str = str_replace('[32;1m', '', $value);
-                    $strr .= str_replace('[0m', '', $str) . "\r";
-                }
-                $row->test_result = $strr;
+            if (!empty($row->test_result)) {
+                $test_result = decodeUnicode($row->test_result);
+                $row->test_result = $test_result;
             }
 
 

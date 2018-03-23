@@ -23,9 +23,9 @@ class CrawlTaskController extends Controller
         $validator = Validator::make($params, [
             'name' => 'string|nullable',
             'description' => 'string|nullable',
-            'resource_url' => 'required|string|nullable',
+            'resource_url' => 'string|nullable',
             'cron_type' => 'integer|nullable',
-            'selectors' => 'string|nullable',
+            'selectors' => 'nullable',
             'response_type' => 'string|nullable',
             'response_url' => 'string|nullable',
             'keywords' => 'string|nullable',
@@ -33,6 +33,9 @@ class CrawlTaskController extends Controller
             'setting_id' => 'integer|nullable',
             'protocol' => 'integer|nullable',
             'is_proxy' => 'integer|nullable',
+            'is_ajax' => 'integer|nullable',
+            'is_login' => 'integer|nullable',
+            'is_wall' => 'integer|nullable'
         ]);
 
         if ($validator->fails()) {
@@ -43,12 +46,9 @@ class CrawlTaskController extends Controller
                 return $this->resError(401, $value);
             }
         }
-        if (empty($params['setting_id'])) {
-            $params['setting_id'] = 1;
-        }
-
+        $params['selectors'] = json_encode($params['selectors']);
         infoLog('[create] validate end.', $params);
-        $fieldList = ['name', 'description', 'resource_url', 'cron_type', 'selectors', 'setting_id', 'protocol', 'is_proxy'];
+        $fieldList = ['name', 'description', 'resource_url', 'cron_type', 'selectors', 'setting_id', 'protocol', 'is_proxy', 'is_ajax', 'is_login', 'is_wall', 'keywords'];
         $data = array_only($params, $fieldList);
         $data['status'] = CrawlTask::IS_INIT;
         $data['response_type'] = CrawlTask::RESPONSE_TYPE_API;
@@ -57,69 +57,6 @@ class CrawlTaskController extends Controller
         infoLog('[create] create task.', $task);
         infoLog('[create] end.', $task);
         return $this->resObjectGet($task, 'crawl_task', $request->path());
-    }
-
-    /**
-     * 更新任务状态接口
-     * @param $taskId
-     * @param int $status
-     * @return json
-     */
-    public function updateStatus(Request $request)
-    {
-        infoLog('[updateStatus] start.');
-        $params = $request->all();
-        infoLog('[updateStatus] validate.', $params);
-        $validator = Validator::make($params, [
-            "id" => "integer|required",
-            "status" => "integer|required"
-        ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            errorLog('[updateStatus] validate fail.', $errors);
-            foreach ($errors->all() as $value) {
-                errorLog('[updateStatus] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-        infoLog('[updateStatus] validate end.', $params);
-        try {
-            $taskId = $params['id'];
-            $status = $params['status'];
-            $statusArr = [
-                CrawlTask::IS_INIT,
-                CrawlTask::IS_TEST_SUCCESS,
-                CrawlTask::IS_TEST_ERROR,
-                CrawlTask::IS_START_UP,
-                CrawlTask::IS_PAUSE,
-                CrawlTask::IS_ARCHIEVE,
-            ];
-            infoLog('[updateStatus] check the params.', $status);
-            if (!in_array($status, $statusArr)) {
-                throw new Exception('[updateStatus] status param error', 401);
-            }
-            infoLog('[updateStatus] get the task.', $taskId);
-            $task = CrawlTask::find($taskId);
-            infoLog('[updateStatus] get the task.', $task);
-            $data = [];
-            if (empty($task)) {
-                throw new Exception('[updateStatus] task not exist.', 401);
-            }
-            if ($status == CrawlTask::IS_START_UP) {
-                $task->start_time = date('Y-m-d H:i:s');
-            }
-            $task->status = $status;
-            if (!$task->save()) {
-                infoLog('[updateStatus] save fail.', $task);
-                throw new Exception('save failed.', 401);
-            }
-            $data = $task->toArray();
-        } catch (Exception $e) {
-            errorLog($e->getMessage(), $e->getCode());
-            return $this->resError($e->getCode(), $e->getMessage());
-        }
-        return $this->resObjectGet($data, 'crawl_task', $request->path());
     }
 
     /**
@@ -154,156 +91,16 @@ class CrawlTaskController extends Controller
         return $this->resObjectGet($data, 'crawl_task', $request->path());
     }
 
-    /**
-     * 更新脚本文件
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function updateScriptFile(Request $request)
-    {
-        infoLog('[updateScriptFile] start.');
-        $params = $request->all();
-        infoLog('[updateScriptFile] validate.', $params);
-        $validator = Validator::make($params, [
-            "id" => "integer|required",
-        ]);
 
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            errorLog('[updateScriptFile] validate fail.', $errors);
-            foreach ($errors->all() as $value) {
-                errorLog('[updateScriptFile] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-        infoLog('[updateScriptFile] validate end.', $params);
-        try {
-            $taskId = $params['id'];
-            $scriptFile = CrawlTask::SCRIPT_PREFIX . '_' . $taskId . '_' . date('YmdHis') . '.js';
-            infoLog('[updateScriptFile] get script file name', [$taskId, $scriptFile]);
-            $task = CrawlTask::find($taskId);
-            infoLog('[updateScriptFile] get task', $task);
-            if (empty($task)) {
-                throw new Exception('task not exist', 401);
-            }
-            if ($task->script_file) {
-                $task->last_script_file = $task->script_file;
-            }
-            $task->script_file = $scriptFile;
-            if (!$task->save()) {
-                errorLog('[updateScriptFile] save fail', $task);
-                throw new Exception('[updateScriptFile] task save fail', 401);
-            }
-            infoLog('[updateScriptFile] save success', $task);
-        } catch (Exception $e) {
-            errorLog($e->getMessage());
-            return $this->resError($e->getCode(), $e->getMessage());
-        }
-
-        infoLog('[updateScriptFile] end', $task);
-        return $this->resObjectGet($task, 'crawl_task', $request->path());
-    }
-    /**
-     * 修改抓取返回结果
-     *
-     */
-    public function updateResult(Request $request)
-    {
-        infoLog('[updateResult] start.');
-        $params = $request->all();
-        infoLog('[updateResult] validate.', $params);
-        $validator = Validator::make($params, [
-            'id' => 'integer|required',
-            'test_result' => 'nullable',
-        ]);
-        infoLog('[updateResult] validate.', $validator);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            foreach ($errors->all() as $value) {
-                infoLog('[start] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-        infoLog('[updateResult] validate end.');
-        $result = [];
-        if (empty($params['test_result'])) {
-            infoLog('[updateResult] test_result empty.');
-            return $this->resObjectGet($result, 'crawl_task.result', $request->path());
-        }
-        try {
-            $taskId = $params['id'];
-            $data['test_time'] = date('Y-m-d H:i:s');
-            $data['test_result'] = $params['test_result'];
-            $result = CrawlTask::where('id', $taskId)->update($data);
-
-        } catch (Exception $e) {
-            errorLog($e->getMessage(), $e->getCode());
-            return $this->resError($e->getCode(), $e->getMessage());
-        }
-        return $this->resObjectGet($result, 'crawl_task', $request->path());
-
-    }
-    /**
-     * 任务列表
-     * @param Request $request
-     * @return 任务列表
-     */
-    public function all(Request $request)
-    {
-        infoLog('[all] start.');
-        $params = $request->all();
-        infoLog('[all] validate.', $params);
-        $validator = Validator::make($params, [
-            'limit' => 'integer|nullable',
-            'offset' => 'integer|nullable',
-            'protocol' => 'integer|nullable',
-            'cron_type' => 'integer|nullable',
-            'task_id' => 'integer|nullable',
-            'is_proxy' => 'integer|nullable',
-        ]);
-        infoLog('[all] validate start');
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            foreach ($errors->all() as $value) {
-                infoLog('[start] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-        infoLog('[all] validate end.');
-        $query = CrawlTask::where('protocol', $params['protocol'])
-             ->where('cron_type', $params['cron_type']);
-        if (!empty($params['task_id'])) {
-                $query->where('status', '<>', CrawlTask::IS_START_UP);
-                $query->where('id', $params['task_id']);
-        } else {
-                $query->where('status', CrawlTask::IS_START_UP);
-                $query->take($params['limit']);
-                $query->skip($params['offset']);
-                $query->orderBy('start_time', 'asc');
-        }
-        $items = $query->get();
-
-        $data = [];
-        if (!empty($items)) {
-            $data = $items->toArray();
-        }
-        return $this->resObjectGet($data, 'crawl_task', $request->path());
-    }
-
-    /**
-     * 更新任务最后执行时间
-     * @param Request $request
-     */
-    public function updateLastJobAt(Request $request)
+    public function search(Request $request)
     {
         infoLog('[updateLastJobAt] start.');
         $params = $request->all();
         infoLog('[updateLastJobAt] validate start.');
         $validator = Validator::make($params, [
-            'id' => 'integer|required',
-            'last_job_at' => 'required',
+            'cron_type' => 'integer|required',
+            'is_proxy' => 'integer|required',
+            'protocol' => 'integer|required',
         ]);
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -313,14 +110,160 @@ class CrawlTaskController extends Controller
             }
         }
         try {
-            $taskId = $params['id'];
-            $data['last_job_at'] = $params['last_job_at'];
-            $result = CrawlTask::where('id', $taskId)->update($data);
-
+            $items = CrawlTask::select('id,resource_url')
+                                ->where('protocol', $params['protocol'])
+                                ->where('is_proxy', $params['is_proxy'])
+                                ->where('cron_type', $params['protocol'])
+                                ->get();
+            $data = [];
+            if ($items) {
+                $data = $items->toArray();
+            }
         } catch (Exception $e) {
             errorLog($e->getMessage(), $e->getCode());
             return $this->resError($e->getCode(), $e->getMessage());
         }
-        return $this->resObjectGet($result, 'updateLastJobAt', $request->path());
+        return $this->resObjectGet($data, 'crawl_task', $request->path());
+    }
+
+    public function update(Request $request)
+    {
+        infoLog('[update] start.');
+        $params = $request->all();
+        infoLog('[update] validate.', $params);
+        $validator = Validator::make($params, [
+            'name' => 'string|nullable',
+            'description' => 'string|nullable',
+            'resource_url' => 'nullable',
+            'cron_type' => 'integer|nullable',
+            'selectors' => 'nullable',
+            'response_type' => 'string|nullable',
+            'response_url' => 'nullable',
+            'keywords' => 'nullable',
+            'response_param' => 'string|nullable',
+            'setting_id' => 'integer|nullable',
+            'status' => 'integer|nullable',
+            'protocol' => 'integer|nullable',
+            'is_proxy' => 'integer|nullable',
+            'is_ajax' => 'integer|nullable',
+            'is_login' => 'integer|nullable',
+            'is_wall' => 'integer|nullable',
+            'start_time' => 'date|nullable',
+            'last_job_at' => 'date|nullable',
+            'test_time' => 'date|nullable',
+            'test_result' => 'nullable',
+            'id' => 'required|integer'
+        ]);
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            errorLog('[create] validate fail.', $errors);
+            foreach ($errors->all() as $value) {
+                errorLog('[create] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        $item = CrawlTask::find($params['id']);
+
+        if (isset($params['name'])) {
+            $item->name = $params['name'];
+        }
+        if (isset($params['description'])) {
+            $item->description = $params['description'];
+        }
+        if (isset($params['resource_url'])) {
+            $item->resource_url = $params['resource_url'];
+        }
+        if (isset($params['cron_type'])) {
+            $item->cron_type = $params['cron_type'];
+        }
+        if (isset($params['selectors'])) {
+            $item->selectors = $params['selectors'];
+        }
+        if (isset($params['response_type'])) {
+            $item->response_type = $params['response_type'];
+        }
+        if (isset($params['response_url'])) {
+            $item->response_url = $params['response_url'];
+        }
+        if (isset($params['keywords'])) {
+            $item->keywords = $params['keywords'];
+        }
+        if (isset($params['response_param'])) {
+            $item->response_param = $params['response_param'];
+        }
+        if (isset($params['setting_id'])) {
+            $item->setting_id = $params['setting_id'];
+        }
+        if (isset($params['protocol'])) {
+            $item->protocol = $params['protocol'];
+        }
+        if (isset($params['is_proxy'])) {
+            $item->is_proxy = $params['is_proxy'];
+        }
+        if (isset($params['is_ajax'])) {
+            $item->is_ajax = $params['is_ajax'];
+        }
+        if (isset($params['is_login'])) {
+            $item->is_login = $params['is_login'];
+        }
+        if (isset($params['is_wall'])) {
+            $item->is_wall = $params['is_wall'];
+        }
+
+        if (isset($params['status'])) {
+            $item->status = $params['status'];
+        }
+        if (isset($params['start_time'])) {
+            $item->start_time = $params['start_time'];
+        }
+        if (isset($params['last_job_at'])) {
+            $item->last_job_at = $params['last_job_at'];
+        }
+        if (isset($params['test_time'])) {
+            $item->test_time = $params['test_time'];
+        }
+        if (isset($params['test_result'])) {
+            $item->test_result = $params['test_result'];
+        }
+
+        try {
+            if ($item->save()) {
+                $result = $item->toArray();
+            }
+        } catch (Exception $e) {
+            errorLog($e->getMessage(), $e->getCode());
+            return $this->resError($e->getCode(), $e->getMessage());
+        }
+        return $this->resObjectGet($result, 'crawl_task', $request->path());
+    }
+
+    /**
+     * 根据id列表获取任务列表
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function listByIds(Request $request)
+    {
+        infoLog('[listByIds] start.');
+        $params = $request->all();
+        infoLog('[listByIds] validate start.');
+        $validator = Validator::make($params, [
+            'ids' => 'string|required|max:100',
+        ]);
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            foreach ($errors->all() as $value) {
+                infoLog('[listByIds] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+        infoLog('[listByIds] validate end.');
+        $ids = explode(',', $params['ids']);
+        $tasks = CrawlTask::whereIn('id', $ids)->get();
+        $data = [];
+        if ($tasks) {
+            $data = $tasks->toArray();
+        }
+        return $this->resObjectGet($data, 'list', $request->path());
     }
 }

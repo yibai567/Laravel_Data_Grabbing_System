@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Requests\CrawlResultCreateRequest;
 use App\Services\APIService;
 use Illuminate\Http\Request;
 use Log;
-use App\Models\CrawlResult;
 use Illuminate\Support\Facades\Validator;
 
 class CrawlResultController extends Controller
@@ -17,40 +15,39 @@ class CrawlResultController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
     */
-    public function createByBatch(Request $request)
+    public function createForBatch(Request $request)
     {
         $params = $request->all();
-        infoLog("[createByBatch] start.");
+        infoLog("[v1:createForBatch] start.");
         $validator = Validator::make($params, [
-            'data' => 'nullable',
+            'task_id' => 'required|integer',
+            'is_test' => 'integer|nullable',
+            'start_time' => 'date|nullable',
+            'end_time' => 'date|nullable',
+            'result' => 'nullable',
         ]);
-        infoLog('[createByBatch] params validator start');
+        infoLog('[v1:createForBatch] params validator start');
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                errorLog('[createByBatch] params validator fail', $value);
-                return response($value, 401);
+                errorLog('[v1:createForBatch] params validator fail', $value);
+                return $this->resError(401, $value);
             }
         }
-        infoLog('[params validator] end.');
+        infoLog('[v1:createForBatch] params validator end.');
 
-        $result = [];
-        if (empty($params['data'])) {
-            infoLog('[createByBatch] data empty!');
-            return $this->resObjectGet($result, 'crawl_result', $request->path());
-        }
-
-        infoLog('[createByBatch] request internalApi createByBatch start');
-        $data = APIService::internalPost('/internal/crawl/result/batch_result', $params);
+        infoLog('[v1:createForBatch] request internalApi createForBatch start');
+        $data = APIService::internalPost('/internal/crawl/results', $params);
         if ($data['status_code'] != 200) {
-            errorLog('[createByBatch] request internalApi createByBatch result error', $data);
-            return response($data['message'], $data['status_code']);
+            errorLog('[v1:createForBatch] request internalApi createForBatch result error', $data);
+            return response($data['status_code'], $data['message']);
         }
         if ($data['data']) {
             $result = $data['data'];
         }
-        infoLog('[createByBatch] request internalApi createByBatch end');
-        infoLog('[createByBatch] end.');
+        infoLog('[v1:createForBatch] request internalApi createForBatch end');
+
+        infoLog('[v1:createForBatch] end.');
         return $this->resObjectGet($result, 'crawl_result', $request->path());
     }
 

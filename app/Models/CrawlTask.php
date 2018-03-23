@@ -18,8 +18,33 @@ class CrawlTask extends Model
     const RESPONSE_TYPE_SMS = 3; //短信响应
     const RESPONSE_TYPE_WEWORK = 4; //企业微信响应
 
+    //协议类型 1、http 2、https
     const PROTOCOL_HTTP = 1;
     const PROTOCOL_HTTPS = 2;
+
+    //是否需要代理 1、需要 2、不需要
+    const IS_PROXY_TRUE = 1;
+    const IS_PROXY_FALSE = 2;
+
+    //是否ajax请求 1、是 2、否
+    const IS_AJAX_TRUE = 1;
+    const IS_AJAX_FALSE = 2;
+
+    //是否被墙 1、是 2、否
+    const IS_WALL_TRUE = 1;
+    const IS_WALL_FALSE = 2;
+
+    //是否需要登录 1、是 2、否
+    const IS_LOGIN_TRUE = 1;
+    const IS_LOGIN_FALSE = 2;
+
+    //任务执行类型 1、保持 2、每分钟 3、每五分钟 4、每十分钟 5、每十五分钟 6、每二十分钟
+    const CRON_TYPE_KEEP = 1;
+    const CRON_TYPE_EVERY_MINUTE = 2;
+    const CRON_TYPE_EVERY_FIVE_MINUTES = 3;
+    const CRON_TYPE_EVERY_TEN_MINUTES = 4;
+    const CRON_TYPE_EVERY_FIFTEEN_MINUTES = 5;
+    const CRON_TYPE_EVERY_TWENTY_MINUTES = 6;
 
     const SCRIPT_PREFIX = 'grab';
 
@@ -37,12 +62,14 @@ class CrawlTask extends Model
         'setting_id',
         'test_result',
         'test_time',
-        'script_file',
-        'last_script_file',
         'status',
         'protocol',
         'is_proxy',
+        'is_ajax',
+        'is_login',
+        'is_wall',
         'start_time',
+        'keywords',
         'last_job_at',
     ];
 

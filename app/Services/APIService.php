@@ -136,6 +136,7 @@ class APIService extends Service
         try {
             $requestParams = [
                 'timeout'  => 10000,
+                'debug' => true,
             ];
             $client = new Client($requestParams);
             $response = $client->request('POST', $url, ['json' => $params]);

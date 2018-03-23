@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\InternalAPI;
 
-use App\Http\Requests\CrawlResultCreateRequest;
-use App\Http\Controllers\InternalAPI\Controller;
 use Illuminate\Http\Request;
 use App\Models\CrawlResult;
+use App\Models\CrawlTask;
 use Illuminate\Support\Facades\Validator;
 use App\Services\APIService;
 
@@ -17,118 +16,160 @@ class CrawlResultController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
     */
-    public function createByBatch(Request $request)
+    public function createForBatch(Request $request)
     {
-        infoLog('[createByBatch] start.');
+        infoLog('[internal:createForBatch] start.');
         $params = $request->all();
         $validator = Validator::make($params, [
-            'data' => 'nullable',
+            'task_id' => 'required|integer',
+            'is_test' => 'integer|nullable',
+            'start_time' => 'date|nullable',
+            'end_time' => 'date|nullable',
+            'result' => 'nullable',
         ]);
-        infoLog('[createByBatch] params validator start.');
+        infoLog('[internal:createForBatch] params validator start.', $params);
         if ($validator->fails()) {
             $errors = $validator->errors();
             foreach ($errors->all() as $value) {
-                errorLog('[createByBatch] params validator fail.', $value);
-                return response($value, 401);
+                errorLog('[internal:createForBatch] params validator fail.', $value);
+                return $this->resError(401, $value);
             }
         }
-        infoLog('[createByBatch] params validator end.');
-        if (empty($params['data'])) {
-            infoLog('[createByBatch] data empty!');
-            return $this->resObjectGet([], 'crawl_result', $request->path());
-        }
-        $formatData = [];
-        $is_test = $params['data'][0]['is_test'];
-        $crawl_task_id = $params['data'][0]['crawl_task_id'];
+        infoLog('[internal:createForBatch] params validator end.');
 
-        $taskParams['id'] = $crawl_task_id;
+        //任务详情
+        infoLog('[internal:createForBatch] task detail start.');
+        $taskDetail = $this->__taskDetail($params['task_id']);
+        if (empty($taskDetail)) {
+            return $this->resError(401, '任务不存在');
+        }
+        infoLog('[internal:createForBatch] task detail end.');
+
+
+        //更新任务表last_job_at字段
+        infoLog('[internal:createForBatch] update t_crawl_task last_job_at start.');
+        $taskParams = [];
+        $taskParams['id'] = $params['task_id'];
         $taskParams['last_job_at'] = date('Y-m-d H:i:s');
-        $taskResult = APIService::internalPost('/internal/crawl/task/last_job_at', $taskParams, 'json');
-        if ($taskResult['status_code'] != 200) {
-            errorLog('[createByBatch] request /v1/crawl/task/last_job_at createByBatch result error', $taskParams);
-            return response($taskResult['message'], $taskResult['status_code']);
+
+        if ($taskDetail['status'] == CrawlTask::IS_INIT || $taskDetail['status'] == CrawlTask::IS_TEST_ERROR) {
+            $taskParams['status'] = CrawlTask::IS_TEST_SUCCESS;
+        }
+        $taskParams['test_time'] = date('Y-m-d H:i:s');
+        $taskParams['test_result'] = json_encode($params['result']);
+        $this->__updateTask($taskParams);
+        infoLog('[internal:createForBatch] update t_crawl_task last_job_at end.');
+
+
+        if (empty($params['result']) || empty($params['result']['a'])) {
+            infoLog('[internal:createForBatch] result empty!');
+            return $this->resObjectGet($params, 'crawl_result', $request->path());
+        }
+        //数据去重
+        infoLog('[internal:createForBatch] params filter start.');
+
+        $params['result'] = $this->__dataFilter($params['result']['a'], $taskDetail['resource_url']);
+
+        if (empty($params['result'])) {
+            infoLog('[internal::createForBatch] result empty.');
+            return $this->resObjectGet($params['task_id'], 'crawl_result', $request->path());
         }
 
-        foreach ($params['data'] as $crawlResult) {
-            if (empty($crawlResult['data'])) {
-                return $this->resObjectGet([], 'crawl_result', $request->path());
-            }
-            foreach ($crawlResult['data'] as $crawlResultValue) {
-                $crawlResult['task_url'] = $crawlResultValue['url'];
-                $crawlResult['format_data'] = $crawlResultValue['text'];
-                if (!empty($crawlResult['setting_keywords'])) {
-                    $setting_keywords = explode(',', $crawlResult['setting_keywords']);
-                    foreach ($setting_keywords as $keywordsValue) {
-                        $matchingResult  = strpos($crawlResultValue['text'], $keywordsValue);
-                        if ($matchingResult !== false){
-                            $formatData['data'][] = $crawlResult;
-                        }
-                    }
-                } else {
-                    $formatData['data'][] = $crawlResult;
-                }
-            }
-        }
-        $formatData['data'] = arrayRemovalDuplicate($formatData['data'], 'format_data');
-        if (empty($formatData['data'])) {
-            return $this->resObjectGet($formatData, 'formatData empty.', $request->path());
+        infoLog('[internal:createForBatch] params filter end.');
+
+        //判断是否是测试数据
+        infoLog('[internal:createForBatch] validator is_test start.');
+        if ($params['is_test'] == CrawlResult::EFFECT_TEST) {
+                $this->__platformAPI($params);
+                return $this->resObjectGet($params, 'crawl_result', $request->path());
+        } else {
+            $params['is_test'] = 0;
         }
 
-        if (empty($is_test)) {
-            $is_test = 0;
-        }
-        if ($is_test == CrawlResult::EFFECT_TEST) {
-            $platformData = [];
-            $platformData = formatPlarformData($formatData['data'], $is_test);
-            //平台接口调用
-            $platformResult = APIService::post(config('url.platform_url'), $platformData);
-            if (!empty($platformResult)) {
-                infoLog('[createByBatch] request platform API error', $platformData);
-                return response('数据发送异常', 501);
-            }
-            return $this->resObjectGet($formatData, 'crawl_result', $request->path());
-        }
-        //去重复
-        $newFormatData['data'] = [];
-        foreach ($formatData['data'] as $formatValue) {
-            $formatValue['data'] = null;
-            $responseDada = APIService::baseGet('/internal/basic/crawl/result/is_task_exist', ['id' => $formatValue['crawl_task_id'], 'url' => $formatValue['task_url']]);
-            if ($responseDada['status_code'] != 200) {
-                errorLog('[createByBatch] request /internal/basic/crawl/result/is_task_exist result error', $formatValue);
-                return response($responseDada['message'], $responseDada['status_code']);
-            }
-            if (empty($responseDada['data'])) {
-                $newFormatData['data'][] = $formatValue;
-            }
-        }
-        if (empty($newFormatData['data'])) {
-            infoLog('[createByBatch] repeated data');
-            return $this->resObjectGet([], 'crawl_result', $request->path());
-        }
-        infoLog('[createByBatch] request internal/basic createByBatch start');
-        $resultData = APIService::basePost('/internal/basic/crawl/result/batch_result', $newFormatData, 'json');
+        infoLog('[internal:createForBatch] validator is_test end.');
+        infoLog('[internal::createForBatch] request internal/basic createForBatch start');
+        $resultData = APIService::basePost('/internal/basic/crawl/results', $params, 'json');
         if ($resultData['status_code'] != 200) {
-            errorLog('[createByBatch] request internal/basic createByBatch result error', $newFormatData);
+            errorLog('[createForBatch] request internal/basic createForBatch result error', $newFormatData);
             return response($resultData['message'], $resultData['status_code']);
         }
+        infoLog('[internal::createForBatch] request internal/basic createForBatch end');
+
         $result = [];
         if ($resultData['data']) {
             $result = $resultData['data'];
-            $platformData = [];
-            $platformData = formatPlarformData($result, $is_test);
-            //平台接口调用
-            $platformResult = APIService::post(config('url.platform_url'), $platformData);
-            if (!empty($platformResult)) {
-                infoLog('[createByBatch] request platform API error', $platformData);
-                return response('数据发送异常', 501);
-            }
+            $this->__platformAPI($result);
+        }
+        return $this->resObjectGet($result, 'crawl_result', $request->path());
+    }
+
+    private function __platformAPI($params)
+    {
+        $platformParams = [];
+        $platformParams['result'] = [];
+        $platformParams['is_test'] = $params['is_test'];
+        foreach ($params['result'] as $key => $value) {
+            $newArr['title'] = $value['text'];
+            $newArr['url'] = $value['url'];
+            $newArr['task_id'] = $params['task_id'];
+            $platformParams['result'][] = $newArr;
 
         }
-        infoLog('[createByBatch] request internal/basic createByBatch end');
-        infoLog('[createByBatch] end.');
+        $platformData = sign($platformParams);
+        infoLog('[url.platform_url] '. config('url.platform_url'));
+        $platformResult = APIService::post(config('url.platform_url'), $platformData);
+        if (!empty($platformResult)) {
+            infoLog('[internal:createForBatch] request platform API error', $platformData);
+            return $this->resError(501, '数据发送异常');
+        }
+    }
 
+    private function __taskDetail($taskId)
+    {
+        $taskDetail = APIService::baseGet('/internal/basic/crawl/task', ['id' => $taskId], 'json');
+        if ($taskDetail['status_code'] != 200) {
+                errorLog('[createForBatch] request /internal/basic/crawl/result/search result error', $value);
+                return response($responseDada['message'], $responseDada['status_code']);
+        }
+        $result = [];
+        if (!empty($taskDetail)) {
+            $result = $taskDetail['data'];
+        }
+        return $result;
+    }
+    private function __updateTask($taskParams)
+    {
+        $taskResult = APIService::internalPost('/internal/basic/crawl/task/update', $taskParams, 'json');
+        if ($taskResult['status_code'] != 200) {
+            errorLog('[internal:createForBatch] update t_crawl_task last_job_at error', $taskParams);
+            return $this->resError($taskResult['status_code'], $taskResult['message']);
+        }
+    }
+    private function __dataFilter($data,$taskUrl)
+    {
+        $formatData = [];
+        foreach ($data as $value) {
+            if (empty($value['text']) || $value['text'] == 'undefined' || empty($value['url']) || $value['url'] == 'undefined') {
+                    continue;
+               }
+            $result = APIService::basePost('/internal/basic/crawl/result/search', ['task_id' => $params['task_id'],'original_data' => md5(json_encode($value)) ], 'json');
+            if ($result['status_code'] != 200) {
+                errorLog('[internal:createForBatch] request /internal/basic/crawl/result/search result error', $value);
+                return response($responseDada['message'], $responseDada['status_code']);
+            }
 
-        return $this->resObjectGet($result, 'crawl_result', $request->path());
+            if (empty($result['data'])) {
+                $strOne = substr($value['url'], 0,1);
+                if ($strOne == '/') {
+                    $strTwo = substr($value['url'], 1,1);
+                    if ($strTwo != '/') {
+                        $value['url'] = $taskUrl . $value['url'];
+                    }
+                }
+                $formatData[] = $value;
+            }
+        }
+        return $formatData;
     }
 
  }
