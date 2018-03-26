@@ -42,7 +42,7 @@ class CrawlResultController extends Controller
 
         if (empty($params['result'])) {
             infoLog('[basic:createForBatch] result empty!');
-            return $this->resObjectGet($params['task_id'], 'crawl_result', $request->path());
+            return $this->resError(401, 'result is empty!');
         }
 
         $items = [];
@@ -92,14 +92,21 @@ class CrawlResultController extends Controller
             }
         }
 
+        if (empty($params['limit'])) {
+            $params['limit'] = 20;
+        }
+        if (empty($params['offset'])) {
+            $params['offset'] = 0;
+        }
+
         try {
             $items = CrawlResult::take($params['limit'])
                                 ->skip($params['offset'])
                                 ->orderBy('id', 'desc')
                                 ->get();
-            $result = [];
 
-            if ($items) {
+            $result = [];
+            if (!empty($items)) {
                 $result = $items->toArray();
             }
         } catch (Exception $e) {
@@ -109,6 +116,7 @@ class CrawlResultController extends Controller
 
         return $this->resObjectGet($result, 'list', $request->path());
     }
+
     /**
      * search
      * 根据复杂条件获取结果纪录
@@ -155,7 +163,7 @@ class CrawlResultController extends Controller
             //$query->skip($params['offset']);
             $result = [];
 
-            if ($items) {
+            if (!empty($items)) {
                 $result = $items->toArray();
             }
         } catch (Exception $e) {

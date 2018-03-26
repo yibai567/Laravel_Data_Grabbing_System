@@ -14,12 +14,11 @@ class CrawlTaskController extends Controller
      * create
      * 创建爬虫任务接口-基础接口
      *
-     * @param CrawlTaskCreateRequest $request
+     * @param Request $request
      * @return json
      */
     public function create(Request $request)
     {
-        infoLog('[create] start.');
         $params = $request->all();
 
         $validator = Validator::make($params, [
@@ -85,8 +84,8 @@ class CrawlTaskController extends Controller
         }
 
         $task = CrawlTask::with('setting')->find($params['id']);
-        $data = [];
 
+        $data = [];
         if (!empty($task)) {
             $data = $task->toArray();
         }
