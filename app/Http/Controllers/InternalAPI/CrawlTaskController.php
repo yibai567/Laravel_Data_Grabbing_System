@@ -294,8 +294,7 @@ class CrawlTaskController extends Controller
             $listName = 'crawl_task_http_test';
         }
 
-        Redis::connection('queue');
-        Redis::lpush($listName, json_encode($item));
+        Redis::connection('queue')->lpush($listName, json_encode($item));
         return $this->resObjectGet('测试已提交，请稍后查询结果！', 'crawl_task', $request->path());
     }
 
