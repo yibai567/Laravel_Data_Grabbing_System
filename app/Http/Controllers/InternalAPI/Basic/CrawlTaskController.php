@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Validator;
 class CrawlTaskController extends Controller
 {
     /**
+     * create
      * 创建爬虫任务接口-基础接口
+     *
      * @param CrawlTaskCreateRequest $request
      * @return json
      */
@@ -20,7 +22,6 @@ class CrawlTaskController extends Controller
         infoLog('[create] start.');
         $params = $request->all();
 
-        infoLog('[create] validate.', $params);
         $validator = Validator::make($params, [
             'name' => 'string|nullable',
             'description' => 'string|nullable',
@@ -41,7 +42,6 @@ class CrawlTaskController extends Controller
 
         if ($validator->fails()) {
             $errors = $validator->errors();
-            errorLog('[create] validate fail.', $errors);
 
             foreach ($errors->all() as $value) {
                 errorLog('[create] validate fail message.', $value);
@@ -50,38 +50,33 @@ class CrawlTaskController extends Controller
         }
 
         $params['selectors'] = json_encode($params['selectors']);
-        infoLog('[create] validate end.', $params);
 
         $fieldList = ['name', 'description', 'resource_url', 'cron_type', 'selectors', 'setting_id', 'protocol', 'is_proxy', 'is_ajax', 'is_login', 'is_wall', 'keywords'];
 
         $data = array_only($params, $fieldList);
         $data['status'] = CrawlTask::IS_INIT;
         $data['response_type'] = CrawlTask::RESPONSE_TYPE_API;
-        infoLog('[create] prepare data.', $data);
-
         $task = CrawlTask::create($data);
 
-        infoLog('[create] end.');
         return $this->resObjectGet($task, 'crawl_task', $request->path());
     }
 
     /**
+     * retrieve
      * 获取任务详情
+     *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return json
      */
     public function retrieve(Request $request)
     {
-        infoLog('[retrieve] start.');
         $params = $request->all();
-
         $validator = Validator::make($params, [
             "id" => "integer|required",
         ]);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
-            errorLog('[retrieve] validate fail.');
 
             foreach ($errors->all() as $value) {
                 errorLog('[retrieve] validate fail message.', $value);
@@ -92,21 +87,25 @@ class CrawlTaskController extends Controller
         $task = CrawlTask::with('setting')->find($params['id']);
         $data = [];
 
-        if ($task) {
+        if (!empty($task)) {
             $data = $task->toArray();
         }
 
-        infoLog('[retrieve] end.');
         return $this->resObjectGet($data, 'crawl_task', $request->path());
     }
 
 
+    /**
+     * search
+     * 任务查询接口-根据条件查询
+     *
+     * @param Request $request
+     * @return json
+     */
     public function search(Request $request)
     {
-        infoLog('[updateLastJobAt] start.');
         $params = $request->all();
 
-        infoLog('[updateLastJobAt] validate start.');
         $validator = Validator::make($params, [
             'cron_type' => 'integer|required',
             'is_proxy' => 'integer|required',
@@ -128,8 +127,7 @@ class CrawlTaskController extends Controller
                                 ->where('cron_type', $params['protocol'])
                                 ->get();
             $data = [];
-
-            if ($items) {
+            if (!empty($items)) {
                 $data = $items->toArray();
             }
         } catch (Exception $e) {
@@ -140,12 +138,17 @@ class CrawlTaskController extends Controller
         return $this->resObjectGet($data, 'crawl_task', $request->path());
     }
 
+    /**
+     * update
+     * 更新任务信息
+     *
+     * @param Request $request
+     * @return json
+     */
     public function update(Request $request)
     {
-        infoLog('[update] start.');
         $params = $request->all();
 
-        infoLog('[update] validate.');
         $validator = Validator::make($params, [
             'name' => 'string|nullable',
             'description' => 'string|nullable',
@@ -172,7 +175,6 @@ class CrawlTaskController extends Controller
 
         if ($validator->fails()) {
             $errors = $validator->errors();
-            errorLog('[create] validate fail.');
 
             foreach ($errors->all() as $value) {
                 errorLog('[create] validate fail message.', $value);
@@ -201,16 +203,16 @@ class CrawlTaskController extends Controller
     }
 
     /**
+     * listByIds
      * 根据id列表获取任务列表
+     *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return json
      */
     public function listByIds(Request $request)
     {
-        infoLog('[listByIds] start.');
         $params = $request->all();
 
-        infoLog('[listByIds] validate start.');
         $validator = Validator::make($params, [
             'ids' => 'string|required|max:100',
         ]);
@@ -223,13 +225,12 @@ class CrawlTaskController extends Controller
                 return $this->resError(401, $value);
             }
         }
-        infoLog('[listByIds] validate end.');
 
         $ids = explode(',', $params['ids']);
         $tasks = CrawlTask::whereIn('id', $ids)->get();
 
         $data = [];
-        if ($tasks) {
+        if (!empty($tasks)) {
             $data = $tasks->toArray();
         }
 

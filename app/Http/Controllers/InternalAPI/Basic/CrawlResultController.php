@@ -13,14 +13,15 @@ use Illuminate\Support\Facades\Validator;
 class CrawlResultController extends Controller
 {
     /**
+     * createForBatch
      * 支持单条，批量插入数据
+     *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return json
      */
     public function createForBatch(Request $request)
     {
         $params = $request->all();
-        infoLog("[basic:createForBatch] start.");
 
         $validator = Validator::make($params, [
             'task_id' => 'required|integer',
@@ -30,9 +31,9 @@ class CrawlResultController extends Controller
             'result' => 'nullable',
         ]);
 
-        infoLog('[basic:createForBatch] params validator start');
         if ($validator->fails()) {
             $errors = $validator->errors();
+
             foreach ($errors->all() as $value) {
                 errorLog('[basic:createForBatch] params validator fail', $value);
                 return $this->resError(401, $value);
@@ -64,7 +65,6 @@ class CrawlResultController extends Controller
             return $this->resError(402, '插入失败');
         }
 
-        infoLog('[basic:createByBatch] end.');
         return $this->resObjectGet($params, 'list', $request->path());
     }
     /**
@@ -129,6 +129,7 @@ class CrawlResultController extends Controller
 
         if ($validator->fails()) {
             $errors = $validator->errors();
+
             foreach ($errors->all() as $value) {
                 return  $this->response->error($value, 401);
             }
@@ -161,6 +162,7 @@ class CrawlResultController extends Controller
             errorLog($e->getMessage(), $e->getCode());
             return $this->resError($e->getCode(), $e->getMessage());
         }
+
         return $this->resObjectGet($result, 'list', $request->path());
     }
 }
