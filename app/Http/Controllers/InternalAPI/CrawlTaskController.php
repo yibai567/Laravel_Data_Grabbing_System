@@ -122,8 +122,7 @@ class CrawlTaskController extends Controller
             }
 
             $result = $task;
-            Redis::connection('queue');
-            Redis::lpush($listName, json_encode($item));
+            Redis::connection('queue')->lpush($listName, json_encode($item));
         } catch (Exception $e){
             return $this->resError($e->getCode(), $e->getMessage());
         }
@@ -373,7 +372,7 @@ class CrawlTaskController extends Controller
     /**
      * 根据id列表获取任务列表
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return json
      */
     public function listByIds(Request $request)
     {
@@ -416,5 +415,121 @@ class CrawlTaskController extends Controller
         }
 
         return $this->resObjectGet($result, 'list', $request->path());
+    }
+
+    /**
+     * update
+     * 更新任务详情
+     *
+     * @param Request $request
+     * @return json
+     */
+    public function update(Request $request)
+    {
+        $params = $request->all();
+        $validator = Validator::make($params, [
+            'id' => 'required|integer',
+            'resource_url' => 'nullable|string',
+            'cron_type' => 'integer|nullable',
+            'selectors' => 'nullable',
+            'is_ajax' => 'integer|nullable',
+            'is_login' => 'integer|nullable',
+            'is_wall' => 'integer|nullable',
+            'is_proxy' => 'integer|nullable',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+
+            foreach ($errors->all() as $value) {
+                errorLog('[create] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+
+        $result = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
+        if ($result['status_code'] !== 200) {
+            errorLog($result['message'], $result['status_code']);
+            throw new Exception($result['message'], $result['status_code']);
+        }
+
+        if (empty($result['data'])) { // task does not exist
+            return $this->resError(401, 'task not exist!');
+        }
+
+        $task = $result['data'];
+        if ($task['status'] == CrawlTask::IS_START_UP) { // task is startup
+            return $this->resError(401, 'task status does not allow update!');
+        }
+
+        if (!empty($params['selectors'])) {
+            $selectors = ['range' => '','content' => [], 'tags' => []];
+
+            if (is_array($params['selectors'])) {
+                if (isset($params['selectors']['range'])) {
+                    if (mb_strlen($params['selectors']['range']) > 200) {
+                        return $this->resError(401, 'range 不能超过200');
+                    }
+
+                    $selectors['range'] = $params['selectors']['range'];
+                }
+
+                if (isset($params['selectors']['content'])) {
+                    $selectors['content'] = $params['selectors']['content'];
+                }
+
+                if  (isset($params['selectors']['tags'])) {
+                    $selectors['tags'] = $params['selectors']['tags'];
+                }
+            }
+            $params['selectors'] = $selectors;
+        }
+
+        if (!empty($params['resource_url'])) {
+            if (substr($params['resource_url'], 0, 8) == 'https://') {
+                $params['protocol'] = CrawlTask::PROTOCOL_HTTPS;
+            } else {
+                $params['protocol'] = CrawlTask::PROTOCOL_HTTP;
+            }
+        }
+
+        if (empty(array_diff($params, $task))) {
+            return $this->resError(401, 'task nothing be updated!');
+        }
+        $data['status'] = CrawlTask::IS_INIT;
+        $data = $params;
+
+        try{
+            $res = APIService::basePost('/internal/basic/crawl/task/update', $data, 'json');
+
+            if ($res['status_code'] !== 200) {
+                errorLog($res['message'], $res['status_code']);
+                throw new Exception($res['message'], $res['status_code']);
+            }
+
+            $task = [];
+            if ($res['data']) {
+                $task = $res['data'];
+            }
+
+            $item = [
+                'task_id' => $task['id'],
+                'url' => $task['resource_url'],
+                'selector' => $task['selectors'],
+            ];
+
+            if ($task['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
+                $listName = 'crawl_task_https_test';
+            } else {
+                $listName = 'crawl_task_http_test';
+            }
+
+            $result = $task;
+            Redis::connection('queue')->lpush($listName, json_encode($item));
+        } catch (Exception $e){
+            return $this->resError($e->getCode(), $e->getMessage());
+        }
+
+        return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 }

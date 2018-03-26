@@ -279,4 +279,51 @@ class CrawlTaskController extends Controller
 
         return $this->resObjectGet($result, 'list', $request->path());
     }
+
+    /**
+     * update
+     * 更新任务详情
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function update(Request $request)
+    {
+        $params = $request->all();
+        $validator = Validator::make($params, [
+            'id' => 'required|integer',
+            'resource_url' => 'nullable|string',
+            'cron_type' => 'integer|nullable',
+            'selectors' => 'nullable',
+            'is_ajax' => 'integer|nullable',
+            'is_login' => 'integer|nullable',
+            'is_wall' => 'integer|nullable',
+            'is_proxy' => 'integer|nullable',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+
+            foreach ($errors->all() as $value) {
+                errorLog('[create] validate fail message.', $value);
+                return $this->resError(401, $value);
+            }
+        }
+
+        $data = APIService::internalPost('/internal/crawl/task/update', $params);
+
+        if ($data['status_code'] !== 200) {
+            errorLog($data['message'], $data['status_code']);
+            return $this->resError($data['status_code'], $data['message']);
+        }
+
+        $result = [];
+        if ($data['data']) {
+            $task = $data['data'];
+            $result = ['id'=> $task['id']];
+        }
+
+        infoLog('[create] create end.');
+        return $this->resObjectGet($result, 'crawl_task', $request->path());
+    }
 }

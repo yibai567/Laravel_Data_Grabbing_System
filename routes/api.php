@@ -20,6 +20,7 @@ $api->version(
             return 'test';
         });
         $api->post('/crawl/task', 'CrawlTaskController@create');
+        $api->post('/crawl/task/update', 'CrawlTaskController@update');
         $api->post('/crawl/task/test', 'CrawlTaskController@test');
         $api->post('/crawl/task/stop', 'CrawlTaskController@stop');
         $api->post('/crawl/task/start','CrawlTaskController@start');
