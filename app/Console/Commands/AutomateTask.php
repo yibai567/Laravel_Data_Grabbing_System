@@ -105,12 +105,15 @@ class AutomateTask extends Command
             $key = $this->_getKey($item);
             $item = [
                 'task_id' => $item['id'],
-                'selector' => $item['selectors'],
                 'url' => $item['resource_url'],
-                'type' => $item['type'],
-                'header' => $item['header'],
-                'protocol' => $item['protocol'],
             ];
+            if ($item['resource_type'] == CrawlTask::RESOURCE_TYPE_JSON) {
+                $item['header'] = $item['header'];
+                $item['is_proxy'] = $item['is_proxy'];
+            } else {
+                $item['selector'] = $item['selectors'];
+            }
+
             $result[$key][] = $item;
         }
         return $result;
