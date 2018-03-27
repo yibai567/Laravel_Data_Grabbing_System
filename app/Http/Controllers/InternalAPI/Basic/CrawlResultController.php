@@ -7,6 +7,13 @@ use App\Models\CrawlResult;
 use App\Http\Controllers\InternalAPI\Controller;
 use Illuminate\Http\Request;
 
+/**
+ * CrawlResultController
+ * 抓取任务基础结果API控制器
+ *
+ * @author: yuwenbin@jinse.com
+ * @version: v1.0
+ */
 class CrawlResultController extends Controller
 {
     /**

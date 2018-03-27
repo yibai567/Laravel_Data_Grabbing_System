@@ -7,6 +7,13 @@ use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\InternalAPI\Controller;
 
+/**
+ * CrawlTaskController
+ * 抓取任务基础API控制器
+ *
+ * @author: yuwenbin@jinse.com
+ * @version: v1.0
+ */
 class CrawlTaskController extends Controller
 {
     /**
