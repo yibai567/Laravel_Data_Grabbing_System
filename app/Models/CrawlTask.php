@@ -51,7 +51,23 @@ class CrawlTask extends Model
     const RESOURCE_TYPE_HTML = 1;
     const RESOURCE_TYPE_JSON = 2;
 
+    /**
+     * 表名
+     */
     protected $table = 't_crawl_task';
+
+    /**
+     * 主键
+     */
+    protected $primaryKey = "id";
+
+    /**
+     * 隐藏的字段
+     */
+    protected $hidden = [
+        "updated_at",
+        "deleted_at",
+    ];
 
     protected $fillable = [
         'name',
@@ -74,8 +90,9 @@ class CrawlTask extends Model
         'start_time',
         'keywords',
         'last_job_at',
-        'type',
+        'resource_type',
         'header',
+        'md5_params',
     ];
 
     public function setting()

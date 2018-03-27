@@ -6,11 +6,37 @@ use Illuminate\Database\Eloquent\Model;
 
 class CrawlResult extends Model
 {
-    const IS_UNTREATED = 1; //未处理
-    const IS_PROCESSED = 2; //已处理
-    const IS_REPORT_ERROR = 3; //已处理
-    const EFFECT_TEST = 1;//test测试
+    use SoftDeletes;
+
+    //未处理
+    const IS_UNTREATED = 1;
+
+     //已处理
+    const IS_PROCESSED = 2;
+
+    //test测试
+    const EFFECT_TEST = 1;
+
+    //已处理
+    const IS_REPORT_ERROR = 3;
+
+    /**
+     * 表名
+     */
     protected $table = 't_crawl_result';
+
+    /**
+     * 主键
+     */
+    protected $primaryKey = "id";
+
+    /**
+     * 隐藏的字段
+     */
+    protected $hidden = [
+        "updated_at",
+        "deleted_at",
+    ];
 
     public $fillable = [
         'crawl_task_id',
