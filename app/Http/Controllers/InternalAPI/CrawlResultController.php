@@ -169,11 +169,24 @@ class CrawlResultController extends Controller
     */
     private function __dataFilter($data, $taskUrl, $taskId)
     {
-        $formatData = [];
+        $urlArr = parse_url($taskUrl);
+        $url = '';
+        if (isset($urlArr['scheme']) && isset($urlArr['host'])) {
+            $url = $urlArr['scheme'] . '://' . $urlArr['host'];
+        }
+
+        if (empty($url)) {
+            returnError(401, '参数错误');
+        }
+
         foreach ($data as $value) {
             if (empty($value['text']) || $value['text'] == 'undefined' || empty($value['url']) || $value['url'] == 'undefined' || $value['url'] == 'javascript:;') {
                     continue;
-               }
+            }
+
+            if (substr($value['url'], 0,1) == '/' && substr($value['url'], 1,1) != '/') {
+                $value['url'] = $url . $value['url'];
+            }
 
             $result = APIService::basePost('/internal/basic/crawl/result/search', ['task_id' => $taskId, 'original_data' => md5(json_encode($value))], 'json');
 
@@ -183,17 +196,9 @@ class CrawlResultController extends Controller
             }
 
             if (empty($result['data'])) {
-                $strOne = substr($value['url'], 0,1);
-                if ($strOne == '/') {
-                    $strTwo = substr($value['url'], 1,1);
-                    if ($strTwo != '/') {
-                        $value['url'] = $taskUrl . $value['url'];
-                    }
-                }
                 $formatData[] = $value;
             }
         }
         return $formatData;
     }
-
  }
