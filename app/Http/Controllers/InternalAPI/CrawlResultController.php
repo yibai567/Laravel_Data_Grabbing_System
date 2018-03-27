@@ -85,7 +85,9 @@ class CrawlResultController extends Controller
         //判断是否是测试数据
         infoLog('[internal:createForBatch] validator is_test start.');
         if ($params['is_test'] == CrawlResult::EFFECT_TEST) {
-                $this->__platformAPI($params);
+                if ($this->__platformAPI($result) === false) {
+                    return $this->resError(502, '调用外部接口失败');
+                }
                 return $this->resObjectGet($params, 'crawl_result', $request->path());
         } else {
             $params['is_test'] = 0;
@@ -105,7 +107,9 @@ class CrawlResultController extends Controller
 
         if ($resultData['data']) {
             $result = $resultData['data'];
-            $this->__platformAPI($result);
+            if ($this->__platformAPI($result) === false) {
+                return $this->resError(502, '调用外部接口失败');
+            }
         }
 
         return $this->resObjectGet($result, 'crawl_result', $request->path());
@@ -127,15 +131,15 @@ class CrawlResultController extends Controller
             $newArr['task_id'] = $params['task_id'];
             $platformParams['result'][] = $newArr;
         }
-
         $platformData = sign($platformParams);
         infoLog('[url.platform_url] '. config('url.platform_url'));
         $platformResult = APIService::post(config('url.platform_url'), $platformData);
 
-        if (!empty($platformResult)) {
+        if ($platformResult === false) {
             infoLog('[internal:createForBatch] request platform API error', $platformData);
-            return $this->resError(501, '数据发送异常');
+            return false;
         }
+        return true;
     }
 
     /**
