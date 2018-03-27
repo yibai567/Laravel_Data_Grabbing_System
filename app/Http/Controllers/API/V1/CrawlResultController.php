@@ -46,7 +46,7 @@ class CrawlResultController extends Controller
     }
 
     /**
-     * Dispatch
+     * dispatch
      * 结果分发
      *
      * @param task_id (抓取任务ID)
@@ -56,22 +56,37 @@ class CrawlResultController extends Controller
      * @param result (抓取结果)
      * @return array
      */
-    public function Dispatch(Request $request)
+    public function dispatch(Request $request)
     {
         $params = $request->all();
 
         ValidatorService::check($params, [
-            'task_id' => 'required|integer',
+            'task_id' => 'required|integer|min:1|max:99999999',
             'is_test' => 'integer|nullable',
             'start_time' => 'date|nullable',
             'end_time' => 'date|nullable',
-            'result' => 'nullable',
+            'result' => 'array|nullable',
         ]);
+
+        if ($params['is_test'] == CrawlResult::IS_TEST_TRUE) {
+            $params['is_test'] = CrawlResult::IS_TEST_TRUE;
+        } else {
+            $params['is_test'] = CrawlResult::IS_TEST_FALSE;
+        }
 
         // 获取任务信息
         $task = APIService::internalPost('/internal/crawl/task', ['id' => $params['task_id']]);
         if (empty($task)) {
             throw new \Dingo\Api\Exception\ResourceException("task is not found");
+        }
+
+        // 测试结果需要更新
+        if ($params['is_test'] == CrawlResult::IS_TEST_TRUE) {
+            try {
+                APIService::internalPost('/internal/crawl/result/test', ['task_id' => $params['task_id'], 'result' => $params['result']], 'json');
+            } catch (\Dingo\Api\Exception\InternalHttpException $e) {
+                throw new \Dingo\Api\Exception\ResourceException("update test result fail");
+            }
         }
 
         // 按任务资源数据的类型进行分发
