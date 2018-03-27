@@ -71,6 +71,8 @@ class CrawlTask extends Model
         'start_time',
         'keywords',
         'last_job_at',
+        'type',
+        'header',
     ];
 
     public function setting()
