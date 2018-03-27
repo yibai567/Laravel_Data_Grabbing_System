@@ -107,6 +107,8 @@ class AutomateTask extends Command
                 'task_id' => $item['id'],
                 'selector' => $item['selectors'],
                 'url' => $item['resource_url'],
+                'type' => $item['type'],
+                'header' => $item['header'],
             ];
             $result[$key][] = $item;
         }

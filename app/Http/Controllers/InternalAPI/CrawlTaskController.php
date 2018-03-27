@@ -435,6 +435,8 @@ class CrawlTaskController extends Controller
             'is_login' => 'integer|nullable',
             'is_wall' => 'integer|nullable',
             'is_proxy' => 'integer|nullable',
+            'type' => 'integer|nullable',
+            'header' => 'nullable',
         ]);
 
         if ($validator->fails()) {
@@ -515,6 +517,8 @@ class CrawlTaskController extends Controller
                 'task_id' => $task['id'],
                 'url' => $task['resource_url'],
                 'selector' => $task['selectors'],
+                'type' => $task['type'],
+                'header' => $task['header'],
             ];
 
             if ($task['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
