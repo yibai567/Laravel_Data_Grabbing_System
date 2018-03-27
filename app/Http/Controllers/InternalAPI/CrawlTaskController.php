@@ -4,6 +4,7 @@ namespace App\Http\Controllers\InternalAPI;
 
 use App\Models\CrawlTask;
 use App\Services\APIService;
+use App\Services\ValidatorService;
 use Dompdf\Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
@@ -18,11 +19,8 @@ class CrawlTaskController extends Controller
      */
     public function create(Request $request)
     {
-        infoLog('[create] start.');
         $params = $request->all();
-
-        infoLog('[create] validate.', $params);
-        $validator = Validator::make($params, [
+        ValidatorService::check($params, [
             'resource_url' => 'required|string',
             'cron_type' => 'integer|nullable',
             'selectors' => 'nullable',
@@ -33,16 +31,6 @@ class CrawlTaskController extends Controller
             'type' => 'integer|nullable',
             'header' => 'nullable',
         ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            errorLog('[create] validate fail.', $errors);
-
-            foreach ($errors->all() as $value) {
-                errorLog('[create] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
 
         $selectors = ['range' => '','content' => [], 'tags' => []];
 
@@ -65,8 +53,6 @@ class CrawlTaskController extends Controller
         }
 
         $params['selectors'] = $selectors;
-        infoLog('[create] validate end.');
-
         if (empty($params['cron_type'])) {
             $params['cron_type'] = CrawlTask::CRON_TYPE_KEEP;
         }
@@ -94,21 +80,11 @@ class CrawlTaskController extends Controller
         }
 
         $data = $params;
-        infoLog('[create] prepare data.', $data);
-
         try{
-            infoLog('[create] prepare data.', $data);
             $res = APIService::basePost('/internal/basic/crawl/task', $data, 'json');
-            infoLog('[create] create task.', $res);
-
-            if ($res['status_code'] !== 200) {
-                errorLog($res['message'], $res['status_code']);
-                throw new Exception($res['message'], $res['status_code']);
-            }
-
             $task = [];
-            if ($res['data']) {
-                $task = $res['data'];
+            if ($res) {
+                $task = $res;
             }
 
             $item = [
@@ -141,54 +117,25 @@ class CrawlTaskController extends Controller
      */
     public function stop(Request $request)
     {
-        infoLog('[stop] start.');
         $params = $request->all();
-
-        infoLog('[stop] validate.');
-        $validator = Validator::make($params, [
+        ValidatorService::check($params, [
             'id' => 'integer|required',
         ]);
 
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-
-            foreach ($errors->all() as $value) {
-                infoLog('[stop] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-        infoLog('[stop] validate end.');
-
+        $result = [];
         try {
             //获取任务详情
             $taskDetail = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
-
-            if ($taskDetail['status_code'] !== 200 || empty($taskDetail)) {
-                errorLog($taskDetail['messsage']);
-                throw new Exception($taskDetail['messsage'], $taskDetail['status_code']);
-            }
-
-            $taskData = $taskDetail['data'];
-            if (empty($taskData)) {
+            if (empty($taskDetail)) {
                 return $this->resError(401, 'task does not exist!');
             }
 
-            if ($taskData['status'] !== CrawlTask::IS_START_UP) {
-                return $this->resError(401, 'task not start!');
-            }
-
-            $params = ['id' => $taskData['id'], 'status' => CrawlTask::IS_PAUSE];
+            $params = ['id' => $taskDetail['id'], 'status' => CrawlTask::IS_PAUSE];
             $result = APIService::basePost('/internal/basic/crawl/task/update', $params);
-
-            if ($result['status_code'] !== 200) {
-                errorLog($result['messsage']);
-                throw new Exception('[stop] ' . $result['status_code'] . 'stop fail', 401);
-            }
         } catch (Exception $e) {
             return $this->resError($e->getCode(), $e->getMessage());
         }
 
-        infoLog('[stop] end.');
         return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 
@@ -199,54 +146,32 @@ class CrawlTaskController extends Controller
      */
     public function start(Request $request)
     {
-        infoLog('[start] start.');
         $params = $request->all();
 
-        infoLog('[start] validate.', $params);
-        $validator = Validator::make($params, [
+        ValidatorService::check($params, [
             'id' => 'integer|required',
         ]);
 
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-
-            foreach ($errors->all() as $value) {
-                infoLog('[start] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-
-        infoLog('[start] validate end.');
+        $result = [];
         try {
             //获取任务详情
             $taskDetail = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
 
-            if ($taskDetail['status_code'] !== 200 || empty($taskDetail)) {
-                errorLog($taskDetail['messsage']);
-                throw new Exception($taskDetail['messsage'], $taskDetail['status_code']);
-            }
-
-            $taskData = $taskDetail['data'];
-            if (empty($taskData)) {
+            if (empty($taskDetail)) {
                 return $this->resError(401, 'task does not exist');
             }
 
-            if ($taskData['status'] != CrawlTask::IS_TEST_SUCCESS && $taskData['status'] != CrawlTask::IS_PAUSE) {
+            if ($taskDetail['status'] != CrawlTask::IS_TEST_SUCCESS && $taskDetail['status'] != CrawlTask::IS_PAUSE) {
                 return $this->resError(401, 'task status does not allow to start');
             }
 
-            $params = ['id' => $taskData['id'], 'status' => CrawlTask::IS_START_UP];
-            $data = APIService::basePost('/internal/basic/crawl/task/update', $params);
-
-            if ($data['status_code'] !== 200) {
-                errorLog($data['messsage']);
-                throw new Exception('[start] ' . $data['status_code'] . 'start fail', 401);
-            }
+            $params = ['id' => $taskDetail['id'], 'status' => CrawlTask::IS_START_UP];
+            $result = APIService::basePost('/internal/basic/crawl/task/update', $params);
         } catch (Exception $e) {
             return $this->resError($e->getCode(), $e->getMessage());
         }
-        infoLog('[start] end.');
-        return $this->resObjectGet($data, 'crawl_task', $request->path());
+
+        return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
     /**
      * 任务测试
@@ -255,45 +180,28 @@ class CrawlTaskController extends Controller
      */
     public function test(Request $request)
     {
-        infoLog('[test] start.');
         $params = $request->all();
-
-        infoLog('[test] validate.', $params);
-        $validator = Validator::make($params, [
+        ValidatorService::check($params, [
             'id' => 'integer|required',
         ]);
 
-        infoLog('[test] validate.', $validator);
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-
-            foreach ($errors->all() as $value) {
-                infoLog('[test] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-
-        infoLog('[test] validate end.');
         //获取任务详情
         $taskDetail = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
 
-        if ($taskDetail['status_code'] !== 200 || empty($taskDetail)) {
-            errorLog($taskDetail['messsage']);
-            throw new Exception($taskDetail['messsage'], $taskDetail['status_code']);
-        }
-
-        if (empty($taskDetail['data'])) {
+        if (empty($taskDetail)) {
             return $this->resError('task does not exist!');
         }
 
-        $task = $taskDetail['data'];
         $item = [
-            'task_id'=> $task['id'],
-            'url'=> $task['resource_url'],
-            'selector'=> $task['selectors']
+            'task_id'=> $taskDetail['id'],
+            'url'=> $taskDetail['resource_url'],
+            'selector'=> $taskDetail['selectors'],
+            'protocol' => $taskDetail['protocol'],
+            'type' => $taskDetail['type'],
+            'header' => $taskDetail['header'],
         ];
 
-        if ($task['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
+        if ($taskDetail['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
             $listName = 'crawl_task_https_test';
         } else {
             $listName = 'crawl_task_http_test';
@@ -310,24 +218,11 @@ class CrawlTaskController extends Controller
      */
     public function getByQueueName(Request $request)
     {
-        infoLog('[getByQueueName] start.');
         $params = $request->all();
-
-        infoLog('[getByQueueName] validate start.');
-        $validator = Validator::make($params, [
+        ValidatorService::check($params, [
             'name' => 'string|required|max:100',
         ]);
 
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-
-            foreach ($errors->all() as $value) {
-                infoLog('[getByQueueName] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-
-        infoLog('[getByQueueName] validate end.');
         try {
             Redis::connection('queue');
             $data = [];
@@ -380,36 +275,15 @@ class CrawlTaskController extends Controller
      */
     public function listByIds(Request $request)
     {
-        infoLog('[listByIds] start.');
         $params = $request->all();
-
-        infoLog('[listByIds] validate start.');
-        $validator = Validator::make($params, [
+        ValidatorService::check($params, [
             'ids' => 'string|required|max:100',
         ]);
 
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-
-            foreach ($errors->all() as $value) {
-                infoLog('[listByIds] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-
-        infoLog('[listByIds] validate end.');
         $data = APIService::baseGet('/internal/basic/crawl/tasks/ids', $params);
 
-        if ($data['status_code'] !== 200) {
-            errorLog('[listByIds] error.', $data);
-            return $this->resError($data['status_code'], $data['message']);
-        }
-
-        $result = [];
-        if ($data['data']) {
-            $tasks = $data['data'];
-
-            foreach ($tasks as $task) {
+        if (!empty($data)) {
+            foreach ($data as $task) {
                 $item = [];
                 $item['task_id'] = $task['id'];
                 $item['selector'] = $task['selectors'];
@@ -434,7 +308,7 @@ class CrawlTaskController extends Controller
     public function update(Request $request)
     {
         $params = $request->all();
-        $validator = Validator::make($params, [
+        ValidatorService::check($params, [
             'id' => 'required|integer',
             'resource_url' => 'nullable|string',
             'cron_type' => 'integer|nullable',
@@ -447,26 +321,12 @@ class CrawlTaskController extends Controller
             'header' => 'nullable',
         ]);
 
-        if ($validator->fails()) {
-            $errors = $validator->errors();
+        $task = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
 
-            foreach ($errors->all() as $value) {
-                errorLog('[create] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-
-        $result = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
-        if ($result['status_code'] !== 200) {
-            errorLog($result['message'], $result['status_code']);
-            throw new Exception($result['message'], $result['status_code']);
-        }
-
-        if (empty($result['data'])) { // task does not exist
+        if (empty($task)) { // task does not exist
             return $this->resError(401, 'task not exist!');
         }
 
-        $task = $result['data'];
         if ($task['status'] == CrawlTask::IS_START_UP) { // task is startup
             return $this->resError(401, 'task status does not allow update!');
         }
@@ -505,20 +365,17 @@ class CrawlTaskController extends Controller
         if (empty(array_diff($params, $task))) {
             return $this->resError(401, 'task nothing be updated!');
         }
+
+        $data = [];
         $data['status'] = CrawlTask::IS_INIT;
         $data = $params;
 
         try{
             $res = APIService::basePost('/internal/basic/crawl/task/update', $data, 'json');
 
-            if ($res['status_code'] !== 200) {
-                errorLog($res['message'], $res['status_code']);
-                throw new Exception($res['message'], $res['status_code']);
-            }
-
-            $task = [];
-            if ($res['data']) {
-                $task = $res['data'];
+            $result = [];
+            if (!empty($res)) {
+                $result = $res;
             }
 
             $item = [
@@ -530,13 +387,11 @@ class CrawlTaskController extends Controller
                 'header' => $task['header'],
             ];
 
-            if ($task['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
+            if ($result['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
                 $listName = 'crawl_task_https_test';
             } else {
                 $listName = 'crawl_task_http_test';
             }
-
-            $result = $task;
             Redis::connection('queue')->lpush($listName, json_encode($item));
         } catch (Exception $e){
             return $this->resError($e->getCode(), $e->getMessage());
