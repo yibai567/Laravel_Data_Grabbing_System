@@ -26,7 +26,7 @@ class CrawlTaskController extends Controller
      * @param is_login (是否登陆，默认1) 1|不是
      * @param is_wall (是否翻墙，默认1) 1|不是
      * @param is_proxy (是否使用协议，默认1) 1|http,2|https
-     * @param type (类型) 1|http,2|https
+     * @param resource_type (类型) 1|html,2|json
      * @param header (头信息)
      * @return array
      */
@@ -41,7 +41,7 @@ class CrawlTaskController extends Controller
             'is_login' => 'integer|nullable',
             'is_wall' => 'integer|nullable',
             'is_proxy' => 'integer|nullable',
-            'type' => 'integer|nullable',
+            'resource_type' => 'integer|nullable',
             'header' => 'nullable',
         ]);
 
@@ -201,7 +201,7 @@ class CrawlTaskController extends Controller
      * @param is_login (是否登陆，默认1) 1|不是
      * @param is_wall (是否翻墙，默认1) 1|不是
      * @param is_proxy (是否使用协议，默认1) 1|http,2|https
-     * @param type (类型) 1|http,2|https
+     * @param resource_type (类型) 1|html,2|api
      * @param header (头信息)
      * @return array
      */
@@ -217,7 +217,7 @@ class CrawlTaskController extends Controller
             'is_login' => 'integer|nullable',
             'is_wall' => 'integer|nullable',
             'is_proxy' => 'integer|nullable',
-            'type' => 'integer|nullable',
+            'resource_type' => 'integer|nullable',
             'header' => 'nullable',
         ]);
 

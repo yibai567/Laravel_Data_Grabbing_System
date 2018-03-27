@@ -148,7 +148,13 @@ class AutomateTask extends Command
         $ajax = $this->_ajaxs[$item['is_ajax']];
         $login = $this->_logins[$item['is_login']];
         $cronType = $this->_cronTypes[$item['cron_type']];
-        $key = 'crawl_task_' . $protocol . '_' . $proxy . '_' . $wall . '_' . $ajax . '_' . $login . '_' . $cronType;
+
+        if ($item['resource_type'] == CrawlTask::RESOURCE_TYPE_JSON) {
+            $key = 'crawl_task_json';
+        } else {
+            $key = 'crawl_task_' . $protocol . '_' . $proxy . '_' . $wall . '_' . $ajax . '_' . $login . '_' . $cronType;
+        }
+
         return $key;
     }
 }

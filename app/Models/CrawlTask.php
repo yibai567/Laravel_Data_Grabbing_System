@@ -48,6 +48,9 @@ class CrawlTask extends Model
 
     const SCRIPT_PREFIX = 'grab';
 
+    const RESOURCE_TYPE_HTML = 1;
+    const RESOURCE_TYPE_JSON = 2;
+
     protected $table = 't_crawl_task';
 
     protected $fillable = [
