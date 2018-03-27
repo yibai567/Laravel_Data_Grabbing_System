@@ -6,11 +6,26 @@ use App\Services\APIService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * CrawlTaskController
+ * 任务控制器
+ * @author huangxingxing@jinse.com
+ * @version 1.1
+ * Date: 2018/03/25
+ */
 class CrawlTaskController extends Controller
 {
     /**
-     * 创建任务接口
-     * @param Request $request
+     * createForBatch
+     * 保存抓取结果
+     *
+     * @param resource_url (任务资源URL)
+     * @param cron_type 默认 1可持续的
+     * @param selectors (选择器)
+     * @param is_ajax (是否是ajax，默认1) 1|不是
+     * @param is_login (是否登陆，默认1) 1|不是
+     * @param is_wall (是否翻墙，默认1) 1|不是
+     * @param is_proxy (是否使用协议，默认1) 1|http,2|https
      * @return array
      */
     public function create(Request $request)
@@ -56,17 +71,17 @@ class CrawlTaskController extends Controller
         infoLog('[create] create end.');
         return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
+
     /**
-     * 停止任务接口
-     * @param Request $request
+     * stop
+     * 任务停止
+     *
+     * @param id (任务ID)
      * @return array
      */
     public function stop(Request $request)
     {
-        infoLog('[stop] start.');
         $params = $request->all();
-
-        infoLog('[stop] validate.', $params);
         $validator = Validator::make($params, [
             'id' => 'integer|required',
         ]);
@@ -100,21 +115,18 @@ class CrawlTaskController extends Controller
     }
 
     /**
-     * 启动任务
-     * @param Request $request
-     * @return 启动任务
+     * start
+     * 任务开始
+     *
+     * @param id (任务ID)
+     * @return array
      */
     public function start(Request $request)
     {
-        infoLog('[start] start.');
         $params = $request->all();
-
-        infoLog('[start] validate.', $params);
         $validator = Validator::make($params, [
             'id' => 'integer|required',
         ]);
-
-        infoLog('[start] validate.', $validator);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -125,7 +137,6 @@ class CrawlTaskController extends Controller
             }
         }
 
-        infoLog('[start] validate end.');
         $data = APIService::internalPost('/internal/crawl/task/start', $params);
 
         if ($data['status_code'] !== 200) {
@@ -143,20 +154,18 @@ class CrawlTaskController extends Controller
     }
 
     /**
+     * test
      * 任务测试
-     * @param Request $request
-     * @return 任务测试
+     *
+     * @param id (任务ID)
+     * @return array
      */
     public function test(Request $request)
     {
-        infoLog('[start] start.');
         $params = $request->all();
-
-        infoLog('[start] validate.', $params);
         $validator = Validator::make($params, [
             'id' => 'integer|required',
         ]);
-        infoLog('[start] validate.', $validator);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -167,7 +176,6 @@ class CrawlTaskController extends Controller
             }
         }
 
-        infoLog('[start] validate end.');
         $data = APIService::internalPost('/internal/crawl/task/test', $params);
 
         if ($data['status_code'] !== 200) {
@@ -175,21 +183,19 @@ class CrawlTaskController extends Controller
             return $this->resError($data['status_code'], $data['message']);
         }
 
-        infoLog('[start] validate end.');
         return $this->resObjectGet('测试提交成功，请稍后查看结果！', 'crawl_task', $request->path());
     }
 
     /**
+     * getByQueueName
      * 根据队列名获取列表数据
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     *
+     * @param name (队列名)
+     * @return array
      */
     public function getByQueueName(Request $request)
     {
-        infoLog('[getByQueueName] start.');
         $params = $request->all();
-
-        infoLog('[getByQueueName] validate start.');
         $validator = Validator::make($params, [
             'name' => 'string|required|max:100',
         ]);
@@ -203,7 +209,6 @@ class CrawlTaskController extends Controller
             }
         }
 
-        infoLog('[getByQueueName] validate end.');
         $data = APIService::internalGet('/internal/crawl/task/queue/name?name=' . $params['name']);
 
         if ($data['status_code'] !== 200) {
@@ -220,9 +225,10 @@ class CrawlTaskController extends Controller
     }
 
     /**
+     * getQueueInfo
      * 获取队列信息-名字及任务数
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     *
+     * @return array
      */
     public function getQueueInfo(Request $request)
     {
@@ -242,15 +248,15 @@ class CrawlTaskController extends Controller
     }
 
     /**
+     * listByIds
      * 根据ids获取任务列表
-     * @param Request $request
+     *
+     * @param ids (任务ids)
+     * @return array
      */
     public function listByIds(Request $request)
     {
-        infoLog('[listByIds] start.');
         $params = $request->all();
-
-        infoLog('[listByIds] validate start.');
         $validator = Validator::make($params, [
             'ids' => 'string|required|max:100',
         ]);
@@ -264,7 +270,6 @@ class CrawlTaskController extends Controller
             }
         }
 
-        infoLog('[listByIds] validate end.');
         $data = APIService::internalGet('/internal/crawl/tasks/ids', $params);
 
         if ($data['status_code'] !== 200) {
