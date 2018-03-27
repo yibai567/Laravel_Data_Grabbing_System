@@ -36,9 +36,9 @@ class RequestService extends Service
      * @param bool $isProxy
      * @return array
      */
-    public function get($url, $params=[], $type='json', $header=[], $isProxy=false, $charset='UTF-8')
+    public function get($url, $params=[], $header=[], $isProxy=false, $charset='UTF-8')
     {
-        return $this->request('get', $url, $params, $type, $header, $isProxy, $charset);
+        return $this->request('get', $url, $params, $header, $isProxy, $charset);
     }
 
     /**
@@ -46,15 +46,14 @@ class RequestService extends Service
      * post 请求
      *
      * @param $url
-     * @param array $params
-     * @param string $type
      * @param array $header
+     * @param array $params
      * @param bool $isProxy
      * @return array
      */
-    public function post($url, $params=[], $type='json', $header=[], $isProxy=false, $charset='UTF-8')
+    public function post($url, $params=[], $header=[], $isProxy=false, $charset='UTF-8')
     {
-        return $this->request('post', $url, $params, $type, $header, $isProxy, $charset);
+        return $this->request('post', $url, $params, $header, $isProxy, $charset);
     }
 
     /**
@@ -69,9 +68,9 @@ class RequestService extends Service
      * @param bool $isProxy
      * @return array
      */
-    public function request($requestType, $url, $params=[], $type='json', $header=[], $isProxy=false, $charset='UTF-8')
+    public function request($requestType, $url, $params=[], $header=[], $isProxy=false, $charset='UTF-8')
     {
-        $this->__init($url, $type, $header, $isProxy);
+        $this->__init($url, $header, $isProxy);
         try {
             if (!empty($params)) {
                 $this->__setParams($requestType, $params);
@@ -125,8 +124,9 @@ class RequestService extends Service
     private function __parse_url($url)
     {
         $urlArr = parse_url($url);
+
         if (!empty($urlArr)) {
-            $this->__urlSchema = $urlArr['schema'];
+            $this->__urlSchema = $urlArr['scheme'];
             $this->__urlHost = $urlArr['host'];
         }
         return false;
