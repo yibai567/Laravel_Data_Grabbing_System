@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers\InternalAPI\Basic;
 
-use DB;
-use App\Http\Requests\CrawlResultCreateRequest;
+use App\Services\ValidatorService;
 use App\Models\CrawlResult;
 use App\Http\Controllers\InternalAPI\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-
 
 class CrawlResultController extends Controller
 {
@@ -22,23 +19,13 @@ class CrawlResultController extends Controller
     public function createForBatch(Request $request)
     {
         $params = $request->all();
-
-        $validator = Validator::make($params, [
+        ValidatorService::check($params, [
             'task_id' => 'required|integer',
             'is_test' => 'integer|nullable',
             'start_time' => 'date|nullable',
             'end_time' => 'date|nullable',
             'result' => 'nullable',
         ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-
-            foreach ($errors->all() as $value) {
-                errorLog('[basic:createForBatch] params validator fail', $value);
-                return $this->resError(401, $value);
-            }
-        }
 
         if (empty($params['result'])) {
             infoLog('[basic:createForBatch] result empty!');
@@ -77,20 +64,10 @@ class CrawlResultController extends Controller
     public function all(Request $request)
     {
         $params =$request->all();
-
-        //数据验证规则
-        $validator = Validator::make($request->all(), [
+        ValidatorService::check($request->all(), [
             "limit" => "nullable|integer|min:1|max:500",
             "offset" => "nullable|integer|min:0",
         ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-
-            foreach ($errors->all() as $value) {
-                return  $this->response->error($value, 401);
-            }
-        }
 
         if (empty($params['limit'])) {
             $params['limit'] = 20;
@@ -127,21 +104,11 @@ class CrawlResultController extends Controller
     public function search(Request $request)
     {
         $params =$request->all();
-
-        //数据验证规则
-        $validator = Validator::make($request->all(), [
+        ValidatorService::check($request->all(), [
             "task_id" => "nullable|integer",
             "url" => "nullable|string",
             "original_data" => "nullable|string",
         ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-
-            foreach ($errors->all() as $value) {
-                return  $this->response->error($value, 401);
-            }
-        }
 
         try {
             $items = CrawlResult::where(function ($query) use ($params) {

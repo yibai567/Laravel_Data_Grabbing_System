@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\InternalAPI\Basic;
 
 use App\Models\CrawlTask;
-use Dompdf\Exception;
+use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\InternalAPI\Controller;
-use Illuminate\Support\Facades\Validator;
 
 class CrawlTaskController extends Controller
 {
@@ -21,7 +20,7 @@ class CrawlTaskController extends Controller
     {
         $params = $request->all();
 
-        $validator = Validator::make($params, [
+        ValidatorService::check($params, [
             'name' => 'string|nullable',
             'description' => 'string|nullable',
             'resource_url' => 'string|nullable',
@@ -41,23 +40,8 @@ class CrawlTaskController extends Controller
             'header' => 'nullable',
         ]);
 
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-
-            foreach ($errors->all() as $value) {
-                errorLog('[create] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
-
         $params['selectors'] = json_encode($params['selectors']);
-
-        $fieldList = ['name', 'description', 'resource_url', 'cron_type', 'selectors', 'setting_id', 'protocol', 'is_proxy', 'is_ajax', 'is_login', 'is_wall', 'keywords'];
-
-        $data = array_only($params, $fieldList);
-        $data['status'] = CrawlTask::IS_INIT;
-        $data['response_type'] = CrawlTask::RESPONSE_TYPE_API;
-        $task = CrawlTask::create($data);
+        $task = CrawlTask::create($params);
 
         return $this->resObjectGet($task, 'crawl_task', $request->path());
     }
@@ -72,18 +56,9 @@ class CrawlTaskController extends Controller
     public function retrieve(Request $request)
     {
         $params = $request->all();
-        $validator = Validator::make($params, [
+        ValidatorService::check($params, [
             "id" => "integer|required",
         ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-
-            foreach ($errors->all() as $value) {
-                errorLog('[retrieve] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
 
         $task = CrawlTask::with('setting')->find($params['id']);
 
@@ -107,19 +82,11 @@ class CrawlTaskController extends Controller
     {
         $params = $request->all();
 
-        $validator = Validator::make($params, [
+        ValidatorService::check($params, [
             'cron_type' => 'integer|required',
             'is_proxy' => 'integer|required',
             'protocol' => 'integer|required',
         ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            foreach ($errors->all() as $value) {
-                infoLog('[updateLastJobAt] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
 
         try {
             $items = CrawlTask::select('id,resource_url')
@@ -150,7 +117,7 @@ class CrawlTaskController extends Controller
     {
         $params = $request->all();
 
-        $validator = Validator::make($params, [
+        ValidatorService::check($params, [
             'name' => 'string|nullable',
             'description' => 'string|nullable',
             'resource_url' => 'nullable',
@@ -173,15 +140,6 @@ class CrawlTaskController extends Controller
             'test_result' => 'nullable',
             'id' => 'required|integer'
         ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-
-            foreach ($errors->all() as $value) {
-                errorLog('[create] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
 
         $item = CrawlTask::find($params['id']);
 
@@ -214,18 +172,9 @@ class CrawlTaskController extends Controller
     {
         $params = $request->all();
 
-        $validator = Validator::make($params, [
+        ValidatorService::check($params, [
             'ids' => 'string|required|max:100',
         ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-
-            foreach ($errors->all() as $value) {
-                infoLog('[listByIds] validate fail message.', $value);
-                return $this->resError(401, $value);
-            }
-        }
 
         $ids = explode(',', $params['ids']);
         $tasks = CrawlTask::whereIn('id', $ids)->get();
