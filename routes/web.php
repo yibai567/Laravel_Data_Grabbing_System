@@ -12,6 +12,5 @@
 */
 
 Route::get('/', function () {
-    infoLog('test');
-    return view('welcome');
+    return response('', 404);
 });
