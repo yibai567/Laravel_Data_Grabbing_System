@@ -42,6 +42,8 @@ class CrawlTaskController extends Controller
             'is_login' => 'integer|nullable',
             'is_wall' => 'integer|nullable',
             'is_proxy' => 'integer|nullable',
+            'type' => 'integer|nullable',
+            'header' => 'nullable',
         ]);
 
         if ($validator->fails()) {

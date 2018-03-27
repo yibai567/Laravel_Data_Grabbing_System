@@ -109,6 +109,7 @@ class AutomateTask extends Command
                 'url' => $item['resource_url'],
                 'type' => $item['type'],
                 'header' => $item['header'],
+                'protocol' => $item['protocol'],
             ];
             $result[$key][] = $item;
         }

@@ -30,6 +30,8 @@ class CrawlTaskController extends Controller
             'is_login' => 'integer|nullable',
             'is_wall' => 'integer|nullable',
             'is_proxy' => 'integer|nullable',
+            'type' => 'integer|nullable',
+            'header' => 'nullable',
         ]);
 
         if ($validator->fails()) {
@@ -113,6 +115,9 @@ class CrawlTaskController extends Controller
                 'task_id' => $task['id'],
                 'url' => $task['resource_url'],
                 'selector' => $task['selectors'],
+                'protocol' => $task['protocol'],
+                'type' => $task['type'],
+                'header' => $task['header'],
             ];
 
             if ($task['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
@@ -409,6 +414,9 @@ class CrawlTaskController extends Controller
                 $item['task_id'] = $task['id'];
                 $item['selector'] = $task['selectors'];
                 $item['url'] = $task['resource_url'];
+                $item['protocol'] = $task['protocol'];
+                $item['type'] = $task['type'];
+                $item['header'] = $task['header'];
                 $result[] = $item;
             }
         }
@@ -517,6 +525,7 @@ class CrawlTaskController extends Controller
                 'task_id' => $task['id'],
                 'url' => $task['resource_url'],
                 'selector' => $task['selectors'],
+                'protocol' => $task['protocol'],
                 'type' => $task['type'],
                 'header' => $task['header'],
             ];
