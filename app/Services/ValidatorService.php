@@ -20,14 +20,9 @@ class ValidatorService extends Service
 
         if ($validator->fails()) {
             $errors = $validator->errors();
+
             foreach ($errors->all() as $value) {
-                $result = [
-                    'status_code' => 401,
-                    'message' => $value,
-                    'date' => null,
-                ];
-                echo json_encode($result);
-                exit();
+                throw new \Dingo\Api\Exception\ResourceException($value);
             }
         }
         return;

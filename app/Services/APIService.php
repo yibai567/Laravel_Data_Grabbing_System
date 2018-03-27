@@ -28,11 +28,18 @@ class APIService extends Service
             $dispatcher->with($params);
         }
 
-        $response = $dispatcher->post($url);
+        try {
+            $response = $dispatcher->post($url);
+        } catch (\Dingo\Api\Exception\InternalHttpException $e) {
 
-        if ($response['status_code'] != 200) {
-            echo json_encode($response);
-            exit();
+            $response = $e->getResponse();
+            $errorMessage = $response->getContent();
+            errorLog('[__dingoPost] ' . $errorMessage . 'url:' . $url);
+            throw new \Dingo\Api\Exception\ResourceException('API post error');
+
+        } catch (\App\Exceptions\Exception $e) {
+            errorLog('[__dingoPost Exception API] ');
+            throw new \Dingo\Api\Exception\ResourceException('API Exception error ');
         }
 
         return $response['data'];
@@ -44,11 +51,18 @@ class APIService extends Service
         $url = config('url.jinse_open_url') . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');
 
-        $response = $dispatcher->get($url, $params);
+        try {
+            $response = $dispatcher->get($url, $params);
+        } catch (\Dingo\Api\Exception\InternalHttpException $e) {
 
-        if ($response['status_code'] != 200) {
-            echo json_encode($response);
-            exit();
+            $response = $e->getResponse();
+            $errorMessage = $response->getContent();
+            errorLog('[__dingoPost] ' . $errorMessage . 'url:' . $url);
+            throw new \Dingo\Api\Exception\ResourceException('API post error');
+
+        } catch (\App\Exceptions\Exception $e) {
+            errorLog('[__dingoPost Exception API] ');
+            throw new \Dingo\Api\Exception\ResourceException('API Exception error ');
         }
 
         return $response['data'];
@@ -70,15 +84,21 @@ class APIService extends Service
             $dispatcher->with($params);
         }
 
-        $response = $dispatcher->post($url);
+        try {
+            $response = $dispatcher->post($url);
+        } catch (\Dingo\Api\Exception\InternalHttpException $e) {
 
-        if ($response['status_code'] != 200) {
-            echo json_encode($response);
-            exit();
+            $response = $e->getResponse();
+            $errorMessage = $response->getContent();
+            errorLog('[__dingoPost] ' . $errorMessage . 'url:' . $url);
+            throw new \Dingo\Api\Exception\ResourceException('API post error');
+
+        } catch (\App\Exceptions\Exception $e) {
+            errorLog('[__dingoPost Exception API] ');
+            throw new \Dingo\Api\Exception\ResourceException('API Exception error ');
         }
 
         return $response['data'];
-
     }
 
     public static function internalGet($path, $params = [])
@@ -87,11 +107,18 @@ class APIService extends Service
         $url = config('url.jinse_internal_url') . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');
 
-        $response = $dispatcher->get($url, $params);
+        try {
+            $response = $dispatcher->get($url, $params);
+        } catch (\Dingo\Api\Exception\InternalHttpException $e) {
 
-         if ($response['status_code'] != 200) {
-            echo json_encode($response);
-            exit();
+            $response = $e->getResponse();
+            $errorMessage = $response->getContent();
+            errorLog('[__dingoPost] ' . $errorMessage . 'url:' . $url);
+            throw new \Dingo\Api\Exception\ResourceException('API post error');
+
+        } catch (\App\Exceptions\Exception $e) {
+            errorLog('[__dingoPost Exception API] ');
+            throw new \Dingo\Api\Exception\ResourceException('API Exception error ');
         }
 
         return $response['data'];
@@ -113,11 +140,18 @@ class APIService extends Service
             $dispatcher->with($params);
         }
 
-        $response = $dispatcher->post($url);
+        try {
+            $response = $dispatcher->post($url);
+        } catch (\Dingo\Api\Exception\InternalHttpException $e) {
 
-        if ($response['status_code'] != 200) {
-            echo json_encode($response);
-            exit();
+            $response = $e->getResponse();
+            $errorMessage = $response->getContent();
+            errorLog('[__dingoPost] ' . $errorMessage . 'url:' . $url);
+            throw new \Dingo\Api\Exception\ResourceException('API post error');
+
+        } catch (\App\Exceptions\Exception $e) {
+            errorLog('[__dingoPost Exception API] ');
+            throw new \Dingo\Api\Exception\ResourceException('API Exception error ');
         }
 
         return $response['data'];
@@ -129,35 +163,18 @@ class APIService extends Service
         $url = config('url.jinse_base_url') . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');
 
-        $response = $dispatcher->get($url, $params);
+        try {
+            $response = $dispatcher->get($url, $params);
+        } catch (\Dingo\Api\Exception\InternalHttpException $e) {
 
-        if ($response['status_code'] != 200) {
-            echo json_encode($response);
-            exit();
-        }
+            $response = $e->getResponse();
+            $errorMessage = $response->getContent();
+            errorLog('[__dingoPost] ' . $errorMessage . 'url:' . $url);
+            throw new \Dingo\Api\Exception\ResourceException('API post error');
 
-        return $response['data'];
-    }
-
-    /**
-     * base API
-     */
-
-    public static function httpPost($url, $params = [], $contentType = '')
-    {
-        $dispatcher = app('Dingo\Api\Dispatcher');
-
-        if ($contentType == 'json') {
-            $dispatcher->json($params);
-        } else {
-            $dispatcher->with($params);
-        }
-
-        $response = $dispatcher->post($url);
-
-        if ($response['status_code'] != 200) {
-            echo json_encode($response);
-            exit();
+        } catch (\App\Exceptions\Exception $e) {
+            errorLog('[__dingoPost Exception API] ');
+            throw new \Dingo\Api\Exception\ResourceException('API Exception error ');
         }
 
         return $response['data'];

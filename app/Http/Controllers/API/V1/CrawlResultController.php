@@ -56,7 +56,7 @@ class CrawlResultController extends Controller
      * @param result (抓取结果)
      * @return array
      */
-    public function dispatch(Request $request)
+    public function dispatch1(Request $request)
     {
         $params = $request->all();
 
