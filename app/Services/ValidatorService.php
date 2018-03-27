@@ -26,9 +26,10 @@ class ValidatorService extends Service
                     'message' => $value,
                     'date' => null,
                 ];
-                return response()->json($result);
+                echo json_encode($result);
+                exit();
             }
         }
-        return false;
+        return;
     }
 }

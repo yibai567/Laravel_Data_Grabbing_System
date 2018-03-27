@@ -59,8 +59,10 @@ class APIService extends Service
         $response = $dispatcher->post($url);
 
         if ($response['status_code'] != 200) {
-            return false;
+            echo json_encode($response);
+            exit();
         }
+
         return $response['data'];
 
     }

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API\V1;
 use App\Services\APIService;
 use Illuminate\Http\Request;
 use Log;
-use Illuminate\Support\Facades\Validator;
 use App\Services\ValidatorService;
 
 /**
@@ -32,8 +31,7 @@ class CrawlResultController extends Controller
     {
         $params = $request->all();
 
-
-        $check = ValidatorService::check($params, [
+        ValidatorService::check($params, [
             'task_id' => 'required|integer',
             'is_test' => 'integer|nullable',
             'start_time' => 'date|nullable',
@@ -41,15 +39,7 @@ class CrawlResultController extends Controller
             'result' => 'nullable',
         ]);
 
-        if ($check) {
-            return $check;
-        }
-
         $data = APIService::internalPost('/internal/crawl/results', $params);
-
-        if ($data === false) {
-            return $this->resError(501, '系统内部错误');
-        }
 
         return $this->resObjectGet($data, 'crawl_result', $request->path());
     }
