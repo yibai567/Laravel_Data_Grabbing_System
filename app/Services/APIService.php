@@ -28,7 +28,14 @@ class APIService extends Service
             $dispatcher->with($params);
         }
 
-        return $dispatcher->post($url);
+        $response = $dispatcher->post($url);
+
+        if ($response['status_code'] != 200) {
+            echo json_encode($response);
+            exit();
+        }
+
+        return $response['data'];
     }
 
     public static function openGet($path, $params = [])
@@ -37,7 +44,14 @@ class APIService extends Service
         $url = config('url.jinse_open_url') . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');
 
-        return $dispatcher->get($url, $params);
+        $response = $dispatcher->get($url, $params);
+
+        if ($response['status_code'] != 200) {
+            echo json_encode($response);
+            exit();
+        }
+
+        return $response['data'];
     }
 
     /**
@@ -73,7 +87,14 @@ class APIService extends Service
         $url = config('url.jinse_internal_url') . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');
 
-        return $dispatcher->get($url, $params);
+        $response = $dispatcher->get($url, $params);
+
+         if ($response['status_code'] != 200) {
+            echo json_encode($response);
+            exit();
+        }
+
+        return $response['data'];
     }
 
     /**
@@ -92,7 +113,14 @@ class APIService extends Service
             $dispatcher->with($params);
         }
 
-        return $dispatcher->post($url);
+        $response = $dispatcher->post($url);
+
+        if ($response['status_code'] != 200) {
+            echo json_encode($response);
+            exit();
+        }
+
+        return $response['data'];
     }
 
     public static function baseGet($path, $params = [])
@@ -101,7 +129,14 @@ class APIService extends Service
         $url = config('url.jinse_base_url') . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');
 
-        return $dispatcher->get($url, $params);
+        $response = $dispatcher->get($url, $params);
+
+        if ($response['status_code'] != 200) {
+            echo json_encode($response);
+            exit();
+        }
+
+        return $response['data'];
     }
 
     /**
@@ -118,7 +153,14 @@ class APIService extends Service
             $dispatcher->with($params);
         }
 
-        return $dispatcher->post($url);
+        $response = $dispatcher->post($url);
+
+        if ($response['status_code'] != 200) {
+            echo json_encode($response);
+            exit();
+        }
+
+        return $response['data'];
     }
 
     /**
@@ -157,10 +199,10 @@ class APIService extends Service
             $resBody  = $response->getbody()->getContents();
 
             if ($resBody == "ok" && $resCode == 200) {
-                return true;
+                return;
             }
         } catch (RequestException $e) {
-            return false;
+            returnError(501, '调用接口失败');
         }
 
     }

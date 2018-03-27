@@ -91,3 +91,16 @@ if (!function_exists('arrayRemovalDuplicate')){
         return $result;
     }
 }
+
+
+if (!function_exists('returnError')){
+    function returnError($status_code, $message, $data=[]){
+        $result = [
+            'status_code' => $status_code,
+            'message' => $message,
+            'data' => $data,
+        ];
+        echo json_encode($result);
+        exit();
+    }
+}
