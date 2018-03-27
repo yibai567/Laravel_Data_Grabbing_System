@@ -80,7 +80,7 @@ class AutomateTask extends Command
     private function _getData()
     {
         $data = [];
-        CrawlTask::chunk(10, function ($tasks) use(&$data) {
+        CrawlTask::where('status', CrawlTask::IS_START_UP)->chunk(500, function ($tasks) use(&$data) {
             if ($tasks) {
                 $tasks = $tasks->toArray();
             } else {

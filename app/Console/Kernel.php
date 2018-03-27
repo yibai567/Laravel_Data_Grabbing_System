@@ -13,6 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
+        Commands\AutomateTask::class,
         //
     ];
 
@@ -24,8 +25,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        $crawlTaskAutomate = 1; // 互斥锁存在时间，单位分钟
+        $schedule->command('crawl:task:automate')->runInBackground()->withoutOverlapping(
+            $crawlTaskAutomate
+        )->everyMinute();
     }
 
     /**

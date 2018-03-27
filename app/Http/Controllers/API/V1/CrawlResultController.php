@@ -6,6 +6,7 @@ use App\Services\APIService;
 use Illuminate\Http\Request;
 use Log;
 use Illuminate\Support\Facades\Validator;
+use App\Services\ValidatorService;
 
 class CrawlResultController extends Controller
 {
@@ -20,7 +21,7 @@ class CrawlResultController extends Controller
         $params = $request->all();
         infoLog("[v1:createForBatch] start.");
 
-        $validator = Validator::make($params, [
+        $check = ValidatorService::check($params, [
             'task_id' => 'required|integer',
             'is_test' => 'integer|nullable',
             'start_time' => 'date|nullable',
@@ -28,29 +29,17 @@ class CrawlResultController extends Controller
             'result' => 'nullable',
         ]);
 
-        infoLog('[v1:createForBatch] params validator start');
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-
-            foreach ($errors->all() as $value) {
-                errorLog('[v1:createForBatch] params validator fail', $value);
-                return $this->resError(401, $value);
-            }
+        if ($check) {
+            return $check;
         }
-        infoLog('[v1:createForBatch] params validator end.');
 
         $data = APIService::internalPost('/internal/crawl/results', $params);
 
-        if ($data['status_code'] != 200) {
-            errorLog('[v1:createForBatch] request internalApi createForBatch result error', $data);
-            return response($data['status_code'], $data['message']);
-        }
-
-        if ($data['data']) {
-            $result = $data['data'];
+        if ($data === false) {
+            return $this->resError(501, '系统内部错误');
         }
 
         infoLog('[v1:createForBatch] end.');
-        return $this->resObjectGet($result, 'crawl_result', $request->path());
+        return $this->resObjectGet($data, 'crawl_result', $request->path());
     }
 }

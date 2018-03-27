@@ -12,21 +12,21 @@ class CustomizeFormatter
      */
     public function __invoke($logger)
     {
-        foreach ($logger->getHandlers() as $handler) {
-            $handler->setFormatter(new \Monolog\Formatter\LogstashFormatter(config('logging.application_name'), null, '', $contextPrefix = '', 1));
+        // foreach ($logger->getHandlers() as $handler) {
+        //     $handler->setFormatter(new \Monolog\Formatter\LogstashFormatter(config('logging.application_name'), null, '', $contextPrefix = '', 1));
 
-            $handler->pushProcessor(
-                new \Monolog\Processor\WebProcessor(null, array(
-                        'url' => 'REQUEST_URI',
-                        'ip' => 'REMOTE_ADDR',
-                        'real_ip' => 'HTTP_X_FORWARDED_FOR',
-                        'http_method' => 'REQUEST_METHOD',
-                        'server' => 'SERVER_NAME',
-                        'referrer' => 'HTTP_REFERER',
-                    )
-                )
-            );
-            $handler->pushProcessor(new \Monolog\Processor\UidProcessor());
-        }
+        //     $handler->pushProcessor(
+        //         new \Monolog\Processor\WebProcessor(null, array(
+        //                 'url' => 'REQUEST_URI',
+        //                 'ip' => 'REMOTE_ADDR',
+        //                 'real_ip' => 'HTTP_X_FORWARDED_FOR',
+        //                 'http_method' => 'REQUEST_METHOD',
+        //                 'server' => 'SERVER_NAME',
+        //                 'referrer' => 'HTTP_REFERER',
+        //             )
+        //         )
+        //     );
+        //     $handler->pushProcessor(new \Monolog\Processor\UidProcessor());
+        // }
     }
 }

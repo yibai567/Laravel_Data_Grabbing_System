@@ -7,6 +7,8 @@ use Config;
 use VDB\Spider\RequestHandler\GuzzleRequestHandler;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ClientException;
 
 class APIService extends Service
 {
@@ -54,7 +56,13 @@ class APIService extends Service
             $dispatcher->with($params);
         }
 
-        return $dispatcher->post($url);
+        $response = $dispatcher->post($url);
+
+        if ($response['status_code'] != 200) {
+            return false;
+        }
+        return $response['data'];
+
     }
 
     public static function internalGet($path, $params = [])
@@ -114,7 +122,8 @@ class APIService extends Service
     /**
      * get
      */
-    public static function get($url, $params = []) {
+    public static function get($url, $params = [])
+    {
 
         try {
             $requestParams = [
@@ -132,22 +141,25 @@ class APIService extends Service
     /**
      * post
      */
-    public static function post($url, $params = []) {
+    public static function post($url, $params = [])
+    {
+        $requestParams = [
+            'timeout'  => 2,
+            'debug' => false,
+        ];
+        $client = new Client($requestParams);
+
         try {
-            $requestParams = [
-                'timeout'  => 10000,
-                'debug' => true,
-            ];
-            $client = new Client($requestParams);
             $response = $client->request('POST', $url, ['json' => $params]);
-            $resCode  = $response->getStatusCode();
-            $resBody  = $response->getBody();
+            $resCode  = (string) $response->getStatusCode();
+            $resBody  = $response->getbody()->getContents();
+
             if ($resBody == "ok" && $resCode == 200) {
-                return [];
+                return true;
             }
-        } catch (Exception $e) {
-            throw $e;
+        } catch (RequestException $e) {
+            return false;
         }
-        // return $resBody;
+
     }
 }
