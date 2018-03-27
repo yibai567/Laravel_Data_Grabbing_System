@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\API\V1;
 
-use App\Services\APIService;
 use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
+use App\Services\APIService;
+use App\Models\CrawlTask;
 
 /**
  * CrawlResultController
@@ -43,4 +44,75 @@ class CrawlResultController extends Controller
 
         return $this->resObjectGet($data, 'crawl_result', $request->path());
     }
+
+    /**
+     * Dispatch
+     * 结果分发
+     *
+     * @param task_id (抓取任务ID)
+     * @param is_test (是否是测试数据) 1测试|2插入
+     * @param start_time (开始时间)
+     * @param end_time (结束时间)
+     * @param result (抓取结果)
+     * @return array
+     */
+    public function Dispatch(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'task_id' => 'required|integer',
+            'is_test' => 'integer|nullable',
+            'start_time' => 'date|nullable',
+            'end_time' => 'date|nullable',
+            'result' => 'nullable',
+        ]);
+
+        // 获取任务信息
+        $task = APIService::internalPost('/internal/crawl/task', ['id' => $params['task_id']]);
+        if (empty($task)) {
+            throw new \Dingo\Api\Exception\ResourceException("task is not found");
+        }
+
+        // 按任务资源数据的类型进行分发
+        switch ($task['resource_type']) {
+            case CrawlTask::RESOURCE_TYPE_HTML:
+                $result = APIService::internalPost('/internal/crawl/results/html', $params);
+                break;
+
+            case CrawlTask::RESOURCE_TYPE_JSON:
+                $result = APIService::internalPost('/internal/crawl/results/json', $params);
+                break;
+
+            default:
+                throw new \Dingo\Api\Exception\ResourceException("invalid task resource type");
+                break;
+        }
+
+        return $this->resObjectGet($result, 'crawl_result', $request->path());
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

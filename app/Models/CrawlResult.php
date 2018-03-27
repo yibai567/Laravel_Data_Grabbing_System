@@ -8,6 +8,7 @@ class CrawlResult extends Model
 {
     const IS_UNTREATED = 1; //未处理
     const IS_PROCESSED = 2; //已处理
+    const IS_REPORT_ERROR = 3; //已处理
     const EFFECT_TEST = 1;//test测试
     protected $table = 't_crawl_result';
 
