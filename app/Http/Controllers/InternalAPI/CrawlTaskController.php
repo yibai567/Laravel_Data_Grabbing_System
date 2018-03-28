@@ -210,12 +210,11 @@ class CrawlTaskController extends Controller
         ]);
 
         try {
-            Redis::connection('queue');
             $data = [];
 
-            if (Redis::lLen($params['name']) > 0 ) {
+            if (Redis::connection('queue')->lLen($params['name']) > 0 ) {
                 for ($i = 0; $i < 5; $i++) {
-                    $value = Redis::rpop($params['name']);
+                    $value = Redis::connection('queue')->rpop($params['name']);
 
                     if (is_null($value)) {
                         break;
@@ -238,13 +237,12 @@ class CrawlTaskController extends Controller
     public function getQueueInfo(Request $request)
     {
         try {
-            Redis::connection('queue');
             $data = [];
-            $keys = Redis::keys('crawl_task*');
+            $keys = Redis::connection('queue')->keys('crawl_task*');
 
             if (count($keys)) {
                 foreach ($keys as $key) {
-                    $data[] = ['key' => $key, 'count' => Redis::lLen($key)];
+                    $data[] = ['key' => $key, 'count' => Redis::connection('queue')->lLen($key)];
                 }
             }
         } catch (Exception $e) {
