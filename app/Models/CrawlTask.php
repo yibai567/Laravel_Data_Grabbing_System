@@ -96,6 +96,7 @@ class CrawlTask extends Model
         'resource_type',
         'header',
         'md5_params',
+        'api_fields',
     ];
 
     public function setting()

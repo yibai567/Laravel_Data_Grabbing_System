@@ -46,7 +46,6 @@ class CrawlResultV2Controller extends Controller
         if (empty($resData)) {
             return $this->resObjectList([], 'crawl_result', $request->path());
         }
-
         // 数据唯一判断
         $filterResult = $this->__filterResult($resData, $params['is_test'], $params);
         $newResult = $filterResult['newResult'];
@@ -231,6 +230,7 @@ class CrawlResultV2Controller extends Controller
                 }
 
                 $rowData[$key] = $valueFilter;
+                $rowData['task_id'] = $task['id'];
             }
 
             $resData[] = $rowData;
@@ -341,31 +341,8 @@ class CrawlResultV2Controller extends Controller
                 ];
             }
         }
+
         return ['newResult' => $newResult, 'reportResult' => $reportResult];
     }
 
  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

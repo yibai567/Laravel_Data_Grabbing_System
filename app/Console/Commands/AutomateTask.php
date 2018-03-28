@@ -22,6 +22,7 @@ class AutomateTask extends Command
     private $_ajaxs = [CrawlTask::IS_AJAX_TRUE => 'ajax', CrawlTask::IS_AJAX_FALSE => 'noajax'];
     private $_logins = [CrawlTask::IS_LOGIN_TRUE => 'login', CrawlTask::IS_LOGIN_FALSE => 'nologin'];
     private $_walls = [CrawlTask::IS_WALL_TRUE => 'wall', CrawlTask::IS_WALL_FALSE => 'nowall'];
+    private $_resource = [CrawlTask::RESOURCE_TYPE_HTML => 'html', CrawlTask::RESOURCE_TYPE_JSON => 'json'];
 
     /**
      * The name and signature of the console command.
@@ -103,18 +104,17 @@ class AutomateTask extends Command
         foreach ($data as $item)
         {
             $key = $this->_getKey($item);
-            $item = [
+            $data = [
                 'task_id' => $item['id'],
                 'url' => $item['resource_url'],
             ];
             if ($item['resource_type'] == CrawlTask::RESOURCE_TYPE_JSON) {
-                $item['header'] = $item['header'];
-                $item['is_proxy'] = $item['is_proxy'];
+                $data['header'] = $item['header'];
+                $data['is_proxy'] = $item['is_proxy'];
             } else {
-                $item['selector'] = $item['selectors'];
+                $data['selector'] = $item['selectors'];
             }
-
-            $result[$key][] = $item;
+            $result[$key][] = $data;
         }
         return $result;
     }
@@ -125,11 +125,10 @@ class AutomateTask extends Command
      */
     private function _insert(array $data)
     {
-        Redis::connection('queue');
         foreach ($data as $key => $items) {
-            if (Redis::lLen($key) <= 0 && count($items) > 0 ) {
+            if (Redis::connection('queue')->lLen($key) <= 0 && count($items) > 0 ) {
                 foreach($items as $item) {
-                    Redis::lpush($key, json_encode($item));
+                    Redis::connection('queue')->lpush($key, json_encode($item));
                 }
             } else {
                 sleep(1);
@@ -151,13 +150,12 @@ class AutomateTask extends Command
         $ajax = $this->_ajaxs[$item['is_ajax']];
         $login = $this->_logins[$item['is_login']];
         $cronType = $this->_cronTypes[$item['cron_type']];
-
-        if ($item['resource_type'] == CrawlTask::RESOURCE_TYPE_JSON) {
-            $key = 'crawl_task_json';
+        $resourceType = $this->_resource[$item['resource_type']];
+        if ($resourceType == 'json') {
+            $key = 'crawl_task_' . $proxy . '_' . $wall . '_' . $ajax . '_' . $login . '_' . $cronType . '_' . $resourceType;
         } else {
             $key = 'crawl_task_' . $protocol . '_' . $proxy . '_' . $wall . '_' . $ajax . '_' . $login . '_' . $cronType;
         }
-
-        return $key;
+         return $key;
     }
 }

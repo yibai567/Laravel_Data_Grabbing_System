@@ -40,7 +40,7 @@ class CrawlTaskController extends Controller
             'is_proxy' => 'integer|nullable',
             'resource_type' => 'integer|nullable',
             'header' => 'nullablew',
-            'api_fileds' => 'nullable',
+            'api_fields' => 'nullable',
         ]);
         $params['md5_params'] = md5(json_encode($params, true));
         $taskResult = APIService::baseGet('/internal/basic/crawl/task/search', ['resource_url' => $params['resource_url'], 'md5_params' => $params['md5_params']], 'json');
@@ -177,23 +177,8 @@ class CrawlTaskController extends Controller
             return $this->resError('task does not exist!');
         }
 
-        $item = [
-            'task_id'=> $taskDetail['id'],
-            'url'=> $taskDetail['resource_url'],
-            'selector'=> $taskDetail['selectors'],
-            'protocol' => $taskDetail['protocol'],
-            'header' => $taskDetail['header'],
-        ];
-        if ($taskDetail['resource_type'] == CrawlTask::RESOURCE_TYPE_JSON) {
-                $listName = 'crawl_task_test_json';
-        } else {
-            if ($taskDetail['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
-                $listName = 'crawl_task_https_test';
-            } else {
-                $listName = 'crawl_task_http_test';
-            }
-        }
-        $res = Redis::connection('queue')->lpush($listName, json_encode($item));
+        $this->__toTest($taskDetail);
+
         return $this->resObjectGet('测试已提交，请稍后查询结果！', 'crawl_task', $request->path());
     }
 
@@ -303,7 +288,7 @@ class CrawlTaskController extends Controller
             'is_proxy' => 'integer|nullable',
             'resource_type' => 'integer|nullable',
             'header' => 'nullable',
-            'api_fileds' => 'nullable',
+            'api_fields' => 'nullable',
         ]);
         //$params['md5_params'] = md5(json_encode($params));
         $task = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
@@ -361,20 +346,55 @@ class CrawlTaskController extends Controller
             'url' => $task['resource_url'],
         ];
 
-        if ($task['resource_type'] == CrawlTask::RESOURCE_TYPE_JSON) {
-            $item['header'] = $item['header'];
-            $item['is_proxy'] = $item['is_proxy'];
-            $listName = 'crawl_task_json_test';
-        } else {
-            $item['selector'] = $task['selectors'];
+        switch ($task['resource_type']) {
+            case CrawlTask::RESOURCE_TYPE_JSON:
+                $item['header'] = $item['header'];
+                $listName = 'crawl_task_json_test';
+                break;
 
-            if ($task['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
-                $listName = 'crawl_task_https_test';
-            } else {
-                $listName = 'crawl_task_http_test';
-            }
+            case CrawlTask::RESOURCE_TYPE_HTML:
+
+                $item['selector'] = $task['selectors'];
+
+                if ($task['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
+                    $listName = 'crawl_task_https_test_v2';
+                } else {
+                    $listName = 'crawl_task_http_test_v2';
+                }
+                break;
+
+            default:
+
+                $item['selector'] = $task['selectors'];
+
+                if ($task['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
+                    $listName = 'crawl_task_https_test';
+                } else {
+                    $listName = 'crawl_task_http_test';
+                }
+                break;
         }
+
         Redis::connection('queue')->lpush($listName, json_encode($item));
         return true;
+    }
+
+    /**
+     * retrieve
+     * 任务详情
+     *
+     * @param $id
+     */
+    public function retrieve(Request $request)
+    {
+        $params = $request->all();
+        ValidatorService::check($params, [
+            'id' => 'required|integer',
+        ]);
+        $result = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
+        if (empty($result)) {
+            return $this->resError(401, 'task not exist!');
+        }
+        return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 }
