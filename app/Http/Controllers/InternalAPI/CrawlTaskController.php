@@ -39,9 +39,10 @@ class CrawlTaskController extends Controller
             'is_wall' => 'integer|nullable',
             'is_proxy' => 'integer|nullable',
             'resource_type' => 'integer|nullable',
-            'header' => 'nullablew',
+            'header' => 'nullable',
             'api_fields' => 'nullable',
         ]);
+
         $params['md5_params'] = md5(json_encode($params, true));
         $taskResult = APIService::baseGet('/internal/basic/crawl/task/search', ['resource_url' => $params['resource_url'], 'md5_params' => $params['md5_params']], 'json');
         if (!empty($taskResult)) {

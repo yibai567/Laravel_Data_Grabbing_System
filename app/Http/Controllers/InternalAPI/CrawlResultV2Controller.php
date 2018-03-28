@@ -29,7 +29,6 @@ class CrawlResultV2Controller extends Controller
             'end_time' => 'date|nullable',
             'result' => 'nullable',
         ]);
-
         // 获取任务信息
         $task = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['task_id']);
         if (empty($task)) {

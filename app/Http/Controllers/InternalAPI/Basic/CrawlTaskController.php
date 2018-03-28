@@ -45,10 +45,12 @@ class CrawlTaskController extends Controller
             'is_wall' => 'integer|nullable',
             'resource_type' => 'integer|nullable',
             'header' => 'nullable',
-            'md5_params' => 'string|required',
-            'api_fields' => 'string|nullable',
+            'md5_params' => 'string',
+            'api_fields' => 'nullable',
         ]);
+
         $params['selectors'] = json_encode($params['selectors']);
+        $params['header'] = json_encode($params['header']);
         $params['api_fields'] = json_encode($params['api_fields']);
         $params['status'] = CrawlTask::IS_INIT;
         $task = CrawlTask::create($params);
@@ -158,7 +160,10 @@ class CrawlTaskController extends Controller
             'id' => 'required|integer'
         ]);
 
-        $params['status'] = CrawlTask::IS_INIT;
+        if (empty($params['status'])) {
+            $params['status'] = CrawlTask::IS_INIT;
+        }
+
         if (!empty($params['selectors'])) {
             $params['selectors'] = json_encode($params['selectors'], true);
         }

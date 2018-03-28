@@ -120,7 +120,6 @@ class TaskCrawl extends Command
      */
     private function __createCrawlResult($crawlResult)
     {
-        echo sprintf("__createCrawlResult start params result = %d \n", json_encode($crawlResult));
         $data = APIService::openPost('/v1/crawl/result/dispatch', $crawlResult, 'json');
         echo sprintf("__createCrawlResult end res = %s \n", json_encode($data));
 
