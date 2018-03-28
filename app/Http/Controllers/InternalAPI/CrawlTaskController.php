@@ -40,7 +40,7 @@ class CrawlTaskController extends Controller
             'is_proxy' => 'integer|nullable',
             'resource_type' => 'integer|nullable',
             'header' => 'nullablew',
-            'api_fileds' => 'nullable',
+            'api_fields' => 'nullable',
         ]);
         $params['md5_params'] = md5(json_encode($params, true));
         $taskResult = APIService::baseGet('/internal/basic/crawl/task/search', ['resource_url' => $params['resource_url'], 'md5_params' => $params['md5_params']], 'json');
@@ -288,7 +288,7 @@ class CrawlTaskController extends Controller
             'is_proxy' => 'integer|nullable',
             'resource_type' => 'integer|nullable',
             'header' => 'nullable',
-            'api_fileds' => 'nullable',
+            'api_fields' => 'nullable',
         ]);
         //$params['md5_params'] = md5(json_encode($params));
         $task = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
@@ -348,9 +348,7 @@ class CrawlTaskController extends Controller
 
         switch ($task['resource_type']) {
             case CrawlTask::RESOURCE_TYPE_JSON:
-
                 $item['header'] = $item['header'];
-                $item['is_proxy'] = $item['is_proxy'];
                 $listName = 'crawl_task_json_test';
                 break;
 
@@ -379,5 +377,24 @@ class CrawlTaskController extends Controller
 
         Redis::connection('queue')->lpush($listName, json_encode($item));
         return true;
+    }
+
+    /**
+     * retrieve
+     * 任务详情
+     *
+     * @param $id
+     */
+    public function retrieve(Request $request)
+    {
+        $params = $request->all();
+        ValidatorService::check($params, [
+            'id' => 'required|integer',
+        ]);
+        $result = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
+        if (empty($result)) {
+            return $this->resError(401, 'task not exist!');
+        }
+        return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 }

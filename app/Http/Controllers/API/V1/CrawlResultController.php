@@ -7,6 +7,7 @@ use Log;
 use App\Services\ValidatorService;
 use App\Services\APIService;
 use App\Models\CrawlTask;
+use App\Models\CrawlResult;
 
 /**
  * CrawlResultController
@@ -59,7 +60,6 @@ class CrawlResultController extends Controller
     public function dispatch1(Request $request)
     {
         $params = $request->all();
-
         ValidatorService::check($params, [
             'task_id'    => 'required|integer|min:1|max:99999999',
             'is_test'    => 'integer|nullable',
@@ -67,15 +67,14 @@ class CrawlResultController extends Controller
             'end_time'   => 'date|nullable',
             'result'     => 'array|nullable',
         ]);
-
         if ($params['is_test'] == CrawlResult::IS_TEST_TRUE) {
             $params['is_test'] = CrawlResult::IS_TEST_TRUE;
         } else {
-            $params['is_test'] = CrawlResult::IS_TEST_FALSE;
+            $params['is_test'] = 0;
         }
 
         // 获取任务信息
-        $task = APIService::internalPost('/internal/crawl/task', ['id' => $params['task_id']]);
+        $task = APIService::internalGet('/internal/basic/crawl/task?id=' . $params['task_id']);
         if (empty($task)) {
             throw new \Dingo\Api\Exception\ResourceException("task is not found");
         }
@@ -98,7 +97,7 @@ class CrawlResultController extends Controller
                 break;
 
             case CrawlTask::RESOURCE_TYPE_JSON:
-                $result = APIService::internalPost('/internal/crawl/results/json', $params);
+                $result = APIService::internalPost('/internal/crawl/results/json', $params, 'json');
                 break;
 
             default:

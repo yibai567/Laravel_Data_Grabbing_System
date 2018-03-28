@@ -43,7 +43,7 @@ class CrawlTaskController extends Controller
             'is_proxy' => 'integer|nullable',
             'resource_type' => 'integer|nullable',
             'header' => 'nullable',
-            'api_fileds' => 'nullable',
+            'api_fields' => 'nullable',
         ]);
         $data = APIService::internalPost('/internal/crawl/task', $params, 'json');
 
@@ -219,6 +219,7 @@ class CrawlTaskController extends Controller
             'is_proxy' => 'integer|nullable',
             'resource_type' => 'integer|nullable',
             'header' => 'nullable',
+            'api_fields' => 'nullable',
         ]);
 
         $data = APIService::internalPost('/internal/crawl/task/update', $params);
