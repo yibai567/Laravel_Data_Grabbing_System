@@ -50,6 +50,7 @@ class CrawlTaskController extends Controller
         ]);
         $params['selectors'] = json_encode($params['selectors']);
         $params['api_fields'] = json_encode($params['api_fields']);
+        $params['status'] = CrawlTask::IS_INIT;
         $task = CrawlTask::create($params);
 
         return $this->resObjectGet($task, 'crawl_task', $request->path());
@@ -152,12 +153,16 @@ class CrawlTaskController extends Controller
             'test_result' => 'nullable',
             'resource_type' => 'integer|nullable',
             'header' => 'nullable',
-            'md5_params' => 'string|required',
+            'md5_params' => 'string|nullable',
             'api_fields' => 'string|nullable',
             'id' => 'required|integer'
         ]);
-        $params['selectors'] = json_encode($params['selectors']);
-        $params['api_fields'] = json_encode($params['api_fields']);
+        if (!empty($params['selectors'])) {
+            $params['selectors'] = json_encode($params['selectors'], true);
+        }
+        if (!empty($params['api_fields'])) {
+            $params['api_fields'] = json_encode($params['api_fields'], true);
+        }
         $item = CrawlTask::find($params['id']);
 
         foreach ($params as $key=>$value) {

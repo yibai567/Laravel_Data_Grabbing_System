@@ -141,7 +141,6 @@ class CrawlTaskController extends Controller
         try {
             //获取任务详情
             $taskDetail = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
-
             if (empty($taskDetail)) {
                 return $this->resError(401, 'task does not exist');
             }
@@ -348,7 +347,7 @@ class CrawlTaskController extends Controller
 
         switch ($task['resource_type']) {
             case CrawlTask::RESOURCE_TYPE_JSON:
-                $item['header'] = $item['header'];
+                $item['header'] = $task['header'];
                 $listName = 'crawl_task_json_test';
                 break;
 

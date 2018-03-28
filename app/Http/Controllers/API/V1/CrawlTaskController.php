@@ -69,14 +69,8 @@ class CrawlTaskController extends Controller
             'id' => 'integer|required',
         ]);
 
-        $data = APIService::internalPost('/internal/crawl/task/stop', $params);
+        $result = APIService::internalPost('/internal/crawl/task/stop', $params);
 
-        $result = [];
-        if ($data) {
-            $result = $data['data'];
-        }
-
-        infoLog('[stop] end');
         return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 
@@ -94,12 +88,7 @@ class CrawlTaskController extends Controller
             'id' => 'integer|required',
         ]);
 
-        $data = APIService::internalPost('/internal/crawl/task/start', $params);
-
-        $result = [];
-        if ($data) {
-            $result = $data['data'];
-        }
+        $result = APIService::internalPost('/internal/crawl/task/start', $params);
 
         return $this->resObjectGet($result, 'crawl_task', $request->path());
     }

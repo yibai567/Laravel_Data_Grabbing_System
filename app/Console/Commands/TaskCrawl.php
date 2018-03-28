@@ -55,6 +55,7 @@ class TaskCrawl extends Command
             $queueName = 'crawl_task_noproxy_nowall_noajax_nologin_keep_json';
         }
         $taskList = $this->__getByQueueName($queueName);
+
         if (empty($taskList)) {
             echo "没有可处理的任务";
         }
@@ -63,7 +64,7 @@ class TaskCrawl extends Command
             try {
                     $this->__request($value, $is_test);
                 } catch (\Exception $e) {
-                  continue;
+                    continue;
                 }
             }
     }
@@ -96,6 +97,7 @@ class TaskCrawl extends Command
         }
         $request = new RequestService();
         $result = $request->get($params['url'], [], $header, $params['isProxy']);
+        $result = [];
         if (empty($result)) {
             return false;
         }
