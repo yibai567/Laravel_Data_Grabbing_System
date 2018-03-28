@@ -446,13 +446,11 @@
             $uri = '/v1/crawl/task/test';
             $params['id'] = $id;
             $result = APIService::openPost($uri, $params);
-            if (empty($result) || $result['status_code'] != 200 )
+            if (empty($result))
             {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
             }
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试提交成功，请稍后查看结果", "info");
-            return Redirect::to('admin/t_crawl_task/detail/' . $id);
-
         }
 
         public function getStartUp($id, $status)
@@ -460,7 +458,7 @@
             $uri = '/v1/crawl/task/start';
             $params['id'] = $id;
             $result = APIService::openPost($uri, $params);
-            if (empty($result) || $result['status_code'] != 200 )
+            if (empty($result))
             {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
             }
@@ -472,7 +470,7 @@
             $uri = '/v1/crawl/task/stop';
             $params['id'] = $id;
             $result = APIService::openPost($uri, $params);
-            if (empty($result) || $result['status_code'] != 200 )
+            if (empty($result))
             {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
             }

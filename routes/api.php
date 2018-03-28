@@ -14,12 +14,13 @@ $api = app('Dingo\Api\Routing\Router');
 
 $api->version(
     'v1',
-    ['namespace' => 'App\Http\Controllers\Api\V1', 'prefix'=>'v1'],
+    ['namespace' => 'App\Http\Controllers\API\V1', 'prefix'=>'v1'],
     function (Dingo\Api\Routing\Router $api) {
         $api->get('/test', function(Illuminate\Http\Request $request){
             return 'test';
         });
         $api->post('/crawl/task', 'CrawlTaskController@create');
+        $api->post('/crawl/task/update', 'CrawlTaskController@update');
         $api->post('/crawl/task/test', 'CrawlTaskController@test');
         $api->post('/crawl/task/stop', 'CrawlTaskController@stop');
         $api->post('/crawl/task/start','CrawlTaskController@start');
@@ -27,5 +28,6 @@ $api->version(
         $api->get('/crawl/task/queue/name', 'CrawlTaskController@getByQueueName');
         $api->get('/crawl/task/queue/info', 'CrawlTaskController@getQueueInfo');
         $api->post('/crawl/results', 'CrawlResultController@createForBatch');
+        $api->post('/crawl/result/dispatch', 'CrawlResultController@dispatch1');
     }
 );

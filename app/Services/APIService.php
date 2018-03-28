@@ -7,6 +7,8 @@ use Config;
 use VDB\Spider\RequestHandler\GuzzleRequestHandler;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ClientException;
 
 class APIService extends Service
 {
@@ -26,7 +28,21 @@ class APIService extends Service
             $dispatcher->with($params);
         }
 
-        return $dispatcher->post($url);
+        try {
+            $response = $dispatcher->post($url);
+        } catch (\Dingo\Api\Exception\InternalHttpException $e) {
+
+            $response = $e->getResponse();
+            $errorMessage = $response->getContent();
+            errorLog('[__dingoPost] ' . $errorMessage . 'url:' . $url);
+            throw new \Dingo\Api\Exception\ResourceException('API post error');
+
+        } catch (\App\Exceptions\Exception $e) {
+            errorLog('[__dingoPost Exception API] ');
+            throw new \Dingo\Api\Exception\ResourceException('API Exception error ');
+        }
+
+        return $response['data'];
     }
 
     public static function openGet($path, $params = [])
@@ -35,7 +51,21 @@ class APIService extends Service
         $url = config('url.jinse_open_url') . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');
 
-        return $dispatcher->get($url, $params);
+        try {
+            $response = $dispatcher->get($url, $params);
+        } catch (\Dingo\Api\Exception\InternalHttpException $e) {
+
+            $response = $e->getResponse();
+            $errorMessage = $response->getContent();
+            errorLog('[__dingoPost] ' . $errorMessage . 'url:' . $url);
+            throw new \Dingo\Api\Exception\ResourceException('API post error');
+
+        } catch (\App\Exceptions\Exception $e) {
+            errorLog('[__dingoPost Exception API] ');
+            throw new \Dingo\Api\Exception\ResourceException('API Exception error ');
+        }
+
+        return $response['data'];
     }
 
     /**
@@ -54,7 +84,21 @@ class APIService extends Service
             $dispatcher->with($params);
         }
 
-        return $dispatcher->post($url);
+        try {
+            $response = $dispatcher->post($url);
+        } catch (\Dingo\Api\Exception\InternalHttpException $e) {
+
+            $response = $e->getResponse();
+            $errorMessage = $response->getContent();
+            errorLog('[internalPost] ' . $errorMessage . 'url:' . $url);
+            throw new \Dingo\Api\Exception\ResourceException('internal API post error');
+
+        } catch (\App\Exceptions\Exception $e) {
+            errorLog('[internalPost Exception API] ');
+            throw new \Dingo\Api\Exception\ResourceException('internal API Exception error ');
+        }
+
+        return $response['data'];
     }
 
     public static function internalGet($path, $params = [])
@@ -63,7 +107,21 @@ class APIService extends Service
         $url = config('url.jinse_internal_url') . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');
 
-        return $dispatcher->get($url, $params);
+        try {
+            $response = $dispatcher->get($url, $params);
+        } catch (\Dingo\Api\Exception\InternalHttpException $e) {
+
+            $response = $e->getResponse();
+            $errorMessage = $response->getContent();
+            errorLog('[__dingoPost] ' . $errorMessage . 'url:' . $url);
+            throw new \Dingo\Api\Exception\ResourceException('API post error');
+
+        } catch (\App\Exceptions\Exception $e) {
+            errorLog('[__dingoPost Exception API] ');
+            throw new \Dingo\Api\Exception\ResourceException('API Exception error ');
+        }
+
+        return $response['data'];
     }
 
     /**
@@ -82,7 +140,21 @@ class APIService extends Service
             $dispatcher->with($params);
         }
 
-        return $dispatcher->post($url);
+        try {
+            $response = $dispatcher->post($url);
+        } catch (\Dingo\Api\Exception\InternalHttpException $e) {
+
+            $response = $e->getResponse();
+            $errorMessage = $response->getContent();
+            errorLog('[__dingoPost] ' . $errorMessage . 'url:' . $url);
+            throw new \Dingo\Api\Exception\ResourceException('API post error');
+
+        } catch (\App\Exceptions\Exception $e) {
+            errorLog('[__dingoPost Exception API] ');
+            throw new \Dingo\Api\Exception\ResourceException('API Exception error ');
+        }
+
+        return $response['data'];
     }
 
     public static function baseGet($path, $params = [])
@@ -91,30 +163,28 @@ class APIService extends Service
         $url = config('url.jinse_base_url') . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');
 
-        return $dispatcher->get($url, $params);
-    }
+        try {
+            $response = $dispatcher->get($url, $params);
+        } catch (\Dingo\Api\Exception\InternalHttpException $e) {
 
-    /**
-     * base API
-     */
+            $response = $e->getResponse();
+            $errorMessage = $response->getContent();
+            errorLog('[__dingoPost] ' . $errorMessage . 'url:' . $url);
+            throw new \Dingo\Api\Exception\ResourceException('API post error');
 
-    public static function httpPost($url, $params = [], $contentType = '')
-    {
-        $dispatcher = app('Dingo\Api\Dispatcher');
-
-        if ($contentType == 'json') {
-            $dispatcher->json($params);
-        } else {
-            $dispatcher->with($params);
+        } catch (\App\Exceptions\Exception $e) {
+            errorLog('[__dingoPost Exception API] ');
+            throw new \Dingo\Api\Exception\ResourceException('API Exception error ');
         }
 
-        return $dispatcher->post($url);
+        return $response['data'];
     }
 
     /**
      * get
      */
-    public static function get($url, $params = []) {
+    public static function get($url, $params = [])
+    {
 
         try {
             $requestParams = [
@@ -132,22 +202,26 @@ class APIService extends Service
     /**
      * post
      */
-    public static function post($url, $params = []) {
+    public static function post($url, $params = [])
+    {
+        $requestParams = [
+            'timeout'  => 2,
+            'debug' => false,
+        ];
+        $client = new Client($requestParams);
+
         try {
-            $requestParams = [
-                'timeout'  => 10000,
-                'debug' => false,
-            ];
-            $client = new Client($requestParams);
             $response = $client->request('POST', $url, ['json' => $params]);
-            $resCode  = $response->getStatusCode();
-            $resBody  = $response->getBody();
+            $resCode  = (string) $response->getStatusCode();
+            $resBody  = $response->getbody()->getContents();
+
             if ($resBody == "ok" && $resCode == 200) {
-                return [];
+                return true;
             }
-        } catch (Exception $e) {
-            throw $e;
+        } catch (RequestException $e) {
+            throw new \Dingo\Api\Exception\ResourceException('post api error');
+            // returnError(501, '调用接口失败');
         }
-        // return $resBody;
+
     }
 }

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class CrawlResult extends Model
+class CrawlResultV2 extends Model
 {
     use SoftDeletes;
 
@@ -28,7 +28,7 @@ class CrawlResult extends Model
     /**
      * 表名
      */
-    protected $table = 't_crawl_result';
+    protected $table = 't_crawl_result_v2';
 
     /**
      * 主键

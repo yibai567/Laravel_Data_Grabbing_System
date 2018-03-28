@@ -12,8 +12,10 @@ $api->version(
         $api->post('/crawl/results', 'CrawlResultController@createForBatch');
         $api->get('/crawl/results', 'CrawlResultController@all');
         $api->post('/crawl/result/search', 'CrawlResultController@search');
+        $api->post('/crawl/result/search_v2', 'CrawlResultController@searchV2');
         $api->get('/crawl/task', 'CrawlTaskController@retrieve');
         $api->post('/crawl/task', 'CrawlTaskController@create');
+        $api->get('/crawl/task/search', 'CrawlTaskController@search');
         $api->post('/crawl/task/update','CrawlTaskController@update');
         $api->get('/crawl/tasks/ids','CrawlTaskController@listByIds');
     }
@@ -28,12 +30,17 @@ $api->version(
             echo 'test';
         });
         $api->post('/crawl/task', 'CrawlTaskController@create');
+        $api->get('/crawl/task', 'CrawlTaskController@retrieve');
         $api->post('/crawl/task/stop', 'CrawlTaskController@stop');
         $api->get('/crawl/task/queue/name', 'CrawlTaskController@getByQueueName');
         $api->get('/crawl/task/queue/info', 'CrawlTaskController@getQueueInfo');
         $api->post('/crawl/task/test', 'CrawlTaskController@test');
         $api->post('/crawl/task/start', 'CrawlTaskController@start');
         $api->post('/crawl/results', 'CrawlResultController@createForBatch');
+        $api->post('/crawl/results/json', 'CrawlResultV2Controller@saveAllToJson');
+        $api->post('/crawl/results/html', 'CrawlResultV2Controller@saveAllToHtml');
+        $api->post('/crawl/result/test', 'CrawlResultV2Controller@saveToTest');
         $api->get('/crawl/tasks/ids','CrawlTaskController@listByIds');
+        $api->post('/crawl/task/update','CrawlTaskController@update');
     }
 );

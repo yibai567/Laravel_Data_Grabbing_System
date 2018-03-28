@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CrawlTask extends Model
 {
+    use SoftDeletes;
+
     const IS_INIT = 1; //未启动
     const IS_TEST_SUCCESS = 2; //测试成功
     const IS_TEST_ERROR = 3; //测试失败
@@ -48,7 +51,26 @@ class CrawlTask extends Model
 
     const SCRIPT_PREFIX = 'grab';
 
+    const RESOURCE_TYPE_HTML = 1;
+    const RESOURCE_TYPE_JSON = 2;
+
+    /**
+     * 表名
+     */
     protected $table = 't_crawl_task';
+
+    /**
+     * 主键
+     */
+    protected $primaryKey = "id";
+
+    /**
+     * 隐藏的字段
+     */
+    protected $hidden = [
+        "updated_at",
+        "deleted_at",
+    ];
 
     protected $fillable = [
         'name',
@@ -71,6 +93,10 @@ class CrawlTask extends Model
         'start_time',
         'keywords',
         'last_job_at',
+        'resource_type',
+        'header',
+        'md5_params',
+        'api_fields',
     ];
 
     public function setting()
