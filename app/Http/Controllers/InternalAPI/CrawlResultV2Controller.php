@@ -96,7 +96,7 @@ class CrawlResultV2Controller extends Controller
         }
 
         // 格式化抓取结果 $resData = [['title' => 'block chain', 'url' => ‘http://xxxx’]]
-        $resData = $this->__formatResultToHtml($params);
+        $resData = $this->__formatResultToHtml($task, $params);
 
         if (empty($resData)) {
             return $this->resObjectList([], 'crawl_result', $request->path());
@@ -246,7 +246,7 @@ class CrawlResultV2Controller extends Controller
      * @param Request $request
      * @return array
     */
-    private function __formatResultToHtml($params)
+    private function __formatResultToHtml($task, $params)
     {
         $resData = [];
         $resultList = $params['result'];
@@ -267,6 +267,7 @@ class CrawlResultV2Controller extends Controller
                 }
 
                $resData[$key][$rowkey] = $valueFilter;
+               $resData[$key]['task_id'] = $task['id'];
             }
         }
 

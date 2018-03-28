@@ -90,12 +90,12 @@ class APIService extends Service
 
             $response = $e->getResponse();
             $errorMessage = $response->getContent();
-            errorLog('[__dingoPost] ' . $errorMessage . 'url:' . $url);
-            throw new \Dingo\Api\Exception\ResourceException('API post error');
+            errorLog('[internalPost] ' . $errorMessage . 'url:' . $url);
+            throw new \Dingo\Api\Exception\ResourceException('internal API post error');
 
         } catch (\App\Exceptions\Exception $e) {
-            errorLog('[__dingoPost Exception API] ');
-            throw new \Dingo\Api\Exception\ResourceException('API Exception error ');
+            errorLog('[internalPost Exception API] ');
+            throw new \Dingo\Api\Exception\ResourceException('internal API Exception error ');
         }
 
         return $response['data'];
@@ -219,6 +219,7 @@ class APIService extends Service
                 return;
             }
         } catch (RequestException $e) {
+            // throw new \Dingo\Api\Exception\ResourceException('post api error');
             returnError(501, '调用接口失败');
         }
 
