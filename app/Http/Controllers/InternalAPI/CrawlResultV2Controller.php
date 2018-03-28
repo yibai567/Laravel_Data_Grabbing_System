@@ -90,7 +90,8 @@ class CrawlResultV2Controller extends Controller
         ]);
 
         // 获取任务信息
-        $task = APIService::internalPost('/internal/crawl/task', ['id' => $params['task_id']]);
+         // 获取任务信息
+        $task = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['task_id']);
         if (empty($task)) {
             throw new \Dingo\Api\Exception\ResourceException("task is not found");
         }
@@ -101,9 +102,8 @@ class CrawlResultV2Controller extends Controller
         if (empty($resData)) {
             return $this->resObjectList([], 'crawl_result', $request->path());
         }
-
         // 数据唯一判断
-        $filterResult = $this->__filterResult($resData, $params['is_test'], $params['taskId']);
+        $filterResult = $this->__filterResult($resData, $params['is_test'], $params);
         $newResult = $filterResult['newResult'];
         $reportResult = $filterResult['reportResult'];
 
@@ -329,6 +329,11 @@ class CrawlResultV2Controller extends Controller
     {
         $newResult = [];
         $reportResult = ['is_test' => $isTest, 'result' => []];
+        if ($reportResult['is_test'] == CrawlResult::IS_TEST_FALSE) {
+            $reportResult['is_test'] = false;
+        } else {
+            $reportResult['is_test'] = true;
+        }
         foreach ($data as $key => $value) {
             $md5Value = md5(json_encode($value, true));
 

@@ -216,11 +216,11 @@ class APIService extends Service
             $resBody  = $response->getbody()->getContents();
 
             if ($resBody == "ok" && $resCode == 200) {
-                return;
+                return true;
             }
         } catch (RequestException $e) {
-            // throw new \Dingo\Api\Exception\ResourceException('post api error');
-            returnError(501, '调用接口失败');
+            throw new \Dingo\Api\Exception\ResourceException('post api error');
+            // returnError(501, '调用接口失败');
         }
 
     }

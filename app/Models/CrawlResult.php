@@ -15,11 +15,11 @@ class CrawlResult extends Model
      //已处理
     const IS_PROCESSED = 2;
 
+    //上报失败
+    const IS_REPORT_ERROR = 3;
+
     //test测试
     const EFFECT_TEST = 1;
-
-    //已处理
-    const IS_REPORT_ERROR = 3;
 
     const IS_TEST_TRUE = 1;
 

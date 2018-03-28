@@ -70,7 +70,7 @@ class CrawlResultController extends Controller
         if ($params['is_test'] == CrawlResult::IS_TEST_TRUE) {
             $params['is_test'] = CrawlResult::IS_TEST_TRUE;
         } else {
-            $params['is_test'] = 0;
+            $params['is_test'] = CrawlResult::IS_TEST_FALSE;
         }
 
         // 获取任务信息
