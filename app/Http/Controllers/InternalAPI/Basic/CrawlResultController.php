@@ -115,7 +115,7 @@ class CrawlResultController extends Controller
         ValidatorService::check($request->all(), [
             "task_id" => "nullable|integer",
             "url" => "nullable|string",
-            "md5_fields" => "nullable|string",
+            "original_data" => "nullable|string",
         ]);
 
         try {
@@ -125,8 +125,8 @@ class CrawlResultController extends Controller
                     $query->where('crawl_task_id', $params['task_id']);
                 }
 
-                if (!empty($params['md5_fields'])) {
-                    $query->where('md5_fields', $params['md5_fields']);
+                if (!empty($params['original_data'])) {
+                    $query->where('original_data', $params['original_data']);
                 }
 
                 if (!empty($params['url'])) {

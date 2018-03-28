@@ -144,7 +144,8 @@ class CrawlResultController extends Controller
                     continue;
                }
 
-            if (substr($value['url'], 0,1) == '/' && substr($value['url'], 1,1) != '/') {                                       $value['url'] = $url . $value['url'];
+            if (substr($value['url'], 0,1) == '/' && substr($value['url'], 1,1) != '/') {
+                $value['url'] = $url . $value['url'];
             }
 
             $result = APIService::basePost('/internal/basic/crawl/result/search', ['task_id' => $taskId, 'original_data' => md5(json_encode($value))], 'json');
