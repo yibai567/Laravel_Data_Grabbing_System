@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CrawlTask extends Model
 {
+    use SoftDeletes;
+
     const IS_INIT = 1; //未启动
     const IS_TEST_SUCCESS = 2; //测试成功
     const IS_TEST_ERROR = 3; //测试失败

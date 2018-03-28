@@ -39,29 +39,15 @@ class CrawlTaskController extends Controller
             'is_wall' => 'integer|nullable',
             'is_proxy' => 'integer|nullable',
             'resource_type' => 'integer|nullable',
-            'header' => 'nullable',
+            'header' => 'nullablew',
+            'api_fileds' => 'nullable',
         ]);
-
-        $selectors = ['range' => '','content' => [], 'tags' => []];
-        if (is_array($params['selectors'])) {
-            if (isset($params['selectors']['range'])) {
-                if (mb_strlen($params['selectors']['range']) > 200) {
-                    return $this->resError(401, 'range 不能超过200');
-                }
-
-                $selectors['range'] = $params['selectors']['range'];
-            }
-
-            if (isset($params['selectors']['content'])) {
-                $selectors['content'] = $params['selectors']['content'];
-            }
-
-            if  (isset($params['selectors']['tags'])) {
-                $selectors['tags'] = $params['selectors']['tags'];
-            }
+        $params['md5_params'] = md5(json_encode($params, true));
+        $taskResult = APIService::baseGet('/internal/basic/crawl/task/search', ['resource_url' => $params['resource_url'], 'md5_params' => $params['md5_params']], 'json');
+        if (!empty($taskResult)) {
+            returnError(401, '任务已存在', $taskResult);
         }
 
-        $params['selectors'] = $selectors;
         if (empty($params['cron_type'])) {
             $params['cron_type'] = CrawlTask::CRON_TYPE_KEEP;
         }
@@ -196,17 +182,18 @@ class CrawlTaskController extends Controller
             'url'=> $taskDetail['resource_url'],
             'selector'=> $taskDetail['selectors'],
             'protocol' => $taskDetail['protocol'],
-            'type' => $taskDetail['type'],
             'header' => $taskDetail['header'],
         ];
-
-        if ($taskDetail['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
-            $listName = 'crawl_task_https_test';
+        if ($taskDetail['resource_type'] == CrawlTask::RESOURCE_TYPE_JSON) {
+                $listName = 'crawl_task_test_json';
         } else {
-            $listName = 'crawl_task_http_test';
+            if ($taskDetail['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
+                $listName = 'crawl_task_https_test';
+            } else {
+                $listName = 'crawl_task_http_test';
+            }
         }
-
-        Redis::connection('queue')->lpush($listName, json_encode($item));
+        $res = Redis::connection('queue')->lpush($listName, json_encode($item));
         return $this->resObjectGet('测试已提交，请稍后查询结果！', 'crawl_task', $request->path());
     }
 
@@ -318,8 +305,9 @@ class CrawlTaskController extends Controller
             'is_proxy' => 'integer|nullable',
             'resource_type' => 'integer|nullable',
             'header' => 'nullable',
+            'api_fileds' => 'nullable',
         ]);
-
+        //$params['md5_params'] = md5(json_encode($params));
         $task = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
 
         if (empty($task)) { // task does not exist
@@ -328,29 +316,6 @@ class CrawlTaskController extends Controller
 
         if ($task['status'] == CrawlTask::IS_START_UP) { // task is startup
             return $this->resError(401, 'task status does not allow update!');
-        }
-
-        if (!empty($params['selectors'])) {
-            $selectors = ['range' => '','content' => [], 'tags' => []];
-
-            if (is_array($params['selectors'])) {
-                if (isset($params['selectors']['range'])) {
-                    if (mb_strlen($params['selectors']['range']) > 200) {
-                        return $this->resError(401, 'range 不能超过200');
-                    }
-
-                    $selectors['range'] = $params['selectors']['range'];
-                }
-
-                if (isset($params['selectors']['content'])) {
-                    $selectors['content'] = $params['selectors']['content'];
-                }
-
-                if  (isset($params['selectors']['tags'])) {
-                    $selectors['tags'] = $params['selectors']['tags'];
-                }
-            }
-            $params['selectors'] = $selectors;
         }
 
         if (!empty($params['resource_url'])) {

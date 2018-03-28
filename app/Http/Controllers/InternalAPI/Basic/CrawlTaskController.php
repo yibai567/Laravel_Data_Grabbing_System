@@ -43,11 +43,13 @@ class CrawlTaskController extends Controller
             'is_ajax' => 'integer|nullable',
             'is_login' => 'integer|nullable',
             'is_wall' => 'integer|nullable',
-            'type' => 'integer|nullable',
+            'resource_type' => 'integer|nullable',
             'header' => 'nullable',
+            'md5_params' => 'string|required',
+            'api_fileds' => 'string|nullable',
         ]);
-
         $params['selectors'] = json_encode($params['selectors']);
+        $params['api_fileds'] = json_encode($params['api_fileds']);
         $task = CrawlTask::create($params);
 
         return $this->resObjectGet($task, 'crawl_task', $request->path());
@@ -90,16 +92,19 @@ class CrawlTaskController extends Controller
         $params = $request->all();
 
         ValidatorService::check($params, [
-            'cron_type' => 'integer|required',
-            'is_proxy' => 'integer|required',
-            'protocol' => 'integer|required',
+            // 'cron_type' => 'integer|nullable',
+            // 'is_proxy' => 'integer|nullable',
+            // 'protocol' => 'integer|nullable',
+            //'resource_url' => 'string|nullable',
+            'md5_params' => 'string|nullable',
         ]);
 
         try {
-            $items = CrawlTask::select('id,resource_url')
-                                ->where('protocol', $params['protocol'])
-                                ->where('is_proxy', $params['is_proxy'])
-                                ->where('cron_type', $params['protocol'])
+            $items = CrawlTask::select('id', 'resource_url')
+                                // ->where('protocol', $params['protocol'])
+                                // ->where('is_proxy', $params['is_proxy'])
+                                // ->where('cron_type', $params['protocol'])
+                                ->where('md5_params', $params['md5_params'])
                                 ->get();
             $data = [];
             if (!empty($items)) {
