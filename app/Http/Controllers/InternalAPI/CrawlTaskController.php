@@ -308,14 +308,8 @@ class CrawlTaskController extends Controller
             }
         }
 
-        if (empty(array_diff($params, $task))) {
-            return $this->resError(401, 'task nothing be updated!');
-        }
-
         $data = [];
-        $data['status'] = CrawlTask::IS_INIT;
         $data = $params;
-
         try{
             $res = APIService::basePost('/internal/basic/crawl/task/update', $data, 'json');
 

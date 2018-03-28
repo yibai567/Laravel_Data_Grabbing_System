@@ -157,6 +157,8 @@ class CrawlTaskController extends Controller
             'api_fields' => 'string|nullable',
             'id' => 'required|integer'
         ]);
+
+        $params['status'] = CrawlTask::IS_INIT;
         if (!empty($params['selectors'])) {
             $params['selectors'] = json_encode($params['selectors'], true);
         }
