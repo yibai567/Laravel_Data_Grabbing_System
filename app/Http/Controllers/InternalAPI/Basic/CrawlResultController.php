@@ -42,6 +42,7 @@ class CrawlResultController extends Controller
 
         $items = [];
 
+        $currentTime = date('Y-m-d H:i:s');
         foreach ($params['result'] as $value) {
             $item['format_data'] = json_encode($value);
             $item['original_data'] = md5($item['format_data']);
@@ -50,6 +51,8 @@ class CrawlResultController extends Controller
             $item['task_start_time'] = $params['start_time'];
             $item['task_end_time'] = $params['end_time'];
             $item['task_url'] = $value['url'];
+            $item['created_at'] = $currentTime;
+            $item['updated_at'] = $currentTime;
             $items[] = $item;
         }
 

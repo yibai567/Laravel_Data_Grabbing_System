@@ -335,6 +335,8 @@ class CrawlResultV2Controller extends Controller
         } else {
             $reportResult['is_test'] = true;
         }
+
+        $currentTime = date('Y-m-d H:i:s');
         foreach ($data as $key => $value) {
             $md5Value = md5(json_encode($value, true));
 
@@ -354,6 +356,9 @@ class CrawlResultV2Controller extends Controller
                     'start_time' => $params['start_time'],
                     'end_time' => $params['end_time'],
                     'status' => CrawlResult::IS_UNTREATED,
+                    'created_at' => $currentTime,
+                    'updated_at' => $currentTime,
+
                 ];
             }
         }
