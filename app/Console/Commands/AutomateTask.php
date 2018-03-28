@@ -154,11 +154,9 @@ class AutomateTask extends Command
         switch ($item['resource_type']) {
             case CrawlTask::RESOURCE_TYPE_HTML:
                 $key = 'crawl_task_' . $protocol . '_' . $proxy . '_' . $wall . '_' . $ajax . '_' . $login . '_' . $cronType . '_v2';
-
                 break;
             case CrawlTask::RESOURCE_TYPE_JSON:
                 $key = 'crawl_task_' . $proxy . '_' . $wall . '_' . $ajax . '_' . $login . '_' . $cronType . '_' . $resourceType;
-
                 break;
 
             default:
