@@ -177,23 +177,8 @@ class CrawlTaskController extends Controller
             return $this->resError('task does not exist!');
         }
 
-        $item = [
-            'task_id'=> $taskDetail['id'],
-            'url'=> $taskDetail['resource_url'],
-            'selector'=> $taskDetail['selectors'],
-            'protocol' => $taskDetail['protocol'],
-            'header' => $taskDetail['header'],
-        ];
-        if ($taskDetail['resource_type'] == CrawlTask::RESOURCE_TYPE_JSON) {
-                $listName = 'crawl_task_test_json';
-        } else {
-            if ($taskDetail['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
-                $listName = 'crawl_task_https_test';
-            } else {
-                $listName = 'crawl_task_http_test';
-            }
-        }
-        $res = Redis::connection('queue')->lpush($listName, json_encode($item));
+        $this->__toTest($taskDetail);
+
         return $this->resObjectGet('测试已提交，请稍后查询结果！', 'crawl_task', $request->path());
     }
 
@@ -361,19 +346,37 @@ class CrawlTaskController extends Controller
             'url' => $task['resource_url'],
         ];
 
-        if ($task['resource_type'] == CrawlTask::RESOURCE_TYPE_JSON) {
-            $item['header'] = $item['header'];
-            $item['is_proxy'] = $item['is_proxy'];
-            $listName = 'crawl_task_json_test';
-        } else {
-            $item['selector'] = $task['selectors'];
+        switch ($task['resource_type']) {
+            case CrawlTask::RESOURCE_TYPE_JSON:
 
-            if ($task['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
-                $listName = 'crawl_task_https_test';
-            } else {
-                $listName = 'crawl_task_http_test';
-            }
+                $item['header'] = $item['header'];
+                $item['is_proxy'] = $item['is_proxy'];
+                $listName = 'crawl_task_json_test';
+                break;
+
+            case CrawlTask::RESOURCE_TYPE_HTML:
+
+                $item['selector'] = $task['selectors'];
+
+                if ($task['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
+                    $listName = 'crawl_task_https_test_v2';
+                } else {
+                    $listName = 'crawl_task_http_test_v2';
+                }
+                break;
+
+            default:
+
+                $item['selector'] = $task['selectors'];
+
+                if ($task['protocol'] == CrawlTask::PROTOCOL_HTTPS) {
+                    $listName = 'crawl_task_https_test';
+                } else {
+                    $listName = 'crawl_task_http_test';
+                }
+                break;
         }
+
         Redis::connection('queue')->lpush($listName, json_encode($item));
         return true;
     }
