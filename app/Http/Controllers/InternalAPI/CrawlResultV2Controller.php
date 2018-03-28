@@ -31,11 +31,10 @@ class CrawlResultV2Controller extends Controller
         ]);
 
         // 获取任务信息
-        $task = APIService::internalPost('/internal/crawl/task', ['id' => $params['task_id']]);
+        $task = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['task_id']);
         if (empty($task)) {
             throw new \Dingo\Api\Exception\ResourceException("task is not found");
         }
-
         // 获取 api_fields
         if (empty($task['api_fields'])) {
             throw new \Dingo\Api\Exception\ResourceException("invalid api fields config");
@@ -44,6 +43,7 @@ class CrawlResultV2Controller extends Controller
         // 格式化抓取结果
         $resData = [];
         $resultList = $params['result'];
+        $task['api_fields'] = json_decode($task['api_fields'], true);
 
         // 分析列表数据所在位置，并获取
         if (empty($task['api_fields']['filter'])) {
@@ -53,28 +53,26 @@ class CrawlResultV2Controller extends Controller
                 $resultList = $resultList[$resultListkey];
             }
         }
-
         if (empty($resultList)) {
             throw new \Dingo\Api\Exception\ResourceException("not found result list");
         }
 
         // 按需重新组装结果
         foreach ($resultList as $rowkey => $row) {
+            $rowData = [];
             foreach ($task['api_fields'] as $key => $value) {
                 if ($key == 'filter') {
                     continue;
                 }
-
-                $resData[$rowKey][$key] = $row[$value];
+                $rowData[$key] = $row[$value];
             }
+            $resData[] = $rowData;
         }
-
         if (empty($resData)) {
             return $this->resObjectList([], 'crawl_result', $request->path());
         }
-
         // 数据唯一判断
-        $filterResult = $this->__filterResult($resData, $params['is_test'], $params['taskId']);
+        $filterResult = $this->__filterResult($resData, $params['is_test'], $params);
         $newResult = $filterResult['newResult'];
         $reportResult = $filterResult['reportResult'];
 
@@ -87,7 +85,7 @@ class CrawlResultV2Controller extends Controller
             APIService::post(config('url.platform_url'), sign($reportResult));
         } catch (\Exception $e) {
             foreach ($newResult as $key => $value) {
-                $newResult[$key]['status'] = CrawlResult::IS_REPORT_ERROR,
+                $newResult[$key]['status'] = CrawlResult::IS_REPORT_ERROR;
             }
         }
 
@@ -160,7 +158,7 @@ class CrawlResultV2Controller extends Controller
         } catch (\Exception $e) {
             // TODO LOG
             foreach ($newResult as $key => $value) {
-                $newResult[$key]['status'] = CrawlResult::IS_REPORT_ERROR,
+                $newResult[$key]['status'] = CrawlResult::IS_REPORT_ERROR;
             }
         }
 
@@ -185,9 +183,8 @@ class CrawlResultV2Controller extends Controller
             'task_id' => 'required|integer',
             'result' => 'nullable',
         ]);
-
         // 获取任务信息
-        $task = APIService::internalPost('/internal/crawl/task', ['id' => $params['task_id']]);
+        $task = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['task_id']);
         if (empty($task)) {
             throw new \Dingo\Api\Exception\ResourceException("task is not found");
         }
@@ -211,8 +208,10 @@ class CrawlResultV2Controller extends Controller
             throw new \Dingo\Api\Exception\ResourceException("update test result fail");
         }
 
+
         // 上报结果
         $reportResult = ['is_test' => 1, 'result' => $params['result']];
+
         try {
             APIService::post(config('url.platform_url'), sign($reportResult));
         } catch (\Exception $e) {
@@ -229,33 +228,32 @@ class CrawlResultV2Controller extends Controller
      * @param Request $request
      * @return array
     */
-    private function __filterResult($data, $isTest, $taskId)
+    private function __filterResult($data, $isTest, $params)
     {
         $newResult = [];
         $reportResult = ['is_test' => $isTest, 'result' => []];
-
         foreach ($data as $key => $value) {
             $md5Value = md5(json_encode($value, true));
 
             $resultDetail = APIService::basePost('/internal/basic/crawl/result/search', ['task_id' => $params['task_id'], 'md5_fields' => $md5Value], 'json');
+
             if (empty($resultDetail)) {
 
                 // 整理需要上报的结构
                 $reportResult['result'][$key] = $value;
-                $reportResult['result'][$key]['task_id'] => $taskId;
+                $reportResult['result'][$key]['task_id'] = $params['task_id'];
 
                 // 整理需要保存的结构
                 $newResult[$key] = [
-                    'fields' => $value,
+                    'fields' => json_encode($value, true),
                     'md5_fields' => $md5Value,
-                    'task_id' => $params['task_id'],
+                    'crawl_task_id' => $params['task_id'],
                     'start_time' => $params['start_time'],
-                    'end_time' => $params['end_time',
+                    'end_time' => $params['end_time'],
                     'status' => CrawlResult::IS_UNTREATED,
                 ];
             }
         }
-
         return ['newResult' => $newResult, 'reportResult' => $reportResult];
     }
 
