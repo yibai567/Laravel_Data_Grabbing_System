@@ -18,7 +18,7 @@ class TaskCrawl extends Command
      *
      * @var string
      */
-    protected $signature = 'task:crawl {queue_name} {is_test} {sleep_time}';
+    protected $signature = 'task:crawl {queue_name} {is_test} {sleep_time=10}';
 
     /**
      * The console command description.
@@ -46,16 +46,12 @@ class TaskCrawl extends Command
     {
         $queueName = $this->argument('queue_name');
         $isTest = (int)$this->argument('is_test');
-        $sleepTime = $this->argument('sleep_time');
-
-        if (empty($sleepTime)) {
-            $sleepTime = 10;
-        } else {
-            if ($sleepTime > 120) {
-                echo "sleep_time 不能超过 120";
-                return false;
-            }
+        $sleepTime = (int)$this->argument('sleep_time');
+        if ($sleepTime > 120) {
+            echo "sleep_time 不能超过 120";
+            return false;
         }
+
 
         if (empty($queueName)) {
             echo "参数 queue_name 不能为空 \n";
