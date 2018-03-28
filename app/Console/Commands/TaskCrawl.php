@@ -18,7 +18,7 @@ class TaskCrawl extends Command
      *
      * @var string
      */
-    protected $signature = 'task:crawl {is_test=2}';
+    protected $signature = 'task:crawl {queue_name} {is_test}';
 
     /**
      * The console command description.
@@ -44,25 +44,25 @@ class TaskCrawl extends Command
      */
     public function handle()
     {
-        $is_test = (int)$this->argument('is_test');
-        if ($is_test != CrawlResult::IS_TEST_TRUE && $is_test != CrawlResult::IS_TEST_FALSE) {
-            echo "参数 is_test 必须是1或2";
+        $queueName = $this->argument('queue_name');
+        $isTest = (int)$this->argument('is_test');
+        if (empty($queueName)) {
+            echo "参数 queue_name 不能为空 \n";
         }
 
-        if ($is_test == CrawlResult::IS_TEST_TRUE) {
-            $queueName = 'crawl_task_json_test';
-        } else {
-            $queueName = 'crawl_task_noproxy_nowall_noajax_nologin_keep_json';
+        if ($isTest != CrawlResult::IS_TEST_TRUE && $isTest != CrawlResult::IS_TEST_FALSE) {
+            echo "参数 is_test 不能为空 值是1或2 \n";
         }
+
         $taskList = $this->__getByQueueName($queueName);
 
         if (empty($taskList)) {
-            echo "没有可处理的任务";
+            echo "没有可处理的任务 \n";
         }
 
         foreach ($taskList as $value) {
             try {
-                    $this->__request($value, $is_test);
+                    $this->__request($value, $isTest);
                 } catch (\Exception $e) {
                     continue;
                 }
@@ -77,8 +77,7 @@ class TaskCrawl extends Command
      */
     private function __getByQueueName($name)
     {
-        $result = APIService::internalGet('/internal/crawl/task/queue/name?name=' . $name);
-        return $result;
+        return APIService::internalGet('/internal/crawl/task/queue/name?name=' . $name);
     }
     /**
      * __request
@@ -86,8 +85,9 @@ class TaskCrawl extends Command
      *
      * @return array
      */
-    private function __request($params, $is_test)
+    private function __request($params, $isTest)
     {
+        echo sprintf("__request start params task_id = %d, url = %s \n", $params['task_id'], $params['url']);
         $crawlResult = [];
         $newResult = [];
         $crawlResult['start_time'] = date('Y-m-d H:i:s');
@@ -97,16 +97,18 @@ class TaskCrawl extends Command
         }
         $request = new RequestService();
         $result = $request->get($params['url'], [], $header, $params['isProxy']);
-        $result = [];
         if (empty($result)) {
+            echo sprintf("__request start params task_id = %d result not found \n", $params['task_id']);
             return false;
         }
         $crawlResult['task_id'] = $params['task_id'];
-        $crawlResult['is_test'] = $is_test;
+        $crawlResult['is_test'] = $isTest;
         $crawlResult['end_time'] = date('Y-m-d H:i:s');
 
         $newResult = json_decode($result['data'], ture);
         $crawlResult['result'] = $newResult['data'];
+        echo sprintf("__request end params task_id = %d \n", $params['task_id']);
+
         $this->__createCrawlResult($crawlResult);
     }
 
@@ -118,7 +120,10 @@ class TaskCrawl extends Command
      */
     private function __createCrawlResult($crawlResult)
     {
+        echo sprintf("__createCrawlResult start params result = %d \n", json_encode($crawlResult));
         $data = APIService::openPost('/v1/crawl/result/dispatch', $crawlResult, 'json');
-        return $data;
+        echo sprintf("__createCrawlResult end res = %s \n", json_encode($data));
+
+        return true;
     }
 }
