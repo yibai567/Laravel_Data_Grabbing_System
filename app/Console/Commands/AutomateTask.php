@@ -151,11 +151,20 @@ class AutomateTask extends Command
         $login = $this->_logins[$item['is_login']];
         $cronType = $this->_cronTypes[$item['cron_type']];
         $resourceType = $this->_resource[$item['resource_type']];
-        if ($resourceType == 'json') {
-            $key = 'crawl_task_' . $proxy . '_' . $wall . '_' . $ajax . '_' . $login . '_' . $cronType . '_' . $resourceType;
-        } else {
-            $key = 'crawl_task_' . $protocol . '_' . $proxy . '_' . $wall . '_' . $ajax . '_' . $login . '_' . $cronType;
+        switch ($item['resource_type']) {
+            case CrawlTask::RESOURCE_TYPE_HTML:
+                $key = 'crawl_task_' . $protocol . '_' . $proxy . '_' . $wall . '_' . $ajax . '_' . $login . '_' . $cronType . '_v2';
+
+                break;
+            case CrawlTask::RESOURCE_TYPE_JSON:
+                $key = 'crawl_task_' . $proxy . '_' . $wall . '_' . $ajax . '_' . $login . '_' . $cronType . '_' . $resourceType;
+
+                break;
+
+            default:
+                $key = 'crawl_task_' . $protocol . '_' . $proxy . '_' . $wall . '_' . $ajax . '_' . $login . '_' . $cronType;
+                break;
         }
-         return $key;
+        return $key;
     }
 }
