@@ -96,7 +96,7 @@ class CrawlResultV2Controller extends Controller
         }
 
         // 格式化抓取结果 $resData = [['title' => 'block chain', 'url' => ‘http://xxxx’]]
-        $resData = $this->__formatResultToHtml($task, $params);
+        $resData = $this->__formatResultToHtml($params);
 
         if (empty($resData)) {
             return $this->resObjectList([], 'crawl_result', $request->path());
@@ -211,6 +211,7 @@ class CrawlResultV2Controller extends Controller
                 $resultList = $resultList[$resultListkey];
             }
         }
+
         if (empty($resultList)) {
             throw new \Dingo\Api\Exception\ResourceException("not found result list");
         }
@@ -245,7 +246,7 @@ class CrawlResultV2Controller extends Controller
      * @param Request $request
      * @return array
     */
-    private function __formatResultToHtml($task, $params)
+    private function __formatResultToHtml($params)
     {
         $resData = [];
         $resultList = $params['result'];
@@ -264,8 +265,8 @@ class CrawlResultV2Controller extends Controller
                 if ($valueFilter === false) {
                     continue;
                 }
-                $resData[$key][$rowkey] = $valueFilter;
-                $resData[$key]['task_id'] = $task['id'];
+
+               $resData[$key][$rowkey] = $valueFilter;
             }
         }
 
@@ -283,19 +284,28 @@ class CrawlResultV2Controller extends Controller
     {
         if ($key == 'url') {
             if (empty($valueFilter) || $valueFilter == 'undefined' || $valueFilter == 'javascript:;') {
-                    return false;
-               }
+                return false;
+            }
 
-            if (substr($value['url'], 0, 1) == '/' && substr($value['url'], 1, 1) != '/') {
-                $url = $task['url'];
+            $url = $valueFilter;
+            $httpPre = substr($valueFilter, 0, 4);
+            $urlArr = parse_url($task['resource_url']);
+            if ($httpPre != 'http:') {
+                if (substr($valueFilter, 0, 2) == '//') {
+                    $url = $urlArr['scheme'] . ':';
+                } else {
 
-                $urlArr = parse_url($url);
-                if (isset($urlArr['scheme']) && isset($urlArr['host'])) {
-                    $url = $urlArr['scheme'] . '://' . $urlArr['host'] . '/';
+                    if (substr($valueFilter, 0, 1) == '/') {
+                        $url = $urlArr['scheme'] . '://' . $urlArr['host'];
+
+                    } else {
+                        $url = $urlArr['scheme'] . '://' . $urlArr['host'] . '/';
+                    }
                 }
 
-               $valueFilter = $url . $valueFilter;
             }
+
+           $valueFilter = $url . $valueFilter;
         }
 
         if ($key == 'title') {
