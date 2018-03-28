@@ -18,7 +18,7 @@ class TaskCrawl extends Command
      *
      * @var string
      */
-    protected $signature = 'task:crawl {queue_name} {is_test}';
+    protected $signature = 'task:crawl {queue_name} {is_test} {sleep_time}';
 
     /**
      * The console command description.
@@ -46,27 +46,43 @@ class TaskCrawl extends Command
     {
         $queueName = $this->argument('queue_name');
         $isTest = (int)$this->argument('is_test');
+        $sleepTime = $this->argument('sleep_time');
+
+        if (empty($sleepTime)) {
+            $sleepTime = 10;
+        } else {
+            if ($sleepTime > 120) {
+                echo "sleep_time 不能超过 120";
+                return false;
+            }
+        }
+
         if (empty($queueName)) {
             echo "参数 queue_name 不能为空 \n";
+            return false;
         }
 
         if ($isTest != CrawlResult::IS_TEST_TRUE && $isTest != CrawlResult::IS_TEST_FALSE) {
             echo "参数 is_test 不能为空 值是1或2 \n";
+            return false;
         }
 
         $taskList = $this->__getByQueueName($queueName);
 
         if (empty($taskList)) {
             echo "没有可处理的任务 \n";
+            return false;
         }
 
         foreach ($taskList as $value) {
             try {
-                    $this->__request($value, $isTest);
-                } catch (\Exception $e) {
-                    continue;
-                }
+                $this->__request($value, $isTest);
+            } catch (\Exception $e) {
+                continue;
             }
+        }
+        sleep($sleepTime);
+        return true;
     }
 
     /**
