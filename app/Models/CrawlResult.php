@@ -28,7 +28,7 @@ class CrawlResult extends Model
     /**
      * 表名
      */
-    protected $table = 't_crawl_result_v2';
+    protected $table = 't_crawl_result';
 
     /**
      * 主键

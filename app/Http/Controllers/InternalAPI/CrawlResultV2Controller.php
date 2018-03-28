@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\InternalAPI;
 
 use Illuminate\Http\Request;
-use App\Models\CrawlResult;
+use App\Models\CrawlResultV2 as CrawlResult;
 use App\Models\CrawlTask;
 use App\Services\ValidatorService;
 use App\Services\APIService;
@@ -158,6 +158,8 @@ class CrawlResultV2Controller extends Controller
         // 目前只有成功测试的数据才会调用接口，TODO 失败情况的处理
         if ($task['status'] == CrawlTask::IS_INIT || $task['status'] == CrawlTask::IS_TEST_ERROR) {
             $updateParams['status'] = CrawlTask::IS_TEST_SUCCESS;
+        } else {
+            $updateParams['status'] = $task['status'];
         }
 
         try {
@@ -336,7 +338,7 @@ class CrawlResultV2Controller extends Controller
         foreach ($data as $key => $value) {
             $md5Value = md5(json_encode($value, true));
 
-            $resultDetail = APIService::basePost('/internal/basic/crawl/result/search', ['task_id' => $params['task_id'], 'md5_fields' => $md5Value], 'json');
+            $resultDetail = APIService::basePost('/internal/basic/crawl/result/search_v2', ['task_id' => $params['task_id'], 'md5_fields' => $md5Value], 'json');
 
             if (empty($resultDetail)) {
 

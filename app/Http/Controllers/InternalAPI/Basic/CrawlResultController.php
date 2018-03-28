@@ -4,6 +4,7 @@ namespace App\Http\Controllers\InternalAPI\Basic;
 
 use App\Services\ValidatorService;
 use App\Models\CrawlResult;
+use App\Models\CrawlResultV2;
 use App\Http\Controllers\InternalAPI\Controller;
 use Illuminate\Http\Request;
 
@@ -119,6 +120,53 @@ class CrawlResultController extends Controller
 
         try {
             $items = CrawlResult::where(function ($query) use ($params) {
+
+                if (!empty($params['task_id'])) {
+                    $query->where('crawl_task_id', $params['task_id']);
+                }
+
+                if (!empty($params['md5_fields'])) {
+                    $query->where('md5_fields', $params['md5_fields']);
+                }
+
+                if (!empty($params['url'])) {
+                    $query->where('task_url', $params['url']);
+                }
+            })->get();
+
+            //$query->take($params['limit']);
+            //$query->skip($params['offset']);
+            $result = [];
+
+            if (!empty($items)) {
+                $result = $items->toArray();
+            }
+        } catch (Exception $e) {
+            errorLog($e->getMessage(), $e->getCode());
+            return $this->resError($e->getCode(), $e->getMessage());
+        }
+
+        return $this->resObjectGet($result, 'list', $request->path());
+    }
+
+    /**
+     * search
+     * 根据复杂条件获取结果纪录
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function searchV2(Request $request)
+    {
+        $params =$request->all();
+        ValidatorService::check($request->all(), [
+            "task_id" => "nullable|integer",
+            "url" => "nullable|string",
+            "md5_fields" => "nullable|string",
+        ]);
+
+        try {
+            $items = CrawlResultV2::where(function ($query) use ($params) {
 
                 if (!empty($params['task_id'])) {
                     $query->where('crawl_task_id', $params['task_id']);

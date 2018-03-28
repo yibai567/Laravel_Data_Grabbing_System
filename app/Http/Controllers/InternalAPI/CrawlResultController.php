@@ -37,6 +37,8 @@ class CrawlResultController extends Controller
 
         if ($taskDetail['status'] == CrawlTask::IS_INIT || $taskDetail['status'] == CrawlTask::IS_TEST_ERROR) {
             $taskParams['status'] = CrawlTask::IS_TEST_SUCCESS;
+        } else {
+            $taskParams['status'] = $taskDetail['status'];
         }
 
         $taskParams['test_time'] = date('Y-m-d H:i:s');
