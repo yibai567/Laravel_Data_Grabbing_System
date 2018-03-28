@@ -28,5 +28,6 @@ $api->version(
         $api->get('/crawl/task/queue/name', 'CrawlTaskController@getByQueueName');
         $api->get('/crawl/task/queue/info', 'CrawlTaskController@getQueueInfo');
         $api->post('/crawl/results', 'CrawlResultController@createForBatch');
+        $api->post('/crawl/result/dispatch', 'CrawlResultController@dispatch1');
     }
 );
