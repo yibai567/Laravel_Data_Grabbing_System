@@ -224,8 +224,15 @@ class CrawlResultV2Controller extends Controller
                 if ($key == 'filter') {
                     continue;
                 }
-                $rowData[$key] = $row[$value];
+
+                $valueFilter = $this->__formatURLAndTitle($row[$value], $task, $key);
+                if ($valueFilter === false) {
+                    continue;
+                }
+
+                $rowData[$key] = $valueFilter;
             }
+
             $resData[] = $rowData;
         }
 
@@ -254,11 +261,51 @@ class CrawlResultV2Controller extends Controller
             }
 
             foreach ($row as $key => $value) {
-               $resData[$key][$rowkey] = $value;
+                $valueFilter = $this->__formatURLAndTitle($value, $task, $rowkey);
+                if ($valueFilter === false) {
+                    continue;
+                }
+
+               $resData[$key][$rowkey] = $valueFilter;
             }
         }
 
         return $resData;
+    }
+
+    /**
+     * __formatURLAndTitle
+     * 格式化 空地址 空 title
+     *
+     * @param Request $request
+     * @return array
+    */
+    private function __formatURLAndTitle($valueFilter, $task, $key)
+    {
+        if ($key == 'url') {
+            if (empty($valueFilter) || $valueFilter == 'undefined' || $valueFilter == 'javascript:;') {
+                    return false;
+               }
+
+            if (substr($value['url'], 0, 1) == '/' && substr($value['url'], 1, 1) != '/') {
+                $url = $task['url'];
+
+                $urlArr = parse_url($url);
+                if (isset($urlArr['scheme']) && isset($urlArr['host'])) {
+                    $url = $urlArr['scheme'] . '://' . $urlArr['host'] . '/';
+                }
+
+               $valueFilter = $url . $valueFilter;
+            }
+        }
+
+        if ($key == 'title') {
+            if (empty($valueFilter) || $valueFilter == 'undefined') {
+                    return false;
+               }
+        }
+
+        return $valueFilter;
     }
 
     /**
