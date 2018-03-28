@@ -41,36 +41,12 @@ class CrawlResultV2Controller extends Controller
         }
 
         // 格式化抓取结果
-        $resData = [];
-        $resultList = $params['result'];
-        $task['api_fields'] = json_decode($task['api_fields'], true);
+        $resData = $this->__formatResultToJson($task, $params);
 
-        // 分析列表数据所在位置，并获取
-        if (empty($task['api_fields']['filter'])) {
-            $resultListkeys = explode('-', $task['api_fields']['filter']);
-
-            foreach ($resultListkeys as $resultListkey) {
-                $resultList = $resultList[$resultListkey];
-            }
-        }
-        if (empty($resultList)) {
-            throw new \Dingo\Api\Exception\ResourceException("not found result list");
-        }
-
-        // 按需重新组装结果
-        foreach ($resultList as $rowkey => $row) {
-            $rowData = [];
-            foreach ($task['api_fields'] as $key => $value) {
-                if ($key == 'filter') {
-                    continue;
-                }
-                $rowData[$key] = $row[$value];
-            }
-            $resData[] = $rowData;
-        }
         if (empty($resData)) {
             return $this->resObjectList([], 'crawl_result', $request->path());
         }
+
         // 数据唯一判断
         $filterResult = $this->__filterResult($resData, $params['is_test'], $params);
         $newResult = $filterResult['newResult'];
@@ -120,25 +96,9 @@ class CrawlResultV2Controller extends Controller
             throw new \Dingo\Api\Exception\ResourceException("task is not found");
         }
 
-        // 格式化抓取结果
-        $resData = [];
-        $resultList = $params['result'];
-        if (empty($resultList)) {
-            throw new \Dingo\Api\Exception\ResourceException("not found result list");
-        }
+        // 格式化抓取结果 $resData = [['title' => 'block chain', 'url' => ‘http://xxxx’]]
+        $resData = $this->__formatResultToHtml($params);
 
-        // 按需重新组装结果
-        foreach ($resultList as $rowkey => $row) {
-            if (empty($row)) {
-                continue;
-            }
-
-            foreach ($row as $key => $value) {
-               $resData[$key][$rowkey] = $value;
-            }
-        }
-
-        // $resData = [['title' => 'block chain', 'url' => ‘http://xxxx’]]
         if (empty($resData)) {
             return $this->resObjectList([], 'crawl_result', $request->path());
         }
@@ -208,9 +168,19 @@ class CrawlResultV2Controller extends Controller
             throw new \Dingo\Api\Exception\ResourceException("update test result fail");
         }
 
+        // 上报结果 格式化
+        if ($task['resource_type'] == CrawlTask::RESOURCE_TYPE_JSON) {
+            $resData = $this->__formatResultToJson($task, $params);
+        } else {
+            $resData = $this->__formatResultToHtml($task, $params);
+        }
+
+        if (empty($resData)) {
+            return $this->resObjectList([], 'crawl_result', $request->path());
+        }
 
         // 上报结果
-        $reportResult = ['is_test' => 1, 'result' => $params['result']];
+        $reportResult = ['is_test' => 1, 'result' => $resData];
 
         try {
             APIService::post(config('url.platform_url'), sign($reportResult));
@@ -219,6 +189,76 @@ class CrawlResultV2Controller extends Controller
         }
 
         return $this->resObjectList($saveResult, 'crawl_result', $request->path());
+    }
+
+    /**
+     * __formatResultToJson
+     * json 数据格式化
+     *
+     * @param Request $request
+     * @return array
+    */
+    private function __formatResultToJson($task, $params)
+    {
+        $resData = [];
+        $resultList = $params['result'];
+        $task['api_fields'] = json_decode($task['api_fields'], true);
+
+        // 分析列表数据所在位置，并获取
+        if (empty($task['api_fields']['filter'])) {
+            $resultListkeys = explode('-', $task['api_fields']['filter']);
+
+            foreach ($resultListkeys as $resultListkey) {
+                $resultList = $resultList[$resultListkey];
+            }
+        }
+
+        if (empty($resultList)) {
+            throw new \Dingo\Api\Exception\ResourceException("not found result list");
+        }
+
+        // 按需重新组装结果
+        foreach ($resultList as $rowkey => $row) {
+            $rowData = [];
+            foreach ($task['api_fields'] as $key => $value) {
+                if ($key == 'filter') {
+                    continue;
+                }
+                $rowData[$key] = $row[$value];
+            }
+            $resData[] = $rowData;
+        }
+
+        return  $resData;
+    }
+
+    /**
+     * __formatResultToHtml
+     * html 数据格式化
+     *
+     * @param Request $request
+     * @return array
+    */
+    private function __formatResultToHtml($params)
+    {
+        $resData = [];
+        $resultList = $params['result'];
+        if (empty($resultList)) {
+            throw new \Dingo\Api\Exception\ResourceException("not found result list");
+        }
+
+        // 按需重新组装结果
+        foreach ($resultList as $rowkey => $row) {
+            if (empty($row)) {
+                continue;
+            }
+
+            foreach ($row as $key => $value) {
+               $resData[$key][$rowkey] = $value;
+            }
+        }
+
+        return $resData;
     }
 
     /**
