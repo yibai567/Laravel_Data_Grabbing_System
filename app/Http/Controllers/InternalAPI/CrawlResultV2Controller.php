@@ -316,7 +316,7 @@ class CrawlResultV2Controller extends Controller
                }
         }
 
-        return $valueFilter;
+        return trim($valueFilter);
     }
 
     /**
