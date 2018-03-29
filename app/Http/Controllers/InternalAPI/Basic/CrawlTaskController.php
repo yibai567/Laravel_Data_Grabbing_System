@@ -156,7 +156,7 @@ class CrawlTaskController extends Controller
             'resource_type' => 'integer|nullable',
             'header' => 'nullable',
             'md5_params' => 'string|nullable',
-            'api_fields' => 'string|nullable',
+            'api_fields' => 'nullable',
             'id' => 'required|integer'
         ]);
 
@@ -171,6 +171,11 @@ class CrawlTaskController extends Controller
         if (!empty($params['api_fields'])) {
             $params['api_fields'] = json_encode($params['api_fields'], true);
         }
+
+        if (!empty($params['header'])) {
+            $params['header'] = json_encode($params['header'], true);
+        }
+
 
         $item = CrawlTask::find($params['id']);
 
