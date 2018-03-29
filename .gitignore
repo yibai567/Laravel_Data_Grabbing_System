@@ -3,8 +3,7 @@ node_modules
 bower_components
 /public/hot
 /public/storage
-/storage/*.key
-/storage/uploads/*
+/storage/*
 composer.phar
 /.idea
 /.vagrant
@@ -18,4 +17,4 @@ _ide_helper.php
 sftp-config.json
 .vscode/ftp-sync.json
 .ftpconfig
-/upload
+/public/uploads
