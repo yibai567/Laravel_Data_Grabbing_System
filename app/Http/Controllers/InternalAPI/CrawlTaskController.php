@@ -32,22 +32,16 @@ class CrawlTaskController extends Controller
         $params = $request->all();
         ValidatorService::check($params, [
             'resource_url' => 'required|string',
-            'cron_type' => 'integer|nullable',
+            'cron_type' => 'integer|nullable|between:1,100',
             'selectors' => 'nullable',
-            'is_ajax' => 'integer|nullable',
-            'is_login' => 'integer|nullable',
-            'is_wall' => 'integer|nullable',
-            'is_proxy' => 'integer|nullable',
-            'resource_type' => 'integer|nullable',
+            'is_ajax' => 'integer|nullable|between:1,2',
+            'is_login' => 'integer|nullable|between:1,2',
+            'is_wall' => 'integer|nullable|between:1,2',
+            'is_proxy' => 'integer|nullable|between:1,2',
+            'resource_type' => 'integer|nullable|between:1,2',
             'header' => 'nullable',
             'api_fields' => 'nullable',
         ]);
-
-        $params['md5_params'] = md5(json_encode($params, true));
-        $taskResult = APIService::baseGet('/internal/basic/crawl/task/search', ['resource_url' => $params['resource_url'], 'md5_params' => $params['md5_params']], 'json');
-        if (!empty($taskResult)) {
-            returnError(401, '任务已存在', $taskResult);
-        }
 
         if (empty($params['cron_type'])) {
             $params['cron_type'] = CrawlTask::CRON_TYPE_KEEP;
@@ -78,6 +72,14 @@ class CrawlTaskController extends Controller
         if (empty($params['resource_type']) && !in_array($params['resource_type'], [CrawlTask::RESOURCE_TYPE_HTML, CrawlTask::RESOURCE_TYPE_JSON])) {
             $params['resource_type'] = CrawlTask::RESOURCE_TYPE_HTML;
         }
+
+        $params['md5_params'] = $this->__getMd5Params([], $params);
+
+        $taskResult = APIService::baseGet('/internal/basic/crawl/task/search', ['resource_url' => $params['resource_url'], 'md5_params' => $params['md5_params']], 'json');
+        if (!empty($taskResult)) {
+            returnError(401, '任务已存在', $taskResult);
+        }
+
 
         $data = $params;
         try{
@@ -280,17 +282,17 @@ class CrawlTaskController extends Controller
         ValidatorService::check($params, [
             'id' => 'required|integer',
             'resource_url' => 'nullable|string',
-            'cron_type' => 'integer|nullable',
+            'cron_type' => 'integer|nullable|between:1,100',
             'selectors' => 'nullable',
-            'is_ajax' => 'integer|nullable',
-            'is_login' => 'integer|nullable',
-            'is_wall' => 'integer|nullable',
-            'is_proxy' => 'integer|nullable',
-            'resource_type' => 'integer|nullable',
+            'is_ajax' => 'integer|nullable|between:1,2',
+            'is_login' => 'integer|nullable|between:1,2',
+            'is_wall' => 'integer|nullable|between:1,2',
+            'is_proxy' => 'integer|nullable|between:1,2',
+            'resource_type' => 'integer|nullable|between:1,2',
             'header' => 'nullable',
             'api_fields' => 'nullable',
         ]);
-        //$params['md5_params'] = md5(json_encode($params));
+
         $task = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
 
         if (empty($task)) { // task does not exist
@@ -309,15 +311,17 @@ class CrawlTaskController extends Controller
             }
         }
 
-        $data = [];
+        $result = [];
         $data = $params;
-        try{
-            $res = APIService::basePost('/internal/basic/crawl/task/update', $data, 'json');
+        $data['md5_params'] = $this->__getMd5Params($task, $params);
 
-            $result = [];
+        try{
+
+            $res = APIService::basePost('/internal/basic/crawl/task/update', $data, 'json');
             if (!empty($res)) {
                 $result = $res;
             }
+
             $this->__toTest($result);
         } catch (Exception $e){
             return $this->resError($e->getCode(), $e->getMessage());
@@ -390,5 +394,72 @@ class CrawlTaskController extends Controller
             return $this->resError(401, 'task not exist!');
         }
         return $this->resObjectGet($result, 'crawl_task', $request->path());
+    }
+
+    private function __getMd5Params($task = [], $params = [])
+    {
+        $item = [
+            'resource_url'  => '',
+            'cron_type'     => 1,
+            'is_ajax'       => 2,
+            'is_login'      => 2,
+            'is_wall'       => 2,
+            'is_proxy'      => 2,
+            'protocol'      => 1,
+        ];
+
+        if (!empty($task)) {
+            foreach ($item as $key => $value) {
+                if (empty($task[$key])) {
+                    continue;
+                }
+                $item[$key] = $task[$key];
+            }
+        }
+        if (!empty($params)) {
+            foreach ($item as $key => $value) {
+                if (array_key_exists($key, $params)) {
+                    $item[$key] = $params[$key];
+                }
+            }
+        }
+
+        if (empty($task)) {
+            $resourceType = $params['resource_type'];
+        } else {
+            if (empty($params['resource_type'])) {
+                $resourceType = $task['resource_type'];
+            } else {
+                $resourceType = $params['resource_type'];
+            }
+        }
+        $item['resource_type'] = $resourceType;
+
+        if ($resourceType == CrawlTask::RESOURCE_TYPE_JSON) {
+
+            if (!empty($task)) {
+                $item['api_fields'] = json_decode($task['api_fields']);
+                $item['header'] = json_decode($task['header']);
+            }
+
+            if (!empty($params['api_fields'])) {
+                $item['api_fields'] = $params['api_fields'];
+            }
+
+            if (!empty($params['api_fields'])) {
+                $item['header'] = $params['header'];
+            }
+
+        } else {
+
+            if (!empty($task)) {
+                $item['selectors'] = json_decode($task['selectors']);
+            }
+
+            if (!empty($params['selectors'])) {
+                $item['selectors'] = $params['selectors'];
+            }
+        }
+        return md5(json_encode($item, true));
     }
 }
