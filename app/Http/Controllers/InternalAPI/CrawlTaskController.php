@@ -73,7 +73,7 @@ class CrawlTaskController extends Controller
             $params['resource_type'] = CrawlTask::RESOURCE_TYPE_HTML;
         }
 
-        $params['md5_params'] = $this->__md5Data($params);
+        $params['md5_params'] = $this->__getMd5Params([], $params);
 
         $taskResult = APIService::baseGet('/internal/basic/crawl/task/search', ['resource_url' => $params['resource_url'], 'md5_params' => $params['md5_params']], 'json');
         if (!empty($taskResult)) {
@@ -312,15 +312,16 @@ class CrawlTaskController extends Controller
         }
 
 
-         $md5_params = $this->__md5Data($task, $params);
-        $data = [];
+        $result = [];
         $data = $params;
+        $data['md5_params'] = $this->__getMd5Params($task, $params);
         try{
+
             $res = APIService::basePost('/internal/basic/crawl/task/update', $data, 'json');
-            $result = [];
             if (!empty($res)) {
                 $result = $res;
             }
+
             $this->__toTest($result);
         } catch (Exception $e){
             return $this->resError($e->getCode(), $e->getMessage());
@@ -395,24 +396,46 @@ class CrawlTaskController extends Controller
         return $this->resObjectGet($result, 'crawl_task', $request->path());
     }
 
-    private function __md5Data($data, $params)
+    private function __getMd5Params($task = [], $params = [])
     {
-        $data['resource_url'] = $params['resource_url'];
-        $data['cron_type'] = $params['cron_type'];
-        $data['is_ajax'] = $params['is_ajax'];
-        $data['is_login'] = $params['is_login'];
-        $data['is_wall'] = $params['is_wall'];
-        $data['is_proxy'] = $params['is_proxy'];
-        $data['protocol'] = $params['protocol'];
-        $data['resource_type'] = $params['resource_type'];
-        dd($data);
-        if ($data['resource_type'] == CrawlTask::RESOURCE_TYPE_JSON) {
-            $items['api_fields'] = $data['api_fields'];
-            $items['header'] = $data['header'];
-        } else {
-            $items['selectors'] = $data['selectors'];
+        $item = [
+            'resource_url'  => '',
+            'cron_type'     => 1,
+            'is_ajax'       => 1,
+            'is_login'      => 1,
+            'is_wall'       => 1,
+            'is_proxy'      => 1,
+            'protocol'      => 1,
+            'resource_type' => 1,
+        ];
+
+        if (!empty($task)) {
+            foreach ($item as $key => $value) {
+                $item[$key] = $task[$key];
+            }
         }
 
-        return md5(json_encode($items, true));
+        if (!empty($params)) {
+            foreach ($item as $key => $value) {
+                $item[$key] = $params[$key];
+            }
+        }
+
+        if ($task['resource_type'] == CrawlTask::RESOURCE_TYPE_JSON) {
+            if (!empty($params['api_fields'])) {
+                $item['api_fields'] = $params['api_fields'];
+            }
+
+            if (!empty($params['api_fields'])) {
+                $item['header'] = $params['header'];
+            }
+
+        } else {
+            if (!empty($params['selectors'])) {
+                $item['selectors'] = $params['selectors'];
+            }
+        }
+
+        return md5(json_encode($item, true));
     }
 }
