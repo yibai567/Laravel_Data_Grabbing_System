@@ -32,13 +32,13 @@ class CrawlTaskController extends Controller
         $params = $request->all();
         ValidatorService::check($params, [
             'resource_url' => 'required|string',
-            'cron_type' => 'integer|nullable',
+            'cron_type' => 'integer|nullable|between:1,100',
             'selectors' => 'nullable',
-            'is_ajax' => 'integer|nullable',
-            'is_login' => 'integer|nullable',
-            'is_wall' => 'integer|nullable',
-            'is_proxy' => 'integer|nullable',
-            'resource_type' => 'integer|nullable',
+            'is_ajax' => 'integer|nullable|between:1,2',
+            'is_login' => 'integer|nullable|between:1,2',
+            'is_wall' => 'integer|nullable|between:1,2',
+            'is_proxy' => 'integer|nullable|between:1,2',
+            'resource_type' => 'integer|nullable|between:1,2',
             'header' => 'nullable',
             'api_fields' => 'nullable',
         ]);
@@ -282,13 +282,13 @@ class CrawlTaskController extends Controller
         ValidatorService::check($params, [
             'id' => 'required|integer',
             'resource_url' => 'nullable|string',
-            'cron_type' => 'integer|nullable',
+            'cron_type' => 'integer|nullable|between:1,100',
             'selectors' => 'nullable',
-            'is_ajax' => 'integer|nullable',
-            'is_login' => 'integer|nullable',
-            'is_wall' => 'integer|nullable',
-            'is_proxy' => 'integer|nullable',
-            'resource_type' => 'integer|nullable',
+            'is_ajax' => 'integer|nullable|between:1,2',
+            'is_login' => 'integer|nullable|between:1,2',
+            'is_wall' => 'integer|nullable|between:1,2',
+            'is_proxy' => 'integer|nullable|between:1,2',
+            'resource_type' => 'integer|nullable|between:1,2',
             'header' => 'nullable',
             'api_fields' => 'nullable',
         ]);
@@ -311,10 +311,10 @@ class CrawlTaskController extends Controller
             }
         }
 
-
         $result = [];
         $data = $params;
         $data['md5_params'] = $this->__getMd5Params($task, $params);
+
         try{
 
             $res = APIService::basePost('/internal/basic/crawl/task/update', $data, 'json');
@@ -401,27 +401,47 @@ class CrawlTaskController extends Controller
         $item = [
             'resource_url'  => '',
             'cron_type'     => 1,
-            'is_ajax'       => 1,
-            'is_login'      => 1,
-            'is_wall'       => 1,
-            'is_proxy'      => 1,
+            'is_ajax'       => 2,
+            'is_login'      => 2,
+            'is_wall'       => 2,
+            'is_proxy'      => 2,
             'protocol'      => 1,
-            'resource_type' => 1,
         ];
 
         if (!empty($task)) {
             foreach ($item as $key => $value) {
+                if (empty($task[$key])) {
+                    continue;
+                }
                 $item[$key] = $task[$key];
             }
         }
-
         if (!empty($params)) {
             foreach ($item as $key => $value) {
-                $item[$key] = $params[$key];
+                if (array_key_exists($key, $params)) {
+                    $item[$key] = $params[$key];
+                }
             }
         }
 
-        if ($task['resource_type'] == CrawlTask::RESOURCE_TYPE_JSON) {
+        if (empty($task)) {
+            $resourceType = $params['resource_type'];
+        } else {
+            if (empty($params['resource_type'])) {
+                $resourceType = $task['resource_type'];
+            } else {
+                $resourceType = $params['resource_type'];
+            }
+        }
+        $item['resource_type'] = $resourceType;
+
+        if ($resourceType == CrawlTask::RESOURCE_TYPE_JSON) {
+
+            if (!empty($task)) {
+                $item['api_fields'] = json_decode($task['api_fields']);
+                $item['header'] = json_decode($task['header']);
+            }
+
             if (!empty($params['api_fields'])) {
                 $item['api_fields'] = $params['api_fields'];
             }
@@ -431,11 +451,15 @@ class CrawlTaskController extends Controller
             }
 
         } else {
+
+            if (!empty($task)) {
+                $item['selectors'] = json_decode($task['selectors']);
+            }
+
             if (!empty($params['selectors'])) {
                 $item['selectors'] = $params['selectors'];
             }
         }
-
         return md5(json_encode($item, true));
     }
 }
