@@ -149,10 +149,11 @@ class CrawlResultController extends Controller
             }
 
             $result = APIService::basePost('/internal/basic/crawl/result/search', ['task_id' => $taskId, 'original_data' => md5(json_encode($value))], 'json');
+
             if (empty($result)) {
-                $formatData[] = $value;
+                $formatData[] = ['text' => trim($value['text']), 'url' => trim($value['url'])];
             }
         }
-        return trim($formatData);
+        return $formatData;
     }
  }
