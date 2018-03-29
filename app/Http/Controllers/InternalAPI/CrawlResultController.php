@@ -153,6 +153,6 @@ class CrawlResultController extends Controller
                 $formatData[] = $value;
             }
         }
-        return $formatData;
+        return trim($formatData);
     }
  }
