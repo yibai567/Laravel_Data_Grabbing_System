@@ -43,12 +43,6 @@ class CrawlTaskController extends Controller
             'api_fields' => 'nullable',
         ]);
 
-        $params['md5_params'] = md5(json_encode($params, true));
-        $taskResult = APIService::baseGet('/internal/basic/crawl/task/search', ['resource_url' => $params['resource_url'], 'md5_params' => $params['md5_params']], 'json');
-        if (!empty($taskResult)) {
-            returnError(401, '任务已存在', $taskResult);
-        }
-
         if (empty($params['cron_type'])) {
             $params['cron_type'] = CrawlTask::CRON_TYPE_KEEP;
         }
@@ -78,6 +72,14 @@ class CrawlTaskController extends Controller
         if (empty($params['resource_type']) && !in_array($params['resource_type'], [CrawlTask::RESOURCE_TYPE_HTML, CrawlTask::RESOURCE_TYPE_JSON])) {
             $params['resource_type'] = CrawlTask::RESOURCE_TYPE_HTML;
         }
+
+        $params['md5_params'] = $this->__md5Data($params);
+
+        $taskResult = APIService::baseGet('/internal/basic/crawl/task/search', ['resource_url' => $params['resource_url'], 'md5_params' => $params['md5_params']], 'json');
+        if (!empty($taskResult)) {
+            returnError(401, '任务已存在', $taskResult);
+        }
+
 
         $data = $params;
         try{
@@ -290,7 +292,7 @@ class CrawlTaskController extends Controller
             'header' => 'nullable',
             'api_fields' => 'nullable',
         ]);
-        //$params['md5_params'] = md5(json_encode($params));
+
         $task = APIService::baseGet('/internal/basic/crawl/task?id=' . $params['id']);
 
         if (empty($task)) { // task does not exist
@@ -309,11 +311,12 @@ class CrawlTaskController extends Controller
             }
         }
 
+
+         $md5_params = $this->__md5Data($task, $params);
         $data = [];
         $data = $params;
         try{
             $res = APIService::basePost('/internal/basic/crawl/task/update', $data, 'json');
-
             $result = [];
             if (!empty($res)) {
                 $result = $res;
@@ -390,5 +393,26 @@ class CrawlTaskController extends Controller
             return $this->resError(401, 'task not exist!');
         }
         return $this->resObjectGet($result, 'crawl_task', $request->path());
+    }
+
+    private function __md5Data($data, $params)
+    {
+        $data['resource_url'] = $params['resource_url'];
+        $data['cron_type'] = $params['cron_type'];
+        $data['is_ajax'] = $params['is_ajax'];
+        $data['is_login'] = $params['is_login'];
+        $data['is_wall'] = $params['is_wall'];
+        $data['is_proxy'] = $params['is_proxy'];
+        $data['protocol'] = $params['protocol'];
+        $data['resource_type'] = $params['resource_type'];
+        dd($data);
+        if ($data['resource_type'] == CrawlTask::RESOURCE_TYPE_JSON) {
+            $items['api_fields'] = $data['api_fields'];
+            $items['header'] = $data['header'];
+        } else {
+            $items['selectors'] = $data['selectors'];
+        }
+
+        return md5(json_encode($items, true));
     }
 }

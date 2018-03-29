@@ -167,9 +167,11 @@ class CrawlTaskController extends Controller
         if (!empty($params['selectors'])) {
             $params['selectors'] = json_encode($params['selectors'], true);
         }
+
         if (!empty($params['api_fields'])) {
             $params['api_fields'] = json_encode($params['api_fields'], true);
         }
+
         $item = CrawlTask::find($params['id']);
 
         foreach ($params as $key=>$value) {
