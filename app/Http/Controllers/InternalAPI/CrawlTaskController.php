@@ -38,7 +38,7 @@ class CrawlTaskController extends Controller
             'is_login' => 'integer|nullable|between:1,2',
             'is_wall' => 'integer|nullable|between:1,2',
             'is_proxy' => 'integer|nullable|between:1,2',
-            'resource_type' => 'integer|nullable|between:1,2',
+            'resource_type' => 'integer|nullable|in:0,1,2',
             'header' => 'nullable',
             'api_fields' => 'nullable',
         ]);
@@ -69,8 +69,8 @@ class CrawlTaskController extends Controller
             $params['is_proxy'] = CrawlTask::IS_PROXY_FALSE;
         }
 
-        if (empty($params['resource_type']) && !in_array($params['resource_type'], [CrawlTask::RESOURCE_TYPE_HTML, CrawlTask::RESOURCE_TYPE_JSON])) {
-            $params['resource_type'] = CrawlTask::RESOURCE_TYPE_HTML;
+        if (!in_array($params['resource_type'], [CrawlTask::RESOURCE_TYPE_HTML, CrawlTask::RESOURCE_TYPE_JSON])) {
+            $params['resource_type'] = 0;
         }
 
         $params['md5_params'] = $this->__getMd5Params([], $params);
@@ -288,7 +288,7 @@ class CrawlTaskController extends Controller
             'is_login' => 'integer|nullable|between:1,2',
             'is_wall' => 'integer|nullable|between:1,2',
             'is_proxy' => 'integer|nullable|between:1,2',
-            'resource_type' => 'integer|nullable|between:1,2',
+            'resource_type' => 'integer|nullable|in:0,1,2',
             'header' => 'nullable',
             'api_fields' => 'nullable',
         ]);

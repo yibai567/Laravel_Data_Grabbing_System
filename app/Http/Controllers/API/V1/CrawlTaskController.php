@@ -41,7 +41,7 @@ class CrawlTaskController extends Controller
             'is_login' => 'integer|nullable|between:1,2',
             'is_wall' => 'integer|nullable|between:1,2',
             'is_proxy' => 'integer|nullable|between:1,2',
-            'resource_type' => 'integer|nullable|between:1,2',
+            'resource_type' => 'integer|nullable|in:0,1,2',
             'header' => 'nullable',
             'api_fields' => 'nullable',
         ]);
@@ -206,7 +206,7 @@ class CrawlTaskController extends Controller
             'is_login' => 'integer|nullable|between:1,2',
             'is_wall' => 'integer|nullable|between:1,2',
             'is_proxy' => 'integer|nullable|between:1,2',
-            'resource_type' => 'integer|nullable|between:1,2',
+            'resource_type' => 'integer|nullable|in:0,1,2',
             'header' => 'nullable',
             'api_fields' => 'nullable',
         ]);
