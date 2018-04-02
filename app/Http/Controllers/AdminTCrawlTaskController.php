@@ -63,13 +63,13 @@
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
 			$this->col[] = ["label"=>"ID","name"=>"id"];
-			$this->col[] = ["label"=>"任务名称","name"=>"name"];
-			$this->col[] = ["label"=>"任务描述","name"=>"description"];
-            $this->col[] = ["label"=>"资源URL","name"=>"resource_url",'width'=>'300',"callback"=>function ($row) {
-                return '<a href="' . $row->resource_url . '" target="_brank" style="width:300px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->resource_url .'</a>';
+			$this->col[] = ["label"=>"名称","name"=>"name"];
+			$this->col[] = ["label"=>"描述","name"=>"description"];
+            $this->col[] = ["label"=>"地址","name"=>"resource_url",'width'=>'200',"callback"=>function ($row) {
+                return '<a href="' . $row->resource_url . '" target="_brank" style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->resource_url .'</a>';
             }];
 			//$this->col[] = ["label"=>"Cron类型","name"=>"cron_type"];
-            $this->col[] = ["label"=>"Cron类型","name"=>"cron_type","callback"=>function ($row) {
+            $this->col[] = ["label"=>"执行频次","name"=>"cron_type","callback"=>function ($row) {
                 if ( $row->cron_type == self::CRON_MINUTE) {
                     return '每分钟执行一次';
                 } else if( $row->cron_type == self::CRON_HOUR) {
@@ -113,20 +113,23 @@
 
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
-			$this->form[] = ['label'=>'任务名称','name'=>'name','type'=>'text','validation'=>'required|string|min:1|max:70','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'任务描述','name'=>'description','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'资源URL','name'=>'resource_url','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'任务名称','name'=>'name','type'=>'text','validation'=>'string|min:1|max:70','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'任务描述','name'=>'description','type'=>'text','validation'=>'min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'资源地址','name'=>'resource_url','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'关键词','name'=>'keywords','type'=>'textarea','width'=>'col-sm-9'];
-			$this->form[] = ['label'=>'Cron类型','name'=>'cron_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'2|每分钟执行一次;3|每小时执行一次;4|每天执行一次;1|持续执行','value'=>'1'];
-            $this->form[] = ['label'=>'是否支持协议','name'=>'protocol','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|http;2|https','value'=>'1'];
-            $this->form[] = ['label'=>'是否使用代理','name'=>'is_proxy','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|使用;2|不使用','value'=>'1'];
+			$this->form[] = ['label'=>'定时任务类型','name'=>'cron_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'2|每分钟执行一次;3|每小时执行一次;4|每天执行一次;1|持续执行','value'=>'1'];
+            $this->form[] = ['label'=>'是否使用代理','name'=>'is_proxy','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|使用;2|不使用','value'=>'2'];
+            $this->form[] = ['label'=>'是否异步请求','name'=>'is_ajax','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|使用;2|不使用','value'=>'2'];
+            $this->form[] = ['label'=>'是否需要翻墙','name'=>'is_wall','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|使用;2|不使用','value'=>'2'];
+            $this->form[] = ['label'=>'是否需要登录','name'=>'is_login','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|使用;2|不使用','value'=>'2'];
 			$this->form[] = ['label'=>'选择器','name'=>'selectors','type'=>'textarea','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'响应类型','name'=>'response_type','type'=>'hidden','validation'=>'required','width'=>'col-sm-10','value'=>'1'];
-			$this->form[] = ['label'=>'发送地址','name'=>'response_url','type'=>'text','validation'=>'','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'参数','name'=>'response_params','type'=>'textarea','validation'=>'','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'规则模版','name'=>'setting_id','type'=>'select2','validation'=>'required','width'=>'col-sm-10','datatable'=>'t_crawl_task_setting,name'];
+			$this->form[] = ['label'=>'响应地址','name'=>'response_url','type'=>'text','validation'=>'','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'响应参数','name'=>'response_params','type'=>'textarea','validation'=>'','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'资源类型','name'=>'resource_type','type'=>'select2','validation'=>'required','width'=>'col-sm-10','dataenum'=>'1|html;2|api;','value'=>'1'];
+            $this->form[] = ['label'=>'请求头信息','name'=>'header','type'=>'textarea','validation'=>'required','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'测试结果','name'=>'test_result','type'=>'text','width'=>'col-sm-9','readonly'=>'false'];
-			$this->form[] = ['label'=>'状态','name'=>'status','type'=>'hidden','width'=>'col-sm-9'];
+			$this->form[] = ['label'=>'状态','name'=>'status','type'=>'hidden','width'=>'col-sm-9', 'dataenum'=>'1|未启动;2|测试成功;3|测试失败;4|启动中;5|已停止;6|归档;','value'=>'1'];
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
@@ -177,10 +180,6 @@
 
             $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-up/[id]/' . self::STATUS_STOP),'color'=>'warning', 'icon'=>'fa fa-stop', 'showIf'=>'[status] == ' . self::STATUS_START_UP];
             $this->addaction[] = ['label'=>'归档', 'url'=>CRUDBooster::mainpath('archived/[id]/' . self::STATUS_ARCHIVED),'showIf'=>'[status] == ' . self::STATUS_STOP . '|| [status] == ' . self::STATUS_NO_STARTING . '|| [status] == ' . self::STATUS_TEST_FAIL . '|| [status] == ' . self::STATUS_TEST_SUCCESS ];
-            $this->addaction[] = ['label'=>'log日志', 'url'=>CRUDBooster::mainpath('log-list')];
-            $this->addaction[] = ['label'=>'统计'];
-
-            $this->sub_module[] = ['label'=>'节点任务', 'path'=>'t_crawl_node_task', 'foreign_key'=>'crawl_task_id', 'button_color'=>'success', 'button_icon'=>'fa fa-bars', 'parent_columns'=>'name'];
 
 	        /*
 	        | ----------------------------------------------------------------------

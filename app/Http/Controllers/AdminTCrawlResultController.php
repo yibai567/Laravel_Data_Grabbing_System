@@ -39,8 +39,8 @@
 			$this->col = [];
             $this->col[] = ["label"=>"任务ID","name"=>"crawl_task_id",'width'=>'110'];
 			$this->col[] = ["label"=>"任务名称","name"=>"crawl_task_id","join"=>"t_crawl_task,name",'width'=>'150'];
-			$this->col[] = ["label"=>"任务开始时间","name"=>"task_start_time",'width'=>'120'];
-			$this->col[] = ["label"=>"任务结束时间","name"=>"task_end_time",'width'=>'120'];
+			$this->col[] = ["label"=>"开始时间","name"=>"task_start_time",'width'=>'120'];
+			$this->col[] = ["label"=>"结束时间","name"=>"task_end_time",'width'=>'120'];
 			// $this->col[] = ["label"=>"选择器","name"=>"setting_selectors"];
 			// $this->col[] = ["label"=>"关键词","name"=>"setting_keywords"];
             $this->col[] = ["label"=>"数据类型","name"=>"setting_data_type","callback"=>function ($row) {
@@ -57,8 +57,8 @@
             //         return '已处理';
             //     }
             // }];
-			$this->col[] = ["label"=>"任务URL地址","name"=>"task_url",'width'=>'500',"callback"=>function ($row) {
-                return '<a href="" style="width:500px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->task_url .'</a>';
+			$this->col[] = ["label"=>"地址","name"=>"task_url",'width'=>'200',"callback"=>function ($row) {
+                return '<a href="" style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->task_url .'</a>';
             }];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
