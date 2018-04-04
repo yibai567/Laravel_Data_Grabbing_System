@@ -37,29 +37,9 @@
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
-            $this->col[] = ["label"=>"任务ID","name"=>"crawl_task_id",'width'=>'110'];
-			$this->col[] = ["label"=>"任务名称","name"=>"crawl_task_id","join"=>"t_crawl_task,name",'width'=>'150'];
-			$this->col[] = ["label"=>"开始时间","name"=>"task_start_time",'width'=>'120'];
-			$this->col[] = ["label"=>"结束时间","name"=>"task_end_time",'width'=>'120'];
-			// $this->col[] = ["label"=>"选择器","name"=>"setting_selectors"];
-			// $this->col[] = ["label"=>"关键词","name"=>"setting_keywords"];
-            $this->col[] = ["label"=>"数据类型","name"=>"setting_data_type","callback"=>function ($row) {
-                if ( $row->setting_data_type == self::DATA_TYPE_HTML) {
-                    return 'html';
-                } else if( $row->setting_data_type == self::DATA_TYPE_JSON) {
-                    return 'json';
-                }
-            },'width'=>'80'];
-            // $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
-            //     if ( $row->status == self::STATUS_UNTREATED) {
-            //         return '未处理';
-            //     } else if( $row->status == self::STATUS_ALREADYA_PROCESSED) {
-            //         return '已处理';
-            //     }
-            // }];
-			$this->col[] = ["label"=>"地址","name"=>"task_url",'width'=>'200',"callback"=>function ($row) {
-                return '<a href="" style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->task_url .'</a>';
-            }];
+            $this->col[] = ["label"=>"任务ID","name"=>"crawl_task_id"];
+			$this->col[] = ["label"=>"开始时间","name"=>"task_start_time"];
+			$this->col[] = ["label"=>"结束时间","name"=>"task_end_time"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
@@ -174,7 +154,12 @@
 	        |
 	        */
 	        $this->index_statistic = array();
-
+            $this->index_statistic[] = ['label'=>'抓取结果总数','count'=>DB::table('t_crawl_result')->where(function($query){
+                    $parentId = $_GET['parent_id'];
+                    if (isset($_GET['parent_id'])) {
+                        $query -> where('crawl_task_id', $parentId);
+                    }
+            })->count(),'icon'=>'fa fa-check','color'=>'success'];
 
 
 	        /*
