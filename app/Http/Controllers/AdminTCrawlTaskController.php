@@ -187,7 +187,11 @@
 	        |
 	        */
 	        $this->sub_module = array();
-            $this->sub_module[] = ['label'=>'任务结果','path'=>'t_crawl_result_v2','foreign_key'=>'crawl_task_id','button_color'=>'success','button_icon'=>'fa fa-bars', 'parent_columns'=>'id'];
+
+            $this->sub_module[] = ['label'=>'任务结果','path'=>'t_crawl_result_v2','foreign_key'=>'crawl_task_id','button_color'=>'success','button_icon'=>'fa fa-bars', 'parent_columns'=>'id', 'showIf'=>"[resource_type] != 0"];
+            $this->sub_module[] = ['label'=>'任务结果','path'=>'t_crawl_result','foreign_key'=>'crawl_task_id','button_color'=>'success','button_icon'=>'fa fa-bars', 'parent_columns'=>'id', 'showIf'=>"[resource_type] == 0"];
+
+            //$this->sub_module[] = ['label'=>'任务结果','path'=>'t_crawl_result','foreign_key'=>'crawl_task_id','button_color'=>'success','button_icon'=>'fa fa-bars', 'parent_columns'=>'id'];
 	        /*
 	        | ----------------------------------------------------------------------
 	        | Add More Action Button / Menu
