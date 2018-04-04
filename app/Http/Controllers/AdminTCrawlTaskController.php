@@ -6,6 +6,7 @@
 	use CRUDBooster;
     use Redirect;
     use GuzzleHttp;
+    use App\Models\CrawlTask;
     use App\Services\APIService;
     use Illuminate\Support\Facades\Route;
     use App\Events\TaskPreview;
@@ -63,13 +64,10 @@
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
 			$this->col[] = ["label"=>"ID","name"=>"id"];
-			$this->col[] = ["label"=>"任务名称","name"=>"name"];
-			$this->col[] = ["label"=>"任务描述","name"=>"description"];
-            $this->col[] = ["label"=>"资源URL","name"=>"resource_url",'width'=>'300',"callback"=>function ($row) {
-                return '<a href="' . $row->resource_url . '" target="_brank" style="width:300px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->resource_url .'</a>';
+            $this->col[] = ["label"=>"资源地址","name"=>"resource_url",'width'=>'200',"callback"=>function ($row) {
+                return '<a href="' . $row->resource_url . '" target="_brank" style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->resource_url .'</a>';
             }];
-			//$this->col[] = ["label"=>"Cron类型","name"=>"cron_type"];
-            $this->col[] = ["label"=>"Cron类型","name"=>"cron_type","callback"=>function ($row) {
+            $this->col[] = ["label"=>"执行频次","name"=>"cron_type","callback"=>function ($row) {
                 if ( $row->cron_type == self::CRON_MINUTE) {
                     return '每分钟执行一次';
                 } else if( $row->cron_type == self::CRON_HOUR) {
@@ -80,7 +78,47 @@
                     return '持续执行';
                 }
             }];
-			//$this->col[] = ["label"=>"状态","name"=>"status"];
+
+            $this->col[] = ["label"=>"资源类型","name"=>"resource_type","callback"=>function ($row) {
+                if ( $row->resource_type == CrawlTask::RESOURCE_TYPE_HTML) {
+                    return 'html';
+                } else if( $row->resource_type == CrawlTask::RESOURCE_TYPE_JSON) {
+                    return 'json';
+                } else {
+                    return ' ';
+                }
+            }];
+
+            $this->col[] = ["label"=>"是否是ajax","name"=>"is_ajax","callback"=>function ($row) {
+                if ( $row->is_ajax == CrawlTask::IS_AJAX_TRUE) {
+                    return '是';
+                } else {
+                    return '否';
+                }
+            }];
+            $this->col[] = ["label"=>"是否登陆","name"=>"is_login","callback"=>function ($row) {
+                if ( $row->is_login == CrawlTask::IS_LOGIN_TRUE) {
+                    return '是';
+                } else {
+                    return '否';
+                }
+            }];
+            $this->col[] = ["label"=>"是否使用代理","name"=>"is_proxy","callback"=>function ($row) {
+                if ( $row->is_proxy == CrawlTask::IS_PROXY_TRUE) {
+                    return '是';
+                } else {
+                    return '否';
+                }
+            }];
+            $this->col[] = ["label"=>"是否翻墙","name"=>"is_wall","callback"=>function ($row) {
+                if ( $row->is_wall == CrawlTask::IS_WALL_TRUE) {
+                    return '是';
+                } else {
+                    return '否';
+                }
+            }];
+
+            $this->col[] = ["label"=>"最后执行时间","name"=>"last_job_at"];
             $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
                 if ( $row->status == self::STATUS_NO_STARTING) {
                     return '未启动';
@@ -96,37 +134,28 @@
                     return '已归档';
                 }
             }];
-            //$this->col[] = ["label"=>"响应类型","name"=>"response_type"];
-            $this->col[] = ["label"=>"响应类型","name"=>"response_type","callback"=>function ($row) {
-                if ( $row->response_type == self::RESPONSE_TYPE_API) {
-                    return 'API';
-                } else if( $row->response_type == self::RESPONSE_TYPE_EMAIL) {
-                    return '邮件';
-                } else if( $row->response_type == self::RESPONSE_TYPE_SMS) {
-                    return '短信';
-                } else if( $row->response_type == self::RESPONSE_TYPE_ENTERPRISE_WECHAT) {
-                    return '企业微信';
-                }
-            }];
-			$this->col[] = ["label"=>"最后执行时间","name"=>"last_job_at"];
-			# END COLUMNS DO NOT REMOVE THIS LINE
+            # END COLUMNS DO NOT REMOVE THIS LINE
 
-			# START FORM DO NOT REMOVE THIS LINE
-			$this->form = [];
-			$this->form[] = ['label'=>'任务名称','name'=>'name','type'=>'text','validation'=>'required|string|min:1|max:70','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'任务描述','name'=>'description','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'资源URL','name'=>'resource_url','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'关键词','name'=>'keywords','type'=>'textarea','width'=>'col-sm-9'];
-			$this->form[] = ['label'=>'Cron类型','name'=>'cron_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'2|每分钟执行一次;3|每小时执行一次;4|每天执行一次;1|持续执行','value'=>'1'];
-            $this->form[] = ['label'=>'是否支持协议','name'=>'protocol','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|http;2|https','value'=>'1'];
-            $this->form[] = ['label'=>'是否使用代理','name'=>'is_proxy','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|使用;2|不使用','value'=>'1'];
-			$this->form[] = ['label'=>'选择器','name'=>'selectors','type'=>'textarea','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'响应类型','name'=>'response_type','type'=>'hidden','validation'=>'required','width'=>'col-sm-10','value'=>'1'];
-			$this->form[] = ['label'=>'发送地址','name'=>'response_url','type'=>'text','validation'=>'','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'参数','name'=>'response_params','type'=>'textarea','validation'=>'','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'规则模版','name'=>'setting_id','type'=>'select2','validation'=>'required','width'=>'col-sm-10','datatable'=>'t_crawl_task_setting,name'];
+            # START FORM DO NOT REMOVE THIS LINE
+            $this->form = [];
+            $this->form[] = ['label'=>'任务名称','name'=>'name','type'=>'text','validation'=>'string|min:1|max:70','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'任务描述','name'=>'description','type'=>'text','validation'=>'min:1|max:255','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'资源地址','name'=>'resource_url','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+            // $this->form[] = ['label'=>'关键词','name'=>'keywords','type'=>'textarea','width'=>'col-sm-9'];
+            $this->form[] = ['label'=>'定时任务类型','name'=>'cron_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'2|每分钟执行一次;3|每小时执行一次;4|每天执行一次;1|持续执行','value'=>'1'];
+            $this->form[] = ['label'=>'是否使用代理','name'=>'is_proxy','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|是;2|否','value'=>'2'];
+            $this->form[] = ['label'=>'是否异步请求','name'=>'is_ajax','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|是;2|否','value'=>'2'];
+            $this->form[] = ['label'=>'是否需要翻墙','name'=>'is_wall','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|是;2|否','value'=>'2'];
+            $this->form[] = ['label'=>'是否需要登录','name'=>'is_login','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|是;2|否','value'=>'2'];
+            $this->form[] = ['label'=>'资源类型','name'=>'resource_type','type'=>'radio','validation'=>'required','width'=>'col-sm-10','dataenum'=>'1|html;2|json','value'=>'1'];
+            $this->form[] = ['label'=>'选择器','name'=>'selectors','type'=>'textarea','width'=>'col-sm-10','placeholder'=>'资源类型是html时添加'];
+            // $this->form[] = ['label'=>'响应类型','name'=>'response_type','type'=>'hidden','validation'=>'required','width'=>'col-sm-10','value'=>'1'];
+            // $this->form[] = ['label'=>'响应地址','name'=>'response_url','type'=>'text','validation'=>'','width'=>'col-sm-10'];
+            // $this->form[] = ['label'=>'响应参数','name'=>'response_params','type'=>'textarea','validation'=>'','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'请求头信息','name'=>'header','type'=>'textarea','width'=>'col-sm-10','placeholder'=>'资源类型是json时添加'];
+            $this->form[] = ['label'=>'API筛选条件','name'=>'api_fields','type'=>'textarea','width'=>'col-sm-10','placeholder'=>'资源类型是json时添加'];
 			$this->form[] = ['label'=>'测试结果','name'=>'test_result','type'=>'text','width'=>'col-sm-9','readonly'=>'false'];
-			$this->form[] = ['label'=>'状态','name'=>'status','type'=>'hidden','width'=>'col-sm-9'];
+			$this->form[] = ['label'=>'状态','name'=>'status','type'=>'hidden','width'=>'col-sm-9', 'dataenum'=>'1|未启动;2|测试成功;3|测试失败;4|启动中;5|已停止;6|归档;','value'=>'1'];
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
@@ -158,7 +187,7 @@
 	        |
 	        */
 	        $this->sub_module = array();
-
+            $this->sub_module[] = ['label'=>'任务结果','path'=>'t_crawl_result_v2','foreign_key'=>'crawl_task_id','button_color'=>'success','button_icon'=>'fa fa-bars', 'parent_columns'=>'id'];
 	        /*
 	        | ----------------------------------------------------------------------
 	        | Add More Action Button / Menu
@@ -177,10 +206,6 @@
 
             $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-up/[id]/' . self::STATUS_STOP),'color'=>'warning', 'icon'=>'fa fa-stop', 'showIf'=>'[status] == ' . self::STATUS_START_UP];
             $this->addaction[] = ['label'=>'归档', 'url'=>CRUDBooster::mainpath('archived/[id]/' . self::STATUS_ARCHIVED),'showIf'=>'[status] == ' . self::STATUS_STOP . '|| [status] == ' . self::STATUS_NO_STARTING . '|| [status] == ' . self::STATUS_TEST_FAIL . '|| [status] == ' . self::STATUS_TEST_SUCCESS ];
-            $this->addaction[] = ['label'=>'log日志', 'url'=>CRUDBooster::mainpath('log-list')];
-            $this->addaction[] = ['label'=>'统计'];
-
-            $this->sub_module[] = ['label'=>'节点任务', 'path'=>'t_crawl_node_task', 'foreign_key'=>'crawl_task_id', 'button_color'=>'success', 'button_icon'=>'fa fa-bars', 'parent_columns'=>'name'];
 
 	        /*
 	        | ----------------------------------------------------------------------
@@ -239,9 +264,7 @@
 	        |
 	        */
 	        $this->index_statistic = array();
-
-
-
+            $this->index_statistic[] = ['label'=>'任务总数','count'=>DB::table('t_crawl_task')->count(),'icon'=>'fa fa-check','color'=>'success'];
 	        /*
 	        | ----------------------------------------------------------------------
 	        | Add javascript at body
@@ -359,6 +382,17 @@
 	    |
 	    */
 	    public function hook_before_add(&$postdata) {
+            if (substr($postdata['resource_url'], 0, 8) == 'https://') {
+                $postdata['protocol'] = CrawlTask::PROTOCOL_HTTPS;
+            } else {
+                $postdata['protocol'] = CrawlTask::PROTOCOL_HTTP;
+            }
+
+            $postdata['md5_params'] = $this->__getMd5Params([], $postdata);
+            $taskDetail = $this->__getTaskByMd5Params($postdata);
+            if (!empty($taskDetail)) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "任务已存在", "info");
+            }
             $postdata['status'] = 1;
 
 	        //Your code here
@@ -389,6 +423,14 @@
             if ($postdata['status'] == self::STATUS_START_UP) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "状态启动中不能修改，请返回", "info");
             }
+
+            if (substr($postdata['resource_url'], 0, 8) == 'https://') {
+                $postdata['protocol'] = CrawlTask::PROTOCOL_HTTPS;
+            } else {
+                $postdata['protocol'] = CrawlTask::PROTOCOL_HTTP;
+            }
+
+            $postdata['md5_params'] = $this->__getMd5Params([], $postdata);
             $postdata['status'] = 1;
 	        //Your code here
 
@@ -501,10 +543,37 @@
                     $row->protocol = 'https';
                 }
             if ( $row->is_proxy == self::IS_PROXY_YES) {
-                    $row->is_proxy = '使用';
+                    $row->is_proxy = '是';
                 } else if( $row->is_proxy == self::IS_PROXY_NO) {
-                    $row->is_proxy = '未使用';
+                    $row->is_proxy = '否';
                 }
+
+
+            if ($row->is_ajax == CrawlTask::IS_AJAX_TRUE) {
+                $row->is_ajax = '是';
+            } else {
+                $row->is_ajax = '否';
+            }
+
+            if ( $row->is_login == CrawlTask::IS_LOGIN_TRUE) {
+                $row->is_login = '是';
+            } else {
+                $row->is_login = '否';
+            }
+
+            if ( $row->is_wall == CrawlTask::IS_WALL_TRUE) {
+                $row->is_wall = '是';
+            } else {
+                $row->is_wall = '否';
+            }
+
+            if ( $row->resource_type == CrawlTask::RESOURCE_TYPE_HTML) {
+                $row->resource_type = 'html';
+            } else if( $row->resource_type == CrawlTask::RESOURCE_TYPE_JSON) {
+                $row->resource_type = 'json';
+            } else {
+                $row->resource_type = ' ';
+            }
             if (!empty($row->test_result)) {
                 $test_result = decodeUnicode($row->test_result);
                 $row->test_result = $test_result;
@@ -520,6 +589,85 @@
                 $command    = 'detail';
                 Session::put('current_row_id',$id);
                 return view('crudbooster::default.form',compact('row','page_menu','page_title','command','id'));
+        }
+
+        private function __getTaskByMd5Params($postdata)
+        {
+            $res = DB::table('t_crawl_task')->where('resource_url', $postdata['resource_url'])
+                                            ->where('md5_params', $postdata['md5_params'])
+                                            ->get();
+            $data = [];
+            if (!empty($res)) {
+                $data = $res->toArray();
+            }
+            return $data;
+        }
+
+        private function __getMd5Params($task = [], $params = [])
+        {
+            $item = [
+                'resource_url'  => '',
+                'cron_type'     => 1,
+                'is_ajax'       => 2,
+                'is_login'      => 2,
+                'is_wall'       => 2,
+                'is_proxy'      => 2,
+                'protocol'      => 1,
+            ];
+
+            if (!empty($task)) {
+                foreach ($item as $key => $value) {
+                    if (empty($task[$key])) {
+                        continue;
+                    }
+                    $item[$key] = $task[$key];
+                }
+            }
+            if (!empty($params)) {
+                foreach ($item as $key => $value) {
+                    if (array_key_exists($key, $params)) {
+                        $item[$key] = $params[$key];
+                    }
+                }
+            }
+
+            if (empty($task)) {
+                $resourceType = $params['resource_type'];
+            } else {
+                if (empty($params['resource_type'])) {
+                    $resourceType = $task['resource_type'];
+                } else {
+                    $resourceType = $params['resource_type'];
+                }
+            }
+            $item['resource_type'] = $resourceType;
+
+            if ($resourceType == CrawlTask::RESOURCE_TYPE_JSON) {
+
+                if (!empty($task)) {
+                    $item['api_fields'] = json_decode($task['api_fields']);
+                    $item['header'] = json_decode($task['header']);
+                }
+
+                if (!empty($params['api_fields'])) {
+                    $item['api_fields'] = $params['api_fields'];
+                }
+
+                if (!empty($params['api_fields'])) {
+                    $item['header'] = $params['header'];
+                }
+
+            } else {
+
+                if (!empty($task)) {
+                    $item['selectors'] = json_decode($task['selectors']);
+                }
+
+                if (!empty($params['selectors'])) {
+                    $item['selectors'] = $params['selectors'];
+                }
+            }
+            return md5(json_encode($item, true));
         }
 
 	}

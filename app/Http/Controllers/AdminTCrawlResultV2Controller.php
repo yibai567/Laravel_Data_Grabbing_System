@@ -4,15 +4,10 @@
 	use Request;
 	use DB;
 	use CRUDBooster;
+    use App\Models\CrawlResultV2;
     use Illuminate\Support\Facades\Route;
 
-
-	class AdminTCrawlResultController extends \crocodicstudio\crudbooster\controllers\CBController {
-        const DATA_TYPE_HTML = 1;
-        const DATA_TYPE_JSON = 2;
-
-        const STATUS_UNTREATED = 1;
-        const STATUS_ALREADYA_PROCESSED = 2;
+	class AdminTCrawlResultV2Controller extends \crocodicstudio\crudbooster\controllers\CBController {
 
 	    public function cbInit() {
 
@@ -26,65 +21,47 @@
 			$this->button_action_style = "button_icon";
 			$this->button_add = false;
 			$this->button_edit = false;
-			$this->button_delete = true;
+			$this->button_delete = false;
 			$this->button_detail = true;
 			$this->button_show = true;
 			$this->button_filter = true;
 			$this->button_import = false;
 			$this->button_export = false;
-			$this->table = "t_crawl_result";
+			$this->table = "t_crawl_result_v2";
 			# END CONFIGURATION DO NOT REMOVE THIS LINE
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
-            $this->col[] = ["label"=>"任务ID","name"=>"crawl_task_id",'width'=>'110'];
-			$this->col[] = ["label"=>"任务名称","name"=>"crawl_task_id","join"=>"t_crawl_task,name",'width'=>'150'];
-			$this->col[] = ["label"=>"开始时间","name"=>"task_start_time",'width'=>'120'];
-			$this->col[] = ["label"=>"结束时间","name"=>"task_end_time",'width'=>'120'];
-			// $this->col[] = ["label"=>"选择器","name"=>"setting_selectors"];
-			// $this->col[] = ["label"=>"关键词","name"=>"setting_keywords"];
-            $this->col[] = ["label"=>"数据类型","name"=>"setting_data_type","callback"=>function ($row) {
-                if ( $row->setting_data_type == self::DATA_TYPE_HTML) {
-                    return 'html';
-                } else if( $row->setting_data_type == self::DATA_TYPE_JSON) {
-                    return 'json';
+			$this->col[] = ["label"=>"任务ID","name"=>"crawl_task_id"];
+			$this->col[] = ["label"=>"开始时间","name"=>"start_time"];
+            $this->col[] = ["label"=>"结束时间","name"=>"end_time"];
+			$this->col[] = ["label"=>"创建时间","name"=>"created_at"];
+            $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
+                if ( $row->status == CrawlResultV2::IS_UNTREATED) {
+                    return '未处理';
+                } else if( $row->status == CrawlResultV2::IS_PROCESSED) {
+                    return '已处理';
+                } else {
+                    return '上报失败';
                 }
-            },'width'=>'80'];
-            // $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
-            //     if ( $row->status == self::STATUS_UNTREATED) {
-            //         return '未处理';
-            //     } else if( $row->status == self::STATUS_ALREADYA_PROCESSED) {
-            //         return '已处理';
-            //     }
-            // }];
-			$this->col[] = ["label"=>"地址","name"=>"task_url",'width'=>'200',"callback"=>function ($row) {
-                return '<a href="" style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->task_url .'</a>';
             }];
+
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
-			$this->form[] = ['label'=>'原始数据','name'=>'original_data','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'任务开始时间','name'=>'task_start_time','type'=>'datetime','validation'=>'required|date_format:Y-m-d H:i:s','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'任务结束时间','name'=>'task_end_time','type'=>'datetime','validation'=>'required|date_format:Y-m-d H:i:s','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'选择器','name'=>'setting_selectors','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'关键词','name'=>'setting_keywords','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'数据类型','name'=>'setting_data_type','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'任务URL地址','name'=>'task_url','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'格式化数据','name'=>'format_data','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'状态','name'=>'status','type'=>'radio','validation'=>'required|min:1|max:255','width'=>'col-sm-10','dataenum'=>'1|处理;2|未处理'];
+			$this->form[] = ['label'=>'格式化数据','name'=>'fields','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'开始时间','name'=>'start_time','type'=>'datetime','validation'=>'required|date_format:Y-m-d H:i:s','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'结束时间','name'=>'end_time','type'=>'datetime','validation'=>'required|date_format:Y-m-d H:i:s','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'状态','name'=>'status','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
 			//$this->form = [];
-			//$this->form[] = ['label'=>'原始数据','name'=>'original_data','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'任务开始时间','name'=>'task_start_time','type'=>'datetime','validation'=>'required|date_format:Y-m-d H:i:s','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'任务结束时间','name'=>'task_end_time','type'=>'datetime','validation'=>'required|date_format:Y-m-d H:i:s','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'选择器','name'=>'setting_selectors','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'关键词','name'=>'setting_keywords','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'数据类型','name'=>'setting_data_type','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'任务URL地址','name'=>'task_url','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'格式化数据','name'=>'format_data','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
+			//$this->form[] = ['label'=>'任务ID','name'=>'crawl_task_id','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10','datatable'=>'crawl_task,id'];
+			//$this->form[] = ['label'=>'格式化数据','name'=>'fields','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
+			//$this->form[] = ['label'=>'开始时间','name'=>'start_time','type'=>'datetime','validation'=>'required|date_format:Y-m-d H:i:s','width'=>'col-sm-10'];
+			//$this->form[] = ['label'=>'结束时间','name'=>'end_time','type'=>'datetime','validation'=>'required|date_format:Y-m-d H:i:s','width'=>'col-sm-10'];
 			//$this->form[] = ['label'=>'状态','name'=>'status','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			# OLD END FORM
 
@@ -174,8 +151,12 @@
 	        |
 	        */
 	        $this->index_statistic = array();
-
-
+            $this->index_statistic[] = ['label'=>'抓取结果总数','count'=>DB::table('t_crawl_result_v2')->where(function($query){
+                    $parentId = $_GET['parent_id'];
+                    if (isset($_GET['parent_id'])) {
+                        $query -> where('crawl_task_id', $parentId);
+                    }
+                })->count(),'icon'=>'fa fa-check','color'=>'success'];
 
 	        /*
 	        | ----------------------------------------------------------------------
@@ -361,20 +342,18 @@
 
         public function getDetail($id) {
             $this->cbLoader();
-            $row = DB::table('t_crawl_result')->where('id', $id)->first();
-             if ( $row->setting_data_type == self::DATA_TYPE_HTML) {
-                    $row->setting_data_type = 'html';
-                } else if( $row->setting_data_type == self::DATA_TYPE_JSON) {
-                    $row->setting_data_type = 'json';
-                }
-            if ( $row->status == self::STATUS_UNTREATED) {
-                    $row->status = '未处理';
-                } else if( $row->status == self::STATUS_ALREADYA_PROCESSED) {
-                    $row->status = '已处理';
+            $row = DB::table('t_crawl_result_v2')->where('id', $id)->first();
+            if ( $row->status == CrawlResultV2::IS_UNTREATED) {
+                $row->status = '未处理';
+            } else if( $row->status == CrawlResultV2::IS_PROCESSED) {
+                $row->status = '已处理';
+            } else {
+                $row->status = '上报失败';
             }
 
-            // $row->original_data = decodeUnicode($row->original_data);
-            $row->format_data = decodeUnicode($row->format_data);
+            if (!empty($row->fields)) {
+                $row->fields = decodeUnicode($row->fields);
+            }
             if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
                     CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
                     CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
