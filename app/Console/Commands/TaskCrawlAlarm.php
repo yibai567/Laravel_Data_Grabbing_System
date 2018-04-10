@@ -61,7 +61,7 @@ class TaskCrawlAlarm extends Command
             $timeDifference = $time - strtotime($taskValue['last_job_at']);
             foreach ($alarmRuleList as $ruleValue) {
                 $ruleValue['crawl_task_id'] = $taskValue['id'];
-                $ruleValue['test'] = 2;
+                $ruleValue['limit_number'] = 2;
                 switch ($ruleValue['expression']) {
                     case '>':
                         if ($timeDifference > $ruleValue['expression_value']) {
@@ -135,7 +135,7 @@ class TaskCrawlAlarm extends Command
                                     ->where('crawl_task_id', $alarmParams['crawl_task_id'])
                                     ->whereIn('status', [Alarm::IS_INIT, Alarm::IS_PROCESSING])
                                     ->count();
-        if ($res >= $alarmRule['test']) {
+        if ($res >= $alarmRule['limit_number']) {
             return false;
         }
 
