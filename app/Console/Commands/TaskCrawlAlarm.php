@@ -63,7 +63,7 @@ class TaskCrawlAlarm extends Command
             $timeDifference = $this->time - strtotime($taskValue['last_job_at']);
             foreach ($alarmRuleList as $ruleValue) {
                 $ruleValue['crawl_task_id'] = $taskValue['id'];
-                $ruleValue['limit_number'] = 5;
+                $ruleValue['limit_number'] = 1;
                 switch ($ruleValue['expression']) {
                     case '>':
                         if ($timeDifference > $ruleValue['expression_value']) {
