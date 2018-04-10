@@ -125,6 +125,7 @@ class TaskCrawlAlarm extends Command
      */
     private function __saveAlarmMessage($alarmRule)
     {
+        //数据库存储参数
         $alarmParams['alarm_rule_id'] = $alarmRule['id'];
         $alarmParams['content'] = $alarmRule['description'] . " 任务ID=" . $alarmRule['crawl_task_id'];
         $alarmParams['status'] = Alarm::IS_INIT;
@@ -143,6 +144,7 @@ class TaskCrawlAlarm extends Command
             if (empty($alarmId)) {
                 return false;
             }
+            //报警发送参数
             $newAlarmParams['content'] =  $alarmRule['description'] . "\n任务ID = " . $alarmRule['crawl_task_id'] . "\n报警结果ID = " . $alarmId;
             $newAlarmParams['receive_email'] = $alarmRule['receive_email'];
             $newAlarmParams['receive_phone'] = $alarmRule['receive_phone'];
