@@ -71,28 +71,32 @@ class TaskCrawlAlarm extends Command
                         break;
                     case '<':
                         if ($timeDifference < $ruleValue['expression_value']) {
+                            echo sprintf("description = %s, task_id = %s \n", $ruleValue['description'], $taskValue['id']);
                             $this->__saveAlarmMessage($ruleValue);
                         }
                         break;
                     case '=':
                         if ($timeDifference = $ruleValue['expression_value']) {
+                            echo sprintf("description = %s, task_id = %s \n", $ruleValue['description'], $taskValue['id']);
                             $this->__saveAlarmMessage($ruleValue);
                         }
                         break;
                     case '>=':
                         if ($timeDifference >= $ruleValue['expression_value']) {
+                            echo sprintf("description = %s, task_id = %s \n", $ruleValue['description'], $taskValue['id']);
                             $this->__saveAlarmMessage($ruleValue);
                         }
                         break;
 
                     case '<=':
                         if ($timeDifference <= $ruleValue['expression_value']) {
+                            echo sprintf("description = %s, task_id = %s \n", $ruleValue['description'], $taskValue['id']);
                             $this->__saveAlarmMessage($ruleValue);
                         }
                         break;
 
                     default:
-                        echo sprintf("条件不符合 \n");
+                        echo "条件不符合 \n";
                         break;
                 }
             }
@@ -153,6 +157,7 @@ class TaskCrawlAlarm extends Command
             TaskAlarmSend::dispatch(json_encode($newAlarmParams));
 
         } catch (\Exception $e) {
+            infoLog('任务报警错误信息', $e);
             return false;
         }
 

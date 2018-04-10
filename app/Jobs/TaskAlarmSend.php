@@ -13,15 +13,15 @@ class TaskAlarmSend implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $send_message;
+    protected $alarm_parmas;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($send_message)
+    public function __construct($alarm_parmas)
     {
-        $this->send_message = $send_message;
+        $this->alarm_parmas = $alarm_parmas;
     }
 
     /**
@@ -31,11 +31,11 @@ class TaskAlarmSend implements ShouldQueue
      */
     public function handle()
     {
-        if (empty($this->send_message)) {
+        if (empty($this->alarm_parmas)) {
             return false;
         }
 
-        $alarmInfo = json_decode($this->send_message, true);
+        $alarmInfo = json_decode($this->alarm_parmas, true);
 
         //企业微信号发送
         if (!empty($alarmInfo['receive_wework'])) {
