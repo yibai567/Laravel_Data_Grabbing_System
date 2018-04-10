@@ -37,8 +37,5 @@ class AlarmRule extends Model
         'receive_phone',
         'receive_wework',
         'status',
-        'created_at',
-        'updated_at',
-        'deleted_at'
     ];
 }

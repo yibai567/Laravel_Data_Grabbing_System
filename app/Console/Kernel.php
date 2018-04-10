@@ -29,6 +29,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('crawl:task:automate')->runInBackground()->withoutOverlapping(
             $crawlTaskAutomate
         )->everyMinute();
+
+        $schedule->command('task:crawl:alarm')->everyMinute();
+
     }
 
     /**

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Redis;
 
 class TaskCrawlAlarm extends Command
 {
+    protected $time;
     /**
      * The name and signature of the console command.
      *
@@ -33,6 +34,7 @@ class TaskCrawlAlarm extends Command
      */
     public function __construct()
     {
+        $this->time = time();
         parent::__construct();
     }
 
@@ -46,57 +48,52 @@ class TaskCrawlAlarm extends Command
         //获取启动中的任务
         $taskList = $this->__taskList();
         if (empty($taskList)) {
-            echo "没有启动中的任务 \n";
+            infoLog('[报警脚本]-没有启动中的任务');
             return false;
         }
 
         $alarmRuleList = $this->__alarmRuleList();
+
         if (empty($alarmRuleList)) {
-            echo "没有报警规则 \n";
+            infoLog('[报警脚本]-没有报警规则');
             return false;
         }
 
-        $time = time();
         foreach ($taskList as $taskValue) {
-            $timeDifference = $time - strtotime($taskValue['last_job_at']);
+            $timeDifference = $this->time - strtotime($taskValue['last_job_at']);
             foreach ($alarmRuleList as $ruleValue) {
                 $ruleValue['crawl_task_id'] = $taskValue['id'];
-                $ruleValue['limit_number'] = 2;
+                $ruleValue['limit_number'] = 5;
                 switch ($ruleValue['expression']) {
                     case '>':
                         if ($timeDifference > $ruleValue['expression_value']) {
-                            echo sprintf("description = %s, task_id = %s \n", $ruleValue['description'], $taskValue['id']);
                             $this->__saveAlarmMessage($ruleValue);
                         }
                         break;
                     case '<':
                         if ($timeDifference < $ruleValue['expression_value']) {
-                            echo sprintf("description = %s, task_id = %s \n", $ruleValue['description'], $taskValue['id']);
                             $this->__saveAlarmMessage($ruleValue);
                         }
                         break;
                     case '=':
                         if ($timeDifference = $ruleValue['expression_value']) {
-                            echo sprintf("description = %s, task_id = %s \n", $ruleValue['description'], $taskValue['id']);
                             $this->__saveAlarmMessage($ruleValue);
                         }
                         break;
                     case '>=':
                         if ($timeDifference >= $ruleValue['expression_value']) {
-                            echo sprintf("description = %s, task_id = %s \n", $ruleValue['description'], $taskValue['id']);
                             $this->__saveAlarmMessage($ruleValue);
                         }
                         break;
 
                     case '<=':
                         if ($timeDifference <= $ruleValue['expression_value']) {
-                            echo sprintf("description = %s, task_id = %s \n", $ruleValue['description'], $taskValue['id']);
                             $this->__saveAlarmMessage($ruleValue);
                         }
                         break;
 
                     default:
-                        echo "条件不符合 \n";
+                        infoLog('[报警脚本]-表达式条件不符合');
                         break;
                 }
             }
@@ -134,13 +131,25 @@ class TaskCrawlAlarm extends Command
         $alarmParams['content'] = $alarmRule['description'] . " 任务ID=" . $alarmRule['crawl_task_id'];
         $alarmParams['status'] = Alarm::IS_INIT;
         $alarmParams['crawl_task_id'] = $alarmRule['crawl_task_id'];
+        $alarmParams['created_at'] = date('Y-m-d H:i:s');
 
-        $res = Alarm::select('id')->where('alarm_rule_id', $alarmRule['id'])
+        $res = Alarm::select('id', 'created_at')->where('alarm_rule_id', $alarmRule['id'])
                                     ->where('crawl_task_id', $alarmParams['crawl_task_id'])
                                     ->whereIn('status', [Alarm::IS_INIT, Alarm::IS_PROCESSING])
-                                    ->count();
-        if ($res >= $alarmRule['limit_number']) {
-            return false;
+                                    ->orderBy('id', 'desc')
+                                    ->get();
+
+        $alarmResult = $res->toArray();
+
+        if (!empty($alarmResult)) {
+            $hour = $this->time - strtotime($alarmResult[0]['created_at']);
+            $count = count($alarmResult);
+            $day = 21600;
+            if ($count >= $alarmRule['limit_number']) {
+                if ($hour < $day) {
+                    return true;
+                }
+            }
         }
 
         try {
@@ -157,7 +166,7 @@ class TaskCrawlAlarm extends Command
             TaskAlarmSend::dispatch(json_encode($newAlarmParams));
 
         } catch (\Exception $e) {
-            infoLog('任务报警错误信息', $e);
+            infoLog('[报警脚本]-报警error', $e);
             return false;
         }
 

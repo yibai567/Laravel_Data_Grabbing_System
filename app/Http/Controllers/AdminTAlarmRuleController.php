@@ -42,9 +42,9 @@
             $this->form[] = ['label'=>'规则名称','name'=>'name','type'=>'text','validation'=>'required|string|min:3|max:70','width'=>'col-sm-10'];
             $this->form[] = ['label'=>'规则描述','name'=>'description','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
             $this->form[] = ['label'=>'表达式','name'=>'expression','type'=>'select','validation'=>'required|min:1|max:255','width'=>'col-sm-2','dataenum'=>'>;>=;=;<;<='];
-            $this->form[] = ['label'=>'阈值','name'=>'expression_value','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'阈值(秒)','name'=>'expression_value','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
             $this->form[] = ['label'=>'被通知email','name'=>'receive_email','type'=>'textarea','validation'=>'min:1|max:255','width'=>'col-sm-10','placeholder'=>'xxx@xxx.com,xxx@xxx.com'];
-            $this->form[] = ['label'=>'被通知手机号','name'=>'receive_phone','type'=>'textarea','validation'=>'min:1|max:255','width'=>'col-sm-10','placeholder'=>'xxx@xxx.com,xxx@xxx.com'];
+            $this->form[] = ['label'=>'被通知手机号','name'=>'receive_phone','type'=>'textarea','validation'=>'min:1|max:255','width'=>'col-sm-10','placeholder'=>'131xxx,132xxx'];
             $this->form[] = ['label'=>'被通知企业号','name'=>'receive_wework','type'=>'textarea','validation'=>'min:1|max:255','width'=>'col-sm-10','placeholder'=>'xxx@xxx.com,xxx@xxx.com'];
             $this->form[] = ['label'=>'Status','name'=>'status','type'=>'hidden','validation'=>'min:1|max:10','width'=>'col-sm-10'];
             # END FORM DO NOT REMOVE THIS LINE
