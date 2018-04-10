@@ -269,6 +269,7 @@
 	        */
 	        $this->index_statistic = array();
             $this->index_statistic[] = ['label'=>'任务总数','count'=>DB::table('t_crawl_task')->count(),'icon'=>'fa fa-check','color'=>'success'];
+            $this->index_statistic[] = ['label'=>'启动中','count'=>DB::table('t_crawl_task')->where('status', CrawlTask::IS_START_UP)->count(),'icon'=>'fa fa-check','color'=>'success'];
 	        /*
 	        | ----------------------------------------------------------------------
 	        | Add javascript at body
