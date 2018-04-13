@@ -23,6 +23,8 @@ class CreateImagesTable extends Migration
             $table->unsignedInteger('height')->nullable()->comment('高度');
             $table->string('md5_content', 50)->nullable()->comment('md5');
             $table->text('oss_url')->nullable()->comment('oss地址');
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

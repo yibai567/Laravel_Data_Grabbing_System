@@ -27,6 +27,7 @@ class CreateItemTestResultsTable extends Migration
             $table->timestamp('end_at')->nullable()->comment('结束时间');
             $table->boolean('status')->nullable()->comment('状态：1-成功|2-失败');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
