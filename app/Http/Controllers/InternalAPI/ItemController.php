@@ -5,6 +5,10 @@ namespace App\Http\Controllers\InternalAPI;
 use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
+use App\Services\ItemService;
+use App\Services\InternalAPIService;
+use App\Models\Item;
+
 
 /**
  * ItemController
@@ -18,18 +22,43 @@ class ItemController extends Controller
 {
     /**
      * create
-     * 保存抓取结果
+     * 任务创建
      *
-     * @param
+     * @param data_type (数据类型 1 html | 2 json)
+     * @param content_type (内容类型 1 短内容 | 2 内容)
+     * @param resource_url (资源URL)
+     * @param is_capture_image (是否截取图片 1 true | 2 false)
+     * @param short_content_selector (短内容选择器)
+     * @param long_content_selector (长内容选择器)
+     * @param row_selector (行内选择器)
+     * @param cron_type (执行频次 1 持续执行, 2 每分钟执行一次, 3 每小时执行一次, 4 每天执行一次)
+     * @param is_proxy (是否翻墙 1 翻墙 | 2 不翻墙)
      * @return array
      */
     public function create(Request $request)
     {
         $params = $request->all();
-        ValidatorService::check($params, [
-        ]);
 
+        $resData = $params;
 
+        $itemService = new ItemService();
+
+        //获取参数验证规则
+        $paramsVerifyRule = $itemService->paramsVerifyRule();
+
+        //参数验证
+        ValidatorService::check($resData, $paramsVerifyRule);
+        //参数格式化
+        $formatParams = $itemService->paramsFormat($resData);
+
+        $formatParams['status'] = Item::STATUS_INIT;
+
+        $res = Item::create($formatParams);
+
+        $result = [];
+        if (!empty($res)) {
+            $result = $res->toArray();
+        }
         return $this->resObjectGet($result, 'item', $request->path());
     }
 
@@ -60,11 +89,20 @@ class ItemController extends Controller
     public function retrieve(Request $request)
     {
         $params = $request->all();
+
         ValidatorService::check($params, [
+            "id" => "required|integer"
         ]);
 
+        $res = Item::where('id', $params['id'])->get();
 
-        return $this->resObjectGet($result, 'item', $request->path());
+        $resData = [];
+
+        if (!empty($res)) {
+            $resData = $res->toArray();
+        }
+
+        return $this->resObjectGet($resData, 'item', $request->path());
     }
 
     /**
@@ -77,11 +115,13 @@ class ItemController extends Controller
     public function start(Request $request)
     {
         $params = $request->all();
+
         ValidatorService::check($params, [
             'id' => 'integer|required',
         ]);
 
-        $result = InternalAPIService::post('/item/start', $params);
+        $itemDetail = InternalAPIService::get('/item', $params);
+        dd($itemDetail);
 
         return $this->resObjectGet($result, 'item', $request->path());
     }

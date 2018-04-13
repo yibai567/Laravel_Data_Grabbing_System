@@ -59,6 +59,7 @@ class QueueInfoController extends Controller
         $params = $request->all();
         ValidatorService::check($params, [
             'id' => 'required|integer|min:1|max:14',
+
         ]);
 
         $queueInfo = QueueInfo::find($params['id']);
