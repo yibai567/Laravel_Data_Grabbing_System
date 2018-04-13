@@ -18,6 +18,9 @@ class Item extends Model
     const STATUS_START = 6;
     const STATUS_STOP = 7;
 
+    const IS_CAPTURE_IMAGE_TRUE = 1;
+    const IS_CAPTURE_IMAGE_FALSE = 2;
+
     protected $dates = ['deleted_at'];
     protected $table = 't_item';
 

@@ -21,9 +21,8 @@ class CreateQueueInfosTable extends Migration
             $table->string('db', 20)->nullable()->comment('数据库');
             $table->boolean('is_proxy')->nullable()->comment('是否需要翻墙：1-需要|2-不需要');
             $table->boolean('data_type')->nullable()->comment('内容类型：1-html|2-json');
-            $table->boolean('type')->nullable()->comment('队列类型：1-html|2-json|3-capture|4-test');
             $table->boolean('is_capture_image')->nullable()->comment('是否需要截图：1-true|2-false');
-            $table->boolean('status')->nullable()->comment('状态');
+            $table->boolean('status')->nullable()->comment('状态：1-success|2-fail');
             $table->timestamps();
             $table->softDeletes();
         });

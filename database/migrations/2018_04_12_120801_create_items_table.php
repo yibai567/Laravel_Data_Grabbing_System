@@ -23,6 +23,7 @@ class CreateItemsTable extends Migration
             $table->boolean('is_capture_image')->default(2)->nullable()->comment('类型：1-true|2-false');
             $table->unsignedInteger('associate_result_id')->nullable()->comment('关联结果id');
             $table->text('resource_url')->nullable()->comment('资源地址');
+            $table->text('pre_detail_url')->nullable()->comment('url前缀');
             $table->text('short_content_selector')->nullable()->comment('短内容规则');
             $table->text('long_content_selector')->nullable()->comment('长内容规则');
             $table->text('row_selector')->nullable()->comment('行选择器规则');

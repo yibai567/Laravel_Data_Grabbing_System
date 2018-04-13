@@ -42,5 +42,10 @@ $api->version(
         $api->post('/crawl/result/test', 'CrawlResultV2Controller@saveToTest');
         $api->get('/crawl/tasks/ids','CrawlTaskController@listByIds');
         $api->post('/crawl/task/update','CrawlTaskController@update');
+
+        // new route
+        $api->get('/queue_info/update/current_lengths','QueueInfoController@updateCurrentLength');
+        $api->get('/queue_info/job','QueueInfoController@getJob');
+        $api->post('/queue_info/job','QueueInfoController@createJob');
     }
 );

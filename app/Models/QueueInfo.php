@@ -9,11 +9,6 @@ class QueueInfo extends Model
 {
     use SoftDeletes;
 
-    const TYPE_HTML = 1;
-    const TYPE_JSON = 2;
-    const TYPE_CAPTURE = 3;
-    const TYPE_TEST = 4;
-
     const IS_CAPTURE_IMAGE_TRUE = 1;
     const IS_CAPTURE_IMAGE_FALSE = 2;
 

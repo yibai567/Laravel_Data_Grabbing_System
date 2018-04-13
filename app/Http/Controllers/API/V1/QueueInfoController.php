@@ -15,23 +15,23 @@ use App\Services\InternalAPIService;
  * @version 1.1
  * Date: 2018/04/12
  */
-class ItemResultController extends Controller
+class QueueInfoController extends Controller
 {
     /**
-     * getJobByName
+     * getJob
      * 获取指定队列的任务
      *
      * @param item_id
      * @return array
      */
-    public function getJobByName(Request $request)
+    public function getJob(Request $request)
     {
         $params = $request->all();
         ValidatorService::check($params, [
+            'id' => 'required|integer|min:1|max:14',
         ]);
 
-
-        $result = InternalAPIService::get('/item/test/result', $params);
+        $result = InternalAPIService::get('/queue_info/job', $params);
         return $this->resObjectGet($result, 'item', $request->path());
     }
 
