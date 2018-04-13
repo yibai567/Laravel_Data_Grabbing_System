@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\InternalAPI;
 
+use App\Models\ItemRunLog;
 use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
@@ -29,7 +30,7 @@ class ItemRunLogController extends Controller
         $params = $request->all();
         ValidatorService::check($params, [
             'item_id' => 'required|integer',
-            'type' => 'nullable|integer|in:1,2',
+            'type' => 'required|integer|in:1,2',
             'start_at' => 'nullable|datatime',
             'end_at' => 'nullable|datatime',
             'status' => 'nullable|integer|in:1,2',
