@@ -11,13 +11,13 @@ class Item extends Model
 
     //初始化状态
     const STATUS_INIT = 1;
-    const STATUS_SUCCESS = 2;
-    const STATUS_TEST_NO_PROXY_FAIL = 3;
-    const STATUS_TEST_PROXY_FAIL = 4;
-    const STATUS_TEST_FAIL = 5;
-    const STATUS_START = 6;
-    const STATUS_STOP = 7;
-    const STATUS_EXECUTED = 8;
+    const STATUS_TESTING = 2;
+    const STATUS_TEST_SUCCESS = 3;
+    const STATUS_TEST_NO_PROXY_FAIL = 4;
+    const STATUS_TEST_PROXY_FAIL = 5;
+    const STATUS_TEST_FAIL = 6;
+    const STATUS_START = 7;
+    const STATUS_STOP = 8;
 
     const IS_CAPTURE_IMAGE_TRUE = 1;
     const IS_CAPTURE_IMAGE_FALSE = 2;

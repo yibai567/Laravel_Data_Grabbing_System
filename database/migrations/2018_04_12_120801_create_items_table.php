@@ -30,7 +30,7 @@ class CreateItemsTable extends Migration
             $table->boolean('cron_type', 200)->default(1)->nullable()->comment('执行规则：1-持续执行|2-每分钟执行|3-每五分钟执行|4-每十五分钟执行');
             $table->boolean('is_proxy')->default(1)->nullable()->comment('是否翻墙：1-翻墙|2-不翻墙');
             $table->timestamp('last_job_at')->nullable()->comment('任务最后执行时间');
-            $table->boolean('status')->default(1)->nullable()->comment('任务状态：1-初始化|2-测试成功|3-普通测试失败|4-翻墙测试失败|5-测试失败|6-启动|7-停止');
+            $table->boolean('status')->default(1)->nullable()->comment('任务状态：1-初始化|2-测试中|3-测试成功|4-普通测试失败|5-翻墙测试失败|6-测试失败|7-启动|8-停止');
             $table->timestamps();
             $table->softDeletes();
         });
