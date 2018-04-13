@@ -4,17 +4,7 @@ namespace App\Http\Controllers\InternalAPI;
 
 use App\Models\ItemRunLog;
 use Illuminate\Http\Request;
-use Log;
-use App\Services\ValidatorService;
 
-/**
- * ItemRunLogController
- * 任务运行日志
- *
- * @author zhangwencheng@jinse.com
- * @version 1.1
- * Date: 2018/04/12
- */
 class ItemRunLogController extends Controller
 {
 
@@ -121,3 +111,6 @@ class ItemRunLogController extends Controller
 
 
 
+=======
+}
+>>>>>>> Stashed changes

@@ -29,5 +29,13 @@ $api->version(
         $api->get('/crawl/task/queue/info', 'CrawlTaskController@getQueueInfo');
         $api->post('/crawl/results', 'CrawlResultController@createForBatch');
         $api->post('/crawl/result/dispatch', 'CrawlResultController@dispatch1');
+
+        //新版抓取路由
+        $api->post('/item', 'ItemController@create');
+        $api->post('/item/update', 'ItemController@update');
+        $api->get('/item', 'ItemController@retrieve');
+        $api->post('/item/start', 'ItemController@start');
+        $api->post('/item/stop', 'ItemController@stop');
+
     }
 );
