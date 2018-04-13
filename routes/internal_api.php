@@ -47,5 +47,7 @@ $api->version(
         $api->get('/queue_info/update/current_lengths','QueueInfoController@updateCurrentLength');
         $api->get('/queue_info/job','QueueInfoController@getJob');
         $api->post('/queue_info/job','QueueInfoController@createJob');
+
+        $api->post('/item_run_log','ItemRunLogController@create');
     }
 );

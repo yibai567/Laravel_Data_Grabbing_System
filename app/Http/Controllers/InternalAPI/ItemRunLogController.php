@@ -28,8 +28,19 @@ class ItemRunLogController extends Controller
     {
         $params = $request->all();
         ValidatorService::check($params, [
+            'item_id' => 'required|integer',
+            'type' => 'nullable|integer|in:1,2',
+            'start_at' => 'nullable|datatime',
+            'end_at' => 'nullable|datatime',
+            'status' => 'nullable|integer|in:1,2',
         ]);
 
+        $itemRunLog = ItemRunLog::create($params);
+
+        $result = [];
+        if (!empty($itemRunLog)) {
+            $result = $itemRunLog->toArray();
+        }
 
         return $this->resObjectGet($result, 'item_run_log', $request->path());
     }
