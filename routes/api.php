@@ -36,6 +36,11 @@ $api->version(
         $api->get('/item', 'ItemController@retrieve');
         $api->post('/item/start', 'ItemController@start');
         $api->post('/item/stop', 'ItemController@stop');
+        $api->post('/item/test', 'ItemController@test');
+
+        $api->get('/item/results', 'ItemResultController@allByLast');
+        $api->get('/item/test/result', 'ItemTestResultController@getLastTestResult');
+
 
         $api->get('/queue_info/job','QueueInfoController@getJob');
     }
