@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\InternalAPI;
 
 use App\Models\ItemRunLog;
+use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 
 class ItemRunLogController extends Controller
@@ -23,7 +24,7 @@ class ItemRunLogController extends Controller
             'type' => 'required|integer|in:1,2',
             'start_at' => 'nullable|datatime',
             'end_at' => 'nullable|datatime',
-            'status' => 'nullable|integer|in:1,2',
+            'status' => 'nullable|integer|in:1,2,3',
         ]);
 
         $itemRunLog = ItemRunLog::create($params);
@@ -47,8 +48,14 @@ class ItemRunLogController extends Controller
     {
         $params = $request->all();
         ValidatorService::check($params, [
+            'item_id' => 'required|integer',
+            'type' => 'required|integer|in:1,2',
+            'start_at' => 'nullable|datatime',
+            'end_at' => 'nullable|datatime',
+            'status' => 'nullable|integer|in:1,2,3',
         ]);
 
+        $result = [];
 
         return $this->resObjectGet($result, 'item_run_log', $request->path());
     }
@@ -66,6 +73,7 @@ class ItemRunLogController extends Controller
         ValidatorService::check($params, [
         ]);
 
+        $result = [];
 
         return $this->resObjectGet($result, 'item_run_log', $request->path());
     }
@@ -83,34 +91,8 @@ class ItemRunLogController extends Controller
         ValidatorService::check($params, [
         ]);
 
+        $result = [];
 
         return $this->resObjectGet($result, 'item_run_log', $request->path());
     }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-=======
-}
->>>>>>> Stashed changes

@@ -9,6 +9,9 @@ class ItemRunLog extends Model
 {
     use SoftDeletes;
 
+    const TYPE_TEST = 1;
+    const TYPE_PRO = 2;
+
     protected $dates = ['deleted_at'];
     protected $table = 't_item_run_log';
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\InternalAPI;
 
 use App\Models\Item;
+use App\Models\ItemRunLog;
 use App\Models\QueueInfo;
 use App\Services\InternalAPIService;
 use Illuminate\Http\Request;
@@ -59,7 +60,6 @@ class QueueInfoController extends Controller
         $params = $request->all();
         ValidatorService::check($params, [
             'id' => 'required|integer|min:1|max:14',
-
         ]);
 
         $queueInfo = QueueInfo::find($params['id']);
@@ -68,10 +68,11 @@ class QueueInfoController extends Controller
         }
 
         $job = Redis::connection($queueInfo->db)->rPop($queueInfo->name);
+        $job = json_decode($job, true);
+
         if (empty($job)) {
             $job = [];
         }
-        $job = json_decode($job, true);
 
         return $this->resObjectGet($job, 'queue_info', $request->path());
     }
@@ -86,19 +87,21 @@ class QueueInfoController extends Controller
     {
         $params = $request->all();
         ValidatorService::check($params, [
-            'id' => 'required|integer|min:1|max:14',
+            //'id' => 'required|integer|min:1|max:14',
             'item_id' => 'required|integer',
         ]);
+
+        $item = Item::find($params['item_id']);
+        if (empty($item)) {
+            return $this->resError(405, '指定Item不存在!');
+        }
 
         $queueInfo = QueueInfo::find($params['id']);
         if (empty($queueInfo)) {
             return $this->resError(405, '指定队列不存在!');
         }
 
-        $item = Item::find($params['item_id']);
-        if (empty($item)) {
-            return $this->resError(405, '指定Item不存在!');
-        }
+
 
         if (strpos($queueInfo->name, 'test')) {
             $type = ItemRunLog::TYPE_TEST;
@@ -110,7 +113,7 @@ class QueueInfoController extends Controller
             'item_id' => $item->id,
             'type' => $type,
         ];
-        $itemRunLog = InternalAPIService::post('item_run_log', $params);
+        $itemRunLog = InternalAPIService::post('/item_run_log', $params);
 
         $data = [
             'item_id' => $item->id,
@@ -119,7 +122,6 @@ class QueueInfoController extends Controller
             'short_content_selector' => $item->short_content_selector,
             'row_selector' => $item->row_selector
         ];
-
         Redis::connection($queueInfo->db)
             ->lpush($queueInfo->name, json_encode($data));
 

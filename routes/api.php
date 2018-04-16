@@ -37,5 +37,6 @@ $api->version(
         $api->post('/item/start', 'ItemController@start');
         $api->post('/item/stop', 'ItemController@stop');
 
+        $api->get('/queue_info/job','QueueInfoController@getJob');
     }
 );

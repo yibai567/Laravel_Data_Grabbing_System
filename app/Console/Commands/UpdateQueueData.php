@@ -69,15 +69,23 @@ class UpdateQueueData extends Command
                     ->where('action_type', Item::TYPE_OUT)
                     ->where('is_proxy', $queueInfo->is_proxy)
                     ->where('data_type', $queueInfo->data_type)
-                    ->pluck('id');
+                    ->pluck('id')
+                    ->toArray();
 
                 if (empty($jobs)) {
                     continue;
                 }
 
                 foreach ($jobs as $job) {
-                    $params = ['id' => $queueInfo->id, 'item_id' => $job];
-                    InternalAPIService::post('queue_info/job', $params);
+                    try {
+                        $params = [
+                            'id' => $queueInfo->id,
+                            'item_id' => $job,
+                        ];
+                        InternalAPIService::post('/queue_info/job', $params);
+                    } catch (\Exception $e) {
+                        echo $e->getMessage();
+                    }
                 }
             }
         }
