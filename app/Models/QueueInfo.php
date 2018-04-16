@@ -14,6 +14,8 @@ class QueueInfo extends Model
 
     const DATA_TYPE_HTML = 1;
     const DATA_TYPE_JSON = 2;
+    const DATA_TYPE_CAPTURE = 3;
+
     protected $dates = ['deleted_at'];
     protected $table = 't_queue_info';
 

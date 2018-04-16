@@ -49,10 +49,15 @@ $api->version(
         $api->post('/queue_info/job','QueueInfoController@createJob');
 
         $api->post('/item_run_log','ItemRunLogController@create');
+
         $api->post('/item','ItemController@create');
+        $api->post('/item/update', 'ItemController@update');
         $api->get('/item', 'ItemController@retrieve');
         $api->post('/item/start', 'ItemController@start');
         $api->post('/item/stop', 'ItemController@stop');
+        $api->post('/item/test', 'ItemController@test');
         $api->get('/item/update/current_lengths','QueueInfoController@updateCurrentLength');
+        $api->get('/item/results', 'ItemResultController@allByLast');
+        $api->get('/item/test/result', 'ItemTestResultController@getLastTestResult');
     }
 );

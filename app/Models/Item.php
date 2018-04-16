@@ -25,6 +25,14 @@ class Item extends Model
     const TYPE_OUT = 1;
     const TYPE_SYS = 2;
 
+    const DATA_TYPE_HTML = 1;
+    const DATA_TYPE_JSON = 2;
+    const DATA_TYPE_CAPTURE = 3;
+
+    const IS_PROXY_YES = 1;
+    const IS_PROXY_NO = 2;
+
+
     protected $dates = ['deleted_at'];
     protected $table = 't_item';
 
