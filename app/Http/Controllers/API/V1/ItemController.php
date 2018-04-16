@@ -39,7 +39,7 @@ class ItemController extends Controller
         $params = $request->all();
 
         $verifyParams = $this->itemService->paramsVerifyRule();
-        dd($verifyParams);
+
         ValidatorService::check($params, $verifyParams);
 
         $result = InternalAPIService::post('/item', $params, 'json');
