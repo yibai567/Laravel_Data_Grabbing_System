@@ -27,6 +27,9 @@ class ItemResult extends Model
         "deleted_at",
     ];
 
+    /**
+     * 可更新字段
+     */
     protected $fillable = [
         'item_id',
         'item_run_log_id',
