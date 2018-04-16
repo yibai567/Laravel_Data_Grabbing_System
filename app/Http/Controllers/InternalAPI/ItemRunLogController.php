@@ -23,8 +23,8 @@ class ItemRunLogController extends Controller
         ValidatorService::check($params, [
             'item_id' => 'required|integer',
             'type' => 'required|integer|in:1,2',
-            'start_at' => 'nullable|datatime',
-            'end_at' => 'nullable|datatime',
+            'start_at' => 'nullable|date',
+            'end_at' => 'nullable|date',
             'status' => 'nullable|integer|in:1,2,3',
         ]);
 
@@ -81,9 +81,9 @@ class ItemRunLogController extends Controller
      */
     public function all(Request $request)
     {
-        $result = [];
-
         $itemRunLogs = ItemRunLog::all();
+
+        $result = [];
         if (!empty($itemRunLogs)) {
             $result = $itemRunLogs->toArray();
         }

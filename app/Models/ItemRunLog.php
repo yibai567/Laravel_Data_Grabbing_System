@@ -19,7 +19,7 @@ class ItemRunLog extends Model
     const STATUS_SUCCESS = 2; // 成功
     const STATUS_FAIL = 3; // 失败
 
-    protected $dates = ['deleted_at'];
+    protected $dates = ['deleted_at', 'start_at', 'end_at'];
 
     /**
      * 表名
