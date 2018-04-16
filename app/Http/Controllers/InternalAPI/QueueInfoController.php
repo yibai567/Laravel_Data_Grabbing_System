@@ -124,7 +124,7 @@ class QueueInfoController extends Controller
             'short_content_selector' => $item->short_content_selector,
             'row_selector' => $item->row_selector
         ];
-        dd($data);
+        
         Redis::connection($queueInfo->db)
             ->lpush($queueInfo->name, json_encode($data));
 
