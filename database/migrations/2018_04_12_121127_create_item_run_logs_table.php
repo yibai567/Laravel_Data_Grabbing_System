@@ -19,7 +19,7 @@ class CreateItemRunLogsTable extends Migration
             $table->boolean('type')->nullable()->comment('状态：1-test|2-pro');
             $table->timestamp('start_at')->nullable()->comment('开始时间');
             $table->timestamp('end_at')->nullable()->comment('结束时间');
-            $table->boolean('status')->nullable()->comment('状态：1-成功|2-失败');
+            $table->boolean('status')->nullable()->comment('状态：1-running|2-success|3-fail');
             $table->timestamps();
             $table->softDeletes();
         });

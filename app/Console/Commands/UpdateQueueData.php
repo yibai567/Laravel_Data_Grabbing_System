@@ -7,6 +7,7 @@ use App\Models\QueueInfo;
 use App\Services\APIService;
 use App\Services\InternalAPIService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Redis;
 
 class UpdateQueueData extends Command
 {
@@ -43,6 +44,7 @@ class UpdateQueueData extends Command
     {
         $this->info('jinse:update:queue_data start！');
         $this->__updateQueueData();
+        InternalAPIService::get('/queue_info/update/current_lengths');
         $this->info('jinse:update:queue_data ended！');
     }
 
@@ -53,22 +55,18 @@ class UpdateQueueData extends Command
     private function __updateQueueData()
     {
         $queueInfos = QueueInfo::all();
-
         foreach ($queueInfos as $queueInfo) {
             $length = Redis::connection($queueInfo->db)->lLen($queueInfo->name);
-            if (!strpos($queueInfo->name, 'test')) {
-                if ($length > 0 && $queueInfo == QueueInfo::IS_CAPTURE_IMAGE_FALSE) {
+
+            //测试队列不更新
+            if (!strpos($queueInfo->name, 'test') && $queueInfo->data_type !== QueueInfo::DATA_TYPE_CAPTURE) {
+                //非截图任务队列，如果队列有值不更新
+                if ($length > 0) {
                     continue;
                 }
 
                 $jobs = Item::where('status', Item::STATUS_START)
-                    ->where( function ($query) use ($queueInfo) {
-                        if ($queueInfo->is_capture_image == QueueInfo::IS_CAPTURE_IMAGE_TRUE) {
-                            $query->where('is_capture_image', $queueInfo->is_capture_image)->where('action_type', Item::TYPE_SYS);
-                        } else {
-                            $query->where('is_capture_image', $queueInfo->is_capture_image)->where('action_type', Item::TYPE_OUT);
-                        }
-                    })
+                    ->where('action_type', Item::TYPE_OUT)
                     ->where('is_proxy', $queueInfo->is_proxy)
                     ->where('data_type', $queueInfo->data_type)
                     ->pluck('id');
@@ -80,9 +78,6 @@ class UpdateQueueData extends Command
                 foreach ($jobs as $job) {
                     $params = ['id' => $queueInfo->id, 'item_id' => $job];
                     InternalAPIService::post('queue_info/job', $params);
-                    if ($queueInfo->is_capture_image == QueueInfo::IS_CAPTURE_IMAGE_TRUE) {
-                        Item::update(['id' => $job, 'status' => Item::STATUS_STOP]);
-                    }
                 }
             }
         }
