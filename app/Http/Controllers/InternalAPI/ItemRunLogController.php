@@ -88,7 +88,7 @@ class ItemRunLogController extends Controller
             $result = $itemRunLogs->toArray();
         }
 
-        return $this->resObjectGet($result, 'item_run_log', $request->path());
+        return $this->resObjectList($result, 'item_run_log', $request->path());
     }
 
     /**
@@ -131,6 +131,6 @@ class ItemRunLogController extends Controller
             $result = $itemRunLogs->toArray();
         }
 
-        return $this->resObjectGet('item_run_log', $result, $request->path());
+        return $this->resObjectGet($result, 'item_run_log', $request->path());
     }
 }
