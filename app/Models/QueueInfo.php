@@ -18,11 +18,6 @@ class QueueInfo extends Model
     protected $table = 't_queue_info';
 
     /**
-     * 主键
-     */
-    protected $primaryKey = "id";
-
-    /**
      * 隐藏的字段
      */
     protected $hidden = [

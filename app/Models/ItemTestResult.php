@@ -15,11 +15,6 @@ class ItemTestResult extends Model
     protected $table = 't_item_result';
 
     /**
-     * 主键
-     */
-    protected $primaryKey = "id";
-
-    /**
      * 隐藏的字段
      */
     protected $hidden = [

@@ -41,7 +41,6 @@ class Item extends Model
      * 可更新的字段
      */
     protected $fillable = [
-        'id',
         'name',
         'data_type',
         'content_type',
