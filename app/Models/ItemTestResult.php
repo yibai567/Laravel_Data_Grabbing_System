@@ -12,7 +12,7 @@ class ItemTestResult extends Model
     /**
      * 表名
      */
-    protected $table = 't_item_result';
+    protected $table = 't_item_test_result';
 
     /**
      * 隐藏的字段

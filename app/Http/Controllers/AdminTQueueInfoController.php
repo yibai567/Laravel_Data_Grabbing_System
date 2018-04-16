@@ -34,11 +34,29 @@
 			$this->col[] = ["label"=>"队列描述","name"=>"description"];
 			$this->col[] = ["label"=>"当前队列长度","name"=>"current_length"];
 			$this->col[] = ["label"=>"数据库","name"=>"db"];
-			$this->col[] = ["label"=>"是否翻墙","name"=>"is_proxy"];
-			$this->col[] = ["label"=>"内容类型","name"=>"data_type"];
-			$this->col[] = ["label"=>"队列类型","name"=>"type"];
-			$this->col[] = ["label"=>"是否需要截图","name"=>"is_capture_image"];
-			$this->col[] = ["label"=>"状态","name"=>"status"];
+			$this->col[] = ["label"=>"是否翻墙","name"=>"is_proxy","callback"=>function ($row) {
+                if ( $row->is_proxy == 1) {
+                    return '是';
+                } else {
+                    return '否';
+                }
+            }];
+			$this->col[] = ["label"=>"内容类型","name"=>"data_type","callback"=>function ($row) {
+                if ( $row->data_type == 1) {
+                    return 'html';
+                } elseif ($row->data_type == 2) {
+                    return 'json';
+                } elseif ($row->data_type == 3) {
+                    return '截图';
+                }
+            }];
+			$this->col[] = ["label"=>"是否需要截图","name"=>"is_capture_image", "callback"=>function ($row) {
+                if ( $row->is_capture_image == 1) {
+                    return '是';
+                } else {
+                    return '否';
+                }
+            }];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE

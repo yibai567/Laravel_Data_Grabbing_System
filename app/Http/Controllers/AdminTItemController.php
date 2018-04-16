@@ -1,11 +1,21 @@
 <?php namespace App\Http\Controllers;
 
-	use Session;
+	use App\Models\Item;
+    use App\Services\APIService;
+    use App\Services\InternalAPIService;
+    use Session;
 	use Request;
 	use DB;
 	use CRUDBooster;
 
 	class AdminTItemController extends \crocodicstudio\crudbooster\controllers\CBController {
+
+        // 状态
+        const STATUS_NO_STARTING = 1;
+        const STATUS_TEST_SUCCESS = 2;
+        const STATUS_TEST_FAIL = 3;
+        const STATUS_START_UP = 4;
+        const STATUS_STOP = 5;
 
 	    public function cbInit() {
 
@@ -62,6 +72,8 @@
                     return '每小时执行一次';
                 } else if ($row->cron_type == 4) {
                     return '每天执行一次';
+                } else if ($row->cron_type == 5) {
+                    return '执行一次';
                 }
             }];
             $this->col[] = ["label"=>"是否翻墙","name"=>"is_proxy","callback"=>function ($row) {
@@ -96,7 +108,7 @@
 			$this->form[] = ['label'=>'数据类型','name'=>'data_type','type'=>'radio','validation'=>'required|integer|between:1,2','width'=>'col-sm-10','dataenum'=>'1|html;2|json;3|截图','value'=>'1'];
 			$this->form[] = ['label'=>'内容类型','name'=>'content_type','type'=>'radio','validation'=>'required|integer|between:1,2','width'=>'col-sm-10','dataenum'=>'1|短内容;2|长内容','value'=>'1'];
 			$this->form[] = ['label'=>'Type','name'=>'type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|快讯','value'=>'1'];
-            $this->form[] = ['label'=>'Cron Type','name'=>'cron_type','type'=>'radio','validation'=>'required|integer|in:1,2,3,4','width'=>'col-sm-10','dataenum'=>'1|持续执行;2|每分钟;3|每小时;4|每天','value'=>'1'];
+            $this->form[] = ['label'=>'Cron Type','name'=>'cron_type','type'=>'radio','validation'=>'required|integer|in:1,2,3,4','width'=>'col-sm-10','dataenum'=>'1|持续执行;2|每分钟;3|每小时;4|每天;5|执行一次','value'=>'1'];
             $this->form[] = ['label'=>'是否翻墙','name'=>'is_proxy','type'=>'radio','validation'=>'required|integer|between:1,2','width'=>'col-sm-10','dataenum'=>'1|是;2|否','value'=>'2'];
             $this->form[] = ['label'=>'Status','name'=>'status','type'=>'hidden','width'=>'col-sm-10'];
 
@@ -105,21 +117,6 @@
 			$this->form[] = ['label'=>'长内容选择器','name'=>'long_content_selector','type'=>'textarea','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'图片配置','name'=>'capture_config','type'=>'textarea','width'=>'col-sm-10'];
 			# END FORM DO NOT REMOVE THIS LINE
-
-			# OLD START FORM
-			//$this->form = [];
-			//$this->form[] = ['label'=>'任务名称','name'=>'name','type'=>'text','width'=>'col-sm-10','placeholder'=>'请输入字母'];
-			//$this->form[] = ['label'=>'数据类型','name'=>'data_type','type'=>'radio','validation'=>'required|integer|between:1,2','width'=>'col-sm-10','dataenum'=>'1|html;2|json;3|截图'];
-			//$this->form[] = ['label'=>'内容类型','name'=>'content_type','type'=>'radio','validation'=>'required|integer|between:1,2','width'=>'col-sm-10','dataenum'=>'1|短内容;2|长内容'];
-			//$this->form[] = ['label'=>'Type','name'=>'type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','style'=>'1|快讯','value'=>'1'];
-			//$this->form[] = ['label'=>'资源URL','name'=>'resource_url','type'=>'text','validation'=>'required|string','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'短内容选择器','name'=>'short_content_selector','type'=>'textarea','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'长内容选择器','name'=>'long_content_selector','type'=>'textarea','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'图片配置','name'=>'capture_config','type'=>'textarea','width'=>'col-sm-10'];
-			//$this->form[] = ['label'=>'Cron Type','name'=>'cron_type','type'=>'radio','validation'=>'required|integer|in:1,2,3,4','width'=>'col-sm-10','dataenum'=>'1|持续执行;2|每分钟;3|每小时;4|每天'];
-			//$this->form[] = ['label'=>'是否翻墙','name'=>'is_proxy','type'=>'radio','validation'=>'required|integer|between:1,2','width'=>'col-sm-10','dataenum'=>'1|是;2|否'];
-			//$this->form[] = ['label'=>'Status','name'=>'status','type'=>'hidden','width'=>'col-sm-10'];
-			# OLD END FORM
 
 			/*
 	        | ----------------------------------------------------------------------
@@ -148,7 +145,12 @@
 	        |
 	        */
 	        $this->addaction = array();
+            $this->addaction[] = ['label'=>'测试', 'url'=>CRUDBooster::mainpath('test/[id]'),'color'=>'info', 'icon'=>'fa fa-play'];
+            $this->addaction[] = ['label'=>'测试结果', 'url'=>CRUDBooster::mainpath('test-result/[id]'),'color'=>'info', 'icon'=>'fa fa-play'];
 
+            $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]'),'color'=>'success', 'icon'=>'fa fa-play', 'showIf'=>'[status] == ' . self::STATUS_TEST_SUCCESS . '|| [status] == ' . self::STATUS_STOP];
+
+            $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-down/[id]/' . self::STATUS_STOP),'color'=>'warning', 'icon'=>'fa fa-stop', 'showIf'=>'[status] == ' . self::STATUS_START_UP];
 
 	        /*
 	        | ----------------------------------------------------------------------
@@ -241,7 +243,7 @@
 	        | $this->post_index_html = "<p>test</p>";
 	        |
 	        */
-	        $this->post_index_html = null;
+	        $this->post_index_html = '';
 
 
 
@@ -397,5 +399,46 @@
 
 	    //By the way, you can still create your own method in here... :)
 
+        public function getTest($id)
+        {
+            $uri = '/v1/item/test';
+            $params['id'] = intval($id);
+            $result = APIService::openPost($uri, $params);
+            if (empty($result))
+            {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
+            }
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试提交成功，请稍后查看测试结果", "info");
 
+        }
+
+        public function getTestResult($id)
+        {
+
+        }
+
+        public function getStartUp($id)
+        {
+            $uri = '/v1/item/start';
+            $params['id'] = intval($id);
+            $result = APIService::openPost($uri, $params);
+
+            if (empty($result))
+            {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
+            }
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "启动成功", "info");
+        }
+
+        public function getStopDown($id, $status)
+        {
+            $uri = '/v1/item/stop';
+            $params['id'] = intval($id);
+            $result = APIService::openPost($uri, $params);
+            if (empty($result))
+            {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
+            }
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "停止成功", "info");
+        }
 	}

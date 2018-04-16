@@ -51,21 +51,6 @@
 			$this->form[] = ['label'=>'状态','name'=>'status','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			# END FORM DO NOT REMOVE THIS LINE
 
-			# OLD START FORM
-			//$this->form = [];
-			//$this->form[] = ["label"=>"Item Id","name"=>"item_id","type"=>"select2","required"=>TRUE,"validation"=>"required|integer|min:0","datatable"=>"item,id"];
-			//$this->form[] = ["label"=>"Item Run Log Id","name"=>"item_run_log_id","type"=>"select2","required"=>TRUE,"validation"=>"required|integer|min:0","datatable"=>"item_run_log,id"];
-			//$this->form[] = ["label"=>"Short Content","name"=>"short_content","type"=>"textarea","required"=>TRUE,"validation"=>"required|string|min:5|max:5000"];
-			//$this->form[] = ["label"=>"Md5 Short Contents","name"=>"md5_short_contents","type"=>"textarea","required"=>TRUE,"validation"=>"required|string|min:5|max:5000"];
-			//$this->form[] = ["label"=>"Long Content0","name"=>"long_content0","type"=>"textarea","required"=>TRUE,"validation"=>"required|string|min:5|max:5000"];
-			//$this->form[] = ["label"=>"Long Content1","name"=>"long_content1","type"=>"textarea","required"=>TRUE,"validation"=>"required|string|min:5|max:5000"];
-			//$this->form[] = ["label"=>"Images","name"=>"images","type"=>"textarea","required"=>TRUE,"validation"=>"required|string|min:5|max:5000"];
-			//$this->form[] = ["label"=>"Error Message","name"=>"error_message","type"=>"textarea","required"=>TRUE,"validation"=>"required|string|min:5|max:5000"];
-			//$this->form[] = ["label"=>"Start At","name"=>"start_at","type"=>"datetime","required"=>TRUE,"validation"=>"required|date_format:Y-m-d H:i:s"];
-			//$this->form[] = ["label"=>"End At","name"=>"end_at","type"=>"datetime","required"=>TRUE,"validation"=>"required|date_format:Y-m-d H:i:s"];
-			//$this->form[] = ["label"=>"Status","name"=>"status","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			# OLD END FORM
-
 			/* 
 	        | ---------------------------------------------------------------------- 
 	        | Sub Module
@@ -93,7 +78,10 @@
 	        | 
 	        */
 	        $this->addaction = array();
-
+//            $this->addaction[] = ['label'=>'测试成功', 'url'=>CRUDBooster::mainpath('test-result/[id]'),'color'=>'info', 'icon'=>'fa fa-play'];
+//            $this->addaction[] = ['label'=>'测试失败', 'url'=>CRUDBooster::mainpath('test-result/[id]'),'color'=>'info', 'icon'=>'fa fa-play'];
+//            $this->addaction[] = ['label'=>'翻墙测试中', 'url'=>CRUDBooster::mainpath('test-result/[id]'),'color'=>'info', 'icon'=>'fa fa-play'];
+//            $this->addaction[] = ['label'=>'不翻墙测试中', 'url'=>CRUDBooster::mainpath('test-result/[id]'),'color'=>'info', 'icon'=>'fa fa-play'];
 
 	        /* 
 	        | ---------------------------------------------------------------------- 
