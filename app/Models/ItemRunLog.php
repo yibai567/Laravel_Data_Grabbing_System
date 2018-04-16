@@ -13,7 +13,11 @@ class ItemRunLog extends Model
     use SoftDeletes;
 
     const TYPE_TEST = 1; // 测试
-    const TYPE_PRO = 2; // 产品
+    const TYPE_PRO = 2; // 生产
+
+    const STATUS_RUNNING = 1; // 运行中
+    const STATUS_SUCCESS = 2; // 成功
+    const STATUS_FAIL = 3; // 失败
 
     protected $dates = ['deleted_at'];
 
