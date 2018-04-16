@@ -5,6 +5,7 @@ namespace App\Http\Controllers\InternalAPI;
 use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
+use App\Models\ItemTestResult;
 
 /**
  * ItemTestResultController
@@ -27,12 +28,22 @@ class ItemTestResultController extends Controller
     public function getByLast(Request $request)
     {
         $params = $request->all();
+
         ValidatorService::check($params, [
+            'item_id' => 'required|integer'
         ]);
 
+        $res = ItemTestResult::where('item_id', $params['item_id'])
+                            ->orderBy('item_run_log_id', 'desc')
+                            ->get();
+        $resData = [];
 
-        $result = InternalAPIService::get('/item/results', $params);
-        return $this->resObjectGet($result, 'item', $request->path());
+        if (!empty($res)) {
+            $resData = $res->toArray();
+        }
+
+        return $this->resObjectGet($resData, 'item_result', $request->path());
+
     }
 
     /**

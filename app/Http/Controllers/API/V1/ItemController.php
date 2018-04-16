@@ -19,11 +19,6 @@ use App\Services\ItemService;
 class ItemController extends Controller
 {
 
-    public function __construct()
-    {
-        $this->itemService = new ItemService();
-    }
-
     /**
      * create
      * 任务创建
@@ -44,12 +39,12 @@ class ItemController extends Controller
         $params = $request->all();
 
         $verifyParams = $this->itemService->paramsVerifyRule();
-
+        dd($verifyParams);
         ValidatorService::check($params, $verifyParams);
 
-        $res = InternalAPIService::post('/item', $params, 'json');
+        $result = InternalAPIService::post('/item', $params, 'json');
 
-        return $this->resObjectGet($res, 'item', $request->path());
+        return $this->resObjectGet($result, 'item', $request->path());
     }
 
     /**
@@ -76,7 +71,7 @@ class ItemController extends Controller
 
         ValidatorService::check($params, $paramsVerifyRule);
 
-        dd($paramsVerifyRule);
+        $result = InternalAPIService::post('/item/update', $params, 'json');
 
         return $this->resObjectGet($result, 'item', $request->path());
     }
@@ -96,7 +91,7 @@ class ItemController extends Controller
         ]);
 
         $res = InternalAPIService::get('/item', $params);
-        return $this->resObjectGet($result, 'item', $request->path());
+        return $this->resObjectGet($res, 'item', $request->path());
     }
 
     /**
@@ -147,6 +142,7 @@ class ItemController extends Controller
     public function test(Request $request)
     {
         $params = $request->all();
+
         ValidatorService::check($params, [
             'id' => 'integer|required',
         ]);

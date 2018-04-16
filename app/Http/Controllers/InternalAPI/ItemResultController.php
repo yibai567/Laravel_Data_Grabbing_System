@@ -5,6 +5,7 @@ namespace App\Http\Controllers\InternalAPI;
 use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
+use App\Models\ItemResult;
 
 /**
  * ItemResultController
@@ -104,6 +105,33 @@ class ItemResultController extends Controller
 
 
         return $this->resObjectList($saveResult, 'item_result', $request->path());
+    }
+
+    /**
+     * all
+     * 获取任务最后执行结果列表
+     *
+     * @param item_id
+     * @return array
+     */
+    public function allByLast(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'item_id' => 'required|integer'
+        ]);
+
+        $res = ItemResult::where('item_id', $params['item_id'])
+                            ->orderBy('item_run_log_id', 'desc')
+                            ->get();
+        $resData = [];
+
+        if (!empty($res)) {
+            $resData = $res->toArray();
+        }
+
+        return $this->resObjectGet($resData, 'item_result', $request->path());
     }
 
 }
