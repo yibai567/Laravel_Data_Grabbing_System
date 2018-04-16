@@ -7,30 +7,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class QueueInfo extends Model
 {
+    // 使用软删除
     use SoftDeletes;
 
-    const IS_CAPTURE_IMAGE_TRUE = 1;
-    const IS_CAPTURE_IMAGE_FALSE = 2;
-
-    const DATA_TYPE_HTML = 1;
-    const DATA_TYPE_JSON = 2;
-    const DATA_TYPE_CAPTURE = 3;
-
     protected $dates = ['deleted_at'];
+
+    /**
+     * 表名
+     */
     protected $table = 't_queue_info';
 
-    protected $fillable = [
-        'name',
-        'description',
-        'current_length',
-        'db',
-        'is_proxy',
-        'data_type',
-        'type',
-        'is_capture_image',
-        'status',
-    ];
-
+    /**
+     * 隐藏的字段
+     */
     protected $hidden = [
         'deleted_at',
     ];

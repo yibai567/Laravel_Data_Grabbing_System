@@ -5,12 +5,14 @@ namespace App\Http\Controllers\API\V1;
 use App\Http\Controllers\Controller as BaseController;
 use App\Services\FilterService;
 use Config;
+use App\Services\ItemService;
 
 class Controller extends BaseController
 {
     public function __construct()
     {
         Config::set('logging.application_name', 'open_api');
+        $this->itemService = new ItemService();
     }
     /**
      * 格式化单条数据

@@ -4,9 +4,17 @@ namespace App\Http\Controllers\InternalAPI;
 
 use App\Services\FilterService;
 use App\Http\Controllers\Controller as BaseController;
+use App\Services\ItemService;
+
 
 class Controller extends BaseController
 {
+
+    public function __construct()
+    {
+        $this->itemService = new ItemService();
+    }
+
 
     /**
      * 格式化单条数据

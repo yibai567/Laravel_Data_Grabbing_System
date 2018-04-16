@@ -49,6 +49,10 @@ $api->version(
         $api->post('/queue_info/job','QueueInfoController@createJob');
 
         $api->post('/item_run_log','ItemRunLogController@create');
+        $api->get('/item_run_log','ItemRunLogController@all');
+        $api->get('/item_run_log/item/{item}','ItemRunLogController@getByItemId');
+        $api->post('/item_run_log/{item_run_log}','ItemRunLogController@update');
+        $api->get('/item_run_log/{item_run_log}','ItemRunLogController@retrieve');
 
         $api->post('/item','ItemController@create');
         $api->post('/item/update', 'ItemController@update');
@@ -58,6 +62,6 @@ $api->version(
         $api->post('/item/test', 'ItemController@test');
         $api->get('/item/update/current_lengths','QueueInfoController@updateCurrentLength');
         $api->get('/item/results', 'ItemResultController@allByLast');
-        $api->get('/item/test/result', 'ItemTestResultController@getLastTestResult');
+        $api->get('/item/test/result', 'ItemTestResultController@getByLast');
     }
 );

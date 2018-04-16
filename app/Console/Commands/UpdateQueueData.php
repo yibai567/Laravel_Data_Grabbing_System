@@ -59,7 +59,7 @@ class UpdateQueueData extends Command
             $length = Redis::connection($queueInfo->db)->lLen($queueInfo->name);
 
             //测试队列不更新
-            if (!strpos($queueInfo->name, 'test') && $queueInfo->data_type !== QueueInfo::DATA_TYPE_CAPTURE) {
+            if (!strpos($queueInfo->name, 'test') && $queueInfo->data_type !== Item::DATA_TYPE_CAPTURE) {
                 //非截图任务队列，如果队列有值不更新
                 if ($length > 0) {
                     continue;

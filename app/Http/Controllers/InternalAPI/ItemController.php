@@ -20,6 +20,7 @@ use App\Models\Item;
  */
 class ItemController extends Controller
 {
+
     /**
      * create
      * 任务创建
@@ -41,15 +42,14 @@ class ItemController extends Controller
 
         $resData = $params;
 
-        $itemService = new ItemService();
 
         //获取参数验证规则
-        $paramsVerifyRule = $itemService->paramsVerifyRule();
-
+        $paramsVerifyRule = $this->itemService->paramsVerifyRule();
+        dd();
         //参数验证
         ValidatorService::check($resData, $paramsVerifyRule);
         //参数格式化
-        $formatParams = $itemService->paramsFormat($resData);
+        $formatParams = $this->itemService->defaultParamsFormat($resData);
 
         $formatParams['status'] = Item::STATUS_INIT;
 
@@ -72,9 +72,31 @@ class ItemController extends Controller
     public function update(Request $request)
     {
         $params = $request->all();
-        ValidatorService::check($params, [
-        ]);
 
+        $resData = $params;
+
+        $paramsVerifyRule = $this->itemService->updateParamsVerifyRule();
+
+        ValidatorService::check($resData, $paramsVerifyRule);
+
+        //参数格式化
+        $formatParams = $this->itemService->verifySelector($resData);
+
+        $item = Item::find($formatParams['id']);
+
+        foreach ($formatParams as $key=>$value) {
+            if (isset($value)) {
+                $item->{$key} = $value;
+            }
+        }
+
+        try {
+            if ($item->save()) {
+                $result = $item->toArray();
+            }
+        } catch (Exception $e) {
+            return $this->resError($e->getCode(), $e->getMessage());
+        }
 
         return $this->resObjectGet($result, 'item', $request->path());
     }
@@ -94,8 +116,7 @@ class ItemController extends Controller
             "id" => "required|integer"
         ]);
 
-        $res = Item::where('id', $params['id'])->get();
-
+        $res = Item::find( $params['id']);
         $resData = [];
 
         if (!empty($res)) {
@@ -116,12 +137,26 @@ class ItemController extends Controller
     {
         $params = $request->all();
 
+        $itemParams = $params;
+
         ValidatorService::check($params, [
             'id' => 'integer|required',
         ]);
 
-        $itemDetail = InternalAPIService::get('/item', $params);
-        dd($itemDetail);
+        $itemDetail = InternalAPIService::get('/item', $itemParams);
+        if (empty($itemDetail)) {
+            throw new \Dingo\Api\Exception\ResourceException("item does not exist");
+        }
+
+        if ($itemDetail['status'] != Item::STATUS_TEST_SUCCESS && $taskDetail['status'] != CrawlTask::STATUS_STOP) {
+            throw new \Dingo\Api\Exception\ResourceException("item status does not allow to start");
+        }
+        $itemParams['status'] = Item::STATUS_START;
+        try {
+            $result = InternalAPIService::post('/item/update', $itemParams);
+        } catch (Exception $e) {
+            return $this->resError($e->getCode(), $e->getMessage());
+        }
 
         return $this->resObjectGet($result, 'item', $request->path());
     }
@@ -136,13 +171,32 @@ class ItemController extends Controller
     public function stop(Request $request)
     {
         $params = $request->all();
+
+        $itemParams = $params;
+
         ValidatorService::check($params, [
             'id' => 'integer|required',
         ]);
 
-        $result = InternalAPIService::post('/item/stop', $params);
+        $itemDetail = InternalAPIService::get('/item', $itemParams);
+        if (empty($itemDetail)) {
+            throw new \Dingo\Api\Exception\ResourceException("item does not exist");
+        }
+
+        if ($itemDetail['status'] != Item::STATUS_START) {
+            throw new \Dingo\Api\Exception\ResourceException("item status does not allow to start");
+        }
+
+        $itemParams['status'] = Item::STATUS_STOP;
+
+        try {
+            $result = InternalAPIService::post('/item/update', $itemParams);
+        } catch (Exception $e) {
+            return $this->resError($e->getCode(), $e->getMessage());
+        }
 
         return $this->resObjectGet($result, 'item', $request->path());
+
     }
 
     /**
@@ -155,9 +209,24 @@ class ItemController extends Controller
     public function test(Request $request)
     {
         $params = $request->all();
+
+        $formatParams = $params;
+
         ValidatorService::check($params, [
             'id' => 'integer|required',
         ]);
+
+        $itemDetail = InternalAPIService::get('/item', $formatParams);
+
+        if (empty($itemDetail)) {
+            throw new \Dingo\Api\Exception\ResourceException("item does not exist");
+        }
+
+        $queueName = 'item_test_' . $this->_data_type[$itemDetail['data_type']] . '_' . $this->_proxys[$itemDetail['is_proxy']];
+
+        $formatParams['']
+
+        dd($queueName);
 
         $result = InternalAPIService::post('/item/test', $params);
 

@@ -6,6 +6,7 @@ use App\Models\Item;
 use App\Models\ItemRunLog;
 use App\Models\QueueInfo;
 use App\Services\InternalAPIService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 use Log;
@@ -87,7 +88,7 @@ class QueueInfoController extends Controller
     {
         $params = $request->all();
         ValidatorService::check($params, [
-            //'id' => 'required|integer|min:1|max:14',
+            'id' => 'required|integer|min:1|max:14',
             'item_id' => 'required|integer',
         ]);
 
@@ -101,8 +102,6 @@ class QueueInfoController extends Controller
             return $this->resError(405, '指定队列不存在!');
         }
 
-
-
         if (strpos($queueInfo->name, 'test')) {
             $type = ItemRunLog::TYPE_TEST;
         } else {
@@ -112,16 +111,21 @@ class QueueInfoController extends Controller
         $params = [
             'item_id' => $item->id,
             'type' => $type,
+            'status' => ItemRunLog::STATUS_RUNNING,
+            'start_at' => Carbon::now()->toDateTimeString(),
         ];
+
         $itemRunLog = InternalAPIService::post('/item_run_log', $params);
 
         $data = [
             'item_id' => $item->id,
-            'item_run_log_id' => $itemRunLog->id,
+            'item_run_log_id' => $itemRunLog['id'],
             'resource_url' => $item->resource_url,
             'short_content_selector' => $item->short_content_selector,
+            'long_content_selector' => $item->long_content_selector,
             'row_selector' => $item->row_selector
         ];
+
         Redis::connection($queueInfo->db)
             ->lpush($queueInfo->name, json_encode($data));
 

@@ -28,9 +28,10 @@ class ItemResultController extends Controller
     public function allByLast(Request $request)
     {
         $params = $request->all();
-        ValidatorService::check($params, [
-        ]);
 
+        ValidatorService::check($params, [
+            "item_id" => "required|integer"
+        ]);
 
         $result = InternalAPIService::get('/item/results', $params);
         return $this->resObjectGet($result, 'item', $request->path());
@@ -47,8 +48,8 @@ class ItemResultController extends Controller
     {
         $params = $request->all();
         ValidatorService::check($params, [
+            "item_id" => "required|integer"
         ]);
-
 
         $result = InternalAPIService::get('/item/test/result', $params);
         return $this->resObjectGet($result, 'item_result', $request->path());
