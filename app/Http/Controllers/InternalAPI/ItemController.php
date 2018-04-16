@@ -8,6 +8,7 @@ use App\Services\ValidatorService;
 use App\Services\ItemService;
 use App\Services\InternalAPIService;
 use App\Models\Item;
+use App\Models\QueueInfo;
 
 
 /**
@@ -42,22 +43,28 @@ class ItemController extends Controller
 
         $resData = $params;
 
-
         //获取参数验证规则
-        $paramsVerifyRule = $this->itemService->paramsVerifyRule();
-        dd();
+        $paramsVerifyRule = $this->itemService->verifyParamsRule();
         //参数验证
         ValidatorService::check($resData, $paramsVerifyRule);
         //参数格式化
-        $formatParams = $this->itemService->defaultParamsFormat($resData);
+        $formatParams = $this->itemService->formatParams($resData);
 
         $formatParams['status'] = Item::STATUS_INIT;
 
-        $res = Item::create($formatParams);
+        try {
+            $res = Item::create($formatParams);
 
-        $result = [];
-        if (!empty($res)) {
-            $result = $res->toArray();
+            $result = [];
+
+            if (!empty($res)) {
+                $result = $res->toArray();
+            }
+
+            $this->__createQueue($result);
+
+        } catch (Exception $e) {
+            return $this->resError($e->getCode(), $e->getMessage());
         }
         return $this->resObjectGet($result, 'item', $request->path());
     }
@@ -83,7 +90,7 @@ class ItemController extends Controller
         $formatParams = $this->itemService->verifySelector($resData);
 
         $item = Item::find($formatParams['id']);
-
+        $item->status = Item::STATUS_INIT;
         foreach ($formatParams as $key=>$value) {
             if (isset($value)) {
                 $item->{$key} = $value;
@@ -94,6 +101,7 @@ class ItemController extends Controller
             if ($item->save()) {
                 $result = $item->toArray();
             }
+            $this->__createQueue($result);
         } catch (Exception $e) {
             return $this->resError($e->getCode(), $e->getMessage());
         }
@@ -116,7 +124,7 @@ class ItemController extends Controller
             "id" => "required|integer"
         ]);
 
-        $res = Item::find( $params['id']);
+        $res = Item::find($params['id']);
         $resData = [];
 
         if (!empty($res)) {
@@ -210,27 +218,46 @@ class ItemController extends Controller
     {
         $params = $request->all();
 
-        $formatParams = $params;
+        $formatParams['item_id'] = $params['id'];
 
         ValidatorService::check($params, [
             'id' => 'integer|required',
         ]);
 
         $itemDetail = InternalAPIService::get('/item', $formatParams);
-
         if (empty($itemDetail)) {
             throw new \Dingo\Api\Exception\ResourceException("item does not exist");
         }
 
-        $queueName = 'item_test_' . $this->_data_type[$itemDetail['data_type']] . '_' . $this->_proxys[$itemDetail['is_proxy']];
+        $formatParams['id'] = config('crawl_queue.' . QueueInfo::TYPE_TEST . '.' . $itemDetail['data_type'] . '.' . $itemDetail['is_proxy']);
 
-        $formatParams['']
+        if (empty($formatParams['id'])) {
+            throw new \Dingo\Api\Exception\ResourceException("queue not exist");
+        }
 
-        dd($queueName);
-
-        $result = InternalAPIService::post('/item/test', $params);
+        try {
+            InternalAPIService::post('/queue_info/job', $formatParams);
+        } catch (Exception $e) {
+            return $this->resError($e->getCode(), $e->getMessage());
+        }
 
         return $this->resObjectGet('测试提交成功，请稍后查看结果！', 'item', $request->path());
+    }
+
+    /**
+     * paras
+     *
+     */
+    private function __createQueue($result)
+    {
+        //入队列
+        $formatParams['id'] = config('crawl_queue.' . QueueInfo::TYPE_TEST . '.' . $result['data_type'] . '.' . $result['is_proxy']);
+
+        if (empty($formatParams['id'])) {
+            throw new \Dingo\Api\Exception\ResourceException("queue not exist");
+        }
+
+        InternalAPIService::post('/queue_info/job', $formatParams);
     }
 }
 
