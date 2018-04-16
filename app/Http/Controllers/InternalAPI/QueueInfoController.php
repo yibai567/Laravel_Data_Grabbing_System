@@ -87,7 +87,7 @@ class QueueInfoController extends Controller
     {
         $params = $request->all();
         ValidatorService::check($params, [
-            //'id' => 'required|integer|min:1|max:14',
+            'id' => 'required|integer|min:1|max:14',
             'item_id' => 'required|integer',
         ]);
 
@@ -100,8 +100,6 @@ class QueueInfoController extends Controller
         if (empty($queueInfo)) {
             return $this->resError(405, '指定队列不存在!');
         }
-
-
 
         if (strpos($queueInfo->name, 'test')) {
             $type = ItemRunLog::TYPE_TEST;
