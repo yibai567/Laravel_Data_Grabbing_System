@@ -122,9 +122,10 @@ class QueueInfoController extends Controller
             'item_run_log_id' => $itemRunLog['id'],
             'resource_url' => $item->resource_url,
             'short_content_selector' => $item->short_content_selector,
+            'long_content_selector' => $item->long_content_selector,
             'row_selector' => $item->row_selector
         ];
-        
+
         Redis::connection($queueInfo->db)
             ->lpush($queueInfo->name, json_encode($data));
 
