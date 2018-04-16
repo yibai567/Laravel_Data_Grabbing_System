@@ -122,8 +122,15 @@ class ItemResultController extends Controller
             'item_id' => 'required|integer'
         ]);
 
-        $res = ItemResult::where('item_id', $params['item_id'])
-                            ->orderBy('item_run_log_id', 'desc')
+        $type = ItemRunLog::TYPE_PRO;
+
+        $itemRunLog = InternalAPIService::get('/item_run_log/item/' . $params['item_id'] . '?type=' . $type);
+
+        if (empty($itemRunLog)) {
+            throw new \Dingo\Api\Exception\ResourceException("item_run_log_id not exist");
+        }
+
+        $res = ItemTestResult::where('item_run_log_id', $itemRunLog['id'])
                             ->get();
         $resData = [];
 

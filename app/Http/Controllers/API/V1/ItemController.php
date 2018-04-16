@@ -38,7 +38,7 @@ class ItemController extends Controller
     {
         $params = $request->all();
 
-        $verifyParams = $this->itemService->paramsVerifyRule();
+        $verifyParams = $this->itemService->verifyParamsRule();
 
         ValidatorService::check($params, $verifyParams);
 

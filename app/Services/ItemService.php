@@ -25,14 +25,18 @@ class ItemService extends Service
      * @param is_proxy (是否翻墙 1 翻墙 | 2 不翻墙)
      * @return array
      */
-    public function paramsVerifyRule() {
+    public function verifyParamsRule() {
         return [
-            "data_type" => "required|integer|between:1,2",
+            "data_type" => "required|integer|between:1,2,3",
             "content_type" => "required|integer|between:1,2",
             "resource_url" => "required|string",
             "is_capture_image" => "nullable|integer|between:1,2",
-            "cron_type" => "nullable|integer|in:1,2,3,4",
+            "cron_type" => "nullable|integer|in:1,2,3,4,5",
             "is_proxy" => "nullable|integer|between:1,2",
+            "short_content_selector" => "nullable|array",
+            "long_content_selector" => "nullable|array",
+            "row_selector" => "nullable|string|max:100",
+            "header" => "nullable|array",
         ];
     }
 
@@ -52,20 +56,20 @@ class ItemService extends Service
     public function updateParamsVerifyRule() {
         return [
             "id" => "required|integer",
-            "data_type" => "nullable|integer|between:1,2",
+            "data_type" => "nullable|integer|between:1,2,3",
             "content_type" => "nullable|integer|between:1,2",
             "resource_url" => "nullable|string",
             "is_capture_image" => "nullable|integer|between:1,2",
-            "cron_type" => "nullable|integer|in:1,2,3,4",
+            "cron_type" => "nullable|integer|in:1,2,3,4,5",
             "is_proxy" => "nullable|integer|between:1,2",
             "type" => "nullable|integer|between:1,2",
             "action_type" => "nullable|integer|between:1",
             "associate_result_id" => "nullable|integer",
             "pre_detail_url" => "nullable|string",
-            "short_content_selector" => "nullable",
-            "long_content_selector" => "nullable",
+            "short_content_selector" => "nullable|array",
+            "long_content_selector" => "nullable|array",
             "row_selector" => "nullable|string",
-            "header" => "nullable",
+            "header" => "nullable|array",
             "last_job_at" => "nullable|date",
             "status" => "nullable|between:1,6",
         ];
@@ -78,8 +82,7 @@ class ItemService extends Service
      * @param $data (任务参数)
      * @return array
      */
-    public function defaultParamsFormat($data) {
-
+    public function formatParams($data) {
         $formatParams = $data;
         $item = [
             'type'  => 1,
@@ -93,7 +96,6 @@ class ItemService extends Service
                 $formatParams[$key] = $value;
             }
         }
-
         return $this->verifySelector($formatParams);
     }
 
@@ -107,6 +109,7 @@ class ItemService extends Service
     public function verifySelector($data) {
 
         if (!empty($data['short_content_selector'])) {
+
             //短内容不为空时，detail_url键名不存在，默认键名
             if (!array_key_exists('detail_url', $data['short_content_selector'])) {
                 $data['short_content_selector']['detail_url'] = "";
@@ -120,14 +123,38 @@ class ItemService extends Service
             }
 
             $data['short_content_selector'] = json_encode($data['short_content_selector']);
+
+            if (strlen($data['short_content_selector']) > 1000) {
+                throw new \Dingo\Api\Exception\ResourceException("short_content_selector too long ");
+            }
         }
 
         if (!empty($data['long_content_selector'])) {
+
+            //短内容不为空时，detail_url键名不存在，默认键名
+            if (!array_key_exists('detail_url', $data['long_content_selector'])) {
+                $data['long_content_selector']['detail_url'] = "";
+            }
+
+            //如果is_capture_image is true时，detail_url不能为空
+            if ($data['is_capture_image'] == Item::IS_CAPTURE_IMAGE_TRUE) {
+                if (empty($data['long_content_selector']['detail_url'])) {
+                    throw new \Dingo\Api\Exception\ResourceException("is_capture_image is true detail_url not null");
+                }
+            }
+
             $data['long_content_selector'] = json_encode($data['long_content_selector']);
+
+            if (strlen($data['long_content_selector']) > 1000) {
+                throw new \Dingo\Api\Exception\ResourceException("long_content_selector too long ");
+            }
         }
 
         if (!empty($data['header'])) {
             $data['header'] = json_encode($data['header']);
+            if (strlen($data['header']) > 1000) {
+                throw new \Dingo\Api\Exception\ResourceException("header too long ");
+            }
         }
         return $data;
     }

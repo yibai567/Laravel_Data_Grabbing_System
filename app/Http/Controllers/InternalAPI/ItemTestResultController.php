@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
 use App\Models\ItemTestResult;
+use App\Models\ItemRunLog;
+use App\Services\InternalAPIService;
 
 /**
  * ItemTestResultController
@@ -28,13 +30,20 @@ class ItemTestResultController extends Controller
     public function getByLast(Request $request)
     {
         $params = $request->all();
-
         ValidatorService::check($params, [
             'item_id' => 'required|integer'
         ]);
 
-        $res = ItemTestResult::where('item_id', $params['item_id'])
-                            ->orderBy('item_run_log_id', 'desc')
+        //获取item_run_log_id
+        $type = ItemRunLog::TYPE_TEST;
+
+        $itemRunLog = InternalAPIService::get('/item_run_log/item/' . $params['item_id'] . '?type=' . $type);
+
+        if (empty($itemRunLog)) {
+            throw new \Dingo\Api\Exception\ResourceException("item_run_log_id not exist");
+        }
+
+        $res = ItemTestResult::where('item_run_log_id', $itemRunLog['id'])
                             ->get();
         $resData = [];
 
