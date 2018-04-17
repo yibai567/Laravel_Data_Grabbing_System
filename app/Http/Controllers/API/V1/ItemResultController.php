@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
 use App\Services\InternalAPIService;
+use App\Models\ItemRunLog;
+use App\Models\Item;
 
 /**
  * ItemResultController
@@ -59,8 +61,7 @@ class ItemResultController extends Controller
      * dispatchJob
      * 结果分发
      *
-     * @param item_id (抓取任务ID)
-     * @param is_test (是否是测试数据) 1测试|2插入
+     * @param item_run_log_id (执行记录 id)
      * @param start_time (开始时间)
      * @param end_time (结束时间)
      * @param result (抓取结果)
@@ -69,6 +70,7 @@ class ItemResultController extends Controller
     public function dispatchJob(Request $request)
     {
         $params = $request->all();
+
         ValidatorService::check($params, [
             'item_run_log_id' => 'required|integer|min:1|max:99999999',
             'start_time'      => 'date|nullable',
@@ -76,52 +78,56 @@ class ItemResultController extends Controller
             'short_content'   => 'array|nullable',
             'long_content'    => 'array|nullable',
             'images'          => 'array|nullable',
+            'error_message'   => 'string|nullable'
         ]);
-
         // 获取 item run Log
-        $itemRunLog = InternalAPIService::get('/item/run/log', ['id' => $params['item_run_log_id']]);
-        if ($itemRunLog['status'] != 1) {
+        $itemRunLog = InternalAPIService::get('/item_run_log', ['id' => $params['item_run_log_id']]);
+        if ($itemRunLog['status'] != ItemRunLog::STATUS_RUNNING) {
             throw new \Dingo\Api\Exception\ResourceException("invalid item_run_log status");
         }
 
         // 获取 item
         $item = InternalAPIService::get('/item', ['id' => $itemRunLog['item_id']]);
-        if ($item['status'] != 4) {
-            throw new \Dingo\Api\Exception\ResourceException("invalid item status");
-        }
+
+        // // 任务状态应该是 2 、5
+        // if ($item['status'] != 4) {
+        //     throw new \Dingo\Api\Exception\ResourceException("invalid item status");
+        // }
 
         // 判断 任务类型（test or production）、数据类型
         switch ($item['data_type']) {
-            case 1:
-                $path = '/item/result/html';
-                if ($itemRunLog['type'] == 1) {
-                    $path = '/item/test/result/html';
+            case Item::DATA_TYPE_HTML:
+                $path = '/item/result/update';
+                if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
+                    $path = '/item/test/result/update';
                 }
 
                 break;
-            case 2:
-                $path = '/item/result/json';
-                if ($itemRunLog['type'] == 1) {
-                    $path = '/item/test/result/json';
-                }
+            // case Item::DATA_TYPE_JSON:
+            //     $path = '/item/result/json';
+            //     if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
+            //         $path = '/item/test/result/json';
+            //     }
 
-                break;
+            //     break;
 
-            case 3:
-                $path = '/item/result/image';
-                if ($itemRunLog['type'] == 1) {
-                    $path = '/item/test/result/image';
-                }
+            // case Item::DATA_TYPE_CAPTURE:
+            //     $path = '/item/result/image';
+            //     if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
+            //         $path = '/item/test/result/image';
+            //     }
 
-                break;
+            //     break;
             default:
                 throw new \Dingo\Api\Exception\ResourceException("invalid item data_type");
         }
-
         try {
+            $params['is_proxy'] = $item['is_proxy'];
+            dd($path);
             $results = InternalAPIService::post($path, $params);
+            dd($results);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
-
+dd(1);
             // 标记当前任务为失败状态
             InternalAPIService::post('/item/run/log/fail', $params);
             throw new \Dingo\Api\Exception\ResourceException("invalid result");
@@ -136,6 +142,18 @@ class ItemResultController extends Controller
                 // 判断任务是否需要图片资源
                 $this->__downloadImage($item, $result);
             }
+        } else {
+            // if ($item['status'])
+            // if is_test
+            //     get test result
+            //         status
+            //             1
+            //             2
+            //                 // no porxy
+            //                 // add redis
+
+            //             3
+            //             4
         }
 
         return $this->resObjectGet([], 'item_result', $request->path());
@@ -151,15 +169,15 @@ class ItemResultController extends Controller
      */
     private function __captureImage($item, $result)
     {
-        if ($item['data_type'] == 3) {
+        if ($item['data_type'] == Item::DATA_TYPE_CAPTURE) {
             return true;
         }
 
-        if ($item['is_capture_image'] != 1) {
+        if ($item['is_capture_image'] != Item::IS_CAPTURE_IMAGE_TRUE) {
             return true;
         }
 
-        if (empty($result['short_content']['detail_url'])) {
+        if (!isset($result['short_content']['detail_url']) || empty($result['short_content']['detail_url'])) {
             return true;
         }
 
@@ -172,18 +190,18 @@ class ItemResultController extends Controller
             'pre_detail_url'      => $preDetailUrl,
             'associate_result_id' => $result['id'],
             'is_proxy'            => $item['is_proxy'],
-            'is_capture_image'    => 1,
-            'type'                => 2,
-            'data_type'           => 3,
-            'content_type'        => 1,
-            'cron_type'           => 1,
+            'is_capture_image'    => Item::IS_CAPTURE_IMAGE_TRUE,
+            'type'                => Item::TYPE_SYS,
+            'data_type'           => Item::DATA_TYPE_CAPTURE,
+            'content_type'        => Item::CONTENT_TYPE_SHORT,
+            'cron_type'           => Item::CRON_TYPE_ONLY_ONE,
         ];
 
         // 添加系统截图任务
-        $captureItem = InternalAPIService::post('/item/', $itemParams);
+        $captureItem = InternalAPIService::post('/item', $itemParams);
 
         // 入队列
-
+        // $queueItem = InternalAPIService::post('/queue_info/job', )
         return true;
     }
 

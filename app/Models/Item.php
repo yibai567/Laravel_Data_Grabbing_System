@@ -30,6 +30,15 @@ class Item extends Model
     const IS_PROXY_YES = 1; // 需要代理
     const IS_PROXY_NO = 2; // 不需要代理
 
+    const CONTENT_TYPE_SHORT = 1; // 短内容
+    const CONTENT_TYPE_LONG = 2; // 长内容
+
+    const CRON_TYPE_KEEP = 1; // 持续执行
+    const CRON_TYPE_EVERY_MINUTE = 2; // 每分钟执行
+    const CRON_TYPE_EVERY_FIVE_MINIT = 3; // 每五分钟执行
+    const CRON_TYPE_EVERY_FIFTHEEN_MINIT = 4; // 每十五分钟持续执行一次
+    const CRON_TYPE_ONLY_ONE = 5; // 只执行一次
+
     protected $dates = ['deleted_at'];
 
     /**

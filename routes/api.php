@@ -40,6 +40,7 @@ $api->version(
 
         $api->get('/item/results', 'ItemResultController@allByLast');
         $api->get('/item/test/result', 'ItemResultController@getLastTestResult');
+        $api->post('/item/results/dispatch', 'ItemResultController@dispatchJob');
 
         $api->get('/queue_info/job','QueueInfoController@getJob');
     }
