@@ -98,7 +98,7 @@ class ItemRunLogController extends Controller
      * @param
      * @return array
      */
-    public function retrieve(Request $request, $id)
+    public function retrieve(Request $request)
     {
         $params = $request->all();
         ValidatorService::check($params, [
