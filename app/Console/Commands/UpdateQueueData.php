@@ -44,7 +44,6 @@ class UpdateQueueData extends Command
     {
         $this->info('jinse:update:queue_data start！');
         $this->__updateQueueData();
-        InternalAPIService::get('/queue_info/update/current_lengths');
         $this->info('jinse:update:queue_data ended！');
     }
 
@@ -54,40 +53,45 @@ class UpdateQueueData extends Command
      */
     private function __updateQueueData()
     {
-        $queueInfos = QueueInfo::all();
-        foreach ($queueInfos as $queueInfo) {
-            $length = Redis::connection($queueInfo->db)->lLen($queueInfo->name);
+        try {
+            $queueInfos = QueueInfo::all();
+            foreach ($queueInfos as $queueInfo) {
+                $length = Redis::connection($queueInfo->db)->lLen($queueInfo->name);
 
-            //测试队列不更新
-            if (!strpos($queueInfo->name, 'test') && $queueInfo->data_type !== Item::DATA_TYPE_CAPTURE) {
-                //非截图任务队列，如果队列有值不更新
-                if ($length > 0) {
-                    continue;
-                }
+                //测试队列不更新
+                if (!strpos($queueInfo->name, 'test') && $queueInfo->data_type !== Item::DATA_TYPE_CAPTURE) {
+                    //非截图任务队列，如果队列有值不更新
+                    if ($length > 0) {
+                        continue;
+                    }
 
-                $jobs = Item::where('status', Item::STATUS_START)
-                    ->where('action_type', Item::TYPE_OUT)
-                    ->where('is_proxy', $queueInfo->is_proxy)
-                    ->where('data_type', $queueInfo->data_type)
-                    ->pluck('id')
-                    ->toArray();
+                    $jobs = Item::where('status', Item::STATUS_START)
+                        ->where('action_type', Item::TYPE_OUT)
+                        ->where('is_proxy', $queueInfo->is_proxy)
+                        ->where('data_type', $queueInfo->data_type)
+                        ->pluck('id')
+                        ->toArray();
 
-                if (empty($jobs)) {
-                    continue;
-                }
+                    if (empty($jobs)) {
+                        continue;
+                    }
 
-                foreach ($jobs as $job) {
-                    try {
-                        $params = [
-                            'id' => $queueInfo->id,
-                            'item_id' => $job,
-                        ];
-                        InternalAPIService::post('/queue_info/job', $params);
-                    } catch (\Exception $e) {
-                        echo $e->getMessage();
+                    foreach ($jobs as $job) {
+                        try {
+                            $params = [
+                                'id' => $queueInfo->id,
+                                'item_id' => $job,
+                            ];
+                            InternalAPIService::post('/queue_info/job', $params);
+                        } catch (\Exception $e) {
+                            echo $e->getMessage();
+                        }
                     }
                 }
             }
+            InternalAPIService::get('/queue_info/update/current_lengths');
+        } catch (\Exception $e) {
+            return null;
         }
     }
 }

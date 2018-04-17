@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\V1;
 
+use App\Service\WWW\ImageService;
 use Illuminate\Http\Request;
 use Log;
 
@@ -35,7 +36,7 @@ class ItemResultController extends Controller
             $imageService = new ImageService();
             $imgResult = $imageService->uploadByFile($image);
 
-            if (empty($imgResult['data']['pk_image'])) {
+            if (empty($imgResult['data']['id'])) {
                 if (!empty($imgResult['msg'])) {
                     $this->response()->error($imgResult['msg'], 500);
                 }
@@ -45,12 +46,11 @@ class ItemResultController extends Controller
             $scheme = config('aliyun.oss.scheme');
             $domain = config('aliyun.oss.domain');
 
-            $url = $scheme.$domain.'/'.$imgResult['data']['pk_image'];
+            $url = $scheme.$domain.'/'.$imgResult['data']['id'];
 
             return ['image_url' => $url];
         } catch (\Exception $e) {
             Log::error('AppImageV3Controller upload error' . $e->getMessage());
-
         }
 
         $this->response()->error('上传图片失败:' . $e->getMessage(), 500);
