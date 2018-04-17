@@ -138,6 +138,7 @@ class ItemTestResultController extends Controller
         $params = $request->all();
 
         ValidatorService::check($params, [
+            'id' => 'required|integer',
             'item_id' => 'nullable|integer',
             'item_run_log_id' => 'nullable|integer',
             'short_contents' => 'nullable|text',
@@ -151,8 +152,14 @@ class ItemTestResultController extends Controller
             'status' => 'nullable|integer',
         ]);
 
+        $itemTestResult = ItemTestResult::find($params['id']);
+        if (empty($itemTestResult)) {
+            return $this->resError(405, 'item test result does not exist！');
+        }
 
-        return $this->resObjectList($saveResult, 'crawl_result', $request->path());
+        $itemTestResult->update($params);
+        $result = $itemTestResult->toArray();
+        return $this->resObjectGet($result, 'item_test_result', $request->path());
     }
 }
 

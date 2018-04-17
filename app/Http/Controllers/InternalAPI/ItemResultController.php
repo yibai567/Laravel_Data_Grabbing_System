@@ -154,6 +154,7 @@ class ItemResultController extends Controller
         $params = $request->all();
 
         ValidatorService::check($params, [
+            'id' => 'required|integer',
             'item_id' => 'nullable|integer',
             'item_run_log_id' => 'nullable|integer',
             'short_contents' => 'nullable|text',
@@ -165,5 +166,14 @@ class ItemResultController extends Controller
             'end_at' => 'nullable|date',
             'status' => 'nullable|integer',
         ]);
+
+        $itemResult = ItemResult::find($params['id']);
+        if (empty($itemResult)) {
+            return $this->resError(405, 'item result does not exist！');
+        }
+
+        $itemResult->update($params);
+        $result = $itemResult->toArray();
+        return $this->resObjectGet($result, 'item_result', $request->path());
     }
 }
