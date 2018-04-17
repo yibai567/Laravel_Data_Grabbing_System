@@ -63,7 +63,7 @@ class ImageService extends Service
             $md5Content = md5($content);
             $image = Image::where('md5_content', $md5Content)->first();
             if ($image) {
-                return $image->pk_image;
+                return $image->id;
             }
 
             $image = new Image();
@@ -75,13 +75,12 @@ class ImageService extends Service
 
             DB::beginTransaction();
             $image->save();
-
             $objectKey = config('aliyun.oss.base_key').$image->id;
 
             $oss = AliyunOSS::boot($path, $accessKey, $secret);
             $oss->setBucket(config('aliyun.oss.bucket'));
             $oss->uploadContent($objectKey, $object);
-
+            $image->update(['oss_url' => $scheme.$domain.'/'.$image['id']]);
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
@@ -92,7 +91,7 @@ class ImageService extends Service
             return null;
         }
 
-        return $image;
+        return $image->toArray();
     }
 
     /**

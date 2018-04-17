@@ -51,7 +51,10 @@ class ImageCrawl extends Command
                     $imageRes = [];
                     if (count($data['images'])) {
                         foreach ($data['images'] as $imageUrl) {
-                            $imageRes[] = $imageService->uploadByImageUrl($imageUrl);
+                            $imageItem = $imageService->uploadByImageUrl($imageUrl);
+                            $imageItem = array_only($imageItem, ['oss_url', 'width', 'height', 'ext', 'mime_type']);
+                            $imageItem['url'] = $imageItem['oss_url'];
+                            $imageRes[] = $imageItem;
                         }
                     }
 

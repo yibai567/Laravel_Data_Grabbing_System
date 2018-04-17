@@ -56,26 +56,3 @@ class ItemResultController extends Controller
         $this->response()->error('上传图片失败:' . $e->getMessage(), 500);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
