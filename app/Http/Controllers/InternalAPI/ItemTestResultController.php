@@ -128,10 +128,10 @@ class ItemTestResultController extends Controller
 
     /**
      * update
-     * 创建
+     * 更新
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return array
     */
     public function update(Request $request)
     {

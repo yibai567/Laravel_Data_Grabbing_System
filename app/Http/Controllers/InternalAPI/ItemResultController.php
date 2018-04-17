@@ -141,27 +141,25 @@ class ItemResultController extends Controller
         return $this->resObjectGet($resData, 'item_result', $request->path());
     }
 
+
+    /**
+     * update
+     * 更新结果
+     *
+     * @param Request $request
+     * return array
+     */
+    public function update(Request $request, $id)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'item_id' => 'nullable|integer',
+            'item_run_log_id' => 'nullable|integer',
+            'short_contents' => 'nullable|text',
+            'md5_short_contents' => 'nullable|text',
+            'item_run_log_id' => 'nullable|text',
+            'item_run_log_id' => 'nullable|text',
+        ]);
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

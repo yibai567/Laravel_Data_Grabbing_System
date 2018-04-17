@@ -115,7 +115,7 @@ class QueueInfoController extends Controller
             'start_at' => Carbon::now()->toDateTimeString(),
         ];
 
-        $itemRunLog = InternalAPIService::post('/item_run_log', $params);
+        $itemRunLog = InternalAPIService::post('/item_run_log/create', $params);
 
         $data = [
             'item_id' => $item->id,

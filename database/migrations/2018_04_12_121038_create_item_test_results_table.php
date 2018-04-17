@@ -17,7 +17,7 @@ class CreateItemTestResultsTable extends Migration
             $table->increments('id');
             $table->integer('item_id')->comment('Item ID');
             $table->integer('item_run_log_id')->comment('Item 运行日志 ID');
-            $table->text('short_content')->nullable()->comment('短内容');
+            $table->text('short_contents')->nullable()->comment('短内容');
             $table->text('md5_short_contents')->nullable()->comment('短内容MD5');
             $table->text('long_content0')->nullable()->comment('长内容');
             $table->text('long_content1')->nullable()->comment('长内容');

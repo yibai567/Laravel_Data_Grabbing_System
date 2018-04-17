@@ -49,10 +49,10 @@ $api->version(
         $api->post('/queue_info/job','QueueInfoController@createJob');
 
         $api->post('/item_run_log','ItemRunLogController@create');
-        $api->get('/item_run_log','ItemRunLogController@all');
-        $api->get('/item_run_log/item/{item}','ItemRunLogController@getByItemId');
-        $api->post('/item_run_log/{item_run_log}','ItemRunLogController@update');
-        $api->get('/item_run_log/{item_run_log}','ItemRunLogController@retrieve');
+        $api->get('/item_run_logs','ItemRunLogController@all');
+        $api->get('/item_run_log/item','ItemRunLogController@getByItemId');
+        $api->post('/item_run_log/update','ItemRunLogController@update');
+        $api->get('/item_run_log','ItemRunLogController@retrieve');
 
         $api->post('/item','ItemController@create');
         $api->post('/item/update', 'ItemController@update');

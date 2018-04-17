@@ -12,7 +12,7 @@ class ItemRunLogController extends Controller
 
     /**
      * create
-     * 保存
+     * 创建
      *
      * @param
      * @return array
@@ -48,11 +48,11 @@ class ItemRunLogController extends Controller
      * @param
      * @return array
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $id = intval($id);
         $params = $request->all();
         ValidatorService::check($params, [
+            'id' => 'required|integer',
             'item_id' => 'nullable|integer',
             'type' => 'nullable|integer|in:1,2',
             'start_at' => 'nullable|datatime',
@@ -60,7 +60,7 @@ class ItemRunLogController extends Controller
             'status' => 'nullable|integer|in:1,2,3',
         ]);
 
-        $itemRunLog = ItemRunLog::find($id);
+        $itemRunLog = ItemRunLog::find($params['id']);
 
         if (empty($itemRunLog)) {
             return $this->resError(405, 'itemRunLog is not exists!');
@@ -100,8 +100,11 @@ class ItemRunLogController extends Controller
      */
     public function retrieve(Request $request, $id)
     {
-        $id = intval($id);
-        $itemRunLog = ItemRunLog::find($id);
+        $params = $request->all();
+        ValidatorService::check($params, [
+            'id' => 'required|integer',
+        ]);
+        $itemRunLog = ItemRunLog::find($params['id']);
 
         $result = [];
         if (!empty($itemRunLog)) {
@@ -114,14 +117,14 @@ class ItemRunLogController extends Controller
     /**
      * @param Request $request
      */
-    public function getByItemId(Request $request, $itemId) {
-        $itemId = intval($itemId);
+    public function getByItemId(Request $request) {
         $params = $request->all();
         ValidatorService::check($params, [
+            'item_id' => 'required|integer',
             'type' => 'required|integer|min:1|max:2',
         ]);
 
-        $itemRunLogs = ItemRunLog::where('item_id', $itemId)
+        $itemRunLogs = ItemRunLog::where('item_id', $params['item_id'])
             ->where('type', $params['type'])
             ->orderBy('id', 'desc')
             ->first();
