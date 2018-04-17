@@ -144,7 +144,7 @@ class ItemResultController extends Controller
 
     /**
      * update
-     * 更新结果
+     * 更新
      *
      * @param Request $request
      * return array
@@ -158,8 +158,12 @@ class ItemResultController extends Controller
             'item_run_log_id' => 'nullable|integer',
             'short_contents' => 'nullable|text',
             'md5_short_contents' => 'nullable|text',
-            'item_run_log_id' => 'nullable|text',
-            'item_run_log_id' => 'nullable|text',
+            'long_content0' => 'nullable|text',
+            'long_content1' => 'nullable|text',
+            'images' => 'nullable|text',
+            'start_at' => 'nullable|date',
+            'end_at' => 'nullable|date',
+            'status' => 'nullable|integer',
         ]);
     }
 }

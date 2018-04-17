@@ -138,8 +138,17 @@ class ItemTestResultController extends Controller
         $params = $request->all();
 
         ValidatorService::check($params, [
-            'task_id' => 'required|integer',
-            'result' => 'nullable',
+            'item_id' => 'nullable|integer',
+            'item_run_log_id' => 'nullable|integer',
+            'short_contents' => 'nullable|text',
+            'md5_short_contents' => 'nullable|text',
+            'long_content0' => 'nullable|text',
+            'long_content1' => 'nullable|text',
+            'images' => 'nullable|text',
+            'error_message' => 'nullable|text',
+            'start_at' => 'nullable|date',
+            'end_at' => 'nullable|date',
+            'status' => 'nullable|integer',
         ]);
 
 
