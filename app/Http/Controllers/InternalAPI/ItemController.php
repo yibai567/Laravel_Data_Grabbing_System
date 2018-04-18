@@ -42,7 +42,6 @@ class ItemController extends Controller
         $params = $request->all();
 
         $resData = $params;
-
         //获取参数验证规则
         $paramsVerifyRule = $this->itemService->verifyParamsRule();
         //参数验证
@@ -55,6 +54,7 @@ class ItemController extends Controller
         $res = Item::create($formatParams);
 
         $result = [];
+
         if (!empty($res)) {
             $result = $res->toArray();
         }
@@ -81,7 +81,6 @@ class ItemController extends Controller
 
         //参数格式化
         $formatParams = $this->itemService->verifySelector($resData);
-
         $item = Item::find($formatParams['id']);
         $item->status = Item::STATUS_INIT;
 
@@ -94,8 +93,6 @@ class ItemController extends Controller
         if ($item->save()) {
             $result = $item->toArray();
         }
-
-        $this->__createQueue($result);
 
         return $this->resObjectGet($result, 'item', $request->path());
     }
@@ -135,21 +132,20 @@ class ItemController extends Controller
     public function start(Request $request)
     {
         $params = $request->all();
-        $itemParams = $params;
 
         ValidatorService::check($params, [
             'id' => 'integer|required',
         ]);
 
-        $itemDetail = $this->__getDetail($itemParams['id']);
+        $itemDetail = $this->__getDetail($params['id']);
 
         if ($itemDetail['status'] != Item::STATUS_TEST_SUCCESS && $itemDetail['status'] != Item::STATUS_STOP) {
             throw new \Dingo\Api\Exception\ResourceException("item status does not allow to start");
         }
 
-        $itemParams['status'] = Item::STATUS_START;
+        $updateParams['status'] = Item::STATUS_START;
 
-        $result = InternalAPIService::post('/item/update', $itemParams);
+        $result = $this->__saveStatus($params['id'], $updateParams);
 
         return $this->resObjectGet($result, 'item', $request->path());
     }
@@ -177,9 +173,9 @@ class ItemController extends Controller
             throw new \Dingo\Api\Exception\ResourceException("item status does not allow to stop");
         }
 
-        $itemParams['status'] = Item::STATUS_STOP;
+        $updateParams['status'] = Item::STATUS_STOP;
 
-        $result = InternalAPIService::post('/item/update', $itemParams);
+        $result = $this->__saveStatus($params['id'], $updateParams);
 
         return $this->resObjectGet($result, 'item', $request->path());
 
@@ -196,24 +192,23 @@ class ItemController extends Controller
     {
         $params = $request->all();
 
-        $formatParams['item_id'] = $params['id'];
-
         ValidatorService::check($params, [
             'id' => 'integer|required',
         ]);
 
-        $params['status'] = Item::STATUS_TESTING;
-        $itemDetail = InternalAPIService::post('/item/update', $params);
+        $updateParams['status'] = Item::STATUS_TESTING;
+
+        $itemDetail = $this->__saveStatus($params['id'], $updateParams);
 
         $queueInfo = $this->__createQueue($itemDetail);
 
-        $itemTestResult = InternalAPIService::post('/item/test_result', ['item_id' => $formatParams['item_id'], 'item_run_log_id' => $queueInfo['item_run_log_id']]);
+        $itemTestResult = InternalAPIService::post('/item/test_result', ['item_id' => $params['id'], 'item_run_log_id' => $queueInfo['item_run_log_id']]);
 
         if (empty($itemTestResult)) {
             throw new \Dingo\Api\Exception\ResourceException(" create item_test_result fail");
         }
 
-        return $this->resObjectGet('测试提交成功，请稍后查看结果！', 'item', $request->path());
+        return $this->resObjectGet($itemDetail, 'item', $request->path());
     }
 
     /**
@@ -233,6 +228,7 @@ class ItemController extends Controller
             throw new \Dingo\Api\Exception\ResourceException("queue info job is error");
         }
         return $queueInfo;
+
     }
 
     /**
@@ -251,6 +247,28 @@ class ItemController extends Controller
         }
 
         return $itemDetail;
+    }
+
+    /**
+     * __saveStatus
+     * 修改状态
+     *
+     * @param $id
+     * @param $updateParams
+     * @return array
+     */
+    private function __saveStatus($id, $updateParams)
+    {
+        $item = Item::find($id);
+
+        $item->update($updateParams);
+
+        $result = $item->toArray();
+
+        if (empty($result)) {
+            throw new \Dingo\Api\Exception\ResourceException("status update fail");
+        }
+        return $result;
     }
 
 }

@@ -1,7 +1,8 @@
-<?php namespace App\Http\Controllers;
+<?php
+    namespace App\Http\Controllers;
 
 	use App\Models\Item;
-    use App\Services\HttpService;
+    use App\Services\InternalAPIService;
     use Session;
 	use Request;
 	use DB;
@@ -105,7 +106,9 @@
             $this->form[] = ['label'=>'Status','name'=>'status','type'=>'hidden','width'=>'col-sm-10'];
 
 			$this->form[] = ['label'=>'资源URL','name'=>'resource_url','type'=>'text','validation'=>'required|string','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'短内容选择器','name'=>'short_content_selector','type'=>'textarea','width'=>'col-sm-10'];
+
+            $this->form[] = ['label'=>'行内选择器','name'=>'row_selector','type'=>'text','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'短内容选择器','name'=>'short_content_selector','type'=>'textarea','width'=>'col-sm-10'];
             $this->form[] = ['label'=>'长内容选择器','name'=>'long_content_selector','type'=>'textarea','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'header头','name'=>'header','type'=>'textarea','width'=>'col-sm-10'];
 			# END FORM DO NOT REMOVE THIS LINE
@@ -138,7 +141,7 @@
 	        |
 	        */
 	        $this->addaction = array();
-            $this->addaction[] = ['label'=>'测试', 'url'=>CRUDBooster::mainpath('test/[id]'),'color'=>'info', 'icon'=>'fa fa-play'];
+            $this->addaction[] = ['label'=>'测试', 'url'=>CRUDBooster::mainpath('test/[id]'),'color'=>'info', 'icon'=>'fa fa-play', 'showIf'=>'[status] == ' . Item::STATUS_TEST_SUCCESS . '|| [status] == ' . Item::STATUS_STOP . '|| [status] == ' . Item::STATUS_TEST_FAIL . '|| [status] == ' . Item::STATUS_START . '|| [status] == ' . Item::STATUS_INIT];
             $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]'),'color'=>'success', 'icon'=>'fa fa-play', 'showIf'=>'[status] == ' . Item::STATUS_TEST_SUCCESS . '|| [status] == ' . Item::STATUS_STOP];
 
             $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-down/[id]'),'color'=>'warning', 'icon'=>'fa fa-stop', 'showIf'=>'[status] == ' . Item::STATUS_START];
@@ -326,6 +329,7 @@
 	    public function hook_before_add(&$postdata) {
 	        //Your code here
             //调用创建接口创建任务
+            $this->__create($postdata);
 	    }
 
 	    /*
@@ -350,7 +354,8 @@
 	    */
 	    public function hook_before_edit(&$postdata,$id) {
 	        //Your code here
-
+            //调用修改接口修改任务
+            $this->__update($postdata, $id);
 	    }
 
 	    /*
@@ -393,47 +398,66 @@
 
 	    //By the way, you can still create your own method in here... :)
 
+        private function __create($params)
+        {
+            $result = InternalAPIService::post('/item', $params);
+
+            if (empty($result)) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+            }
+
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试提交成功，请稍后查看测试结果", "success");
+        }
+
+        private function __update($params, $id)
+        {
+            $params['id'] = $id;
+            $result = InternalAPIService::post('/item/update', $params);
+
+            if (empty($result)) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+            }
+
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试提交成功，请稍后查看测试结果", "success");
+        }
+
+
         public function getTest($id)
         {
-            $uri = '/v1/item/test';
-            $params['id'] = intval($id);
-            $HttpService = new HttpService();
-            $result = $HttpService->post($uri, $params);
+            $result = InternalAPIService::post('/item/test', ['id' => intval($id)]);
+
             if (empty($result)) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试提交成功，请稍后查看测试结果", "success");
-
         }
 
         public function getTestResult($id)
         {
-            $uri = '/v1/item/start';
-            $params['id'] = intval($id);
-            $result = HttpService::post($uri, $params);
+            // $uri = '/v1/item/start';
+            // $params['id'] = intval($id);
+            // $result = HttpService::post('/v1/item/start', ['id' => intval($id)]);
+
         }
 
         public function getStartUp($id)
         {
-            $uri = '/v1/item/test/result';
-            $params['item_id'] = intval($id);
-            $result = HttpService::post($uri, $params);
-            if (empty($result))
-            {
-                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
+            $result = InternalAPIService::post('/item/start', ['id' => intval($id)]);
+            if (empty($result)) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "启动成功", "info");
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "启动成功", "success");
         }
 
         public function getStopDown($id)
         {
-            $uri = '/v1/item/stop';
-            $params['id'] = intval($id);
-            $result = HttpService::post($uri, $params);
-            if (empty($result))
-            {
-                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
+
+            $result = InternalAPIService::post('/item/stop', ['id' => intval($id)]);
+
+            if (empty($result)) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "停止成功", "info");
+
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "停止成功", "success");
         }
 	}
