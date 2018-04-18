@@ -33,10 +33,10 @@ class ItemService extends Service
             "is_capture_image" => "nullable|integer|between:1,2",
             "cron_type" => "nullable|integer|in:1,2,3,4,5",
             "is_proxy" => "nullable|integer|between:1,2",
-            "short_content_selector" => "nullable|array",
-            "long_content_selector" => "nullable|array",
+            "short_content_selector" => "nullable",
+            "long_content_selector" => "nullable",
             "row_selector" => "nullable|string|max:100",
-            "header" => "nullable|array",
+            "header" => "nullable",
         ];
     }
 
@@ -109,9 +109,9 @@ class ItemService extends Service
     public function verifySelector($data) {
 
         if (!empty($data['short_content_selector'])) {
-
+            $data['short_content_selector'] = json_decode($data['short_content_selector'], true);
             //短内容不为空时，detail_url键名不存在，默认键名
-            if (!array_key_exists('detail_url', $data['short_content_selector'])) {
+            if (empty($data['short_content_selector']['detail_url'])) {
                 $data['short_content_selector']['detail_url'] = "";
             }
 
@@ -130,9 +130,10 @@ class ItemService extends Service
         }
 
         if (!empty($data['long_content_selector'])) {
+            $data['long_content_selector'] = json_decode($data['long_content_selector'], true);
 
             //短内容不为空时，detail_url键名不存在，默认键名
-            if (!array_key_exists('detail_url', $data['long_content_selector'])) {
+            if (empty($data['long_content_selector']['detail_url'])) {
                 $data['long_content_selector']['detail_url'] = "";
             }
 

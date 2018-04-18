@@ -154,7 +154,7 @@ class ItemResultController extends Controller
         $params = $request->all();
 
         ValidatorService::check($params, [
-            'id' => 'required|integer',
+            'id' => 'nullable|integer',
             'item_id' => 'nullable|integer',
             'item_run_log_id' => 'nullable|integer',
             'short_contents' => 'nullable|text',

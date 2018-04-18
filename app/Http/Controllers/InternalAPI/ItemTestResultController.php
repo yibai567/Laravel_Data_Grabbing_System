@@ -44,7 +44,6 @@ class ItemTestResultController extends Controller
         }
 
         return $this->resObjectGet($resData, 'item_result', $request->path());
-
     }
 
     /**
@@ -139,7 +138,8 @@ class ItemTestResultController extends Controller
 
         $testResult = $params;
         ValidatorService::check($testResult, [
-            'item_id' => 'required|nullable',
+            'id' => 'integer|nullable',
+            'item_id' => 'integer|nullable',
             'item_run_log_id' => 'integer|nullable',
             'short_content' => 'array|nullable',
             'long_content' => 'array|nullable',

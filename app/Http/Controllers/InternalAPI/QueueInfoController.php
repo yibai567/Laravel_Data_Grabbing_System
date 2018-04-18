@@ -22,7 +22,6 @@ use App\Services\ValidatorService;
  */
 class QueueInfoController extends Controller
 {
-
     /**
      * updateCurrentLength
      * 更新
@@ -69,11 +68,11 @@ class QueueInfoController extends Controller
         }
 
         $job = Redis::connection($queueInfo->db)->rPop($queueInfo->name);
-        $job = json_decode($job, true);
+        $job = json_decode($job);
 
-        if (empty($job)) {
-            $job = [];
-        }
+//        if (empty($job)) {
+//            $job = [];
+//        }
 
         return $this->resObjectGet($job, 'queue_info', $request->path());
     }
