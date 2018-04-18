@@ -207,7 +207,7 @@ class ItemController extends Controller
 
         $params['status'] = Item::STATUS_TESTING;
 
-        //InternalAPIService::post('/item/update', $params);
+        InternalAPIService::post('/item/update', $params);
 
         $itemDetail = $this->__getDetail($formatParams['item_id']);
         $this->__createQueue($itemDetail);
