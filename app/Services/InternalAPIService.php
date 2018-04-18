@@ -30,7 +30,6 @@ class InternalAPIService extends Service
         try {
             $response = $dispatcher->post($url);
         } catch (\Dingo\Api\Exception\InternalHttpException $e) {
-
             $response = $e->getResponse();
             $errorMessage = $response->getContent();
             throw new \Dingo\Api\Exception\ResourceException('internal API post error');

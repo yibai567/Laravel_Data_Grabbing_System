@@ -10,13 +10,6 @@
 
 	class AdminTItemController extends \crocodicstudio\crudbooster\controllers\CBController {
 
-        // 状态
-        const STATUS_NO_STARTING = 1;
-        const STATUS_TEST_SUCCESS = 2;
-        const STATUS_TEST_FAIL = 3;
-        const STATUS_START_UP = 4;
-        const STATUS_STOP = 5;
-
 	    public function cbInit() {
 
 			# START CONFIGURATION DO NOT REMOVE THIS LINE
@@ -46,9 +39,9 @@
                 return '<a href="' . $row->resource_url . '" target="_brank" style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->resource_url .'</a>';
             }];
             $this->col[] = ["label"=>"数据类型","name"=>"data_type","callback"=>function ($row) {
-                if ( $row->data_type == 1) {
+                if ( $row->data_type == Item::DATA_TYPE_HTML) {
                     return 'html';
-                } else if( $row->data_type == 2) {
+                } else if( $row->data_type == Item::DATA_TYPE_JSON) {
                     return 'json';
                 } else {
                     return '截图';
@@ -56,7 +49,7 @@
             }];
 
             $this->col[] = ["label"=>"内容类型","name"=>"content_type","callback"=>function ($row) {
-                if ( $row->content_type == 1) {
+                if ( $row->content_type == Item::CONTENT_TYPE_SHORT) {
                     return '短内容';
                 } else {
                     return '长内容';
@@ -64,20 +57,20 @@
             }];
 
             $this->col[] = ["label"=>"执行频次","name"=>"cron_type","callback"=>function ($row) {
-                if ( $row->cron_type == 1) {
+                if ( $row->cron_type == Item::CRON_TYPE_KEEP) {
                     return '持续执行';
-                } else if( $row->cron_type == 2) {
-                    return '每分钟执行一次';
-                } else if( $row->cron_type == 3) {
-                    return '每小时执行一次';
-                } else if ($row->cron_type == 4) {
-                    return '每天执行一次';
-                } else if ($row->cron_type == 5) {
+                } else if( $row->cron_type == Item::CRON_TYPE_ONLY_ONE) {
                     return '执行一次';
+                } else if( $row->cron_type == Item::CRON_TYPE_EVERY_MINUTE) {
+                    return '每分钟执行';
+                } else if ($row->cron_type == Item::CRON_TYPE_EVERY_FIVE_MINIT) {
+                    return '每五分钟执行';
+                } else if ($row->cron_type == Item::CRON_TYPE_EVERY_FIFTHEEN_MINIT) {
+                    return '每十五分钟执行';
                 }
             }];
             $this->col[] = ["label"=>"是否翻墙","name"=>"is_proxy","callback"=>function ($row) {
-                if ( $row->is_proxy == 1) {
+                if ( $row->is_proxy == Item::IS_PROXY_YES) {
                     return '是';
                 } else {
                     return '否';
@@ -86,17 +79,17 @@
 
 			$this->col[] = ["label"=>"最后执行时间","name"=>"last_job_at"];
             $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
-                if ( $row->status == 1) {
+                if ( $row->status == Item::STATUS_INIT) {
                     return '未启动';
-                } else if( $row->status == 2) {
+                } else if( $row->status == Item::STATUS_TESTING) {
                     return '测试中';
-                } else if( $row->status == 3) {
+                } else if( $row->status == Item::STATUS_TEST_SUCCESS) {
                     return '测试成功';
-                } else if( $row->status == 4) {
+                } else if( $row->status == Item::STATUS_TEST_FAIL) {
                     return '测试失败';
-                } else if( $row->status == 5) {
+                } else if( $row->status == Item::STATUS_START) {
                     return '运行中';
-                } else if( $row->status == 6) {
+                } else if( $row->status == Item::STATUS_STOP) {
                     return '已停止';
                 }
             }];
@@ -131,6 +124,7 @@
 	        |
 	        */
 	        $this->sub_module = array();
+            $this->sub_module[] = ['label'=>'任务结果','path'=>'t_item_result','foreign_key'=>'item_id','button_color'=>'success','button_icon'=>'fa fa-bars', 'parent_columns'=>'id', 'showIf'=>"[resource_type] != 0"];
 
 
 	        /*
@@ -146,11 +140,13 @@
 	        */
 	        $this->addaction = array();
             $this->addaction[] = ['label'=>'测试', 'url'=>CRUDBooster::mainpath('test/[id]'),'color'=>'info', 'icon'=>'fa fa-play'];
+            $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]'),'color'=>'success', 'icon'=>'fa fa-play', 'showIf'=>'[status] == ' . Item::STATUS_TEST_SUCCESS . '|| [status] == ' . Item::STATUS_STOP];
+
+            $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-down/[id]'),'color'=>'warning', 'icon'=>'fa fa-stop', 'showIf'=>'[status] == ' . Item::STATUS_START];
+
             $this->addaction[] = ['label'=>'测试结果', 'url'=>CRUDBooster::mainpath('test-result/[id]'),'color'=>'info', 'icon'=>'fa fa-play'];
 
-            $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]'),'color'=>'success', 'icon'=>'fa fa-play', 'showIf'=>'[status] == ' . self::STATUS_TEST_SUCCESS . '|| [status] == ' . self::STATUS_STOP];
 
-            $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-down/[id]/' . self::STATUS_STOP),'color'=>'warning', 'icon'=>'fa fa-stop', 'showIf'=>'[status] == ' . self::STATUS_START_UP];
 
 	        /*
 	        | ----------------------------------------------------------------------
@@ -414,15 +410,16 @@
 
         public function getTestResult($id)
         {
-
+            $uri = '/v1/item/start';
+            $params['id'] = intval($id);
+            $result = APIService::openPost($uri, $params);
         }
 
         public function getStartUp($id)
         {
-            $uri = '/v1/item/start';
-            $params['id'] = intval($id);
+            $uri = '/v1/item/test/result';
+            $params['item_id'] = intval($id);
             $result = APIService::openPost($uri, $params);
-
             if (empty($result))
             {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
@@ -430,7 +427,7 @@
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "启动成功", "info");
         }
 
-        public function getStopDown($id, $status)
+        public function getStopDown($id)
         {
             $uri = '/v1/item/stop';
             $params['id'] = intval($id);

@@ -9,7 +9,7 @@ use App\Services\ItemService;
 use App\Services\InternalAPIService;
 use App\Models\Item;
 use App\Models\QueueInfo;
-
+use App\Models\ItemRunLog;
 
 /**
  * ItemController
@@ -52,20 +52,16 @@ class ItemController extends Controller
 
         $formatParams['status'] = Item::STATUS_INIT;
 
-        try {
-            $res = Item::create($formatParams);
+        $res = Item::create($formatParams);
 
-            $result = [];
+        $result = [];
 
-            if (!empty($res)) {
-                $result = $res->toArray();
-            }
-
-            $this->__createQueue($result);
-
-        } catch (Exception $e) {
-            return $this->resError($e->getCode(), $e->getMessage());
+        if (!empty($res)) {
+            $result = $res->toArray();
         }
+
+        $this->__createQueue($result);
+
         return $this->resObjectGet($result, 'item', $request->path());
     }
 
@@ -91,20 +87,18 @@ class ItemController extends Controller
 
         $item = Item::find($formatParams['id']);
         $item->status = Item::STATUS_INIT;
+
         foreach ($formatParams as $key=>$value) {
             if (isset($value)) {
                 $item->{$key} = $value;
             }
         }
 
-        try {
-            if ($item->save()) {
-                $result = $item->toArray();
-            }
-            $this->__createQueue($result);
-        } catch (Exception $e) {
-            return $this->resError($e->getCode(), $e->getMessage());
+        if ($item->save()) {
+            $result = $item->toArray();
         }
+
+        $this->__createQueue($result);
 
         return $this->resObjectGet($result, 'item', $request->path());
     }
@@ -144,27 +138,21 @@ class ItemController extends Controller
     public function start(Request $request)
     {
         $params = $request->all();
-
         $itemParams = $params;
 
         ValidatorService::check($params, [
             'id' => 'integer|required',
         ]);
 
-        $itemDetail = InternalAPIService::get('/item', $itemParams);
-        if (empty($itemDetail)) {
-            throw new \Dingo\Api\Exception\ResourceException("item does not exist");
-        }
+        $itemDetail = $this->__getDetail($itemParams['id']);
 
-        if ($itemDetail['status'] != Item::STATUS_TEST_SUCCESS && $taskDetail['status'] != CrawlTask::STATUS_STOP) {
+        if ($itemDetail['status'] != Item::STATUS_TEST_SUCCESS && $itemDetail['status'] != Item::STATUS_STOP) {
             throw new \Dingo\Api\Exception\ResourceException("item status does not allow to start");
         }
+
         $itemParams['status'] = Item::STATUS_START;
-        try {
-            $result = InternalAPIService::post('/item/update', $itemParams);
-        } catch (Exception $e) {
-            return $this->resError($e->getCode(), $e->getMessage());
-        }
+
+        $result = InternalAPIService::post('/item/update', $itemParams);
 
         return $this->resObjectGet($result, 'item', $request->path());
     }
@@ -186,22 +174,15 @@ class ItemController extends Controller
             'id' => 'integer|required',
         ]);
 
-        $itemDetail = InternalAPIService::get('/item', $itemParams);
-        if (empty($itemDetail)) {
-            throw new \Dingo\Api\Exception\ResourceException("item does not exist");
-        }
+        $itemDetail = $this->__getDetail($itemParams['id']);
 
         if ($itemDetail['status'] != Item::STATUS_START) {
-            throw new \Dingo\Api\Exception\ResourceException("item status does not allow to start");
+            throw new \Dingo\Api\Exception\ResourceException("item status does not allow to stop");
         }
 
         $itemParams['status'] = Item::STATUS_STOP;
 
-        try {
-            $result = InternalAPIService::post('/item/update', $itemParams);
-        } catch (Exception $e) {
-            return $this->resError($e->getCode(), $e->getMessage());
-        }
+        $result = InternalAPIService::post('/item/update', $itemParams);
 
         return $this->resObjectGet($result, 'item', $request->path());
 
@@ -224,41 +205,65 @@ class ItemController extends Controller
             'id' => 'integer|required',
         ]);
 
-        $itemDetail = InternalAPIService::get('/item', $formatParams);
-        if (empty($itemDetail)) {
-            throw new \Dingo\Api\Exception\ResourceException("item does not exist");
+        $params['status'] = Item::STATUS_TESTING;
+
+        InternalAPIService::post('/item/update', $params);
+
+        $itemDetail = $this->__getDetail($formatParams['item_id']);
+
+        $this->__createQueue($itemDetail);
+
+        $type = ItemRunLog::TYPE_TEST;
+
+        $itemRunLog = InternalAPIService::get('/item_run_log/item/', ['item_id' => $formatParams['item_id'], 'type' => $type ]);
+        if (empty($itemRunLog)) {
+            throw new \Dingo\Api\Exception\ResourceException("item_run_log_id not exist");
         }
 
-        $formatParams['id'] = config('crawl_queue.' . QueueInfo::TYPE_TEST . '.' . $itemDetail['data_type'] . '.' . $itemDetail['is_proxy']);
+        $itemTestResult = InternalAPIService::post('/item/test/result/', ['item_id' => $formatParams['item_id'], 'item_run_log_id' => $itemRunLog['id']]);
 
-        if (empty($formatParams['id'])) {
-            throw new \Dingo\Api\Exception\ResourceException("queue not exist");
+        if (empty($itemTestResult)) {
+            throw new \Dingo\Api\Exception\ResourceException(" create item_test_result fail");
         }
 
-        try {
-            InternalAPIService::post('/queue_info/job', $formatParams);
-        } catch (Exception $e) {
-            return $this->resError($e->getCode(), $e->getMessage());
-        }
 
         return $this->resObjectGet('测试提交成功，请稍后查看结果！', 'item', $request->path());
     }
 
     /**
-     * paras
+     * __createQueue
+     * 创建队列
      *
+     * @param $result
      */
     private function __createQueue($result)
     {
         //入队列
         $formatParams['id'] = config('crawl_queue.' . QueueInfo::TYPE_TEST . '.' . $result['data_type'] . '.' . $result['is_proxy']);
 
-        if (empty($formatParams['id'])) {
-            throw new \Dingo\Api\Exception\ResourceException("queue not exist");
-        }
+        $formatParams['item_id'] = $result['id'];
 
         InternalAPIService::post('/queue_info/job', $formatParams);
     }
+
+    /**
+     * __getDetail
+     * 获取任务详情
+     *
+     * @param id
+     * @return array
+     */
+    private function __getDetail($id)
+    {
+        $itemDetail = InternalAPIService::get('/item', ['id' => $id]);
+
+        if (empty($itemDetail)) {
+            throw new \Dingo\Api\Exception\ResourceException("item does not exist");
+        }
+
+        return $itemDetail;
+    }
+
 }
 
 

@@ -50,7 +50,7 @@ class ItemResultController extends Controller
     {
         $params = $request->all();
         ValidatorService::check($params, [
-            "item_id" => "required|integer"
+            "item_run_log_id" => "required|integer"
         ]);
 
         $result = InternalAPIService::get('/item/test/result', $params);

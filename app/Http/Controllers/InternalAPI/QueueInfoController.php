@@ -130,7 +130,8 @@ class QueueInfoController extends Controller
             'resource_url' => $item->resource_url,
             'short_content_selector' => $item->short_content_selector,
             'long_content_selector' => $item->long_content_selector,
-            'row_selector' => $item->row_selector
+            'row_selector' => $item->row_selector,
+            'header' => $item->header
         ];
 
         Redis::connection($queueInfo->db)

@@ -60,6 +60,7 @@ class Item extends Model
         'resource_url',
         'short_content_selector',
         'long_content_selector',
+        'header',
         'row_selector',
         'cron_type',
         'is_proxy',
