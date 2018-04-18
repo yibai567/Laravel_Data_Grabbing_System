@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Service\WWW;
+namespace App\Services;
 
-use App\Models\WWW\Image;
+use App\Models\Image;
 use DB;
 use Exception;
 use GuzzleHttp\Client;
@@ -19,7 +19,6 @@ class ImageService extends Service
      */
     public function uploadByImageUrl($url, $isSizeRule = [])
     {
-
         try {
             $domain = config('aliyun.oss.domain');
             $scheme = config('aliyun.oss.scheme');
@@ -48,10 +47,10 @@ class ImageService extends Service
 
             $response = $client->request('GET', $url, ['timeout' => 30]);
             $content = $response->getBody();
-
             $object = (string)$content;
 
             $ext = $this->getExt($url);
+
             if (!$ext) {
                 Log::error('not found url is url :  '.$url."\t foreach key is : ", -1);
 
@@ -69,7 +68,7 @@ class ImageService extends Service
             $image = new Image();
             $image->name = md5($url);
             $image->ext = $ext;
-            $image->minme_type = $ext;
+            $image->mime_type = $ext;
             $image->size = $size;
             $image->md5_content = $md5Content;
 

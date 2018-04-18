@@ -90,6 +90,7 @@ class QueueInfoController extends Controller
         ValidatorService::check($params, [
             'id' => 'required|integer|min:1|max:14',
             'item_id' => 'required|integer',
+            'item_run_log_id' => 'nullable|integer',
         ]);
 
         $item = Item::find($params['item_id']);
@@ -108,18 +109,24 @@ class QueueInfoController extends Controller
             $type = ItemRunLog::TYPE_PRO;
         }
 
-        $params = [
-            'item_id' => $item->id,
-            'type' => $type,
-            'status' => ItemRunLog::STATUS_RUNNING,
-            'start_at' => Carbon::now()->toDateTimeString(),
-        ];
+        // 判断参数是否有item_run_log_id，如果有不重新申请
+        if (empty($params['item_run_log_id'])) {
+            $res = [
+                'item_id' => $item->id,
+                'type' => $type,
+                'status' => ItemRunLog::STATUS_RUNNING,
+                'start_at' => Carbon::now()->toDateTimeString(),
+            ];
 
-        $itemRunLog = InternalAPIService::post('/item_run_log/create', $params);
+            $itemRunLog = InternalAPIService::post('/item_run_log/create', $res);
+            $itemRunLogId = $itemRunLog['id'];
+        } else {
+            $itemRunLogId = $params['item_run_log_id'];
+        }
 
         $data = [
             'item_id' => $item->id,
-            'item_run_log_id' => $itemRunLog['id'],
+            'item_run_log_id' => $itemRunLogId,
             'resource_url' => $item->resource_url,
             'short_content_selector' => $item->short_content_selector,
             'long_content_selector' => $item->long_content_selector,
@@ -132,26 +139,3 @@ class QueueInfoController extends Controller
         return $this->resObjectGet('入队成功', 'queue_info', $request->path());
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

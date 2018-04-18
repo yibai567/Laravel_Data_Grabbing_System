@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Services\HttpService;
 use App\Services\ImageService;
 use App\Services\InternalAPIService;
 use Illuminate\Console\Command;
@@ -61,6 +60,7 @@ class ImageCrawl extends Command
                     if (count($imageRes)) {
                         $params['images'] = $imageRes;
                         $params['id'] = $data['id'];
+                        
                         DB::beginTransaction();
                         if ($data['is_test']) { // is_test 为真，将结果存入测试结果队列
                             InternalAPIService::post('/item/test/result/update', $params);
@@ -69,6 +69,8 @@ class ImageCrawl extends Command
                         }
                         DB::commit();
                     }
+                } else {
+                    sleep(60);
                 }
             } catch (\Exception $e) {
                 DB::rollBack();
