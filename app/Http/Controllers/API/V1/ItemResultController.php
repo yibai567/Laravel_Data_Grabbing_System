@@ -46,14 +46,14 @@ class ItemResultController extends Controller
      * @param item_id
      * @return array
      */
-    public function getLastTestResult(Request $request)
+    public function getTestResult(Request $request)
     {
         $params = $request->all();
         ValidatorService::check($params, [
             "item_run_log_id" => "required|integer"
         ]);
 
-        $result = InternalAPIService::get('/item/test/result', $params);
+        $result = InternalAPIService::get('/item/test_result', $params);
         return $this->resObjectGet($result, 'item_result', $request->path());
     }
 

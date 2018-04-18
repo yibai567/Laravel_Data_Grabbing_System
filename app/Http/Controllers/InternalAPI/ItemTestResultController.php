@@ -27,25 +27,16 @@ class ItemTestResultController extends Controller
      * @param item_id
      * @return array
      */
-    public function getByLast(Request $request)
+    public function getTestResult(Request $request)
     {
         $params = $request->all();
+
         ValidatorService::check($params, [
             'item_run_log_id' => 'required|integer'
         ]);
 
-        //获取item_run_log_id
-        // $type = ItemRunLog::TYPE_TEST;
-
-        // $itemRunLog = InternalAPIService::get('/item_run_log/item/' . $params['item_id'] . '?type=' . $type);
-
-        // if (empty($itemRunLog)) {
-        //     throw new \Dingo\Api\Exception\ResourceException("item_run_log_id not exist");
-        // }
-
         $res = ItemTestResult::where('item_run_log_id', $params['item_run_log_id'])
                             ->first();
-
         $resData = [];
 
         if (!empty($res)) {
@@ -160,7 +151,7 @@ class ItemTestResultController extends Controller
         ]);
 
         //获取测试结果
-        $itemRunLog = InternalAPIService::get('/item/test_result/last', ['item_run_log_id' => $testResult['item_run_log_id']]);
+        $itemRunLog = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $testResult['item_run_log_id']]);
 
         if (empty($itemRunLog)) {
             throw new \Dingo\Api\Exception\ResourceException(" test result not exist");
@@ -174,22 +165,27 @@ class ItemTestResultController extends Controller
                 } else {
                     $testResult['status'] = ItemTestResult::STATUS_PROXY_TEST;
                 }
-            }
-
-            if ($itemRunLog['status'] == ItemTestResult::STATUS_NO_PROXY_TEST || $itemRunLog['status'] == ItemTestResult::STATUS_PROXY_TEST) {
+            } else if ($itemRunLog['status'] == ItemTestResult::STATUS_NO_PROXY_TEST) {
+                $testResult['status'] = ItemTestResult::STATUS_FAIL;
+            } else if ($itemRunLog['status'] == ItemTestResult::STATUS_PROXY_TEST) {
                 $testResult['status'] = ItemTestResult::STATUS_FAIL;
             }
         } else {
+            if (empty($testResult['short_content']) && empty($testResult['long_content'])) {
+                return $this->resObjectGet([], 'item_test_result', $request->path());
+            }
             $testResult['status'] = ItemTestResult::STATUS_SUCCESS;
         }
-        // $itemTestResult = ItemTestResult::find($params['id']);
-        // if (empty($itemTestResult)) {
-        //     return $this->resError(405, 'item test result does not exist！');
-        // }
 
-        // $itemTestResult->update($params);
-        // $result = $itemTestResult->toArray();
-        // return $this->resObjectGet($result, 'item_test_result', $request->path());
+        $formatData = $this->__formatData($testResult);
+
+        $itemTestResult = ItemTestResult::find($itemRunLog['id']);
+
+        $itemTestResult->update($formatData);
+
+        $result = $itemTestResult->toArray();
+
+        return $this->resObjectGet($result, 'item_test_result', $request->path());
     }
 
     /**
@@ -206,7 +202,7 @@ class ItemTestResultController extends Controller
         ValidatorService::check($params, [
             'item_id' => 'required|integer',
             'item_run_log_id' => 'integer|nullable',
-            'short_content' => 'array|nullable',
+            'short_contents' => 'array|nullable',
             'long_content' => 'array|nullable',
             'images' => 'array|nullable',
             'error_message' => 'string|nullable',
@@ -225,6 +221,35 @@ class ItemTestResultController extends Controller
         }
 
         return $this->resObjectGet($result, 'item_result', $request->path());
+    }
+
+    private function __formatData($params)
+    {
+        $item = [
+            'short_contents'  => '',
+            'md5_short_contents' => '',
+            'long_content0' => '',
+            'long_content1' => '',
+            'images' => '',
+            'error_message' => '',
+            'start_at' => '',
+            'end_at' => '',
+            'status' => ''
+        ];
+
+        $data = [];
+
+        foreach ($item as $key => $value) {
+            if (!empty($params[$key])) {
+                $data[$key] = $params[$key];
+            }
+        }
+
+        if (!empty($data['short_contents'])) {
+            $data['short_contents'] = json_encode($data['short_contents']);
+            $data['md5_short_contents'] = md5(json_encode($data['short_contents']));
+        }
+        return $data;
     }
 
 }

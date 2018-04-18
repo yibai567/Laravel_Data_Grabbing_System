@@ -35,7 +35,7 @@ class ItemTestResult extends Model
     protected $fillable = [
         'item_id',
         'item_run_log_id',
-        'short_content',
+        'short_contents',
         'md5_short_contents',
         'long_content0',
         'long_content1',

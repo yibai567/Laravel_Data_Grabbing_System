@@ -63,7 +63,7 @@ $api->version(
         $api->get('/item/update/current_lengths','QueueInfoController@updateCurrentLength');
 
         $api->get('/item/results', 'ItemResultController@allByLast');
-        $api->get('/item/test_result/last', 'ItemTestResultController@getByLast');
+        $api->get('/item/test_result', 'ItemTestResultController@getTestResult');
         $api->post('/item/test/result', 'ItemTestResultController@create');
 
         $api->post('/item/test/result/html', 'ItemTestResultController@createAllToHtml');
