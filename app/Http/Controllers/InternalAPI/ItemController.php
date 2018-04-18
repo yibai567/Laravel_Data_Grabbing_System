@@ -207,12 +207,10 @@ class ItemController extends Controller
 
         $params['status'] = Item::STATUS_TESTING;
 
-        InternalAPIService::post('/item/update', $params);
+        //InternalAPIService::post('/item/update', $params);
 
         $itemDetail = $this->__getDetail($formatParams['item_id']);
-
         $this->__createQueue($itemDetail);
-
         $type = ItemRunLog::TYPE_TEST;
 
         $itemRunLog = InternalAPIService::get('/item_run_log/item/', ['item_id' => $formatParams['item_id'], 'type' => $type ]);
@@ -220,7 +218,7 @@ class ItemController extends Controller
             throw new \Dingo\Api\Exception\ResourceException("item_run_log_id not exist");
         }
 
-        $itemTestResult = InternalAPIService::post('/item/test/result/', ['item_id' => $formatParams['item_id'], 'item_run_log_id' => $itemRunLog['id']]);
+        $itemTestResult = InternalAPIService::post('/item/test_result/', ['item_id' => $formatParams['item_id'], 'item_run_log_id' => $itemRunLog['id']]);
 
         if (empty($itemTestResult)) {
             throw new \Dingo\Api\Exception\ResourceException(" create item_test_result fail");
@@ -242,7 +240,6 @@ class ItemController extends Controller
         $formatParams['id'] = config('crawl_queue.' . QueueInfo::TYPE_TEST . '.' . $result['data_type'] . '.' . $result['is_proxy']);
 
         $formatParams['item_id'] = $result['id'];
-
         InternalAPIService::post('/queue_info/job', $formatParams);
     }
 

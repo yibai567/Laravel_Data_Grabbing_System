@@ -97,7 +97,6 @@ class QueueInfoController extends Controller
         if (empty($item)) {
             return $this->resError(405, '指定Item不存在!');
         }
-
         $queueInfo = QueueInfo::find($params['id']);
         if (empty($queueInfo)) {
             return $this->resError(405, '指定队列不存在!');
@@ -118,7 +117,7 @@ class QueueInfoController extends Controller
                 'start_at' => Carbon::now()->toDateTimeString(),
             ];
 
-            $itemRunLog = InternalAPIService::post('/item_run_log/create', $res);
+            $itemRunLog = InternalAPIService::post('/item_run_log', $res);
             $itemRunLogId = $itemRunLog['id'];
         } else {
             $itemRunLogId = $params['item_run_log_id'];
