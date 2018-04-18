@@ -1,8 +1,7 @@
 <?php namespace App\Http\Controllers;
 
 	use App\Models\Item;
-    use App\Services\APIService;
-    use App\Services\InternalAPIService;
+    use App\Services\HttpService;
     use Session;
 	use Request;
 	use DB;
@@ -107,8 +106,8 @@
 
 			$this->form[] = ['label'=>'资源URL','name'=>'resource_url','type'=>'text','validation'=>'required|string','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'短内容选择器','name'=>'short_content_selector','type'=>'textarea','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'长内容选择器','name'=>'long_content_selector','type'=>'textarea','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'图片配置','name'=>'capture_config','type'=>'textarea','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'长内容选择器','name'=>'long_content_selector','type'=>'textarea','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'header头','name'=>'header','type'=>'textarea','width'=>'col-sm-10'];
 			# END FORM DO NOT REMOVE THIS LINE
 
 			/*
@@ -327,7 +326,6 @@
 	    public function hook_before_add(&$postdata) {
 	        //Your code here
             //调用创建接口创建任务
-
 	    }
 
 	    /*
@@ -399,12 +397,12 @@
         {
             $uri = '/v1/item/test';
             $params['id'] = intval($id);
-            $result = APIService::openPost($uri, $params);
-            if (empty($result))
-            {
-                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
+            $HttpService = new HttpService();
+            $result = $HttpService->post($uri, $params);
+            if (empty($result)) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试提交成功，请稍后查看测试结果", "info");
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试提交成功，请稍后查看测试结果", "success");
 
         }
 
@@ -412,14 +410,14 @@
         {
             $uri = '/v1/item/start';
             $params['id'] = intval($id);
-            $result = APIService::openPost($uri, $params);
+            $result = HttpService::post($uri, $params);
         }
 
         public function getStartUp($id)
         {
             $uri = '/v1/item/test/result';
             $params['item_id'] = intval($id);
-            $result = APIService::openPost($uri, $params);
+            $result = HttpService::post($uri, $params);
             if (empty($result))
             {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");
@@ -431,7 +429,7 @@
         {
             $uri = '/v1/item/stop';
             $params['id'] = intval($id);
-            $result = APIService::openPost($uri, $params);
+            $result = HttpService::post($uri, $params);
             if (empty($result))
             {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "info");

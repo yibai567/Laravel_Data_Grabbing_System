@@ -16,7 +16,7 @@ class InternalAPIService extends Service
      * @param $contentType
      * @return $response['data']
      */
-    public static function post($path, $params = [], $contentType = '')
+    public static function post($path, $params = [], $contentType = 'json')
     {
         $url = config('url.jinse_internal_url') . '/internal' . $path;
         $dispatcher = app('Dingo\Api\Dispatcher');

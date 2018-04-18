@@ -42,7 +42,14 @@ class ItemController extends Controller
 
         ValidatorService::check($params, $verifyParams);
 
-        $result = InternalAPIService::post('/item', $params, 'json');
+        $result = InternalAPIService::post('/item', $params);
+
+        if (!empty($result)) {
+            $testParams = [
+                'id' => $result['id']
+            ];
+            InternalAPIService::post('/item/test', $testParams);
+        }
 
         return $this->resObjectGet($result, 'item', $request->path());
     }

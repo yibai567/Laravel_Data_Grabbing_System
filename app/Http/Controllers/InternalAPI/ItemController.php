@@ -55,12 +55,9 @@ class ItemController extends Controller
         $res = Item::create($formatParams);
 
         $result = [];
-
         if (!empty($res)) {
             $result = $res->toArray();
         }
-
-        $this->__createQueue($result);
 
         return $this->resObjectGet($result, 'item', $request->path());
     }
@@ -206,24 +203,15 @@ class ItemController extends Controller
         ]);
 
         $params['status'] = Item::STATUS_TESTING;
+        $itemDetail = InternalAPIService::post('/item/update', $params);
 
-        //InternalAPIService::post('/item/update', $params);
+        $queueInfo = $this->__createQueue($itemDetail);
 
-        $itemDetail = $this->__getDetail($formatParams['item_id']);
-        $this->__createQueue($itemDetail);
-        $type = ItemRunLog::TYPE_TEST;
-
-        $itemRunLog = InternalAPIService::get('/item_run_log/item/', ['item_id' => $formatParams['item_id'], 'type' => $type ]);
-        if (empty($itemRunLog)) {
-            throw new \Dingo\Api\Exception\ResourceException("item_run_log_id not exist");
-        }
-
-        $itemTestResult = InternalAPIService::post('/item/test_result/', ['item_id' => $formatParams['item_id'], 'item_run_log_id' => $itemRunLog['id']]);
+        $itemTestResult = InternalAPIService::post('/item/test_result', ['item_id' => $formatParams['item_id'], 'item_run_log_id' => $queueInfo['item_run_log_id']]);
 
         if (empty($itemTestResult)) {
             throw new \Dingo\Api\Exception\ResourceException(" create item_test_result fail");
         }
-
 
         return $this->resObjectGet('测试提交成功，请稍后查看结果！', 'item', $request->path());
     }
@@ -240,7 +228,11 @@ class ItemController extends Controller
         $formatParams['id'] = config('crawl_queue.' . QueueInfo::TYPE_TEST . '.' . $result['data_type'] . '.' . $result['is_proxy']);
 
         $formatParams['item_id'] = $result['id'];
-        InternalAPIService::post('/queue_info/job', $formatParams);
+        $queueInfo = InternalAPIService::post('/queue_info/job', $formatParams);
+        if (empty($queueInfo)) {
+            throw new \Dingo\Api\Exception\ResourceException("queue info job is error");
+        }
+        return $queueInfo;
     }
 
     /**
