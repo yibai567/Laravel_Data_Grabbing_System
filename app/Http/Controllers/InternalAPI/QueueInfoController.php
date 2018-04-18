@@ -136,6 +136,6 @@ class QueueInfoController extends Controller
         Redis::connection($queueInfo->db)
             ->lpush($queueInfo->name, json_encode($data));
 
-        return $this->resObjectGet('入队成功', 'queue_info', $request->path());
+        return $this->resObjectGet($data, 'queue_info', $request->path());
     }
 }
