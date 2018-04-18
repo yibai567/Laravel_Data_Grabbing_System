@@ -80,6 +80,12 @@ class ItemController extends Controller
 
         $result = InternalAPIService::post('/item/update', $params, 'json');
 
+        if (!empty($result)) {
+            $testParams = [
+                'id' => $result['id']
+            ];
+            InternalAPIService::post('/item/test', $testParams);
+        }
         return $this->resObjectGet($result, 'item', $request->path());
     }
 
@@ -155,7 +161,6 @@ class ItemController extends Controller
         ]);
 
         $result = InternalAPIService::post('/item/test', $params);
-
         return $this->resObjectGet('测试提交成功，请稍后查看结果！', 'item', $request->path());
     }
 }
