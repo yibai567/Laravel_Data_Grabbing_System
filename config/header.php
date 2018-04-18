@@ -13,8 +13,8 @@ return [
         'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)', 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; SE 2.X MetaSr 1.0; SE 2.X MetaSr 1.0; .NET CLR 2.0.50727; SE 2.X MetaSr 1.0)'
     ],
     'proxy' => [
-        'http'  => '', // Use this proxy with "http"
-        'https' => '', // Use this proxy with "https",
+        'http'  => '10.2.00.13', // Use this proxy with "http"
+        'https' => '10.2.00.13', // Use this proxy with "https",
         'no' => ['.mit.edu', 'foo.com']    // Don't use a proxy with these
     ],
 ];

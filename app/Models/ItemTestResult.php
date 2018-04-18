@@ -9,6 +9,13 @@ class ItemTestResult extends Model
 {
     use SoftDeletes;
 
+    //初始化状态
+    const STATUS_INIT = 1; // 初始化
+    const STATUS_PROXY_TEST = 2; // 翻墙测试
+    const STATUS_NO_PROXY_TEST = 3; // 不翻墙测试
+    const STATUS_SUCCESS = 4; // 成功
+    const STATUS_FAIL = 5; // 失败
+
     /**
      * 表名
      */
