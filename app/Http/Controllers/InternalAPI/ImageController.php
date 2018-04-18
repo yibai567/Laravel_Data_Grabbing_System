@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\InternalAPI;
 
-use App\Service\WWW\ImageService;
+use App\Service\ImageService;
 use Illuminate\Http\Request;
 use Log;
 
@@ -16,7 +16,6 @@ use Log;
  */
 class ImageController extends Controller
 {
-
     /**
      * upload
      * 上传
