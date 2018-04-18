@@ -8,6 +8,8 @@ use App\Services\ValidatorService;
 use App\Services\InternalAPIService;
 use App\Models\ItemRunLog;
 use App\Models\Item;
+use App\Models\ItemTestResult;
+use App\Models\QueueInfo;
 
 /**
  * ItemResultController
@@ -39,7 +41,7 @@ class ItemResultController extends Controller
         return $this->resObjectGet($result, 'item', $request->path());
     }
 
-    /**
+    /*
      * getLastTestResult
      * 获取最后一次测试结果
      *
@@ -50,7 +52,7 @@ class ItemResultController extends Controller
     {
         $params = $request->all();
         ValidatorService::check($params, [
-            "item_run_log_id" => "required|integer"
+            "item_id" => "required|integer"
         ]);
 
         $result = InternalAPIService::get('/item/test_result', $params);
@@ -62,21 +64,20 @@ class ItemResultController extends Controller
      * 结果分发
      *
      * @param item_run_log_id (执行记录 id)
-     * @param start_time (开始时间)
-     * @param end_time (结束时间)
+     * @param start_at (开始时间)
+     * @param end_at (结束时间)
      * @param result (抓取结果)
      * @return array
      */
     public function dispatchJob(Request $request)
     {
         $params = $request->all();
-
         ValidatorService::check($params, [
             'item_run_log_id' => 'required|integer|min:1|max:99999999',
-            'start_time'      => 'date|nullable',
-            'end_time'        => 'date|nullable',
-            'short_content'   => 'array|nullable',
-            'long_content'    => 'array|nullable',
+            'start_at'      => 'date|nullable',
+            'end_at'        => 'date|nullable',
+            'short_contents'   => 'array|nullable',
+            'long_contents'    => 'array|nullable',
             'images'          => 'array|nullable',
             'error_message'   => 'string|nullable'
         ]);
@@ -123,16 +124,13 @@ class ItemResultController extends Controller
         }
         try {
             $params['is_proxy'] = $item['is_proxy'];
-            dd($path);
-            $results = InternalAPIService::post($path, $params);
-            dd($results);
+            // $results = InternalAPIService::post($path, $params);
+            $results = [];
         } catch (\Dingo\Api\Exception\ResourceException $e) {
-dd(1);
             // 标记当前任务为失败状态
             InternalAPIService::post('/item/run/log/fail', $params);
             throw new \Dingo\Api\Exception\ResourceException("invalid result");
         }
-
         // 任务结果的二次处理
         if (!empty($results)) {
             foreach ($results as $result) {
@@ -143,20 +141,39 @@ dd(1);
                 $this->__downloadImage($item, $result);
             }
         } else {
-            // if ($item['status'])
-            // if is_test
-            //     get test result
-            //         status
-            //             1
-            //             2
-            //                 // no porxy
-            //                 // add redis
+            if ($itemRunLog['type'] == 1) {
 
-            //             3
-            //             4
+                // 获取
+                $test_result = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $params['item_run_log_id']]);
+                dd($test_result);
+                switch ($test_result['status']) {
+                    case ItemTestResult::STATUS_INIT:
+                        break;
+                    case ItemTestResult::STATUS_PROXY_TEST:
+                        // 入另一个库
+                        $jobParams = [
+                            'id' => config('crawl_queue.' . QueueInfo::TYPE_TEST . '.' . $result['data_type'] . '.' . $result['is_proxy']),
+                            'item_id' => $itemRunLog['item_id'],
+                            'item_run_log_id' => $params['item_run_log_id']
+                        ];
+                        InternalAPIService::post('/item/queue_info/job', $jobParams);
+                        break;
+                    case ItemTestResult::STATUS_NO_PROXY_TEST:
+                        # code...
+                        break;
+                    case ItemTestResult::STATUS_SUCCESS:
+                        # code...
+                        break;
+                    case ItemTestResult::STATUS_FAIL:
+                        # code...
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
-        return $this->resObjectGet([], 'item_result', $request->path());
+        // return $this->resObjectGet([], 'item_result', $request->path());
     }
 
     /**
