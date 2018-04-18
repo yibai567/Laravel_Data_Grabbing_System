@@ -62,7 +62,7 @@ class ImageService extends Service
             $md5Content = md5($content);
             $image = Image::where('md5_content', $md5Content)->first();
             if ($image) {
-                return $image->id;
+                return $image->toArray();
             }
 
             $image = new Image();

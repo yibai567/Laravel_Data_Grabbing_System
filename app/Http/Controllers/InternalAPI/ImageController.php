@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Http\Controllers\API\V1;
+namespace App\Http\Controllers\InternalAPI;
 
 use App\Service\WWW\ImageService;
 use Illuminate\Http\Request;
 use Log;
 
 /**
- * ItemResultController
- * 新版任务管理接口
+ * ImageController
+ * 新版图片管理接口
  *
  * @author zhangwencheng@jinse.com
  * @version 1.1
  * Date: 2018/04/12
  */
-class ItemResultController extends Controller
+class ImageController extends Controller
 {
 
     /**

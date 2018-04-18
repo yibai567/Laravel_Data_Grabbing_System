@@ -17,6 +17,17 @@ class Image extends Model
      * 表名
      */
     protected $table = 't_image';
+
+    protected $fillable = [
+        'oss_url',
+        'name',
+        'ext',
+        'mime_type',
+        'size',
+        'width',
+        'height',
+        'md5_content',
+    ];
     /**
      * 隐藏的字段
      */

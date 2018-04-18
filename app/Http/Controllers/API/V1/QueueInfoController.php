@@ -8,8 +8,8 @@ use App\Services\ValidatorService;
 use App\Services\InternalAPIService;
 
 /**
- * ItemResultController
- * 新版任务管理接口
+ * QueueInfoController
+ * 新版队列信息管理接口
  *
  * @author zhangwencheng@jinse.com
  * @version 1.1
@@ -34,28 +34,4 @@ class QueueInfoController extends Controller
         $result = InternalAPIService::get('/queue_info/job', $params);
         return $this->resObjectGet($result, 'item', $request->path());
     }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

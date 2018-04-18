@@ -9,7 +9,7 @@ use App\Models\ItemResult;
 
 /**
  * ItemResultController
- * 新版任务管理接口
+ * 新版任务结果管理接口
  *
  * @author zhangwencheng@jinse.com
  * @version 1.1

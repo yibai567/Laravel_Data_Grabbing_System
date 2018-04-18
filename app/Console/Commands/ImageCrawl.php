@@ -41,7 +41,7 @@ class ImageCrawl extends Command
      */
     public function handle()
     {
-        while (true) {
+        while (1) {
             try {
                 $data = Redis::connection('queue')->rpop('crawl_image_queue');
                 $imageService = new ImageService();
@@ -52,7 +52,6 @@ class ImageCrawl extends Command
                         foreach ($data['images'] as $imageUrl) {
                             $imageItem = $imageService->uploadByImageUrl($imageUrl);
                             $imageItem = array_only($imageItem, ['oss_url', 'width', 'height', 'ext', 'mime_type']);
-                            $imageItem['url'] = $imageItem['oss_url'];
                             $imageRes[] = $imageItem;
                         }
                     }
@@ -60,7 +59,6 @@ class ImageCrawl extends Command
                     if (count($imageRes)) {
                         $params['images'] = $imageRes;
                         $params['id'] = $data['id'];
-                        
                         DB::beginTransaction();
                         if ($data['is_test']) { // is_test 为真，将结果存入测试结果队列
                             InternalAPIService::post('/item/test/result/update', $params);
@@ -70,11 +68,10 @@ class ImageCrawl extends Command
                         DB::commit();
                     }
                 } else {
-                    sleep(60);
+                    sleep(5);
                 }
             } catch (\Exception $e) {
                 DB::rollBack();
-                return null;
             }
         }
     }
