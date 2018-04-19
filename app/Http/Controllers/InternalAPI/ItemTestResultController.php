@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
 use App\Models\ItemTestResult;
-use App\Models\ItemRunLog;
 use App\Services\InternalAPIService;
 
 /**
