@@ -37,77 +37,6 @@ class ItemResultController extends Controller
     }
 
     /**
-     * createAllToJson
-     * 批量插入数据, 对于接口请求的结果
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-    */
-    public function createAllToJson(Request $request)
-    {
-        $params = $request->all();
-
-        ValidatorService::check($params, [
-            'task_id' => 'required|integer',
-            'is_test' => 'integer|nullable',
-            'start_time' => 'date|nullable',
-            'end_time' => 'date|nullable',
-            'result' => 'nullable',
-        ]);
-
-
-        return $this->resObjectList($saveResult, 'item_result', $request->path());
-    }
-
-    /**
-     * createAllToHtml
-     * 批量插入数据, 对于页面请求的结果
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-    */
-    public function createAllToHtml(Request $request)
-    {
-        $params = $request->all();
-
-        ValidatorService::check($params, [
-            'task_id' => 'required|integer',
-            'is_test' => 'integer|nullable',
-            'start_time' => 'date|nullable',
-            'end_time' => 'date|nullable',
-            'result' => 'nullable',
-        ]);
-
-
-
-        return $this->resObjectList($saveResult, 'item_result', $request->path());
-    }
-
-    /**
-     * createAllToImage
-     * 批量插入数据, 对于页面请求的结果
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-    */
-    public function createAllToImage(Request $request)
-    {
-        $params = $request->all();
-
-        ValidatorService::check($params, [
-            'task_id' => 'required|integer',
-            'is_test' => 'integer|nullable',
-            'start_time' => 'date|nullable',
-            'end_time' => 'date|nullable',
-            'result' => 'nullable',
-        ]);
-
-
-
-        return $this->resObjectList($saveResult, 'item_result', $request->path());
-    }
-
-    /**
      * all
      * 获取任务最后执行结果列表
      *
@@ -176,6 +105,17 @@ class ItemResultController extends Controller
         $itemResult->update($data);
         $result = $itemResult->toArray();
         return $this->resObjectGet($result, 'item_result', $request->path());
+    }
+
+    /**
+     * updateImage
+     * 更新任务结果image信息
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateImage(Request $request)
+    {
     }
 
     /**
