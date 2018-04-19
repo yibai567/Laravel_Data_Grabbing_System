@@ -50,6 +50,10 @@ $api->version(
 
         $api->post('/item_run_log','ItemRunLogController@create');
         $api->get('/item_run_logs','ItemRunLogController@all');
+
+        $api->post('/item_run_log/status/success','ItemRunLogController@updateStatusSuccess');
+        $api->post('/item_run_log/status/fail','ItemRunLogController@updateStatusFail');
+
         $api->get('/item_run_log/item','ItemRunLogController@getByItemId');
         $api->post('/item_run_log/update','ItemRunLogController@update');
         $api->get('/item_run_log','ItemRunLogController@retrieve');
