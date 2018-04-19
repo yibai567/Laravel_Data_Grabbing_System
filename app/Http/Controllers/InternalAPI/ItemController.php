@@ -71,7 +71,6 @@ class ItemController extends Controller
     public function update(Request $request)
     {
         $params = $request->all();
-
         $resData = $params;
 
         $paramsVerifyRule = $this->itemService->updateParamsVerifyRule();
@@ -85,7 +84,6 @@ class ItemController extends Controller
                 $item->{$key} = $value;
             }
         }
-
         if ($item->save()) {
             $result = $item->toArray();
         }
@@ -237,7 +235,7 @@ class ItemController extends Controller
     }
 
     /**
-     * start
+     * updateStatusTestSuccess
      * 任务测试成功状态修改
      *
      * @param id (任务ID)
@@ -271,7 +269,7 @@ class ItemController extends Controller
     }
 
     /**
-     * start
+     * updateStatusTestFail
      * 任务测试失败状态修改
      *
      * @param id (任务ID)

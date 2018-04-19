@@ -136,4 +136,66 @@ class ItemRunLogController extends Controller
 
         return $this->resObjectGet($result, 'item_run_log', $request->path());
     }
+
+    /**
+     * updateStatusSuccess
+     * 修改状态为成功
+     *
+     * @param id
+     * @return array
+     */
+    public function updateStatusSuccess(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'id' => 'integer|required',
+        ]);
+
+        $res = ItemRunLog::find($params['id']);
+
+        $itemRunLog = $res->toArray();
+
+        if (empty($itemRunLog)) {
+            throw new \Dingo\Api\Exception\ResourceException(" itemRunLog not exist");
+        }
+
+        $res->status = ItemRunLog::STATUS_SUCCESS;
+        $res->save();
+        $result = $res->toArray();
+
+        return $this->resObjectGet($result, 'item_run_log', $request->path());
+    }
+
+    /**
+     * updateStatusFail
+     * 修改状态为失败
+     *
+     * @param id
+     * @return array
+     */
+    public function updateStatusFail(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'id' => 'integer|required',
+        ]);
+
+        $res = ItemRunLog::find($params['id']);
+
+        $itemRunLog = $res->toArray();
+
+        if (empty($itemRunLog)) {
+            throw new \Dingo\Api\Exception\ResourceException(" itemRunLog not exist");
+        }
+
+        $res->status = ItemRunLog::STATUS_FAIL;
+        $res->save();
+        $result = $res->toArray();
+
+        return $this->resObjectGet($result, 'item_run_log', $request->path());
+    }
+
+
 }
