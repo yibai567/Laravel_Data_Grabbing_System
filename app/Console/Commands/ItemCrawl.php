@@ -3,7 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Services\RequestService;
-use App\Services\APIService;
+use App\Services\InternalAPIService;
+use App\Services\HttpService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
 use App\Models\QueueInfo;
@@ -65,7 +66,8 @@ class ItemCrawl extends Command
             return false;
         }
         //根据队列id获取数据信息
-        $queueInfo = APIService::openGet('/v1/queue_info/job', ['id' => $queueId]);
+        //$httpService = new HttpService();
+        $queueInfo = InternalAPIService::get('/queue_info/job', ['id' => $queueId]);
         if (empty($queueInfo)) {
             echo "没有可处理的任务 \n";
             return false;
@@ -101,6 +103,12 @@ class ItemCrawl extends Command
             $header = json_decode($itemParams['header'], ture);
         }
 
+        if ($isProxy == Item::IS_PROXY_YES) {
+            $isProxy = true;
+        } else {
+            $isProxy = false;
+        }
+
         $request = new RequestService();
         try {
             $result = $request->get($itemParams['resource_url'], [], $header, $isProxy);
@@ -131,28 +139,8 @@ class ItemCrawl extends Command
         } else {
             $item['long_content_selector'] = '';
         }
-        dd($item);
 
-        // $crawlResult['start_time'] = date('Y-m-d H:i:s');
-        // $header = [];
-        // if (!empty($params['header'])) {
-        //     $header = json_decode($params['header'], ture);
-        // }
-        // $request = new RequestService();
-        // $result = $request->get($params['url'], [], $header, $params['isProxy']);
-        // if (empty($result)) {
-        //     echo sprintf("__request start params task_id = %d result not found \n", $params['task_id']);
-        //     return false;
-        // }
-        // $crawlResult['task_id'] = $params['task_id'];
-        // $crawlResult['is_test'] = $isTest;
-        // $crawlResult['end_time'] = date('Y-m-d H:i:s');
-
-        // $newResult = json_decode($result['data'], ture);
-        // $crawlResult['result'] = $newResult['data'];
-        // echo sprintf("__request end params task_id = %d \n", $params['task_id']);
-
-        // $this->__createCrawlResult($crawlResult);
+        $this->__createCrawlResult($item);
     }
 
     /**
@@ -161,10 +149,10 @@ class ItemCrawl extends Command
      *
      * @return array
      */
-    private function __createCrawlResult($crawlResult)
+    private function __createCrawlResult($item)
     {
-        $data = APIService::openPost('/v1/crawl/result/dispatch', $crawlResult, 'json');
-        echo sprintf("__createCrawlResult end res = %s \n", json_encode($data));
+        $httpService = new HttpService();
+        $data = $httpService->post('/v1/crawl/result/dispatch', $item, 'json');
 
         return true;
     }

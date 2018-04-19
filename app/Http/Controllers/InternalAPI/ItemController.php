@@ -143,7 +143,7 @@ class ItemController extends Controller
             throw new \Dingo\Api\Exception\ResourceException("item status does not allow to start");
         }
 
-        $item->status = Item::STATUS_STOP;
+        $item->status = Item::STATUS_START;
         $item->save();
         $res = $item->toArray();
 
