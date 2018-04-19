@@ -408,7 +408,7 @@
 
             InternalAPIService::post('/item/test', ['id' => $result['id']]);
 
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试提交成功，请稍后查看测试结果", "success");
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "创建成果", "success");
         }
 
         private function __update($params, $id)
@@ -420,7 +420,9 @@
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
 
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试提交成功，请稍后查看测试结果", "success");
+            InternalAPIService::post('/item/test', ['id' => $result['id']]);
+
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "修改成功", "success");
         }
 
 

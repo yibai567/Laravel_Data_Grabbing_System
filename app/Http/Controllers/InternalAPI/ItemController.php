@@ -75,15 +75,12 @@ class ItemController extends Controller
 
         $resData = $params;
 
-        dd($resData);
         $paramsVerifyRule = $this->itemService->updateParamsVerifyRule();
         ValidatorService::check($resData, $paramsVerifyRule);
-
         //参数格式化
         $formatParams = $this->itemService->verifySelector($resData);
         $item = Item::find($formatParams['id']);
-        $item->status = Item::STATUS_INIT;
-
+        $formatParams['status'] = Item::STATUS_INIT;
         foreach ($formatParams as $key=>$value) {
             if (isset($value)) {
                 $item->{$key} = $value;

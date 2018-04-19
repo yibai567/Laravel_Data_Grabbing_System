@@ -66,10 +66,10 @@ class ItemService extends Service
             "action_type" => "nullable|integer|between:1",
             "associate_result_id" => "nullable|integer",
             "pre_detail_url" => "nullable|string",
-            "short_content_selector" => "nullable|array",
-            "long_content_selector" => "nullable|array",
+            "short_content_selector" => "nullable",
+            "long_content_selector" => "nullable",
             "row_selector" => "nullable|string",
-            "header" => "nullable|array",
+            "header" => "nullable",
             "last_job_at" => "nullable|date",
             "status" => "nullable|between:1,6",
         ];
@@ -107,7 +107,19 @@ class ItemService extends Service
      * @return array
      */
     public function verifySelector($data) {
-
+        $item = [
+            'name'  => '',
+            'pre_detail_url' => '',
+            'short_content_selector' => '',
+            'long_content_selector' => '',
+            'row_selector' => '',
+            'header' => '',
+        ];
+        foreach ($item as $key => $value) {
+            if (empty($data[$key])) {
+                $data[$key] = $value;
+            }
+        }
         if (!empty($data['short_content_selector'])) {
             $data['short_content_selector'] = json_decode($data['short_content_selector'], true);
             //短内容不为空时，detail_url键名不存在，默认键名
@@ -151,7 +163,6 @@ class ItemService extends Service
         }
 
         if (!empty($data['header'])) {
-            $data['header'] = json_encode($data['header']);
             if (strlen($data['header']) > 1000) {
                 throw new \Dingo\Api\Exception\ResourceException("header too long ");
             }
