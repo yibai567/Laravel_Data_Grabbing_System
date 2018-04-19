@@ -60,6 +60,10 @@ $api->version(
         $api->post('/item/start', 'ItemController@start');
         $api->post('/item/stop', 'ItemController@stop');
         $api->post('/item/test', 'ItemController@test');
+
+        $api->post('/item/status/test_success', 'ItemController@updateStatusTestSuccess');
+        $api->post('/item/status/test_fail', 'ItemController@updateStatusTestFail');
+
         $api->get('/item/update/current_lengths','QueueInfoController@updateCurrentLength');
 
         $api->get('/item/results', 'ItemResultController@allByLast');

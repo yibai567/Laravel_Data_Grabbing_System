@@ -48,7 +48,6 @@ class ItemController extends Controller
         ValidatorService::check($resData, $paramsVerifyRule);
         //参数格式化
         $formatParams = $this->itemService->formatParams($resData);
-
         $formatParams['status'] = Item::STATUS_INIT;
 
         $res = Item::create($formatParams);
@@ -236,6 +235,75 @@ class ItemController extends Controller
 
         return $this->resObjectGet($res, 'item', $request->path());
     }
+
+    /**
+     * start
+     * 任务测试成功状态修改
+     *
+     * @param id (任务ID)
+     * @return array
+     */
+    public function updateStatusTestSuccess(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'id' => 'integer|required',
+        ]);
+
+        $item = Item::find($params['id']);
+
+        $itemDetail = $item->toArray();
+
+        if (empty($itemDetail)) {
+            throw new \Dingo\Api\Exception\ResourceException(" item not exist");
+        }
+
+        if ($itemDetail['status'] != Item::STATUS_TESTING) {
+            throw new \Dingo\Api\Exception\ResourceException("item status does not allow to testSucess");
+        }
+
+        $item->status = Item::STATUS_TEST_SUCCESS;
+        $item->save();
+        $res = $item->toArray();
+
+        return $this->resObjectGet($res, 'item', $request->path());
+    }
+
+    /**
+     * start
+     * 任务测试失败状态修改
+     *
+     * @param id (任务ID)
+     * @return array
+     */
+    public function updateStatusTestFail(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'id' => 'integer|required',
+        ]);
+
+        $item = Item::find($params['id']);
+
+        $itemDetail = $item->toArray();
+
+        if (empty($itemDetail)) {
+            throw new \Dingo\Api\Exception\ResourceException(" item not exist");
+        }
+
+        if ($itemDetail['status'] != Item::STATUS_TESTING) {
+            throw new \Dingo\Api\Exception\ResourceException("item status does not allow to testSucess");
+        }
+
+        $item->status = Item::STATUS_TEST_FAIL;
+        $item->save();
+        $res = $item->toArray();
+
+        return $this->resObjectGet($res, 'item', $request->path());
+    }
+
 
     /**
      * __createQueue
