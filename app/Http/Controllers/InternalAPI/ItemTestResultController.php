@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\InternalAPI;
 
+use App\Models\Item;
 use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
@@ -47,85 +48,6 @@ class ItemTestResultController extends Controller
     }
 
     /**
-     * createAllToJson
-     * 批量插入数据, 对于接口请求的结果
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-    */
-    public function createAllToJson(Request $request)
-    {
-        $params = $request->all();
-
-        ValidatorService::check($params, [
-            'task_id' => 'required|integer',
-            'is_test' => 'integer|nullable',
-            'start_time' => 'date|nullable',
-            'end_time' => 'date|nullable',
-            'result' => 'nullable',
-        ]);
-
-
-        return $this->resObjectList($saveResult, 'item_result', $request->path());
-    }
-
-    /**
-     * createAllToHtml
-     * 批量插入数据, 对于页面请求的结果
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-    */
-    public function createAllToHtml(Request $request)
-    {
-        $params = $request->all();
-
-        $itemParams = $params;
-
-        ValidatorService::check($itemParams, [
-            'item_run_log_id' => 'required|integer|min:1|max:99999999',
-            'start_time'      => 'date|nullable',
-            'end_time'        => 'date|nullable',
-            'short_content'   => 'nullable',
-            'long_content'    => 'array|nullable',
-            'images'          => 'array|nullable',
-            'error_message'   => 'string|nullable',
-        ]);
-
-        $itemRunLog = InternalAPIService::get('/');
-
-        dd($item);
-
-
-
-        return $this->resObjectList($saveResult, 'item_result', $request->path());
-    }
-
-    /**
-     * createAllToImage
-     * 批量插入数据, 对于页面请求的结果
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-    */
-    public function createAllToImage(Request $request)
-    {
-        $params = $request->all();
-
-        ValidatorService::check($params, [
-            'task_id' => 'required|integer',
-            'is_test' => 'integer|nullable',
-            'start_time' => 'date|nullable',
-            'end_time' => 'date|nullable',
-            'result' => 'nullable',
-        ]);
-
-
-
-        return $this->resObjectList($saveResult, 'item_result', $request->path());
-    }
-
-    /**
      * update
      * 更新
      *
@@ -141,8 +63,8 @@ class ItemTestResultController extends Controller
             'id' => 'integer|nullable',
             'item_id' => 'integer|nullable',
             'item_run_log_id' => 'integer|nullable',
-            'short_content' => 'array|nullable',
-            'long_content' => 'array|nullable',
+            'short_contents' => 'array|nullable',
+            'long_contents' => 'array|nullable',
             'images' => 'array|nullable',
             'error_message' => 'string|nullable',
             'start_at' => 'date|nullable',
@@ -156,25 +78,25 @@ class ItemTestResultController extends Controller
         if (empty($itemRunLog)) {
             throw new \Dingo\Api\Exception\ResourceException(" test result not exist");
         }
+
         //判断错误信息
         if (!empty($testResult['error_message'])) {
             //判断当前状态
-            if ($itemRunLog['status'] == ItemTestResult::STATUS_INIT) {
+            if ($itemRunLog['status'] == ItemTestResult::STATUS_NO_PROXY_TEST_FAIL || $itemRunLog['status'] == ItemTestResult::STATUS_PROXY_TEST_FAIL) {
+                $testResult['status'] = ItemTestResult::STATUS_FAIL;
+            } else {
                 if ($testResult['is_proxy'] == Item::IS_PROXY_YES) {
-                    $testResult['status'] = ItemTestResult::STATUS_NO_PROXY_TEST;
+                    $testResult['status'] = ItemTestResult::STATUS_NO_PROXY_TEST_FAIL;
                 } else {
-                    $testResult['status'] = ItemTestResult::STATUS_PROXY_TEST;
+                    $testResult['status'] = ItemTestResult::STATUS_PROXY_TEST_FAIL;
                 }
-            } else if ($itemRunLog['status'] == ItemTestResult::STATUS_NO_PROXY_TEST) {
-                $testResult['status'] = ItemTestResult::STATUS_FAIL;
-            } else if ($itemRunLog['status'] == ItemTestResult::STATUS_PROXY_TEST) {
-                $testResult['status'] = ItemTestResult::STATUS_FAIL;
             }
         } else {
-            if (empty($testResult['short_content']) && empty($testResult['long_content'])) {
-                return $this->resObjectGet([], 'item_test_result', $request->path());
-            }
             $testResult['status'] = ItemTestResult::STATUS_SUCCESS;
+
+            if (empty($testResult['short_contents']) && empty($testResult['long_contents'])) {
+                $testResult['status'] = ItemTestResult::STATUS_FAIL;
+            }
         }
 
         $formatData = $this->__formatData($testResult);
@@ -183,7 +105,15 @@ class ItemTestResultController extends Controller
 
         $itemTestResult->update($formatData);
 
-        $result = $itemTestResult->toArray();
+        $result = [];
+        if (empty($testResult['error_message'])) {// 判断如果没有错误信息则返回short_contents数组，否则返回空数组
+            $shortContents = $testResult['short_contents'];
+
+            foreach ($shortContents as $key => $val) {
+                $shortContents[$key] = json_decode($val, true);
+            }
+            $result = $shortContents;
+        }
 
         return $this->resObjectGet($result, 'item_test_result', $request->path());
     }
@@ -245,34 +175,14 @@ class ItemTestResultController extends Controller
             }
         }
 
+        if (empty($data['error_message'])) {
+            $data['error_message'] = '';
+        }
         if (!empty($data['short_contents'])) {
             $data['short_contents'] = json_encode($data['short_contents']);
             $data['md5_short_contents'] = md5(json_encode($data['short_contents']));
         }
+
         return $data;
     }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
