@@ -100,7 +100,7 @@ class ItemResultController extends Controller
             case Item::DATA_TYPE_HTML:
                 $path = '/item/result/update';
                 if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
-                    $path = '/item/test/result/update';
+                    $path = '/item/test_result/update';
                 }
 
                 break;
@@ -142,34 +142,8 @@ class ItemResultController extends Controller
             }
         } else {
             if ($itemRunLog['type'] == 1) {
-
-                // 获取
-                $test_result = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $params['item_run_log_id']]);
-                dd($test_result);
-                switch ($test_result['status']) {
-                    case ItemTestResult::STATUS_INIT:
-                        break;
-                    case ItemTestResult::STATUS_PROXY_TEST:
-                        // 入另一个库
-                        $jobParams = [
-                            'id' => config('crawl_queue.' . QueueInfo::TYPE_TEST . '.' . $result['data_type'] . '.' . $result['is_proxy']),
-                            'item_id' => $itemRunLog['item_id'],
-                            'item_run_log_id' => $params['item_run_log_id']
-                        ];
-                        InternalAPIService::post('/item/queue_info/job', $jobParams);
-                        break;
-                    case ItemTestResult::STATUS_NO_PROXY_TEST:
-                        # code...
-                        break;
-                    case ItemTestResult::STATUS_SUCCESS:
-                        # code...
-                        break;
-                    case ItemTestResult::STATUS_FAIL:
-                        # code...
-                        break;
-                    default:
-                        break;
-                }
+                dd($itemRunLog);
+                $this->__testResult($itemRunLog, $item);
             }
         }
 
@@ -235,27 +209,70 @@ class ItemResultController extends Controller
         // 判断图片
         //
     }
+
+    /**
+     * __testResult($)
+     * 获取图片资源处理
+     *
+     * @param  $itemRunLog
+     * @param  $item
+     * @return array
+     */
+    private function __testResult($itemRunLog, $item)
+    {
+        // 获取 test_result 结果
+        $test_result = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $itemRunLog['id']]);
+        switch ($test_result['status']) {
+            case ItemTestResult::STATUS_INIT:
+                break;
+            case ItemTestResult::STATUS_PROXY_TEST_FAIL:
+
+                // 修改 proxy 字段
+                $changeProxy = [
+                    'is_proxy' => Item::IS_PROXY_NO,
+                    'id' => $itemRunLog['item_id']
+                ];
+                Log::debug('[dispatchJob] 翻墙测试失败, item/update 修改 proxy 为不翻墙');
+                InternalAPIService::post('item/update',$changeProxy);
+
+                // 入不翻墙队列
+                Log::debug('[dispatchJob] 翻墙测试失败, 入不翻墙队列重试');
+                $jobParams = [
+                    'id' => config('crawl_queue.' . QueueInfo::TYPE_TEST . '.' . $item['data_type'] . '.' . Item::IS_PROXY_NO),
+                    'item_id' => $itemRunLog['item_id'],
+                    'item_run_log_id' => $itemRunLog['id']
+                ];
+                InternalAPIService::post('/item/queue_info/job', $jobParams);
+
+                break;
+            case ItemTestResult::STATUS_NO_PROXY_TEST_FAIL:
+
+                // 修改 proxy 字段
+                $changeProxy = [
+                    'is_proxy' => Item::IS_PROXY_YES,
+                    'id' => $itemRunLog['item_id']
+                ];
+                Log::debug('[dispatchJob] 不翻墙测试失败, item/update 修改 proxy 为翻墙');
+                InternalAPIService::post('item/update',$changeProxy);
+
+                // 入不翻墙队列
+                Log::debug('[dispatchJob] 不翻墙测试失败, 入翻墙队列重试');
+                $jobParams = [
+                    'id' => config('crawl_queue.' . QueueInfo::TYPE_TEST . '.' . $item['data_type'] . '.' . Item::IS_PROXY_YES),
+                    'item_id' => $itemRunLog['item_id'],
+                    'item_run_log_id' => $$itemRunLog['id']
+                ];
+                InternalAPIService::post('/item/queue_info/job', $jobParams);
+
+                break;
+            case ItemTestResult::STATUS_SUCCESS:
+                # code...
+                break;
+            case ItemTestResult::STATUS_FAIL:
+                # code...
+                break;
+            default:
+                break;
+        }
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
