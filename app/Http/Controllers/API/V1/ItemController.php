@@ -161,6 +161,6 @@ class ItemController extends Controller
         ]);
 
         $result = InternalAPIService::post('/item/test', $params);
-        return $this->resObjectGet('测试提交成功，请稍后查看结果！', 'item', $request->path());
+        return $this->resObjectGet($result, 'item', $request->path());
     }
 }

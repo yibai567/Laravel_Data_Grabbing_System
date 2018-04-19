@@ -128,7 +128,6 @@ class ItemService extends Service
                 throw new \Dingo\Api\Exception\ResourceException("short_content_selector too long ");
             }
         }
-
         if (!empty($data['long_content_selector'])) {
             $data['long_content_selector'] = json_decode($data['long_content_selector'], true);
 

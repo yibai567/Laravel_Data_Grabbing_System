@@ -75,8 +75,8 @@ class ItemController extends Controller
 
         $resData = $params;
 
+        dd($resData);
         $paramsVerifyRule = $this->itemService->updateParamsVerifyRule();
-
         ValidatorService::check($resData, $paramsVerifyRule);
 
         //参数格式化
@@ -137,17 +137,23 @@ class ItemController extends Controller
             'id' => 'integer|required',
         ]);
 
-        $itemDetail = $this->__getDetail($params['id']);
+        $item = Item::find($params['id']);
+
+        $itemDetail = $item->toArray();
+
+        if (empty($itemDetail)) {
+            throw new \Dingo\Api\Exception\ResourceException(" item not exist");
+        }
 
         if ($itemDetail['status'] != Item::STATUS_TEST_SUCCESS && $itemDetail['status'] != Item::STATUS_STOP) {
             throw new \Dingo\Api\Exception\ResourceException("item status does not allow to start");
         }
 
-        $updateParams['status'] = Item::STATUS_START;
+        $item->status = Item::STATUS_STOP;
+        $item->save();
+        $res = $item->toArray();
 
-        $result = $this->__saveStatus($params['id'], $updateParams);
-
-        return $this->resObjectGet($result, 'item', $request->path());
+        return $this->resObjectGet($res, 'item', $request->path());
     }
 
     /**
@@ -161,23 +167,31 @@ class ItemController extends Controller
     {
         $params = $request->all();
 
-        $itemParams = $params;
-
         ValidatorService::check($params, [
             'id' => 'integer|required',
         ]);
 
-        $itemDetail = $this->__getDetail($itemParams['id']);
+        $item = Item::find($params['id']);
+
+        $itemDetail = $item->toArray();
+
+        if (empty($itemDetail)) {
+            throw new \Dingo\Api\Exception\ResourceException(" item not exist");
+        }
 
         if ($itemDetail['status'] != Item::STATUS_START) {
             throw new \Dingo\Api\Exception\ResourceException("item status does not allow to stop");
         }
 
-        $updateParams['status'] = Item::STATUS_STOP;
+        $item->status = Item::STATUS_STOP;
+        $item->save();
+        $res = $item->toArray();
 
-        $result = $this->__saveStatus($params['id'], $updateParams);
+        if (empty($res)) {
+            throw new \Dingo\Api\Exception\ResourceException("update status fail");
+        }
 
-        return $this->resObjectGet($result, 'item', $request->path());
+        return $this->resObjectGet($res, 'item', $request->path());
 
     }
 
@@ -196,19 +210,34 @@ class ItemController extends Controller
             'id' => 'integer|required',
         ]);
 
-        $updateParams['status'] = Item::STATUS_TESTING;
+        $item = Item::find($params['id']);
+        $itemDetail = $item->toArray();
 
-        $itemDetail = $this->__saveStatus($params['id'], $updateParams);
+        if (empty($itemDetail)) {
+            throw new \Dingo\Api\Exception\ResourceException(" item not exist");
+        }
 
-        $queueInfo = $this->__createQueue($itemDetail);
+        if ($itemDetail['status'] == Item::STATUS_TESTING) {
+            throw new \Dingo\Api\Exception\ResourceException(" status does not allow to update ");
+        }
 
-        $itemTestResult = InternalAPIService::post('/item/test_result', ['item_id' => $params['id'], 'item_run_log_id' => $queueInfo['item_run_log_id']]);
+        $item->status = Item::STATUS_TESTING;
+        $item->save();
+        $res = $item->toArray();
+
+        if (empty($res)) {
+            throw new \Dingo\Api\Exception\ResourceException("update status fail");
+        }
+
+        $queueInfo = $this->__createQueue($res);
+
+        $itemTestResult = InternalAPIService::post('/item/test_result', ['item_id' => $res['id'], 'item_run_log_id' => $queueInfo['item_run_log_id']]);
 
         if (empty($itemTestResult)) {
             throw new \Dingo\Api\Exception\ResourceException(" create item_test_result fail");
         }
 
-        return $this->resObjectGet($itemDetail, 'item', $request->path());
+        return $this->resObjectGet($res, 'item', $request->path());
     }
 
     /**
@@ -230,68 +259,4 @@ class ItemController extends Controller
         return $queueInfo;
 
     }
-
-    /**
-     * __getDetail
-     * 获取任务详情
-     *
-     * @param id
-     * @return array
-     */
-    private function __getDetail($id)
-    {
-        $itemDetail = InternalAPIService::get('/item', ['id' => $id]);
-
-        if (empty($itemDetail)) {
-            throw new \Dingo\Api\Exception\ResourceException("item does not exist");
-        }
-
-        return $itemDetail;
-    }
-
-    /**
-     * __saveStatus
-     * 修改状态
-     *
-     * @param $id
-     * @param $updateParams
-     * @return array
-     */
-    private function __saveStatus($id, $updateParams)
-    {
-        $item = Item::find($id);
-
-        $item->update($updateParams);
-
-        $result = $item->toArray();
-
-        if (empty($result)) {
-            throw new \Dingo\Api\Exception\ResourceException("status update fail");
-        }
-        return $result;
-    }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -406,6 +406,8 @@
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
 
+            InternalAPIService::post('/item/test', ['id' => $result['id']]);
+
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试提交成功，请稍后查看测试结果", "success");
         }
 
