@@ -408,7 +408,7 @@
 
             InternalAPIService::post('/item/test', ['id' => $result['id']]);
 
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "创建成果", "success");
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "创建成功", "success");
         }
 
         private function __update($params, $id)
