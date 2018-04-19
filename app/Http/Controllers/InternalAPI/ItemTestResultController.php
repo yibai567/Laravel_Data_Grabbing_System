@@ -48,42 +48,6 @@ class ItemTestResultController extends Controller
     }
 
     /**
-     * update
-     * 更新
-     *
-     * @param Request $request
-     * @return array
-    */
-    public function update(Request $request)
-    {
-        $params = $request->all();
-        ValidatorService::check($params, [
-            'id' => 'integer|required',
-            'item_id' => 'integer|nullable',
-            'item_run_log_id' => 'integer|nullable',
-            'short_contents' => 'array|nullable',
-            'long_contents' => 'array|nullable',
-            'images' => 'array|nullable',
-            'error_message' => 'string|nullable',
-            'start_at' => 'date|nullable',
-            'end_at' => 'date|nullable',
-            'is_proxy' => 'required|integer',
-        ]);
-
-        $formatData = $this->__formatData($params);
-        $itemTestResult = ItemTestResult::find($params['id']);
-
-        if (empty($itemTestResult)) {
-            throw new \Dingo\Api\Exception\ResourceException(" test result not exist");
-        }
-
-        $itemTestResult->update($formatData);
-        $result = $itemTestResult->toArray();
-
-        return $this->resObjectGet($result, 'item_test_result', $request->path());
-    }
-
-    /**
      * updateHtml
      * 更新html类型任务结果数据
      *
@@ -95,9 +59,9 @@ class ItemTestResultController extends Controller
         $params = $request->all();
         ValidatorService::check($params, [
             'item_run_log_id' => 'integer|nullable',
-            'short_contents' => 'array|nullable',
-            'long_contents' => 'array|nullable',
-            'images' => 'array|nullable',
+            'short_contents' => 'nullable',
+            'long_contents' => 'nullable',
+            'images' => 'nullable',
             'error_message' => 'string|nullable',
             'start_at' => 'date|nullable',
             'end_at' => 'date|nullable',
@@ -140,10 +104,10 @@ class ItemTestResultController extends Controller
 
         $result = [];
         if (empty($params['error_message'])) {// 判断如果没有错误信息则返回short_contents数组，否则返回空数组
-            if (!empty($params['short_contents']) || !empty($params['long_contents'])) {
-                $shortContent = json_decode($params['short_contents'][0], true);
-                $shortContent['id'] = $itemTestResult['id'];
-                $result[] = $shortContent;
+            if (!empty($params['short_contents'])) {
+                $shortContent = json_decode($params['short_contents'], true);
+                $shortContent[0]['id'] = $itemTestResult['id'];
+                $result[] = $shortContent[0];
             }
         }
 
@@ -160,34 +124,42 @@ class ItemTestResultController extends Controller
     public function updateImage(Request $request)
     {
         $params = $request->all();
+        Log::debug('[updateImage] 更新任务结果image信息' . json_encode($params));
+
         ValidatorService::check($params, [
             'id' => 'integer|required',
-            'images' => 'array|required',
+            'images' => 'string|required',
         ]);
 
         $params['id'] = intval($params['id']);
-
         $itemTestResult = ItemTestResult::find($params['id']);
+
         if (empty($itemTestResult)) {
+            Log::debug('[updateImage] 测试结果不存在');
             throw new ResourceException("test result not exist");
         }
 
         $shortContents = json_decode($itemTestResult->short_contents, true);
+        Log::debug('[updateImage] 测试结果short_contents' . $shortContents);
 
         if (empty($shortContents)) {
+            Log::debug('[updateImage] short_contents为空');
             throw new ResourceException("test result short_contents is empty");
         }
 
-        $item = json_decode($shortContents[0], true);
-        $item['images'] = $params['images'];
+        if (!empty($shortContents[0]['images'])) {
+            Log::debug('[updateImage] short_contents第一个数组的images属性为：' . $shortContents[0]['images']);
+            $shortContents[0]['images'] = $params['images'];
+        }
 
-        $shortContents[0] = json_encode($item);
-        $itemTestResult->short_contents = $shortContents;
+        $itemTestResult->short_contents = json_encode($shortContents);
         $itemTestResult->save();
+        Log::debug('[updateImage] 更新short_contents：' . $itemTestResult->short_contents);
 
         $result = $itemTestResult->toArray();
         return $this->resObjectGet($result, 'item_test_result', $request->path());
     }
+
     /**
      * create
      * 插入数据
@@ -202,9 +174,9 @@ class ItemTestResultController extends Controller
         ValidatorService::check($params, [
             'item_id' => 'required|integer',
             'item_run_log_id' => 'integer|nullable',
-            'short_contents' => 'array|nullable',
-            'long_content' => 'array|nullable',
-            'images' => 'array|nullable',
+            'short_contents' => 'nullable',
+            'long_content' => 'nullable',
+            'images' => 'nullable',
             'error_message' => 'string|nullable',
             'start_at' => 'date|nullable',
             'end_at' => 'date|nullable',
@@ -248,8 +220,7 @@ class ItemTestResultController extends Controller
         }
 
         if (!empty($data['short_contents'])) {
-            $data['short_contents'] = json_encode($data['short_contents']);
-            $data['md5_short_contents'] = md5(json_encode($data['short_contents']));
+            $data['md5_short_contents'] = md5($data['short_contents']);
         }
 
         return $data;
