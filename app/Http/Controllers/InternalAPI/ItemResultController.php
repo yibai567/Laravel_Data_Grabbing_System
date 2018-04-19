@@ -167,13 +167,50 @@ class ItemResultController extends Controller
             'status' => 'nullable|integer',
         ]);
 
-        $itemResult = ItemResult::find($params['id']);
+        $data = $this->__formatData($params);
+        $itemResult = ItemResult::find($data['id']);
         if (empty($itemResult)) {
             return $this->resError(405, 'item result does not exist！');
         }
 
-        $itemResult->update($params);
+        $itemResult->update($data);
         $result = $itemResult->toArray();
         return $this->resObjectGet($result, 'item_result', $request->path());
+    }
+
+    /**
+     * __formatData
+     * 格式化数据
+     * @param $params
+     * @return array
+     */
+    private function __formatData($params)
+    {
+        $item = [
+            'item_id' => '',
+            'item_run_log_id' => '',
+            'short_contents'  => '',
+            'md5_short_contents' => '',
+            'long_content0' => '',
+            'long_content1' => '',
+            'images' => '',
+            'start_at' => '',
+            'end_at' => '',
+            'status' => ''
+        ];
+
+        $data = [];
+        foreach ($item as $key => $value) {
+            if (!empty($params[$key])) {
+                $data[$key] = $params[$key];
+            }
+        }
+
+        if (!empty($data['short_contents'])) {
+            $data['short_contents'] = json_encode($data['short_contents']);
+            $data['md5_short_contents'] = md5(json_encode($data['short_contents']));
+        }
+
+        return $data;
     }
 }

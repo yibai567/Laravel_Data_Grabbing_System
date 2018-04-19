@@ -86,6 +86,7 @@ class QueueInfoController extends Controller
     public function createJob(Request $request)
     {
         $params = $request->all();
+        Log::debug('[createJob] ' . '创建任务队列' . $params);
         ValidatorService::check($params, [
             'id' => 'required|integer|min:1|max:14',
             'item_id' => 'required|integer',
@@ -93,11 +94,16 @@ class QueueInfoController extends Controller
         ]);
 
         $item = Item::find($params['item_id']);
+        Log::debug('[createJob] ' . '获取任务详情' . $item);
+
         if (empty($item)) {
+            Log::debug('[createJob] ' . '指定Item不存在!');
             return $this->resError(405, '指定Item不存在!');
         }
+
         $queueInfo = QueueInfo::find($params['id']);
         if (empty($queueInfo)) {
+            Log::debug('[createJob] ' . '指定队列不存在!');
             return $this->resError(405, '指定队列不存在!');
         }
 

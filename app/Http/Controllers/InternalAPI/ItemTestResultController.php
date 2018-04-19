@@ -11,7 +11,7 @@ use App\Services\InternalAPIService;
 
 /**
  * ItemTestResultController
- * 新版任务管理接口
+ * 新版任务测试结果管理接口
  *
  * @author zhangwencheng@jinse.com
  * @version 1.1
@@ -21,7 +21,7 @@ class ItemTestResultController extends Controller
 {
 
     /**
-     * getByLast
+     * getTestResult
      * 获取任务最后测试结果
      *
      * @param item_id
@@ -78,35 +78,81 @@ class ItemTestResultController extends Controller
             throw new \Dingo\Api\Exception\ResourceException(" test result not exist");
         }
 
-        //判断错误信息
-        if (!empty($testResult['error_message'])) {
-            //判断当前状态
-            if ($itemRunLog['status'] == ItemTestResult::STATUS_NO_PROXY_TEST_FAIL || $itemRunLog['status'] == ItemTestResult::STATUS_PROXY_TEST_FAIL) {
-                $testResult['status'] = ItemTestResult::STATUS_FAIL;
-            } else {
-                if ($testResult['is_proxy'] == Item::IS_PROXY_YES) {
-                    $testResult['status'] = ItemTestResult::STATUS_NO_PROXY_TEST_FAIL;
-                } else {
-                    $testResult['status'] = ItemTestResult::STATUS_PROXY_TEST_FAIL;
-                }
-            }
-        } else {
-            $testResult['status'] = ItemTestResult::STATUS_SUCCESS;
-
-            if (empty($testResult['short_contents']) && empty($testResult['long_contents'])) {
-                $testResult['status'] = ItemTestResult::STATUS_FAIL;
-            }
-        }
-
         $formatData = $this->__formatData($testResult);
 
-        $itemTestResult = ItemTestResult::find($itemRunLog['id']);
-
-        $itemTestResult->update($formatData);
+        ItemTestResult::update($formatData);
 
         $result = [];
         if (empty($testResult['error_message'])) {// 判断如果没有错误信息则返回short_contents数组，否则返回空数组
             $shortContents = $testResult['short_contents'];
+
+            foreach ($shortContents as $key => $val) {
+                $shortContents[$key] = json_decode($val, true);
+            }
+            $result = $shortContents;
+        }
+
+        return $this->resObjectGet($result, 'item_test_result', $request->path());
+    }
+
+    /**
+     * updateHtml
+     * 更新html类型任务结果数据
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateHtml(Request $request)
+    {
+        $params = $request->all();
+        ValidatorService::check($params, [
+            'item_run_log_id' => 'integer|nullable',
+            'short_contents' => 'array|nullable',
+            'long_contents' => 'array|nullable',
+            'images' => 'array|nullable',
+            'error_message' => 'string|nullable',
+            'start_at' => 'date|nullable',
+            'end_at' => 'date|nullable',
+            'is_proxy' => 'required|integer',
+        ]);
+
+        //获取测试结果
+        $itemTestResult = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $params['item_run_log_id']]);
+
+        if (empty($itemTestResult)) {
+            throw new \Dingo\Api\Exception\ResourceException(" test result not exist");
+        }
+
+        //判断错误信息
+        if (!empty($params['error_message'])) {
+            //判断当前状态
+            if ($itemTestResult['status'] == ItemTestResult::STATUS_NO_PROXY_TEST_FAIL || $itemTestResult['status'] == ItemTestResult::STATUS_PROXY_TEST_FAIL) {
+                $params['status'] = ItemTestResult::STATUS_FAIL;
+            } else {
+                if ($params['is_proxy'] == Item::IS_PROXY_YES) {
+                    $params['status'] = ItemTestResult::STATUS_PROXY_TEST_FAIL;
+                } else {
+                    $params['status'] = ItemTestResult::STATUS_NO_PROXY_TEST_FAIL;
+                }
+            }
+        } else {
+            $params['status'] = ItemTestResult::STATUS_SUCCESS;
+            if (empty($params['short_contents']) && empty($params['long_contents'])) {
+                $params['status'] = ItemTestResult::STATUS_FAIL;
+            }
+        }
+
+        $formatData = $this->__formatData($params);
+
+        if (empty($formatData['error_message'])) {
+            $formatData['error_message'] = '';
+        }
+
+        ItemTestResult::find($itemTestResult['id'])->update($formatData);
+
+        $result = [];
+        if (empty($params['error_message'])) {// 判断如果没有错误信息则返回short_contents数组，否则返回空数组
+            $shortContents = $params['short_contents'];
 
             foreach ($shortContents as $key => $val) {
                 $shortContents[$key] = json_decode($val, true);
@@ -155,6 +201,7 @@ class ItemTestResultController extends Controller
     private function __formatData($params)
     {
         $item = [
+            'item_id' => '',
             'short_contents'  => '',
             'md5_short_contents' => '',
             'long_content0' => '',
@@ -174,9 +221,6 @@ class ItemTestResultController extends Controller
             }
         }
 
-        if (empty($data['error_message'])) {
-            $data['error_message'] = '';
-        }
         if (!empty($data['short_contents'])) {
             $data['short_contents'] = json_encode($data['short_contents']);
             $data['md5_short_contents'] = md5(json_encode($data['short_contents']));
