@@ -62,9 +62,9 @@ class ImageCrawl extends Command
 
                         DB::beginTransaction();
                         if ($data['is_test']) { // is_test 为真，将结果存入测试结果队列
-                            InternalAPIService::post('/item/test_result/update', $params);
+                            InternalAPIService::post('/item/test_result/image', $params);
                         } else { // 否则，存入结果队列
-                            InternalAPIService::post('/item/result/update', $params);
+                            InternalAPIService::post('/item/result/image', $params);
                         }
                         DB::commit();
                     }

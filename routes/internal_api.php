@@ -76,5 +76,8 @@ $api->version(
         $api->post('/item/test_result', 'ItemTestResultController@create');
         $api->post('/item/test_result/update', 'ItemTestResultController@update');
         $api->post('/item/test_result/html', 'ItemTestResultController@updateHtml');
+
+        $api->post('/item/test_result/image', 'ItemTestResultController@updateImage');
+        $api->post('/item/result/image', 'ItemTestResultController@updateImage');
     }
 );

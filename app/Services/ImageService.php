@@ -74,12 +74,12 @@ class ImageService extends Service
 
             DB::beginTransaction();
             $image->save();
-            $objectKey = config('aliyun.oss.base_key').$image->id;
+            $objectKey = config('aliyun.oss.base_key') . $image->id . '.' . $image->ext;
 
             $oss = AliyunOSS::boot($path, $accessKey, $secret);
             $oss->setBucket(config('aliyun.oss.bucket'));
             $oss->uploadContent($objectKey, $object);
-            $image->update(['oss_url' => $scheme.$domain.'/'.$image['id']]);
+            $image->update(['oss_url' => $scheme . $domain . '/' . $objectKey]);
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();

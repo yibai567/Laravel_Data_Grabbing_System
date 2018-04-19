@@ -8,6 +8,7 @@ use Log;
 use App\Services\ValidatorService;
 use App\Models\ItemTestResult;
 use App\Services\InternalAPIService;
+use Dingo\Api\Exception\ResourceException;
 
 /**
  * ItemTestResultController
@@ -56,10 +57,8 @@ class ItemTestResultController extends Controller
     public function update(Request $request)
     {
         $params = $request->all();
-
-        $testResult = $params;
-        ValidatorService::check($testResult, [
-            'id' => 'integer|nullable',
+        ValidatorService::check($params, [
+            'id' => 'integer|required',
             'item_id' => 'integer|nullable',
             'item_run_log_id' => 'integer|nullable',
             'short_contents' => 'array|nullable',
@@ -71,26 +70,15 @@ class ItemTestResultController extends Controller
             'is_proxy' => 'required|integer',
         ]);
 
-        //获取测试结果
-        $itemRunLog = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $testResult['item_run_log_id']]);
+        $formatData = $this->__formatData($params);
+        $itemTestResult = ItemTestResult::find($params['id']);
 
-        if (empty($itemRunLog)) {
+        if (empty($itemTestResult)) {
             throw new \Dingo\Api\Exception\ResourceException(" test result not exist");
         }
 
-        $formatData = $this->__formatData($testResult);
-
-        ItemTestResult::update($formatData);
-
-        $result = [];
-        if (empty($testResult['error_message'])) {// 判断如果没有错误信息则返回short_contents数组，否则返回空数组
-            $shortContents = $testResult['short_contents'];
-
-            foreach ($shortContents as $key => $val) {
-                $shortContents[$key] = json_decode($val, true);
-            }
-            $result = $shortContents;
-        }
+        $itemTestResult->update($formatData);
+        $result = $itemTestResult->toArray();
 
         return $this->resObjectGet($result, 'item_test_result', $request->path());
     }
@@ -120,7 +108,7 @@ class ItemTestResultController extends Controller
         $itemTestResult = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $params['item_run_log_id']]);
 
         if (empty($itemTestResult)) {
-            throw new \Dingo\Api\Exception\ResourceException(" test result not exist");
+            throw new ResourceException(" test result not exist");
         }
 
         //判断错误信息
@@ -152,17 +140,54 @@ class ItemTestResultController extends Controller
 
         $result = [];
         if (empty($params['error_message'])) {// 判断如果没有错误信息则返回short_contents数组，否则返回空数组
-            $shortContents = $params['short_contents'];
-
-            foreach ($shortContents as $key => $val) {
-                $shortContents[$key] = json_decode($val, true);
+            if (!empty($params['short_contents']) || !empty($params['long_contents'])) {
+                $shortContent = json_decode($params['short_contents'][0], true);
+                $shortContent['id'] = $itemTestResult['id'];
+                $result[] = $shortContent;
             }
-            $result = $shortContents;
         }
 
         return $this->resObjectGet($result, 'item_test_result', $request->path());
     }
 
+    /**
+     * updateImage
+     * 更新任务结果image信息
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateImage(Request $request)
+    {
+        $params = $request->all();
+        ValidatorService::check($params, [
+            'id' => 'integer|required',
+            'images' => 'array|required',
+        ]);
+
+        $params['id'] = intval($params['id']);
+
+        $itemTestResult = ItemTestResult::find($params['id']);
+        if (empty($itemTestResult)) {
+            throw new ResourceException("test result not exist");
+        }
+
+        $shortContents = json_decode($itemTestResult->short_contents, true);
+
+        if (empty($shortContents)) {
+            throw new ResourceException("test result short_contents is empty");
+        }
+
+        $item = json_decode($shortContents[0], true);
+        $item['images'] = $params['images'];
+
+        $shortContents[0] = json_encode($item);
+        $itemTestResult->short_contents = $shortContents;
+        $itemTestResult->save();
+
+        $result = $itemTestResult->toArray();
+        return $this->resObjectGet($result, 'item_test_result', $request->path());
+    }
     /**
      * create
      * 插入数据
@@ -201,6 +226,7 @@ class ItemTestResultController extends Controller
     private function __formatData($params)
     {
         $item = [
+            'id' => '',
             'item_id' => '',
             'short_contents'  => '',
             'md5_short_contents' => '',

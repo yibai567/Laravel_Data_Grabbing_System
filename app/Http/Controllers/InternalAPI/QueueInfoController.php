@@ -86,7 +86,7 @@ class QueueInfoController extends Controller
     public function createJob(Request $request)
     {
         $params = $request->all();
-        Log::debug('[createJob] ' . '创建任务队列' . $params);
+        Log::debug('[createJob] ' . '创建任务队列' . json_encode($params));
         ValidatorService::check($params, [
             'id' => 'required|integer|min:1|max:14',
             'item_id' => 'required|integer',
