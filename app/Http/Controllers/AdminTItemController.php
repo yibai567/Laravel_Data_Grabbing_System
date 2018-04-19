@@ -1,12 +1,15 @@
 <?php
     namespace App\Http\Controllers;
 
-	use App\Models\Item;
+    use App\Models\Item;
+	use App\Models\ItemRunLog;
     use App\Services\InternalAPIService;
     use Session;
 	use Request;
 	use DB;
 	use CRUDBooster;
+    use Illuminate\Support\Facades\Route;
+
 
 	class AdminTItemController extends \crocodicstudio\crudbooster\controllers\CBController {
 
@@ -146,7 +149,7 @@
 
             $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-down/[id]'),'color'=>'warning', 'icon'=>'fa fa-stop', 'showIf'=>'[status] == ' . Item::STATUS_START];
 
-            $this->addaction[] = ['label'=>'测试结果', 'url'=>CRUDBooster::mainpath('test-result/[id]'),'color'=>'info', 'icon'=>'fa fa-play'];
+            $this->addaction[] = ['label'=>'测试结果', 'url'=>CRUDBooster::mainpath('test-result/[id]'),'color'=>'warning', 'icon'=>'ion-funnel'];
 
 
 
@@ -408,7 +411,7 @@
 
             InternalAPIService::post('/item/test', ['id' => $result['id']]);
 
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "创建成功", "success");
+            CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_item", "创建成功", "success");
         }
 
         private function __update($params, $id)
@@ -421,8 +424,7 @@
             }
 
             InternalAPIService::post('/item/test', ['id' => $result['id']]);
-
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "修改成功", "success");
+            CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_item", "修改成功", "success");
         }
 
 
@@ -438,10 +440,19 @@
 
         public function getTestResult($id)
         {
-            // $uri = '/v1/item/start';
-            // $params['id'] = intval($id);
-            // $result = HttpService::post('/v1/item/start', ['id' => intval($id)]);
+            $itemRunLog = InternalAPIService::get('/item_run_log/item', ['item_id' => intval($id), 'type' => ItemRunLog::TYPE_TEST]);
 
+            if (empty($itemRunLog)) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+            }
+
+            $itemTestResult = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $itemRunLog['id']]);
+            if (!empty($itemTestResult['short_contents'])) {
+                echo "<script type=\"text/javascript\" >alert(" . $itemTestResult['short_contents'] . ");</script>";
+            } else {
+                echo "<script type=\"text/javascript\" >alert( '暂无结果' );</script>";
+            }
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "", "success");
         }
 
         public function getStartUp($id)
@@ -463,5 +474,64 @@
             }
 
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "停止成功", "success");
+        }
+
+        public function getDetail($id) {
+            $this->cbLoader();
+            $row = DB::table('t_item')->where('id', $id)->first();
+
+            if ($row->data_type == Item::DATA_TYPE_HTML) {
+                $row->data_type = 'html';
+            } else if ($row->data_type == Item::DATA_TYPE_Json) {
+                $row->data_type = 'json';
+            } else {
+                $row->data_type = '截图';
+            }
+
+            if ($row->content_type == Item::CONTENT_TYPE_SHORT) {
+                $row->content_type = '短内容';
+            } else {
+                $row->content_type = '长内容';
+            }
+
+            if ($row->type == Item::TYPE_OUT) {
+                $row->type = '外部任务';
+            } else {
+                $row->type = '系统任务';
+            }
+
+            if ( $row->cron_type == Item::CRON_TYPE_KEEP) {
+                $row->cron_type = '持续执行';
+            } else if( $row->cron_type == Item::CRON_TYPE_ONLY_ONE) {
+                $row->cron_type = '执行一次';
+            } else if( $row->cron_type == Item::CRON_TYPE_EVERY_MINUTE) {
+                $row->cron_type = '每分钟执行';
+            } else if ($row->cron_type == Item::CRON_TYPE_EVERY_FIVE_MINIT) {
+                $row->cron_type = '每五分钟执行';
+            } else if ($row->cron_type == Item::CRON_TYPE_EVERY_FIFTHEEN_MINIT) {
+                $row->cron_type = '每十五分钟执行';
+            }
+
+            if ($row->is_proxy == Item::IS_PROXY_YES) {
+                $row->is_proxy = '翻墙';
+            } else {
+                $row->is_proxy = '不翻墙';
+            }
+
+            if (!empty($row->test_result)) {
+                $test_result = decodeUnicode($row->test_result);
+                $row->test_result = $test_result;
+            }
+            //dd($row);
+
+            if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
+                    CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
+                    CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
+                }
+                $page_menu  = Route::getCurrentRoute()->getActionName();
+                $page_title = trans("crudbooster.detail_data_page_title",['module'=>$module->name,'name'=>$row->{$this->title_field}]);
+                $command    = 'detail';
+                Session::put('current_row_id',$id);
+                return view('crudbooster::default.form',compact('row','page_menu','page_title','command','id'));
         }
 	}
