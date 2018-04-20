@@ -60,6 +60,7 @@ $api->version(
 
         $api->post('/item','ItemController@create');
         $api->post('/item/update', 'ItemController@update');
+        $api->post('/item/delete', 'ItemController@delete');
         $api->get('/item', 'ItemController@retrieve');
         $api->post('/item/start', 'ItemController@start');
         $api->post('/item/stop', 'ItemController@stop');
