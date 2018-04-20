@@ -56,6 +56,7 @@ class ItemTestResultController extends Controller
      */
     public function updateHtml(Request $request)
     {
+        Log::debug('[updateHtml] start');
         $params = $request->all();
         ValidatorService::check($params, [
             'item_run_log_id' => 'integer|nullable',
@@ -70,8 +71,10 @@ class ItemTestResultController extends Controller
 
         //获取测试结果
         $itemTestResult = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $params['item_run_log_id']]);
+        Log::debug('[updateHtml] get test result info ' . json_encode($itemTestResult));
 
         if (empty($itemTestResult)) {
+            Log::debug('[updateHtml] get test result info ' . json_encode($itemTestResult));
             throw new ResourceException(" test result not exist");
         }
 
@@ -172,7 +175,7 @@ class ItemTestResultController extends Controller
             $shortContents[0]['images'] = $params['images'];
         }
 
-        $itemTestResult->short_contents = json_encode($shortContents);
+        $itemTestResult->short_contents = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
         if ($itemTestResult->counter > 0) { // 更新计数器
             $itemTestResult->counter -= 1;
         }

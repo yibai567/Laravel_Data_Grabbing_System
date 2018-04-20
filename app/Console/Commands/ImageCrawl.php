@@ -41,9 +41,12 @@ class ImageCrawl extends Command
      */
     public function handle()
     {
+        Log::debug('[jinse::image:crawl] start');
         while (1) {
             try {
                 $data = Redis::connection('queue')->rpop('crawl_image_queue');
+                Log::debug('[jinse::image:crawl] get pop from image queue ', $data);
+                dd($data);
                 $imageService = new ImageService();
                 if (!empty($data)) {
                     $data = json_decode($data, true);
