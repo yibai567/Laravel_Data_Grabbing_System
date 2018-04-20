@@ -81,5 +81,7 @@ $api->version(
         $api->post('/item/test_result/html', 'ItemTestResultController@updateHtml');
         $api->post('/item/test_result/image', 'ItemTestResultController@updateImage');
         $api->post('/item/test_result/capture', 'ItemTestResultController@updateCapture');
+
+        $api->post('/image/upload', 'ImageController@upload');
     }
 );

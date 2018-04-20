@@ -144,6 +144,7 @@ class ImageService extends Service
      */
     public function uploadByFile($file, $isPrivate = false)
     {
+        Log::debug('[uploadByFile] start');
         try {
             if ($file->getError() != 0) {
                 return ["msg" => '上传图片失败，请检查图片并重试', 'error' => -1];
@@ -176,7 +177,7 @@ class ImageService extends Service
             $image = new Image();
             $image->name = $name;
             $image->ext = $ext;
-            $image->minme_type = $minType;
+            $image->mime_type = $minType;
             $image->size = $size;
             $image->md5_content = $md5Content;
             if (!empty($isPrivate)) {
@@ -233,7 +234,7 @@ class ImageService extends Service
             $image = new Image();
             $image->name = $imgObj->filename;
             $image->ext = $imgObj->extension;
-            $image->minme_type = $imgObj->mime;
+            $image->mime_type = $imgObj->mime;
             $image->size = $imgObj->filesize();
             $image->md5_content = $md5Content;
 
@@ -260,5 +261,4 @@ class ImageService extends Service
 
         return ['data' => $image];
     }
-
 }

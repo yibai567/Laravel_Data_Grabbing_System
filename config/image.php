@@ -15,6 +15,7 @@ return [
     |
     */
 
-    'driver' => 'gd'
-
+    'driver' => 'gd',
+    'allow_ext' => ['jpg', 'jpeg', 'png', 'gif', 'pdf'],
+    'allow_size' => 10485760,
 ];

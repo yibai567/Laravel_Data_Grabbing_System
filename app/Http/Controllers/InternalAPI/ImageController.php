@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\InternalAPI;
 
-use App\Service\ImageService;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Log;
 
@@ -25,22 +25,22 @@ class ImageController extends Controller
      */
     public function upload(Request $request)
     {
+        Log::debug('[upload] start!');
         $image = $request->file('image');
-
+        Log::debug('[upload] start!' . json_encode($image));
         if (empty($image)) {
-            $this->response()->error('image 参数错误', 500);
+            return response(500, 'image 参数错误');
         }
 
         try {
             $imageService = new ImageService();
             $imgResult = $imageService->uploadByFile($image);
-
             if (empty($imgResult['data']['id'])) {
                 if (!empty($imgResult['msg'])) {
-                    $this->response()->error($imgResult['msg'], 500);
+                    return response(500, $imgResult['msg']);
                 }
 
-                $this->response()->error('上传图片失败', 500);
+                return response(500, '上传图片失败');
             }
             $scheme = config('aliyun.oss.scheme');
             $domain = config('aliyun.oss.domain');
@@ -52,6 +52,6 @@ class ImageController extends Controller
             Log::error('AppImageV3Controller upload error' . $e->getMessage());
         }
 
-        $this->response()->error('上传图片失败:' . $e->getMessage(), 500);
+        return response(500, '上传图片失败:' . $e->getMessage());
     }
 }
