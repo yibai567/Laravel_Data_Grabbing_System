@@ -448,7 +448,9 @@
 
             $itemTestResult = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $itemRunLog['id']]);
             if (!empty($itemTestResult['short_contents'])) {
-                echo "<script type=\"text/javascript\" >alert(" . $itemTestResult['short_contents'] . ");</script>";
+                //$short_contents = jsonFormat($itemTestResult['short_contents']);
+                //dd($itemTestResult['short_contents']);
+                echo "<script type=\"text/javascript\" >alert(JSON.stringify(" . $itemTestResult['short_contents'] . "));</script>";
             } else {
                 echo "<script type=\"text/javascript\" >alert( '暂无结果' );</script>";
             }
@@ -482,7 +484,7 @@
 
             if ($row->data_type == Item::DATA_TYPE_HTML) {
                 $row->data_type = 'html';
-            } else if ($row->data_type == Item::DATA_TYPE_Json) {
+            } else if ($row->data_type == Item::DATA_TYPE_JSON) {
                 $row->data_type = 'json';
             } else {
                 $row->data_type = '截图';
