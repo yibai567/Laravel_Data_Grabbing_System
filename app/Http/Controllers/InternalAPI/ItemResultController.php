@@ -106,10 +106,16 @@ class ItemResultController extends Controller
             $shortContents['images'] = $params['images'];
         }
 
-        $itemResult->short_contents = json_encode($shortContents);
+        $itemResult->short_contents = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
         if ($itemResult->counter > 0) { // 更新计数器
             $itemResult->counter -= 1;
         }
+
+        // 判断计数器是否为0 修改状态
+        if ($itemResult->counter <= 0) {
+            $itemResult->status = ItemResult::STATUS_SUCCESS;
+        }
+
         $itemResult->save();
 
         $result = $itemResult->toArray();
@@ -141,9 +147,14 @@ class ItemResultController extends Controller
             throw new ResourceException("result not exist");
         }
 
-        $itemResult->images = json_encode($params['images']);
+        $itemResult->images = json_encode($params['images'], JSON_UNESCAPED_UNICODE);
         if ($itemResult->counter > 0) { // 更新计数器
             $itemResult->counter -= 1;
+        }
+
+        // 判断计数器是否为0 修改状态
+        if ($itemResult->counter <= 0) {
+            $itemResult->status = ItemResult::STATUS_SUCCESS;
         }
         $itemResult->save();
 
@@ -197,23 +208,17 @@ class ItemResultController extends Controller
                     $itemResult->start_at = $formatData['start_at'];
                     $itemResult->end_at = $formatData['end_at'];
                     $itemResult->short_contents = $formatData['short_contents'];
-                }
+                    $shortContents = json_decode($shortContents, true);
+                    // 如果有图片信息则计数器增1
+                    $newCounter = empty($shortContents['images']) ? $counter : $counter + 1;
 
-                $shortContents = json_decode($shortContents, true);
-                // 如果有图片信息则计数器增1
-                $newCounter = empty($shortContents['images']) ? $counter : $counter + 1;
-
-                if ($newCounter > 0) {
                     $itemResult->counter = $newCounter;
-                    $itemResult->status = ItemResult::STATUS_INIT;
-                } else {
-                    $itemResult->status = ItemResult::STATUS_SUCCESS;
-                }
-                
-                $itemResult->save();
+                    $itemResult->status = $newCounter > 0 ? ItemResult::STATUS_INIT : ItemResult::STATUS_SUCCESS;
+                    $itemResult->save();
 
-                $shortContents['id'] = $itemResult->id;
-                $result[] = $shortContents;
+                    $shortContents['id'] = $itemResult->id;
+                    $result[] = $shortContents;
+                }
             }
         }
 

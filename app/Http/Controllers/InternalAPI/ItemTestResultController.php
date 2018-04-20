@@ -74,7 +74,7 @@ class ItemTestResultController extends Controller
         Log::debug('[updateHtml] get test result info ' . json_encode($itemTestResult));
 
         if (empty($itemTestResult)) {
-            Log::debug('[updateHtml] get test result info ' . json_encode($itemTestResult));
+            Log::debug('[updateHtml] item test result is empty ');
             throw new ResourceException(" test result not exist");
         }
 
@@ -286,11 +286,13 @@ class ItemTestResultController extends Controller
         if (!empty($data['short_contents'])) {
             $data['md5_short_contents'] = md5($data['short_contents']);
             $shortContents = json_decode($data['short_contents'], true);
-            foreach ($shortContents as $key => $item) {
-                $item = json_decode($item, true);
-                $shortContents[$key] = $item;
+            if (!empty($shortContents)) {
+                foreach ($shortContents as $key => $item) {
+                    $item = json_decode($item, true);
+                    $shortContents[$key] = $item;
+                }
+                $data['short_contents'] = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
             }
-            $data['short_contents'] = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
         }
 
         return $data;

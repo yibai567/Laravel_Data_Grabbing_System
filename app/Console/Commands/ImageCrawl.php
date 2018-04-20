@@ -76,7 +76,6 @@ class ImageCrawl extends Command
                             InternalAPIService::post('/item/result/image', $params);
                         }
 
-
                         DB::commit();
                     }
                 } else {
