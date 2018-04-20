@@ -117,12 +117,14 @@ class ItemTestResultController extends Controller
         if (empty($params['error_message'])) {// 判断如果没有错误信息则返回short_contents数组，否则返回空数组
             if (!empty($params['short_contents'])) {
                 $shortContent = json_decode($params['short_contents'], true);
-                $shortContent[0]['id'] = $itemTestResult['id'];
+                $item = json_decode($shortContent[0], true);
+                $item['id'] = $itemTestResult->id;
 
-                if ($shortContent[0]['images']) {
+                if ($item['images']) {
                     $counter += 1;
                 }
-                $result[] = $shortContent[0];
+
+                $result[] = $item;
             }
         }
 
