@@ -37,6 +37,7 @@
 			$this->col[] = ["label"=>"开始时间","name"=>"start_at"];
 			$this->col[] = ["label"=>"结束时间","name"=>"end_at"];
 			$this->col[] = ["label"=>"状态","name"=>"status"];
+            $this->col[] = ["label"=>"修改时间","name"=>"updated_at"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE

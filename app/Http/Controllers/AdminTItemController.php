@@ -96,6 +96,7 @@
                     return '已停止';
                 }
             }];
+            $this->col[] = ["label"=>"修改时间","name"=>"updated_at"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
