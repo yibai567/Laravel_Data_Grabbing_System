@@ -10,6 +10,7 @@ use App\Models\ItemRunLog;
 use App\Models\Item;
 use App\Models\ItemTestResult;
 use App\Models\QueueInfo;
+use Redis;
 
 /**
  * ItemResultController
@@ -78,16 +79,20 @@ class ItemResultController extends Controller
             'end_at'        => 'date|nullable',
             'short_contents'   => 'array|nullable',
             'long_contents'    => 'array|nullable',
-            'images'          => 'array|nullable',
+            'images'          => 'nullable',
             'error_message'   => 'string|nullable'
         ]);
+Log::debug('[dispatchJob] 请求', $params);
+exit();
         // 获取 item run Log
+        Log::debug('[dispatchJob] 请求 /item_run_log', ['id' => $params['item_run_log_id']]);
         $itemRunLog = InternalAPIService::get('/item_run_log', ['id' => $params['item_run_log_id']]);
         if ($itemRunLog['status'] != ItemRunLog::STATUS_RUNNING) {
             throw new \Dingo\Api\Exception\ResourceException("invalid item_run_log status");
         }
 
         // 获取 item
+        Log::debug('[dispatchJob] 请求 /item', ['id' => $itemRunLog['item_id']]);
         $item = InternalAPIService::get('/item', ['id' => $itemRunLog['item_id']]);
 
         // // 任务状态应该是 2 、5
@@ -100,49 +105,52 @@ class ItemResultController extends Controller
             case Item::DATA_TYPE_HTML:
                 $path = '/item/result/update';
                 if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
-                    $path = '/item/test_result/update';
+                    $path = '/item/test_result/html';
                 }
 
                 break;
-            // case Item::DATA_TYPE_JSON:
-            //     $path = '/item/result/json';
-            //     if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
-            //         $path = '/item/test/result/json';
-            //     }
+            case Item::DATA_TYPE_JSON:
+                $path = '/item/result/json';
+                if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
+                    $path = '/item/test/result/json';
+                }
 
-            //     break;
+                break;
 
-            // case Item::DATA_TYPE_CAPTURE:
-            //     $path = '/item/result/image';
-            //     if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
-            //         $path = '/item/test/result/image';
-            //     }
+            case Item::DATA_TYPE_CAPTURE:
+                $path = '/item/result/image';
+                if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
+                    $path = '/item/test/result/image';
+                }
 
-            //     break;
+                break;
             default:
                 throw new \Dingo\Api\Exception\ResourceException("invalid item data_type");
         }
         try {
             $params['is_proxy'] = $item['is_proxy'];
-            // $results = InternalAPIService::post($path, $params);
-            $results = [];
+            $params['item_id'] = $item['id'];
+            Log::debug('[dispatchJob] 请求 ' . $path);
+            // Log::debug('[dispatchJob] 请求 ' . $path, $params);  // 完整数据太多
+            $results = InternalAPIService::post($path, $params);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
             // 标记当前任务为失败状态
-            InternalAPIService::post('/item/run/log/fail', $params);
+            Log::debug('[dispatchJob] 请求 /item_run_log/status/fail', $params);
+            InternalAPIService::post('/item_run_log/status/fail', $params);
+
             throw new \Dingo\Api\Exception\ResourceException("invalid result");
         }
         // 任务结果的二次处理
         if (!empty($results)) {
             foreach ($results as $result) {
                 // 判断任务结果是否需要截图
-                $this->__captureImage($item, $result);
+                $this->__captureImage($item, $result, $itemRunLog['type']);
 
                 // 判断任务是否需要图片资源
                 $this->__downloadImage($item, $result);
             }
         } else {
-            if ($itemRunLog['type'] == 1) {
-                dd($itemRunLog);
+            if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
                 $this->__testResult($itemRunLog, $item);
             }
         }
@@ -158,7 +166,7 @@ class ItemResultController extends Controller
      * @param  $result
      * @return array
      */
-    private function __captureImage($item, $result)
+    private function __captureImage($item, $result, $runLogType)
     {
         if ($item['data_type'] == Item::DATA_TYPE_CAPTURE) {
             return true;
@@ -189,10 +197,22 @@ class ItemResultController extends Controller
         ];
 
         // 添加系统截图任务
+        Log::debug('[dispatchJob __captureImage] 请求 /item', $itemParams);
         $captureItem = InternalAPIService::post('/item', $itemParams);
 
+        $isTest = QueueInfo::TYPE_PRO;
+        if ($runLogType == ItemRunLog::TYPE_TEST) {
+            $isTest = QueueInfo::TYPE_TEST;
+        }
+
         // 入队列
-        // $queueItem = InternalAPIService::post('/queue_info/job', )
+        $jobParams = [
+            'id' =>  config('crawl_queue.' . $isTest . '.' . $item['data_type'] . '.' . $item['is_proxy']),
+            'item_id' => $captureItem->id
+        ];
+        Log::debug('[dispatchJob __captureImage] 请求 /queue_info/job', $jobParams);
+        $queueItem = InternalAPIService::post('/queue_info/job', $jobParams);
+
         return true;
     }
 
@@ -207,11 +227,39 @@ class ItemResultController extends Controller
     private function __downloadImage($item, $result)
     {
         // 判断图片
-        //
+        if (!array_key_exists("images", $result) || empty($result['images'])) {
+            return true;
+        }
+
+        $is_test = false;
+        if ($item['status'] == Item::STATUS_TESTING) {
+            $is_test = true;
+        }
+
+        if (array_key_exists("remove_images", $result) && !empty($result['remove_images'])) {
+            if (in_array($result['images'], $result['remove_images'])) {
+                $data = [
+                    'id' => $result['id'],
+                    'resource_url' => $result['images'],
+                    'is_test' => $is_test
+                ];
+                Log::debug('[dispatchJob __downloadImage] 入队列 crawl_image_queue', $data);
+                Redis::connection('queue')->lpush('crawl_image_queue', json_encode($data));
+            }
+        } else {
+            // 图片上传
+            $data = [
+                'id' => $result['id'],
+                'resource_url' => $result['images'],
+                'is_test' => $is_test
+            ];
+            Log::debug('[dispatchJob __downloadImage] 入队列 crawl_image_queue', $data);
+            Redis::connection('queue')->lpush('crawl_image_queue', json_encode($data));
+        }
     }
 
     /**
-     * __testResult($)
+     * __testResult()
      * 获取图片资源处理
      *
      * @param  $itemRunLog
@@ -221,56 +269,47 @@ class ItemResultController extends Controller
     private function __testResult($itemRunLog, $item)
     {
         // 获取 test_result 结果
+        Log::debug('[dispatchJob __testResult] 请求 /item/test_result', ['item_run_log_id' => $itemRunLog['id']]);
         $test_result = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $itemRunLog['id']]);
         switch ($test_result['status']) {
-            case ItemTestResult::STATUS_INIT:
-                break;
             case ItemTestResult::STATUS_PROXY_TEST_FAIL:
-
                 // 修改 proxy 字段
                 $changeProxy = [
                     'is_proxy' => Item::IS_PROXY_NO,
                     'id' => $itemRunLog['item_id']
                 ];
-                Log::debug('[dispatchJob] 翻墙测试失败, item/update 修改 proxy 为不翻墙');
-                InternalAPIService::post('item/update',$changeProxy);
+                Log::debug('[dispatchJob __testResult] 翻墙测试失败, item/update 修改 proxy 为不翻墙', $changeProxy);
+                InternalAPIService::post('/item/update', $changeProxy);
 
-                // 入不翻墙队列
-                Log::debug('[dispatchJob] 翻墙测试失败, 入不翻墙队列重试');
-                $jobParams = [
-                    'id' => config('crawl_queue.' . QueueInfo::TYPE_TEST . '.' . $item['data_type'] . '.' . Item::IS_PROXY_NO),
-                    'item_id' => $itemRunLog['item_id'],
-                    'item_run_log_id' => $itemRunLog['id']
-                ];
-                InternalAPIService::post('/item/queue_info/job', $jobParams);
-
+                // 重新测试
+                Log::debug('[dispatchJob __testResult] 重新测试, /item/test', ['id' => $itemRunLog['item_id']]);
+                InternalAPIService::post('/item/test', ['id' => $itemRunLog['item_id']]);
                 break;
-            case ItemTestResult::STATUS_NO_PROXY_TEST_FAIL:
 
+            case ItemTestResult::STATUS_NO_PROXY_TEST_FAIL:
                 // 修改 proxy 字段
                 $changeProxy = [
                     'is_proxy' => Item::IS_PROXY_YES,
                     'id' => $itemRunLog['item_id']
                 ];
-                Log::debug('[dispatchJob] 不翻墙测试失败, item/update 修改 proxy 为翻墙');
-                InternalAPIService::post('item/update',$changeProxy);
+                Log::debug('[dispatchJob __testResult] 不翻墙测试失败, item/update 修改 proxy 为翻墙', $changeProxy);
+                InternalAPIService::post('/item/update', $changeProxy);
 
-                // 入不翻墙队列
-                Log::debug('[dispatchJob] 不翻墙测试失败, 入翻墙队列重试');
-                $jobParams = [
-                    'id' => config('crawl_queue.' . QueueInfo::TYPE_TEST . '.' . $item['data_type'] . '.' . Item::IS_PROXY_YES),
-                    'item_id' => $itemRunLog['item_id'],
-                    'item_run_log_id' => $$itemRunLog['id']
-                ];
-                InternalAPIService::post('/item/queue_info/job', $jobParams);
+                // 重新测试
+                Log::debug('[dispatchJob __testResult] 重新测试, /item/test', ['id' => $itemRunLog['item_id']]);
+                InternalAPIService::post('/item/test', ['id' => $itemRunLog['item_id']]);
+                break;
 
-                break;
-            case ItemTestResult::STATUS_SUCCESS:
-                # code...
-                break;
             case ItemTestResult::STATUS_FAIL:
-                # code...
+                // 修改任务状态到测试失败
+                Log::debug('[dispatchJob __testResult] 请求 /item/status/test_fail', ['id' => $itemRunLog['item_id']]);
+                InternalAPIService::post('/item/status/test_fail', ['id' => $itemRunLog['item_id']]);
+
+                // 修改run_log到失败
+                Log::debug('[dispatchJob __testResult] 请求 /item_run_log/status/fail', ['id' => $itemRunLog['id']]);
+                InternalAPIService::post('/item_run_log/status/fail', ['id' => $itemRunLog['id']]);
                 break;
+
             default:
                 break;
         }
