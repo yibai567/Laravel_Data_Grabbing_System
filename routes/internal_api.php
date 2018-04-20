@@ -72,15 +72,14 @@ $api->version(
         $api->get('/item/update/current_lengths','QueueInfoController@updateCurrentLength');
 
         $api->get('/item/results', 'ItemResultController@allByLast');
-        $api->get('/item/result/update', 'ItemResultController@update');
+        $api->post('/item/result/html', 'ItemResultController@createHtml');
+        $api->post('/item/result/image', 'ItemResultController@updateImage');
+        $api->post('/item/result/capture', 'ItemResultController@updateCapture');
+
         $api->get('/item/test_result', 'ItemTestResultController@getTestResult');
         $api->post('/item/test_result', 'ItemTestResultController@create');
         $api->post('/item/test_result/html', 'ItemTestResultController@updateHtml');
-
-        $api->post('/item/result/html', 'ItemResultController@createHtml');
         $api->post('/item/test_result/image', 'ItemTestResultController@updateImage');
-        $api->post('/item/result/image', 'ItemResultController@updateImage');
-        $api->post('/item/result/capture', 'ItemResultController@updateCapture');
         $api->post('/item/test_result/capture', 'ItemTestResultController@updateCapture');
     }
 );

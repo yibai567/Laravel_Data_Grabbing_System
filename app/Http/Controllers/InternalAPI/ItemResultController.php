@@ -74,43 +74,6 @@ class ItemResultController extends Controller
         return $this->resObjectGet($resData, 'item_result', $request->path());
     }
 
-
-    /**
-     * update
-     * 更新
-     *
-     * @param Request $request
-     * return array
-     */
-    public function update(Request $request, $id)
-    {
-        $params = $request->all();
-
-        ValidatorService::check($params, [
-            'id' => 'nullable|integer',
-            'item_id' => 'nullable|integer',
-            'item_run_log_id' => 'nullable|integer',
-            'short_contents' => 'nullable|text',
-            'md5_short_contents' => 'nullable|text',
-            'long_content0' => 'nullable|text',
-            'long_content1' => 'nullable|text',
-            'images' => 'nullable|text',
-            'start_at' => 'nullable|date',
-            'end_at' => 'nullable|date',
-            'status' => 'nullable|integer',
-        ]);
-
-        $data = $this->__formatData($params);
-        $itemResult = ItemResult::find($data['id']);
-        if (empty($itemResult)) {
-            return $this->resError(405, 'item result does not exist！');
-        }
-
-        $itemResult->update($data);
-        $result = $itemResult->toArray();
-        return $this->resObjectGet($result, 'item_result', $request->path());
-    }
-
     /**
      * updateImage
      * 更新任务结果image信息
@@ -127,7 +90,7 @@ class ItemResultController extends Controller
         ]);
 
         $params['id'] = intval($params['id']);
-        $itemResult = ItemTestResult::find($params['id']);
+        $itemResult = ItemResult::find($params['id']);
 
         if (empty($itemResult)) {
             throw new ResourceException("test result not exist");
@@ -136,20 +99,59 @@ class ItemResultController extends Controller
         $shortContents = json_decode($itemResult->short_contents, true);
 
         if (empty($shortContents)) {
-            throw new ResourceException("test result short_contents is empty");
+            throw new ResourceException("result short_contents is empty");
         }
 
-        foreach ($shortContents as $key=>$val) {
-            if (!empty($params[$key]['images'])) {
-                $val['images'] = $params[$key]['images'];
-            }
-
-            $shortContents[$key] = $val;
+        if (!empty($shortContents['images'])) {
+            $shortContents['images'] = $params['images'];
         }
-
 
         $itemResult->short_contents = json_encode($shortContents);
         $itemResult->save();
+
+        // 更新计数器
+        $itemRunLog = ItemRunLog::find($itemResult->item_run_log_id);
+        if ($itemRunLog->num > 0) {
+            $itemRunLog->decrement('num');
+        }
+
+        $result = $itemResult->toArray();
+        return $this->resObjectGet($result, 'item_test_result', $request->path());
+    }
+
+    /**
+     * updateCapture
+     * 更新任务结果截图信息
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateCapture(Request $request)
+    {
+        $params = $request->all();
+        Log::debug('[updateCapture] 更新任务结果截图信息' . json_encode($params));
+
+        ValidatorService::check($params, [
+            'id' => 'integer|required',
+            'images' => 'string|required',
+        ]);
+
+        $params['id'] = intval($params['id']);
+        $itemResult = ItemTestResult::find($params['id']);
+
+        if (empty($itemResult)) {
+            Log::debug('[updateImage] 结果不存在');
+            throw new ResourceException("result not exist");
+        }
+
+        $itemResult->images = json_encode($params['images']);
+        $itemResult->save();
+
+        // 更新计数器
+        $itemRunLog = ItemRunLog::find($itemResult->item_run_log_id);
+        if ($itemRunLog->num > 0) {
+            $itemRunLog->decrement('num');
+        }
 
         $result = $itemResult->toArray();
         return $this->resObjectGet($result, 'item_test_result', $request->path());

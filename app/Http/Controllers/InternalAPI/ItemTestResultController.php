@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\InternalAPI;
 
 use App\Models\Item;
+use App\Models\ItemRunLog;
 use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
@@ -99,15 +100,35 @@ class ItemTestResultController extends Controller
             $formatData['error_message'] = '';
         }
 
-        ItemTestResult::find($itemTestResult['id'])->update($formatData);
+        $itemTestResult = ItemTestResult::find($itemTestResult['id']);
+        if (empty($itemTestResult)) {
+            throw new ResourceException("result not exist");
+        }
+
+        $num = 0; // 计数器
+
+        // 判断任务是否需要截图
+        $item = Item::find($itemTestResult->item_id);
+        if ($item->is_capture) {
+            $num += 1;
+        }
 
         $result = [];
         if (empty($params['error_message'])) {// 判断如果没有错误信息则返回short_contents数组，否则返回空数组
             if (!empty($params['short_contents'])) {
                 $shortContent = json_decode($params['short_contents'], true);
                 $shortContent[0]['id'] = $itemTestResult['id'];
+
+                if ($shortContent[0]['images']) {
+                    $num += 1;
+                }
                 $result[] = $shortContent[0];
             }
+        }
+
+        // 更新计数器
+        if ($num > 0) {
+            ItemRunLog::find($params['item_run_log_id'])->increment('num', $num);
         }
 
         return $this->resObjectGet($result, 'item_test_result', $request->path());
@@ -115,7 +136,7 @@ class ItemTestResultController extends Controller
 
     /**
      * updateImage
-     * 更新任务结果image信息
+     * 更新任务测试结果image信息
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -153,6 +174,13 @@ class ItemTestResultController extends Controller
 
         $itemTestResult->short_contents = json_encode($shortContents);
         $itemTestResult->save();
+
+        // 更新计数器
+        $itemRunLog = ItemRunLog::find($itemTestResult->item_run_log_id);
+        if ($itemRunLog->num > 0) {
+            $itemRunLog->decrement('num');
+        }
+
         Log::debug('[updateImage] 更新short_contents：' . $itemTestResult->short_contents);
 
         $result = $itemTestResult->toArray();
@@ -223,5 +251,44 @@ class ItemTestResultController extends Controller
         }
 
         return $data;
+    }
+
+    /**
+     * updateCapture
+     * 更新任务结果capture信息
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateCapture(Request $request)
+    {
+        $params = $request->all();
+        Log::debug('[updateImage] 更新任务结果image信息' . json_encode($params));
+
+        ValidatorService::check($params, [
+            'id' => 'integer|required',
+            'images' => 'string|required',
+        ]);
+
+        $params['id'] = intval($params['id']);
+        $itemTestResult = ItemTestResult::find($params['id']);
+
+        if (empty($itemTestResult)) {
+            Log::debug('[updateImage] 测试结果不存在');
+            throw new ResourceException("test result not exist");
+        }
+
+        $itemTestResult->images = $params['images'];
+        $itemTestResult->save();
+        Log::debug('[updateImage] 更新short_contents：' . $itemTestResult->short_contents);
+
+        // 更新计数器
+        $itemRunLog = ItemRunLog::find($itemTestResult->item_run_log_id);
+        if ($itemRunLog->num > 0) {
+            $itemRunLog->decrement('num');
+        }
+
+        $result = $itemTestResult->toArray();
+        return $this->resObjectGet($result, 'item_test_result', $request->path());
     }
 }
