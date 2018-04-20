@@ -131,7 +131,7 @@ class ItemService extends Service
             if ($data['is_capture_image'] == Item::IS_CAPTURE_IMAGE_TRUE) {
                 if (empty($data['short_content_selector']['detail_url'])) {
 
-                    Log::debug('[verifySelector] is_capture_image 为true, detail_url 不能为空', json_encode($data));
+                    Log::debug('[verifySelector] is_capture_image 为true, detail_url 不能为空', $data);
                     throw new \Dingo\Api\Exception\ResourceException("is_capture_image is true detail_url not null");
                 }
             }
@@ -139,7 +139,7 @@ class ItemService extends Service
             $data['short_content_selector'] = json_encode($data['short_content_selector']);
 
             if (strlen($data['short_content_selector']) > 1000) {
-                Log::debug('[verifySelector] short_content_selector 大小不能超过 1000', strlen($data['short_content_selector']));
+                Log::debug('[verifySelector] short_content_selector 大小不能超过 1000' . strlen($data['short_content_selector']));
                 throw new \Dingo\Api\Exception\ResourceException("short_content_selector too long ");
             }
         }
@@ -155,7 +155,7 @@ class ItemService extends Service
             if ($data['is_capture_image'] == Item::IS_CAPTURE_IMAGE_TRUE) {
                 if (empty($data['long_content_selector']['detail_url'])) {
 
-                    Log::debug('[verifySelector] is_capture_image 为true, detail_url 不能为空', json_encode($data));
+                    Log::debug('[verifySelector] is_capture_image 为true, detail_url 不能为空', $data);
                     throw new \Dingo\Api\Exception\ResourceException("is_capture_image is true detail_url not null");
                 }
             }
@@ -163,14 +163,14 @@ class ItemService extends Service
             $data['long_content_selector'] = json_encode($data['long_content_selector']);
 
             if (strlen($data['long_content_selector']) > 1000) {
-                Log::debug('[verifySelector] long_content_selector 大小不能超过 1000', strlen($data['long_content_selector']));
+                Log::debug('[verifySelector] long_content_selector 大小不能超过 1000' . strlen($data['long_content_selector']));
                 throw new \Dingo\Api\Exception\ResourceException("long_content_selector too long ");
             }
         }
 
         if (!empty($data['header'])) {
             if (strlen($data['header']) > 1000) {
-                Log::debug('[verifySelector] header 大小不能超过 1000', strlen($data['header']));
+                Log::debug('[verifySelector] header 大小不能超过 1000' . strlen($data['header']));
                 throw new \Dingo\Api\Exception\ResourceException("header too long ");
             }
         }

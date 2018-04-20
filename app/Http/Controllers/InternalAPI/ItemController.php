@@ -40,7 +40,7 @@ class ItemController extends Controller
     public function create(Request $request)
     {
         $params = $request->all();
-        Log::debug('[create] 创建任务信息' . json_encode($params));
+        Log::debug('[create] 创建任务信息', $params);
 
         $resData = $params;
         //获取参数验证规则
@@ -137,12 +137,12 @@ class ItemController extends Controller
         $itemDetail = $item->toArray();
 
         if (empty($itemDetail)) {
-            Log::debug('[start] item not exist', json_encode($params));
+            Log::debug('[start] item not exist', $params);
             throw new \Dingo\Api\Exception\ResourceException(" item not exist");
         }
 
         if ($itemDetail['status'] != Item::STATUS_TEST_SUCCESS && $itemDetail['status'] != Item::STATUS_STOP) {
-            Log::debug('[start] item status does not allow to start', json_encode($itemDetail));
+            Log::debug('[start] item status does not allow to start', $itemDetail);
             throw new \Dingo\Api\Exception\ResourceException("item status does not allow to start");
         }
 
@@ -177,12 +177,12 @@ class ItemController extends Controller
         $itemDetail = $item->toArray();
 
         if (empty($itemDetail)) {
-            Log::debug('[stop] item not exist', json_encode($params));
+            Log::debug('[stop] item not exist', $params);
             throw new \Dingo\Api\Exception\ResourceException(" item not exist");
         }
 
         if ($itemDetail['status'] != Item::STATUS_START) {
-            Log::debug('[stop] item status does not allow to stop', json_encode($itemDetail));
+            Log::debug('[stop] item status does not allow to stop', $itemDetail);
             throw new \Dingo\Api\Exception\ResourceException("item status does not allow to stop");
         }
 
@@ -218,12 +218,12 @@ class ItemController extends Controller
         $itemDetail = $item->toArray();
 
         if (empty($itemDetail)) {
-            Log::debug('[test] item not exist', json_encode($params));
+            Log::debug('[test] item not exist', $params);
             throw new \Dingo\Api\Exception\ResourceException(" item not exist");
         }
 
         if ($itemDetail['status'] == Item::STATUS_TESTING) {
-            Log::debug('[test] status does not allow to update', json_encode($itemDetail));
+            Log::debug('[test] status does not allow to update', $itemDetail);
             throw new \Dingo\Api\Exception\ResourceException(" status does not allow to update ");
         }
 
@@ -268,12 +268,12 @@ class ItemController extends Controller
         $itemDetail = $item->toArray();
 
         if (empty($itemDetail)) {
-            Log::debug('[updateStatusTestSuccess] item not exist', json_encode($params));
+            Log::debug('[updateStatusTestSuccess] item not exist', $params);
             throw new \Dingo\Api\Exception\ResourceException(" item not exist");
         }
 
         if ($itemDetail['status'] != Item::STATUS_TESTING) {
-            Log::debug('[updateStatusTestSuccess] item status does not allow to testSucess', json_encode($itemDetail));
+            Log::debug('[updateStatusTestSuccess] item status does not allow to testSucess', $itemDetail);
             throw new \Dingo\Api\Exception\ResourceException("item status does not allow to testSucess");
         }
 
@@ -304,12 +304,12 @@ class ItemController extends Controller
         $itemDetail = $item->toArray();
 
         if (empty($itemDetail)) {
-            Log::debug('[updateStatusTestFail] item not exist', json_encode($params));
+            Log::debug('[updateStatusTestFail] item not exist', $params);
             throw new \Dingo\Api\Exception\ResourceException(" item not exist");
         }
 
         if ($itemDetail['status'] != Item::STATUS_TESTING) {
-            Log::debug('[updateStatusTestFail] item status does not allow to testSucess', json_encode($itemDetail));
+            Log::debug('[updateStatusTestFail] item status does not allow to testSucess', $itemDetail);
             throw new \Dingo\Api\Exception\ResourceException("item status does not allow to testSucess");
         }
 
@@ -335,7 +335,7 @@ class ItemController extends Controller
         $formatParams['item_id'] = $result['id'];
         $queueInfo = InternalAPIService::post('/queue_info/job', $formatParams);
         if (empty($queueInfo)) {
-            Log::debug('[__createQueue] queue info job is error', json_encode($formatParams));
+            Log::debug('[__createQueue] queue info job is error', $formatParams);
             throw new \Dingo\Api\Exception\ResourceException("queue info job is error");
         }
         return $queueInfo;

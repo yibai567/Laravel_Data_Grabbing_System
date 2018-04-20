@@ -119,6 +119,7 @@
             $this->form[] = ['label'=>'Status','name'=>'status','type'=>'hidden','width'=>'col-sm-10'];
 
 			$this->form[] = ['label'=>'资源URL','name'=>'resource_url','type'=>'text','validation'=>'required|string','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'URL前缀','name'=>'pre_detail_url','type'=>'text','validation'=>'required|string','width'=>'col-sm-10'];
 
             $this->form[] = ['label'=>'行内选择器','name'=>'row_selector','type'=>'text','width'=>'col-sm-10'];
             $this->form[] = ['label'=>'短内容选择器','name'=>'short_content_selector','type'=>'textarea','width'=>'col-sm-10'];
@@ -413,23 +414,21 @@
 
         private function __create($params)
         {
-            $result = InternalAPIService::post('/item', $params);
-
-            if (empty($result)) {
+            try {
+                $result = InternalAPIService::post('/item', $params);
+                InternalAPIService::post('/item/test', ['id' => $result['id']]);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
-
-            InternalAPIService::post('/item/test', ['id' => $result['id']]);
-
             CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_item", "创建成功", "success");
         }
 
         private function __update($params, $id)
         {
             $params['id'] = $id;
-            $result = InternalAPIService::post('/item/update', $params);
-
-            if (empty($result)) {
+            try {
+                $result = InternalAPIService::post('/item/update', $params);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
 
