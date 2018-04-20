@@ -447,6 +447,7 @@
             }
 
             $itemTestResult = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $itemRunLog['id']]);
+
             if (!empty($itemTestResult['short_contents'])) {
                 //$short_contents = jsonFormat($itemTestResult['short_contents']);
                 //dd($itemTestResult['short_contents']);
@@ -520,9 +521,14 @@
                 $row->is_proxy = '不翻墙';
             }
 
-            if (!empty($row->test_result)) {
-                $test_result = decodeUnicode($row->test_result);
-                $row->test_result = $test_result;
+            if (!empty($row->short_content_selector)) {
+                $row->short_content_selector = json_encode(json_decode($row->short_content_selector), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+            }
+            if (!empty($row->long_content_selector)) {
+                $row->long_content_selector = json_encode(json_decode($row->long_content_selector), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+            }
+            if (!empty($row->header)) {
+                $row->header = json_encode(json_decode($row->header), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
             }
             //dd($row);
 

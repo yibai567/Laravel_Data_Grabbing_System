@@ -360,9 +360,10 @@
             } else if( $row->status == ItemTestResult::STATUS_FAIL) {
                 $row->status = '失败';
             }
-            // if (!empty($row->short_contents)) {
-            //     $row->short_contents = jsonFormat($row->short_contents);
-            // }
+
+            if (!empty($row->short_contents)) {
+                $row->short_contents = json_encode(json_decode($row->short_contents), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+            }
 
             if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
                     CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
