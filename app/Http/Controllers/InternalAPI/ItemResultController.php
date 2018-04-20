@@ -179,15 +179,12 @@ class ItemResultController extends Controller
 
             // 判断任务是否需要截图
             $item = Item::find($params['item_id']);
-            if ($item->is_capture) {
+            if ($item->is_capture_image == Item::IS_CAPTURE_IMAGE_TRUE) {
                 $counter += 1;
             }
 
             foreach ($shortContentsArr as $shortContents) {
                 $params['short_contents'] = $shortContents;
-                if (!empty($shortContents['images'])) {
-                    $counter += 1;
-                }
                 $formatData = $this->__formatData($params);
 
                 $itemResult = ItemResult::firstOrCreate([
@@ -202,8 +199,11 @@ class ItemResultController extends Controller
                     $itemResult->short_contents = $formatData['short_contents'];
                 }
 
-                if ($counter > 0) {
-                    $itemResult->counter = $counter;
+                // 如果有图片信息则计数器增1
+                $newCounter = empty($shortContents['images']) ? $counter : $counter + 1;
+
+                if ($newCounter > 0) {
+                    $itemResult->counter = $newCounter;
                 }
                 $itemResult->save();
 

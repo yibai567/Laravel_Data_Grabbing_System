@@ -109,7 +109,7 @@ class ItemTestResultController extends Controller
 
         // 判断任务是否需要截图
         $item = Item::find($itemTestResult->item_id);
-        if ($item->is_capture) {
+        if ($item->is_capture_image == Item::IS_CAPTURE_IMAGE_TRUE) {
             $counter += 1;
         }
 
@@ -280,7 +280,7 @@ class ItemTestResultController extends Controller
 
         $itemTestResult->save();
         Log::debug('[updateImage] 更新short_contents：' . $itemTestResult->short_contents);
-        
+
         $result = $itemTestResult->toArray();
         return $this->resObjectGet($result, 'item_test_result', $request->path());
     }
