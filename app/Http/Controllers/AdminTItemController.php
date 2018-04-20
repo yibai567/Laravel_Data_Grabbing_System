@@ -80,6 +80,14 @@
                 }
             }];
 
+            $this->col[] = ["label"=>"是否截图","name"=>"is_capture_image","callback"=>function ($row) {
+                if ( $row->is_proxy == Item::IS_CAPTURE_IMAGE_TRUE) {
+                    return '截图';
+                } else {
+                    return '不截图';
+                }
+            }];
+
 			$this->col[] = ["label"=>"最后执行时间","name"=>"last_job_at"];
             $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
                 if ( $row->status == Item::STATUS_INIT) {
@@ -102,11 +110,12 @@
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
 			$this->form[] = ['label'=>'任务名称','name'=>'name','type'=>'text','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'数据类型','name'=>'data_type','type'=>'radio','validation'=>'required|integer|between:1,2','width'=>'col-sm-10','dataenum'=>'1|html;2|json;3|截图','value'=>'1'];
+			$this->form[] = ['label'=>'数据类型','name'=>'data_type','type'=>'radio','validation'=>'required|integer|between:1,2','width'=>'col-sm-10','dataenum'=>'1|html;2|json','value'=>'1'];
 			$this->form[] = ['label'=>'内容类型','name'=>'content_type','type'=>'radio','validation'=>'required|integer|between:1,2','width'=>'col-sm-10','dataenum'=>'1|短内容;2|长内容','value'=>'1'];
 			$this->form[] = ['label'=>'Type','name'=>'type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|快讯','value'=>'1'];
             $this->form[] = ['label'=>'Cron Type','name'=>'cron_type','type'=>'radio','validation'=>'required|integer|in:1,2,3,4','width'=>'col-sm-10','dataenum'=>'1|持续执行;2|每分钟;3|每小时;4|每天;5|执行一次','value'=>'1'];
             $this->form[] = ['label'=>'是否翻墙','name'=>'is_proxy','type'=>'radio','validation'=>'required|integer|between:1,2','width'=>'col-sm-10','dataenum'=>'1|是;2|否','value'=>'2'];
+            $this->form[] = ['label'=>'是否截图','name'=>'is_capture_image','type'=>'radio','validation'=>'required|integer|between:1,2','width'=>'col-sm-10','dataenum'=>'1|截图;2|不截图','value'=>'2'];
             $this->form[] = ['label'=>'Status','name'=>'status','type'=>'hidden','width'=>'col-sm-10'];
 
 			$this->form[] = ['label'=>'资源URL','name'=>'resource_url','type'=>'text','validation'=>'required|string','width'=>'col-sm-10'];
