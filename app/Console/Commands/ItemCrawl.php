@@ -66,14 +66,15 @@ class ItemCrawl extends Command
             return false;
         }
         //根据队列id获取数据信息
-        //$httpService = new HttpService();
-        $queueInfo = InternalAPIService::get('/queue_info/job', ['id' => $queueId]);
-        if (empty($queueInfo)) {
+        $httpService = new HttpService();
+
+        $resQueue = $httpService->get('http://api.webmagic.jinse.cn/v1/queue_info/job', ['id' => $queueId]);
+        $queueInfo = json_decode($resQueue, true);
+        if (empty($queueInfo['data'])) {
             echo "没有可处理的任务 \n";
             return false;
         }
-
-        $this->__request($queueInfo, $isTest, $isProxy);
+        $this->__request($queueInfo['data'], $isTest, $isProxy);
     }
 
     /**
@@ -120,9 +121,13 @@ class ItemCrawl extends Command
 
         if (!empty($result)) {
             $res = json_decode($result['data'], ture);
-            $newResult = $res['data'];
-        }
 
+            $short_content_selector = json_decode($itemParams['short_content_selector'], true);
+
+            $filter = explode('.', $short_content_selector['filter']);
+
+            $newResult = $res[$filter[0]];
+        }
         if ($isTest == 1) {
             $item['error_message'] = $errorMessage;
         }
@@ -139,7 +144,7 @@ class ItemCrawl extends Command
         } else {
             $item['long_content_selector'] = '';
         }
-
+        dd($item);
         $this->__createCrawlResult($item);
     }
 
@@ -152,8 +157,8 @@ class ItemCrawl extends Command
     private function __createCrawlResult($item)
     {
         $httpService = new HttpService();
-        $data = $httpService->post('/v1/crawl/result/dispatch', $item, 'json');
-
+        $data = $httpService->post('/v1/item/result/dispatch', $item, 'json');
+        dd($data);
         return true;
     }
 }
