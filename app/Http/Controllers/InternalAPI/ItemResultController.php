@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\InternalAPI;
 
+use App\Models\Item;
+use App\Models\ItemRunLog;
 use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
@@ -174,11 +176,22 @@ class ItemResultController extends Controller
         ]);
 
         $result = [];
-        if (!empty($params['short_contents'])) {
-            $shortContentsArr = json_decode($params['short_contents']);
+        $num = 0; // 计数器
 
-            foreach ($shortContentsArr as $key=>$shortContents) {
+        if (!empty($params['short_contents'])) {
+            $shortContentsArr = json_decode($params['short_contents'], true);
+
+            // 判断任务是否需要截图
+            $item = Item::find($params['item_id']);
+            if ($item->is_capture) {
+                $num += count($shortContentsArr);
+            }
+
+            foreach ($shortContentsArr as $shortContents) {
                 $params['short_contents'] = $shortContents;
+                if (!empty($shortContents['images'])) {
+                    $num += 1;
+                }
                 $formatData = $this->__formatData($params);
 
                 $itemResult = ItemResult::firstOrCreate([
@@ -187,19 +200,19 @@ class ItemResultController extends Controller
                     'md5_short_contents' => $formatData['md5_short_contents'],
                 ]);
 
-                if (!$itemResult->wasRecentlyCreated) {
-                    continue;
+                if ($itemResult->wasRecentlyCreated) {
+                    $itemResult->start_at = $formatData['start_at'];
+                    $itemResult->end_at = $formatData['end_at'];
+                    $itemResult->short_contents = $formatData['short_contents'];
+                    $itemResult->save();
                 }
 
-                $itemResult->start_at = $formatData['start_at'];
-                $itemResult->end_at = $formatData['end_at'];
-                $itemResult->short_contents = $formatData['short_contents'];
-
-                $result[$key] = [
-                    'id' => $itemResult->id,
-                    'short_contents' => $formatData['short_contents']
-                ];
+                $shortContents['id'] = $itemResult->id;
+                $result = array_merge($result, $shortContents);
             }
+        }
+        if ($num > 0) {
+            ItemRunLog::find($params['item_run_log_id'])->increment('num', $num);
         }
 
         return $this->resObjectGet($result, 'item_test_result', $request->path());
