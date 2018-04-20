@@ -199,16 +199,21 @@ class ItemResultController extends Controller
                     $itemResult->short_contents = $formatData['short_contents'];
                 }
 
+                $shortContents = json_decode($shortContents, true);
                 // 如果有图片信息则计数器增1
                 $newCounter = empty($shortContents['images']) ? $counter : $counter + 1;
 
                 if ($newCounter > 0) {
                     $itemResult->counter = $newCounter;
+                    $itemResult->status = ItemResult::STATUS_INIT;
+                } else {
+                    $itemResult->status = ItemResult::STATUS_SUCCESS;
                 }
+                
                 $itemResult->save();
 
                 $shortContents['id'] = $itemResult->id;
-                $result = array_merge($result, $shortContents);
+                $result[] = $shortContents;
             }
         }
 
@@ -243,7 +248,6 @@ class ItemResultController extends Controller
         }
 
         if (!empty($data['short_contents'])) {
-            $data['short_contents'] = json_encode($data['short_contents']);
             $data['md5_short_contents'] = md5($data['short_contents']);
         }
 

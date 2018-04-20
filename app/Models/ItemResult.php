@@ -9,6 +9,10 @@ class ItemResult extends Model
 {
     use SoftDeletes;
 
+    const STATUS_INIT = 1; // 初始化
+    const STATUS_SUCCESS = 2; // 成功
+    const STATUS_FAIL = 3; // 失败
+
     /**
      * 表名
      */
