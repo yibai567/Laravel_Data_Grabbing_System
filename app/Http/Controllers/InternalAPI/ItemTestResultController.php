@@ -222,43 +222,6 @@ class ItemTestResultController extends Controller
         return $this->resObjectGet($result, 'item_result', $request->path());
     }
 
-    private function __formatData($params)
-    {
-        $item = [
-            'id' => '',
-            'item_id' => '',
-            'short_contents'  => '',
-            'md5_short_contents' => '',
-            'long_content0' => '',
-            'long_content1' => '',
-            'images' => '',
-            'error_message' => '',
-            'start_at' => '',
-            'end_at' => '',
-            'status' => ''
-        ];
-
-        $data = [];
-
-        foreach ($item as $key => $value) {
-            if (!empty($params[$key])) {
-                $data[$key] = $params[$key];
-            }
-        }
-
-        if (!empty($data['short_contents'])) {
-            $data['md5_short_contents'] = md5($data['short_contents']);
-            $shortContents = json_decode($data['short_contents'], true);
-            foreach ($shortContents as $key => $item) {
-                $item = json_decode($item, true);
-                $shortContents[$key] = $item;
-            }
-            $data['short_contents'] = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
-        }
-
-        return $data;
-    }
-
     /**
      * updateCapture
      * 更新任务结果capture信息
@@ -294,5 +257,42 @@ class ItemTestResultController extends Controller
 
         $result = $itemTestResult->toArray();
         return $this->resObjectGet($result, 'item_test_result', $request->path());
+    }
+
+    private function __formatData($params)
+    {
+        $item = [
+            'id' => '',
+            'item_id' => '',
+            'short_contents'  => '',
+            'md5_short_contents' => '',
+            'long_content0' => '',
+            'long_content1' => '',
+            'images' => '',
+            'error_message' => '',
+            'start_at' => '',
+            'end_at' => '',
+            'status' => ''
+        ];
+
+        $data = [];
+
+        foreach ($item as $key => $value) {
+            if (!empty($params[$key])) {
+                $data[$key] = $params[$key];
+            }
+        }
+
+        if (!empty($data['short_contents'])) {
+            $data['md5_short_contents'] = md5($data['short_contents']);
+            $shortContents = json_decode($data['short_contents'], true);
+            foreach ($shortContents as $key => $item) {
+                $item = json_decode($item, true);
+                $shortContents[$key] = $item;
+            }
+            $data['short_contents'] = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
+        }
+
+        return $data;
     }
 }

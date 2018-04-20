@@ -48,7 +48,6 @@ class ImageService extends Service
             $response = $client->request('GET', $url, ['timeout' => 30]);
             $content = $response->getBody();
             $object = (string)$content;
-
             $ext = $this->getExt($url);
 
             if (!$ext) {

@@ -7,6 +7,7 @@ use App\Services\InternalAPIService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Log;
 
 class ImageCrawl extends Command
 {
@@ -45,14 +46,16 @@ class ImageCrawl extends Command
         while (1) {
             try {
                 $data = Redis::connection('queue')->rpop('crawl_image_queue');
-                Log::debug('[jinse::image:crawl] get pop from image queue ', $data);
-                dd($data);
+//                $data = '{"id":1,"resource_url":"https://cdn.jin10.com/pic/67/276f4228e7cca4381fa575a7d8cbed6c.jpg","is_test":true}';
+                Log::debug('[jinse::image:crawl] get pop from image queue ' . json_encode($data));
                 $imageService = new ImageService();
                 if (!empty($data)) {
                     $data = json_decode($data, true);
                     $imageRes = [];
-                    if (count($data['images'])) {
-                        foreach ($data['images'] as $imageUrl) {
+                    $data['resource_url'] = explode(',', $data['resource_url']);
+
+                    if (count($data['resource_url'])) {
+                        foreach ($data['resource_url'] as $imageUrl) {
                             $imageItem = $imageService->uploadByImageUrl($imageUrl);
                             $imageItem = array_only($imageItem, ['oss_url', 'width', 'height', 'ext', 'mime_type']);
                             $imageRes[] = $imageItem;
@@ -60,9 +63,8 @@ class ImageCrawl extends Command
                     }
 
                     if (count($imageRes)) {
-                        $params['images'] = json_encode($imageRes);
+                        $params['images'] = json_encode($imageRes, JSON_UNESCAPED_UNICODE);
                         $params['id'] = $data['id'];
-
                         DB::beginTransaction();
                         if ($data['is_test']) { // is_test 为真，将结果存入测试结果队列
                             InternalAPIService::post('/item/test_result/image', $params);
