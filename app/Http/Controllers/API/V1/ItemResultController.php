@@ -82,8 +82,7 @@ class ItemResultController extends Controller
             'images'          => 'nullable',
             'error_message'   => 'string|nullable'
         ]);
-Log::debug('[dispatchJob] 请求', $params);
-exit();
+
         // 获取 item run Log
         Log::debug('[dispatchJob] 请求 /item_run_log', ['id' => $params['item_run_log_id']]);
         $itemRunLog = InternalAPIService::get('/item_run_log', ['id' => $params['item_run_log_id']]);
