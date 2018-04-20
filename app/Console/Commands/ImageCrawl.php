@@ -66,11 +66,17 @@ class ImageCrawl extends Command
                         $params['images'] = json_encode($imageRes, JSON_UNESCAPED_UNICODE);
                         $params['id'] = $data['id'];
                         DB::beginTransaction();
+                        $result = [];
                         if ($data['is_test']) { // is_test 为真，将结果存入测试结果队列
-                            InternalAPIService::post('/item/test_result/image', $params);
+                            $result = InternalAPIService::post('/item/test_result/image', $params);
+                            if ($result['counter'] < 1 && $result['status'] == 4) { // 判断是否成功
+                                InternalAPIService::post('/item/status/test_success', ['id' => $result['id']]);
+                            }
                         } else { // 否则，存入结果队列
                             InternalAPIService::post('/item/result/image', $params);
                         }
+
+
                         DB::commit();
                     }
                 } else {

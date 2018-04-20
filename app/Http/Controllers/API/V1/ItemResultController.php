@@ -77,27 +77,29 @@ class ItemResultController extends Controller
             'item_run_log_id' => 'required|integer|min:1|max:99999999',
             'start_at'      => 'date|nullable',
             'end_at'        => 'date|nullable',
-            'short_contents'   => 'array|nullable',
-            'long_contents'    => 'array|nullable',
+            'short_contents'   => 'nullable',
+            'long_contents'    => 'nullable',
             'images'          => 'nullable',
             'error_message'   => 'string|nullable'
         ]);
+        if (isset(($params['short_contents']) && !empty($params['short_contents'])) {
+            $params['short_contents'] = json_encode($params['short_contents'], JSON_UNESCAPED_UNICODE);
+        }
+
+        if (isset(($params['long_contents']) && !empty($params['long_contents'])) {
+            $params['long_contents'] = json_encode($params['long_contents'], JSON_UNESCAPED_UNICODE);
+        }
 
         // 获取 item run Log
-        Log::debug('[dispatchJob] 请求 /item_run_log', ['id' => $params['item_run_log_id']]);
+        Log::debug('[dispatchJob] 请求 /item_run_log  | 获取 Item_run_log 信息,', ['id' => $params['item_run_log_id']]);
         $itemRunLog = InternalAPIService::get('/item_run_log', ['id' => $params['item_run_log_id']]);
         if ($itemRunLog['status'] != ItemRunLog::STATUS_RUNNING) {
             throw new \Dingo\Api\Exception\ResourceException("invalid item_run_log status");
         }
 
         // 获取 item
-        Log::debug('[dispatchJob] 请求 /item', ['id' => $itemRunLog['item_id']]);
+        Log::debug('[dispatchJob] 请求 /item | 获取 Item 信息,', ['id' => $itemRunLog['item_id']]);
         $item = InternalAPIService::get('/item', ['id' => $itemRunLog['item_id']]);
-
-        // // 任务状态应该是 2 、5
-        // if ($item['status'] != 4) {
-        //     throw new \Dingo\Api\Exception\ResourceException("invalid item status");
-        // }
 
         // 判断 任务类型（test or production）、数据类型
         switch ($item['data_type']) {
@@ -129,12 +131,12 @@ class ItemResultController extends Controller
         try {
             $params['is_proxy'] = $item['is_proxy'];
             $params['item_id'] = $item['id'];
-            Log::debug('[dispatchJob] 请求 ' . $path);
-            // Log::debug('[dispatchJob] 请求 ' . $path, $params);  // 完整数据太多
+            // Log::debug('[dispatchJob] 请求 ' . $path);
+            Log::debug('[dispatchJob] 请求 ' . $path, $params);  // 完整数据太多
             $results = InternalAPIService::post($path, $params);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
             // 标记当前任务为失败状态
-            Log::debug('[dispatchJob] 请求 /item_run_log/status/fail', $params);
+            Log::debug('[dispatchJob] 请求 /item_run_log/status/fail');
             InternalAPIService::post('/item_run_log/status/fail', $params);
 
             throw new \Dingo\Api\Exception\ResourceException("invalid result");
