@@ -248,6 +248,12 @@ class ItemTestResultController extends Controller
 
         if (!empty($data['short_contents'])) {
             $data['md5_short_contents'] = md5($data['short_contents']);
+            $shortContents = json_decode($data['short_contents'], true);
+            foreach ($shortContents as $key => $item) {
+                $item = json_decode($item, true);
+                $shortContents[$key] = $item;
+            }
+            $data['short_contents'] = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
         }
 
         return $data;
