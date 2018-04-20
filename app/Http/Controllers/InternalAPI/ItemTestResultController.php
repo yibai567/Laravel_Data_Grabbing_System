@@ -20,7 +20,6 @@ use Dingo\Api\Exception\ResourceException;
  */
 class ItemTestResultController extends Controller
 {
-
     /**
      * getTestResult
      * 获取任务最后测试结果
