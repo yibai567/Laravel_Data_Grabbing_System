@@ -132,7 +132,7 @@ class ItemResultController extends Controller
     public function updateCapture(Request $request)
     {
         $params = $request->all();
-        Log::debug('[updateCapture] 更新任务结果截图信息' . json_encode($params));
+        Log::debug('[updateCapture] 更新任务结果截图信息' . json_encode($params, JSON_UNESCAPED_UNICODE));
 
         ValidatorService::check($params, [
             'id' => 'integer|required',
