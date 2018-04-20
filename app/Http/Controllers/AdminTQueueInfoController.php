@@ -4,7 +4,9 @@
 	use Request;
 	use DB;
 	use CRUDBooster;
-
+    use App\Models\Item;
+    use App\Models\QueueInfo;
+    use Illuminate\Support\Facades\Route;
 	class AdminTQueueInfoController extends \crocodicstudio\crudbooster\controllers\CBController {
 
 	    public function cbInit() {
@@ -67,7 +69,7 @@
 			$this->form[] = ['label'=>'数据库','name'=>'db','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'是否翻墙','name'=>'is_proxy','type'=>'radio','validation'=>'required|integer|between:1,2','width'=>'col-sm-10','dataenum'=>'1|需要;2|不需要','value'=>1];
 			$this->form[] = ['label'=>'内容类型','name'=>'data_type','type'=>'radio','validation'=>'required|integer|between:1,2','width'=>'col-sm-10','dataenum'=>'1|html;2|json','value'=>1];
-			$this->form[] = ['label'=>'队列类型','name'=>'type','type'=>'radio','validation'=>'required|integer|between:1,4','width'=>'col-sm-10','dataenum'=>'1|html;2|json;3|capture;4|test','value'=>1];
+			//$this->form[] = ['label'=>'队列类型','name'=>'type','type'=>'radio','validation'=>'required|integer|between:1,4','width'=>'col-sm-10','dataenum'=>'1|html;2|json;3|capture;4|test','value'=>1];
 
 			$this->form[] = ['label'=>'是否需要截图','name'=>'is_capture_image','type'=>'radio','validation'=>'required|integer|between:1,2','width'=>'col-sm-10','dataenum'=>'1|是;2|否','value'=>2];
 
@@ -361,6 +363,40 @@
 
 
 	    //By the way, you can still create your own method in here... :)
+        public function getDetail($id) {
+            $this->cbLoader();
+            $row = DB::table('t_queue_info')->where('id', $id)->first();
+
+            if ($row->is_proxy == Item::IS_PROXY_YES) {
+                $row->is_proxy = '翻墙';
+            } else {
+                $row->is_proxy = '不翻墙';
+            }
+
+            if ($row->data_type == Item::DATA_TYPE_HTML) {
+                $row->data_type = 'html';
+            } else if ($row->data_type == Item::DATA_TYPE_JSON){
+                $row->data_type = 'json';
+            } else {
+                $row->data_type = '截图';
+            }
+
+            if ($row->is_capture_image == Item::IS_CAPTURE_IMAGE_TRUE) {
+                $row->is_capture_image = '截图';
+            } else {
+                $row->is_capture_image = '不截图';
+            }
+
+            if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
+                    CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
+                    CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
+                }
+                $page_menu  = Route::getCurrentRoute()->getActionName();
+                $page_title = trans("crudbooster.detail_data_page_title",['module'=>$module->name,'name'=>$row->{$this->title_field}]);
+                $command    = 'detail';
+                Session::put('current_row_id',$id);
+                return view('crudbooster::default.form',compact('row','page_menu','page_title','command','id'));
+        }
 
 
 	}

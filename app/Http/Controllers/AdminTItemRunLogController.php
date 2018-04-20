@@ -45,7 +45,6 @@
             }];
 			$this->col[] = ["label"=>"开始时间","name"=>"start_at"];
 			$this->col[] = ["label"=>"结束时间","name"=>"end_at"];
-			$this->col[] = ["label"=>"计数器","name"=>"num"];
             $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
                 if ( $row->status == ItemRunLog::STATUS_RUNNING) {
                     return '运行中';
@@ -64,7 +63,7 @@
 			$this->form[] = ['label'=>'类型','name'=>'type','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'开始时间','name'=>'start_at','type'=>'datetime','validation'=>'required|date_format:Y-m-d H:i:s','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'结束时间','name'=>'end_at','type'=>'datetime','validation'=>'required|date_format:Y-m-d H:i:s','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'计数器','name'=>'num','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+
 			$this->form[] = ['label'=>'状态','name'=>'status','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			# END FORM DO NOT REMOVE THIS LINE
 
