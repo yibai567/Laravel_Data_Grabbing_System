@@ -111,8 +111,8 @@ class ItemResultController extends Controller
 
         // 更新计数器
         $itemRunLog = ItemRunLog::find($itemResult->item_run_log_id);
-        if ($itemRunLog->num > 0) {
-            $itemRunLog->decrement('num');
+        if ($itemRunLog->counter > 0) {
+            $itemRunLog->decrement('counter');
         }
 
         $result = $itemResult->toArray();
@@ -149,8 +149,8 @@ class ItemResultController extends Controller
 
         // 更新计数器
         $itemRunLog = ItemRunLog::find($itemResult->item_run_log_id);
-        if ($itemRunLog->num > 0) {
-            $itemRunLog->decrement('num');
+        if ($itemRunLog->counter > 0) {
+            $itemRunLog->decrement('counter');
         }
 
         $result = $itemResult->toArray();
@@ -178,7 +178,7 @@ class ItemResultController extends Controller
         ]);
 
         $result = [];
-        $num = 0; // 计数器
+        $counter = 0; // 计数器
 
         if (!empty($params['short_contents'])) {
             $shortContentsArr = json_decode($params['short_contents'], true);
@@ -186,13 +186,13 @@ class ItemResultController extends Controller
             // 判断任务是否需要截图
             $item = Item::find($params['item_id']);
             if ($item->is_capture) {
-                $num += count($shortContentsArr);
+                $counter += count($shortContentsArr);
             }
 
             foreach ($shortContentsArr as $shortContents) {
                 $params['short_contents'] = $shortContents;
                 if (!empty($shortContents['images'])) {
-                    $num += 1;
+                    $counter += 1;
                 }
                 $formatData = $this->__formatData($params);
 
@@ -213,8 +213,8 @@ class ItemResultController extends Controller
                 $result = array_merge($result, $shortContents);
             }
         }
-        if ($num > 0) {
-            ItemRunLog::find($params['item_run_log_id'])->increment('num', $num);
+        if ($counter > 0) {
+            ItemRunLog::find($params['item_run_log_id'])->increment('counter', $counter);
         }
 
         return $this->resObjectGet($result, 'item_test_result', $request->path());

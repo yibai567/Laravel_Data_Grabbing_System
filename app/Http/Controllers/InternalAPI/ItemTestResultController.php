@@ -105,12 +105,12 @@ class ItemTestResultController extends Controller
             throw new ResourceException("result not exist");
         }
 
-        $num = 0; // 计数器
+        $counter = 0; // 计数器
 
         // 判断任务是否需要截图
         $item = Item::find($itemTestResult->item_id);
         if ($item->is_capture) {
-            $num += 1;
+            $counter += 1;
         }
 
         $result = [];
@@ -120,15 +120,15 @@ class ItemTestResultController extends Controller
                 $shortContent[0]['id'] = $itemTestResult['id'];
 
                 if ($shortContent[0]['images']) {
-                    $num += 1;
+                    $counter += 1;
                 }
                 $result[] = $shortContent[0];
             }
         }
 
         // 更新计数器
-        if ($num > 0) {
-            ItemRunLog::find($params['item_run_log_id'])->increment('num', $num);
+        if ($counter > 0) {
+            ItemRunLog::find($params['item_run_log_id'])->increment('counter', $counter);
         }
 
         return $this->resObjectGet($result, 'item_test_result', $request->path());
@@ -177,8 +177,8 @@ class ItemTestResultController extends Controller
 
         // 更新计数器
         $itemRunLog = ItemRunLog::find($itemTestResult->item_run_log_id);
-        if ($itemRunLog->num > 0) {
-            $itemRunLog->decrement('num');
+        if ($itemRunLog->counter > 0) {
+            $itemRunLog->decrement('counter');
         }
 
         Log::debug('[updateImage] 更新short_contents：' . $itemTestResult->short_contents);
@@ -284,8 +284,8 @@ class ItemTestResultController extends Controller
 
         // 更新计数器
         $itemRunLog = ItemRunLog::find($itemTestResult->item_run_log_id);
-        if ($itemRunLog->num > 0) {
-            $itemRunLog->decrement('num');
+        if ($itemRunLog->counter > 0) {
+            $itemRunLog->decrement('counter');
         }
 
         $result = $itemTestResult->toArray();
