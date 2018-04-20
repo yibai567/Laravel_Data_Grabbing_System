@@ -3,7 +3,9 @@
 	use Session;
 	use Request;
 	use DB;
+    use App\Models\ItemRunLog;
 	use CRUDBooster;
+    use Illuminate\Support\Facades\Route;
 
 	class AdminTItemRunLogController extends \crocodicstudio\crudbooster\controllers\CBController {
 
@@ -32,11 +34,28 @@
 			$this->col = [];
 			$this->col[] = ["label"=>"Id","name"=>"id"];
 			$this->col[] = ["label"=>"任务ID","name"=>"item_id"];
-			$this->col[] = ["label"=>"类型","name"=>"type"];
+			$this->col[] = ["label"=>"类型","name"=>"type","callback"=>function ($row) {
+                if ( $row->type == ItemRunLog::TYPE_TEST) {
+                    return 'html';
+                } else if( $row->data_type == Item::TYPE_PRO) {
+                    return 'json';
+                } else {
+                    return '截图';
+                }
+            }];
 			$this->col[] = ["label"=>"开始时间","name"=>"start_at"];
 			$this->col[] = ["label"=>"结束时间","name"=>"end_at"];
 			$this->col[] = ["label"=>"计数器","name"=>"num"];
-			$this->col[] = ["label"=>"状态","name"=>"status"];
+            $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
+                if ( $row->status == ItemRunLog::STATUS_RUNNING) {
+                    return '运行中';
+                } else if( $row->status == ItemRunLog::STATUS_SUCCESS) {
+                    return '成功';
+                } else if( $row->status == ItemRunLog::STATUS_FAIL) {
+                    return '失败';
+                }
+            }];
+
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
@@ -330,6 +349,35 @@
 
 	    }
 
+        public function getDetail($id) {
+            $this->cbLoader();
+            $row = DB::table('t_item_run_log')->where('id', $id)->first();
+
+            if ( $row->status == ItemRunLog::STATUS_RUNNING) {
+                $row->status = '运行中';
+            } else if( $row->status == ItemRunLog::STATUS_SUCCESS) {
+                $row->status = '成功';
+            } else if( $row->status == ItemRunLog::STATUS_FAIL) {
+                $row->status = '失败';
+            }
+
+            if ($row->type == ItemRunLog::TYPE_TEST) {
+                $row->type = '测试';
+            } else {
+                $row->type = '正式';
+            }
+
+
+            if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
+                    CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
+                    CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
+                }
+                $page_menu  = Route::getCurrentRoute()->getActionName();
+                $page_title = trans("crudbooster.detail_data_page_title",['module'=>$module->name,'name'=>$row->{$this->title_field}]);
+                $command    = 'detail';
+                Session::put('current_row_id',$id);
+                return view('crudbooster::default.form',compact('row','page_menu','page_title','command','id'));
+        }
 
 
 	    //By the way, you can still create your own method in here... :)
