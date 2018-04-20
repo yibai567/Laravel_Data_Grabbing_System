@@ -71,7 +71,7 @@ class ItemTestResultController extends Controller
 
         //获取测试结果
         $itemTestResult = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $params['item_run_log_id']]);
-        Log::debug('[updateHtml] get test result info ' . json_encode($itemTestResult));
+        Log::debug('[updateHtml] get test result info ' . json_encode($itemTestResult, JSON_UNESCAPED_UNICODE));
 
         if (empty($itemTestResult)) {
             Log::debug('[updateHtml] item test result is empty ');
@@ -147,7 +147,7 @@ class ItemTestResultController extends Controller
     public function updateImage(Request $request)
     {
         $params = $request->all();
-        Log::debug('[updateImage] 更新任务结果image信息' . json_encode($params));
+        Log::debug('[updateImage] 更新任务结果image信息' . json_encode($params, JSON_UNESCAPED_UNICODE));
 
         ValidatorService::check($params, [
             'id' => 'integer|required',
@@ -232,7 +232,7 @@ class ItemTestResultController extends Controller
     public function updateCapture(Request $request)
     {
         $params = $request->all();
-        Log::debug('[updateImage] 更新任务结果image信息' . json_encode($params));
+        Log::debug('[updateImage] 更新任务结果image信息' . json_encode($params, JSON_UNESCAPED_UNICODE));
 
         ValidatorService::check($params, [
             'id' => 'integer|required',
