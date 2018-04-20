@@ -35,6 +35,7 @@ class ItemResult extends Model
         'images',
         'start_at',
         'end_at',
+        'counter',
         'status'
     ];
 }

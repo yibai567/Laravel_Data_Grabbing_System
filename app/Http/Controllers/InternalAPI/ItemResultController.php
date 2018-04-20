@@ -107,13 +107,10 @@ class ItemResultController extends Controller
         }
 
         $itemResult->short_contents = json_encode($shortContents);
-        $itemResult->save();
-
-        // 更新计数器
-        $itemRunLog = ItemRunLog::find($itemResult->item_run_log_id);
-        if ($itemRunLog->counter > 0) {
-            $itemRunLog->decrement('counter');
+        if ($itemResult->counter > 0) { // 更新计数器
+            $itemResult->counter -= 1;
         }
+        $itemResult->save();
 
         $result = $itemResult->toArray();
         return $this->resObjectGet($result, 'item_test_result', $request->path());
@@ -145,13 +142,10 @@ class ItemResultController extends Controller
         }
 
         $itemResult->images = json_encode($params['images']);
-        $itemResult->save();
-
-        // 更新计数器
-        $itemRunLog = ItemRunLog::find($itemResult->item_run_log_id);
-        if ($itemRunLog->counter > 0) {
-            $itemRunLog->decrement('counter');
+        if ($itemResult->counter > 0) { // 更新计数器
+            $itemResult->counter -= 1;
         }
+        $itemResult->save();
 
         $result = $itemResult->toArray();
         return $this->resObjectGet($result, 'item_test_result', $request->path());
@@ -186,7 +180,7 @@ class ItemResultController extends Controller
             // 判断任务是否需要截图
             $item = Item::find($params['item_id']);
             if ($item->is_capture) {
-                $counter += count($shortContentsArr);
+                $counter += 1;
             }
 
             foreach ($shortContentsArr as $shortContents) {
@@ -206,15 +200,16 @@ class ItemResultController extends Controller
                     $itemResult->start_at = $formatData['start_at'];
                     $itemResult->end_at = $formatData['end_at'];
                     $itemResult->short_contents = $formatData['short_contents'];
-                    $itemResult->save();
                 }
+
+                if ($counter > 0) {
+                    $itemResult->counter = $counter;
+                }
+                $itemResult->save();
 
                 $shortContents['id'] = $itemResult->id;
                 $result = array_merge($result, $shortContents);
             }
-        }
-        if ($counter > 0) {
-            ItemRunLog::find($params['item_run_log_id'])->increment('counter', $counter);
         }
 
         return $this->resObjectGet($result, 'item_test_result', $request->path());
@@ -238,7 +233,6 @@ class ItemResultController extends Controller
             'images' => '',
             'start_at' => '',
             'end_at' => '',
-            'status' => ''
         ];
 
         $data = [];

@@ -126,10 +126,8 @@ class ItemTestResultController extends Controller
             }
         }
 
-        // 更新计数器
-        if ($counter > 0) {
-            ItemRunLog::find($params['item_run_log_id'])->increment('counter', $counter);
-        }
+        $formatData['counter'] = $counter;
+        $itemTestResult->update($formatData);
 
         return $this->resObjectGet($result, 'item_test_result', $request->path());
     }
@@ -173,13 +171,10 @@ class ItemTestResultController extends Controller
         }
 
         $itemTestResult->short_contents = json_encode($shortContents);
-        $itemTestResult->save();
-
-        // 更新计数器
-        $itemRunLog = ItemRunLog::find($itemTestResult->item_run_log_id);
-        if ($itemRunLog->counter > 0) {
-            $itemRunLog->decrement('counter');
+        if ($itemTestResult->counter > 0) { // 更新计数器
+            $itemTestResult->counter -= 1;
         }
+        $itemTestResult->save();
 
         Log::debug('[updateImage] 更新short_contents：' . $itemTestResult->short_contents);
 
@@ -279,15 +274,13 @@ class ItemTestResultController extends Controller
         }
 
         $itemTestResult->images = $params['images'];
-        $itemTestResult->save();
-        Log::debug('[updateImage] 更新short_contents：' . $itemTestResult->short_contents);
-
-        // 更新计数器
-        $itemRunLog = ItemRunLog::find($itemTestResult->item_run_log_id);
-        if ($itemRunLog->counter > 0) {
-            $itemRunLog->decrement('counter');
+        if ($itemTestResult->counter > 0) { // 更新计数器
+            $itemTestResult->counter -= 1;
         }
 
+        $itemTestResult->save();
+        Log::debug('[updateImage] 更新short_contents：' . $itemTestResult->short_contents);
+        
         $result = $itemTestResult->toArray();
         return $this->resObjectGet($result, 'item_test_result', $request->path());
     }

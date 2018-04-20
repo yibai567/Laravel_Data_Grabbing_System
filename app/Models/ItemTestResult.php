@@ -43,6 +43,7 @@ class ItemTestResult extends Model
         'error_message',
         'start_at',
         'end_at',
+        'counter',
         'status'
     ];
 }

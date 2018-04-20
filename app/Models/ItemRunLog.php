@@ -35,6 +35,7 @@ class ItemRunLog extends Model
         'start_at',
         'end_at',
         'status',
+        'counter',
     ];
 
     /**
