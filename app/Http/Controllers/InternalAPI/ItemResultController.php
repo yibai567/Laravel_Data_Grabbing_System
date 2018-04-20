@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
 use App\Models\ItemResult;
+use Dingo\Api\Exception\ResourceException;
+
 
 /**
  * ItemResultController
@@ -116,6 +118,91 @@ class ItemResultController extends Controller
      */
     public function updateImage(Request $request)
     {
+        $params = $request->all();
+        ValidatorService::check($params, [
+            'id' => 'integer|required',
+            'images' => 'string|required',
+        ]);
+
+        $params['id'] = intval($params['id']);
+        $itemResult = ItemTestResult::find($params['id']);
+
+        if (empty($itemResult)) {
+            throw new ResourceException("test result not exist");
+        }
+
+        $shortContents = json_decode($itemResult->short_contents, true);
+
+        if (empty($shortContents)) {
+            throw new ResourceException("test result short_contents is empty");
+        }
+
+        foreach ($shortContents as $key=>$val) {
+            if (!empty($params[$key]['images'])) {
+                $val['images'] = $params[$key]['images'];
+            }
+
+            $shortContents[$key] = $val;
+        }
+
+
+        $itemResult->short_contents = json_encode($shortContents);
+        $itemResult->save();
+
+        $result = $itemResult->toArray();
+        return $this->resObjectGet($result, 'item_test_result', $request->path());
+    }
+
+    /**
+     * updateHtml
+     * 更新html任务结果
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function createHtml(Request $request)
+    {
+        $params = $request->all();
+        ValidatorService::check($params, [
+            'item_id' => 'integer|required',
+            'item_run_log_id' => 'integer|nullable',
+            'short_contents' => 'nullable',
+            'long_contents' => 'nullable',
+            'images' => 'nullable',
+            'start_at' => 'date|nullable',
+            'end_at' => 'date|nullable',
+        ]);
+
+        $result = [];
+        if (!empty($params['short_contents'])) {
+            $shortContentsArr = json_decode($params['short_contents']);
+
+            foreach ($shortContentsArr as $key=>$shortContents) {
+                $params['short_contents'] = $shortContents;
+                $formatData = $this->__formatData($params);
+
+                $itemResult = ItemResult::firstOrCreate([
+                    'item_id' => $formatData['item_id'],
+                    'item_run_log_id' => $formatData['item_run_log_id'],
+                    'md5_short_contents' => $formatData['md5_short_contents'],
+                ]);
+
+                if (!$itemResult->wasRecentlyCreated) {
+                    continue;
+                }
+
+                $itemResult->start_at = $formatData['start_at'];
+                $itemResult->end_at = $formatData['end_at'];
+                $itemResult->short_contents = $formatData['short_contents'];
+
+                $result[$key] = [
+                    'id' => $itemResult->id,
+                    'short_contents' => $formatData['short_contents']
+                ];
+            }
+        }
+
+        return $this->resObjectGet($result, 'item_test_result', $request->path());
     }
 
     /**
@@ -148,7 +235,7 @@ class ItemResultController extends Controller
 
         if (!empty($data['short_contents'])) {
             $data['short_contents'] = json_encode($data['short_contents']);
-            $data['md5_short_contents'] = md5(json_encode($data['short_contents']));
+            $data['md5_short_contents'] = md5($data['short_contents']);
         }
 
         return $data;

@@ -12,7 +12,7 @@ class ItemResult extends Model
     /**
      * 表名
      */
-    protected $table = 't_item_test_result';
+    protected $table = 't_item_result';
 
     /**
      * 隐藏的字段
@@ -28,7 +28,7 @@ class ItemResult extends Model
     protected $fillable = [
         'item_id',
         'item_run_log_id',
-        'short_content',
+        'short_contents',
         'md5_short_contents',
         'long_content0',
         'long_content1',
