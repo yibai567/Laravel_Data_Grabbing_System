@@ -37,6 +37,15 @@
 			$this->col[] = ["label"=>"开始时间","name"=>"start_at"];
 			$this->col[] = ["label"=>"结束时间","name"=>"end_at"];
 			$this->col[] = ["label"=>"状态","name"=>"status"];
+            $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
+                if ( $row->status == ItemResult::STATUS_INIT) {
+                    return '初始化';
+                } else if( $row->status == ItemResult::STATUS_SUCCESS) {
+                    return '成功';
+                } else if( $row->status == ItemResult::STATUS_FAIL) {
+                    return '失败';
+                }
+            }];
             $this->col[] = ["label"=>"修改时间","name"=>"updated_at"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
@@ -44,7 +53,7 @@
 			$this->form = [];
 			$this->form[] = ['label'=>'任务ID','name'=>'item_id','type'=>'text','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'任务运行日志ID','name'=>'item_run_log_id','type'=>'text','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'短内容','name'=>'short_content','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'短内容','name'=>'short_contents','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'长内容0','name'=>'long_content0','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'长内容1','name'=>'long_content1','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'图片','name'=>'images','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
