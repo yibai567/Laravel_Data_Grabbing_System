@@ -228,6 +228,14 @@ class ItemTestResultController extends Controller
         if ($itemTestResult->counter <= 0) { // 判断计数器是否为0 修改状态
             $itemTestResult->counter = 0;
             $itemTestResult->status = ItemTestResult::STATUS_SUCCESS;
+
+            $result = json_decode($itemTestResult->short_contents, true);
+            $result['task_id'] = $itemTestResult->item_id;
+            $result['screenshot'] = $itemTestResult->images;
+
+            $data['is_test'] = 1;
+            $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
+            InternalAPIService::post('/item/result/report', $data);
         }
 
         $itemTestResult->save();

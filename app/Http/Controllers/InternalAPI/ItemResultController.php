@@ -122,7 +122,7 @@ class ItemResultController extends Controller
             $result['task_id'] = $itemResult->item_id;
             $result['screenshot'] = $itemResult->images;
 
-            $data['is_test'] = 1;
+            $data['is_test'] = 2;
             $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
 
             InternalAPIService::post('/item/result/report', $data);
@@ -173,7 +173,7 @@ class ItemResultController extends Controller
             $result['task_id'] = $itemResult->item_id;
             $result['screenshot'] = $itemResult->images;
 
-            $data['is_test'] = 1;
+            $data['is_test'] = 2;
             $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
 
             InternalAPIService::post('/item/result/report', $data);

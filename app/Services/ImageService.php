@@ -46,7 +46,7 @@ class ImageService extends Service
             $options = ['verify' => false];
             //proxy example 'http' => 'http://username:password@199.220.220.105:2662'
             if ($isProxy) {
-                $options['proxy'] = '36.22.198.60:30491';
+                $options['proxy'] = config('proxy.url');
             }
 
             $client = new Client($options);
