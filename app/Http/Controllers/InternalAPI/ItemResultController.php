@@ -117,6 +117,15 @@ class ItemResultController extends Controller
         if ($itemResult->counter <= 0) {
             $itemResult->counter = 0;
             $itemResult->status = ItemResult::STATUS_SUCCESS;
+
+            $result = json_decode($itemResult->short_contents, true);
+            $result['task_id'] = $itemResult->item_id;
+            $result['screenshot'] = $itemResult->images;
+
+            $data['is_test'] = 1;
+            $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
+
+            InternalAPIService::post('/item/result/report', $data);
         }
 
         $itemResult->save();
@@ -151,7 +160,7 @@ class ItemResultController extends Controller
         // 图片上传
         $imageService = new ImageService();
         $imageInfo = $imageService->uploadByFile($image);
-
+        $imageInfo['url'] = $imageInfo['oss_url'];
         // 更新结果
         $itemResult->image = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);
 
@@ -159,6 +168,15 @@ class ItemResultController extends Controller
         if ($itemResult->counter <= 0) { // 判断计数器是否为0 修改状态
             $itemResult->counter = 0;
             $itemResult->status = ItemResult::STATUS_SUCCESS;
+
+            $result = json_decode($itemResult->short_contents, true);
+            $result['task_id'] = $itemResult->item_id;
+            $result['screenshot'] = $itemResult->images;
+
+            $data['is_test'] = 1;
+            $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
+
+            InternalAPIService::post('/item/result/report', $data);
         }
         $itemResult->save();
 
@@ -194,6 +212,7 @@ class ItemResultController extends Controller
 
             // 判断任务是否需要截图
             $item = Item::find($params['item_id']);
+
             if ($item->is_capture_image == Item::IS_CAPTURE_IMAGE_TRUE) {
                 $counter += 1;
             }
@@ -213,6 +232,7 @@ class ItemResultController extends Controller
                     $itemResult->end_at = $formatData['end_at'];
                     $itemResult->short_contents = $formatData['short_contents'];
                     $shortContents = json_decode($shortContents, true);
+                    $shortContents['url'] = $this->__formatURL($shortContents['url'], $item->pre_detail_url);
                     // 如果有图片信息则计数器增1
                     $newCounter = empty($shortContents['images']) ? $counter : $counter + 1;
 
@@ -261,5 +281,36 @@ class ItemResultController extends Controller
         }
 
         return $data;
+    }
+
+    /**
+     * __formatURL
+     * 格式化地址
+     *
+     * @param Request $request
+     * @return array
+     */
+    private function __formatURL($url, $preDetailUrl)
+    {
+        if (empty($preDetailUrl) || $url == 'undefined' || $url == 'javascript:;') {
+            return false;
+        }
+
+        $httpPre = substr($url, 0, 4);
+        $urlArr = parse_url($preDetailUrl);
+        if ($httpPre != 'http:') {
+            if (substr($url, 0, 2) == '//') {
+                $url = $urlArr['scheme'] . ':' . $url;
+            } else {
+
+                if (substr($url, 0, 1) == '/') {
+                    $url = $urlArr['scheme'] . '://' . $urlArr['host'] . $url;
+                } else {
+                    $url = $urlArr['scheme'] . '://' . $urlArr['host'] . '/' . $url;
+                }
+            }
+        }
+
+        return trim($url);
     }
 }

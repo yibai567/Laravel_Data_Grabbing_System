@@ -270,7 +270,7 @@ class ItemTestResultController extends Controller
 
     private function __formatData($params)
     {
-        $item = [
+        $fields = [
             'id' => '',
             'item_id' => '',
             'short_contents'  => '',
@@ -286,24 +286,57 @@ class ItemTestResultController extends Controller
 
         $data = [];
 
-        foreach ($item as $key => $value) {
+        foreach ($fields as $key => $value) {
             if (!empty($params[$key])) {
                 $data[$key] = $params[$key];
             }
         }
 
+        $item = Item::find($data['item_id']);
         if (!empty($data['short_contents'])) {
             $data['md5_short_contents'] = md5($data['short_contents']);
             $shortContents = json_decode($data['short_contents'], true);
             if (!empty($shortContents)) {
-                foreach ($shortContents as $key => $item) {
-                    $item = json_decode($item, true);
-                    $shortContents[$key] = $item;
+                foreach ($shortContents as $key => $val) {
+                    $val = json_decode($val, true);
+                    $val['url'] = $this->__formatUrl($val['url'], $item->pre_detail_url);
+                    $shortContents[$key] = $val;
                 }
                 $data['short_contents'] = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
             }
         }
 
         return $data;
+    }
+
+    /**
+     * __formatURL
+     * 格式化地址
+     *
+     * @param Request $request
+     * @return array
+     */
+    private function __formatURL($url, $preDetailUrl)
+    {
+        if (empty($preDetailUrl) || $url == 'undefined' || $url == 'javascript:;') {
+            return false;
+        }
+
+        $httpPre = substr($url, 0, 4);
+        $urlArr = parse_url($preDetailUrl);
+        if ($httpPre != 'http:') {
+            if (substr($url, 0, 2) == '//') {
+                $url = $urlArr['scheme'] . ':' . $url;
+            } else {
+
+                if (substr($url, 0, 1) == '/') {
+                    $url = $urlArr['scheme'] . '://' . $urlArr['host'] . $url;
+                } else {
+                    $url = $urlArr['scheme'] . '://' . $urlArr['host'] . '/' . $url;
+                }
+            }
+        }
+
+        return trim($url);
     }
 }
