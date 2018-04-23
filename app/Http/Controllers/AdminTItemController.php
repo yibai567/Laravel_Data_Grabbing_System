@@ -516,6 +516,12 @@
                 $row->type = '系统任务';
             }
 
+            if ($row->is_capture_image == Item::IS_CAPTURE_IMAGE_TRUE) {
+                $row->is_capture_image = '需要截图';
+            } else {
+                $row->is_capture_image = '不需要截图';
+            }
+
             if ( $row->cron_type == Item::CRON_TYPE_KEEP) {
                 $row->cron_type = '持续执行';
             } else if( $row->cron_type == Item::CRON_TYPE_ONLY_ONE) {
