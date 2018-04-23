@@ -6,6 +6,7 @@ use App\Models\Item;
 use App\Models\ItemRunLog;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
+use App\Services\InternalAPIService;
 use Log;
 use App\Services\ValidatorService;
 use App\Models\ItemResult;
@@ -122,9 +123,6 @@ class ItemResultController extends Controller
                 // 标记当前任务为成功状态
                 Log::debug('[dispatchJob] 请求 /item_run_log/status/success', ['id' => $itemResult->item_run_log_id]);
                 InternalAPIService::post('/item_run_log/status/success', ['id' => $itemResult->item_run_log_id]);
-                // 标记任务状态为成功
-                Log::debug('[dispatchJob] 请求 /item/status/test_success', ['id' => $itemResult->item_id]);
-                InternalAPIService::post('/item/status/test_success', ['id' => $itemResult->item_id]);
 
                 $result = json_decode($itemResult->short_contents, true);
                 $result['task_id'] = $itemResult->item_id;
@@ -142,9 +140,6 @@ class ItemResultController extends Controller
             // 标记当前任务为失败状态
             Log::debug('[dispatchJob] 请求 /item_run_log/status/fail', ['id' => $itemResult->item_run_log_id]);
             InternalAPIService::post('/item_run_log/status/fail', ['id' => $itemResult->item_run_log_id]);
-            // 标记任务状态为失败
-            Log::debug('[dispatchJob] 请求 /item/status/test_fail', ['id' => $itemResult->item_id]);
-            InternalAPIService::post('/item/status/test_fail', ['id' => $itemResult->item_id]);
             throw new ResourceException("item result updateImage fail");
         }
 
@@ -191,9 +186,6 @@ class ItemResultController extends Controller
                 // 标记当前任务为成功状态
                 Log::debug('[dispatchJob] 请求 /item_run_log/status/success', ['id' => $itemResult->item_run_log_id]);
                 InternalAPIService::post('/item_run_log/status/success', ['id' => $itemResult->item_run_log_id]);
-                // 标记任务状态为成功
-                Log::debug('[dispatchJob] 请求 /item/status/test_success', ['id' => $itemResult->item_id]);
-                InternalAPIService::post('/item/status/test_success', ['id' => $itemResult->item_id]);
 
                 $result = json_decode($itemResult->short_contents, true);
                 $result['task_id'] = $itemResult->item_id;
@@ -211,9 +203,6 @@ class ItemResultController extends Controller
             // 标记当前任务为失败状态
             Log::debug('[dispatchJob] 请求 /item_run_log/status/fail', ['id' => $itemResult->item_run_log_id]);
             InternalAPIService::post('/item_run_log/status/fail', ['id' => $itemResult->item_run_log_id]);
-            // 标记任务状态为失败
-            Log::debug('[dispatchJob] 请求 /item/status/test_fail', ['id' => $itemResult->item_id]);
-            InternalAPIService::post('/item/status/test_fail', ['id' => $itemResult->item_id]);
 
             throw new ResourceException("item result updateCapture fail");
         }

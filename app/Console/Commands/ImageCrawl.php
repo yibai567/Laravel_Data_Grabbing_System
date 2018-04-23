@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Item;
+use App\Models\ItemTestResult;
 use App\Services\ImageService;
 use App\Services\InternalAPIService;
 use Illuminate\Console\Command;
@@ -48,7 +49,6 @@ class ImageCrawl extends Command
         while ($i <= 100) {
             try {
                 $data = Redis::connection('queue')->rpop('crawl_image_queue');
-//                $data = '{"id":1,"resource_url":"https://cdn.jin10.com/pic/67/276f4228e7cca4381fa575a7d8cbed6c.jpg","is_test":true}';
                 $imageService = new ImageService();
                 if (!empty($data)) {
                     $data = json_decode($data, true);
@@ -67,18 +67,14 @@ class ImageCrawl extends Command
                     if (count($imageRes)) {
                         $params['images'] = json_encode($imageRes, JSON_UNESCAPED_UNICODE);
                         $params['id'] = $data['id'];
-                        DB::beginTransaction();
                         $result = [];
                         if ($data['is_test']) { // is_test 为真，将结果存入测试结果队列
+                            Log::debug('[jinse::image:crawl] /item/test_result/image', $params);
                             $result = InternalAPIService::post('/item/test_result/image', $params);
-                            if ($result['counter'] < 1 && $result['status'] == 4) { // 判断是否成功
-                                InternalAPIService::post('/item/status/test_success', ['id' => $result['id']]);
-                            }
                         } else { // 否则，存入结果队列
+                            Log::debug('[jinse::image:crawl] /item/result/image', $params);
                             InternalAPIService::post('/item/result/image', $params);
                         }
-
-                        DB::commit();
                     }
                 } else {
                     sleep(5);

@@ -272,7 +272,7 @@ class ItemController extends Controller
         $itemDetail = $item->toArray();
 
         if ($itemDetail['status'] != Item::STATUS_TESTING) {
-            Log::debug('[updateStatusTestSuccess] item status does not allow to testSucess', $itemDetail);
+            Log::debug('[updateStatusTestSuccess] item status does not allow to testSucess' . $itemDetail['status']);
             throw new \Dingo\Api\Exception\ResourceException("item status does not allow to testSucess");
         }
 
