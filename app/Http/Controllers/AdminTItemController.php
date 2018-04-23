@@ -81,7 +81,7 @@
             }];
 
             $this->col[] = ["label"=>"是否截图","name"=>"is_capture_image","callback"=>function ($row) {
-                if ( $row->is_proxy == Item::IS_CAPTURE_IMAGE_TRUE) {
+                if ( $row->is_capture_image == Item::IS_CAPTURE_IMAGE_TRUE) {
                     return '截图';
                 } else {
                     return '不截图';
@@ -319,17 +319,18 @@
 	    |
 	    */
 	    public function hook_query_index(&$query) {
-	        //Your code here
+            $query->where('type', Item::TYPE_OUT);
+            //Your code here
 
-	    }
+        }
 
-	    /*
-	    | ----------------------------------------------------------------------
-	    | Hook for manipulate row of index table html
-	    | ----------------------------------------------------------------------
-	    |
-	    */
-	    public function hook_row_index($column_index,&$column_value) {
+        /*
+        | ----------------------------------------------------------------------
+        | Hook for manipulate row of index table html
+        | ----------------------------------------------------------------------
+        |
+        */
+        public function hook_row_index($column_index,&$column_value) {
 	    	//Your code here
 	    }
 

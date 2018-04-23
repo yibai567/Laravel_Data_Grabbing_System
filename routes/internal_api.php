@@ -66,6 +66,8 @@ $api->version(
         $api->post('/item/stop', 'ItemController@stop');
         $api->post('/item/test', 'ItemController@test');
 
+        $api->post('/item/result/report', 'PlatformReportController@itemResultReport');
+
         $api->post('/item/status/test_success', 'ItemController@updateStatusTestSuccess');
         $api->post('/item/status/test_fail', 'ItemController@updateStatusTestFail');
 
