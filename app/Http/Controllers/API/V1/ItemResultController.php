@@ -243,6 +243,7 @@ class ItemResultController extends Controller
                 $data = [
                     'id' => $result['id'],
                     'resource_url' => $result['images'],
+                    'is_proxy' => $item['is_proxy'],
                     'is_test' => $is_test
                 ];
                 Log::debug('[dispatchJob __downloadImage] 入队列 crawl_image_queue', $data);
@@ -252,6 +253,7 @@ class ItemResultController extends Controller
             $data = [
                 'id' => $result['id'],
                 'resource_url' => $result['images'],
+                'is_proxy' => $item['is_proxy'],
                 'is_test' => $is_test
             ];
             Log::debug('[dispatchJob __downloadImage] 入队列 crawl_image_queue', $data);
