@@ -27,7 +27,7 @@ class ItemService extends Service
      */
     public function verifyParamsRule() {
         return [
-            "data_type" => "required|integer|between:1,2,3",
+            "data_type" => "required|integer|in:1,2,3",
             "content_type" => "required|integer|between:1,2",
             "resource_url" => "required|string",
             "is_capture_image" => "nullable|integer|between:1,2",
@@ -56,7 +56,7 @@ class ItemService extends Service
     public function updateParamsVerifyRule() {
         return [
             "id" => "required|integer",
-            "data_type" => "nullable|integer|between:1,2,3",
+            "data_type" => "nullable|integer|in:1,2,3",
             "content_type" => "nullable|integer|between:1,2",
             "resource_url" => "nullable|string",
             "is_capture_image" => "nullable|integer|between:1,2",

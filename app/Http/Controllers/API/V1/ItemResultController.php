@@ -82,11 +82,11 @@ class ItemResultController extends Controller
             'images'          => 'nullable',
             'error_message'   => 'string|nullable'
         ]);
-        if (isset(($params['short_contents']) && !empty($params['short_contents'])) {
+        if (isset($params['short_contents']) && !empty($params['short_contents'])) {
             $params['short_contents'] = json_encode($params['short_contents'], JSON_UNESCAPED_UNICODE);
         }
 
-        if (isset(($params['long_contents']) && !empty($params['long_contents'])) {
+        if (isset($params['long_contents']) && !empty($params['long_contents'])) {
             $params['long_contents'] = json_encode($params['long_contents'], JSON_UNESCAPED_UNICODE);
         }
 
@@ -104,7 +104,7 @@ class ItemResultController extends Controller
         // 判断 任务类型（test or production）、数据类型
         switch ($item['data_type']) {
             case Item::DATA_TYPE_HTML:
-                $path = '/item/result/update';
+                $path = '/item/result/html';
                 if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
                     $path = '/item/test_result/html';
                 }
@@ -119,9 +119,9 @@ class ItemResultController extends Controller
                 break;
 
             case Item::DATA_TYPE_CAPTURE:
-                $path = '/item/result/image';
+                $path = '/item/result/capture';
                 if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
-                    $path = '/item/test/result/image';
+                    $path = '/item/test/result/capture';
                 }
 
                 break;
@@ -131,8 +131,8 @@ class ItemResultController extends Controller
         try {
             $params['is_proxy'] = $item['is_proxy'];
             $params['item_id'] = $item['id'];
-            // Log::debug('[dispatchJob] 请求 ' . $path);
-            Log::debug('[dispatchJob] 请求 ' . $path, $params);  // 完整数据太多
+            Log::debug('[dispatchJob] 请求 ' . $path);
+            // Log::debug('[dispatchJob] 请求 ' . $path, $params);  // 完整数据太多
             $results = InternalAPIService::post($path, $params);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
             // 标记当前任务为失败状态
@@ -141,6 +141,7 @@ class ItemResultController extends Controller
 
             throw new \Dingo\Api\Exception\ResourceException("invalid result");
         }
+
         // 任务结果的二次处理
         if (!empty($results)) {
             foreach ($results as $result) {
@@ -177,16 +178,16 @@ class ItemResultController extends Controller
             return true;
         }
 
-        if (!isset($result['short_content']['detail_url']) || empty($result['short_content']['detail_url'])) {
+        if (!isset($result['detail_url']) || empty($result['detail_url'])) {
             return true;
         }
 
-        $detailUrl    = $result['short_content']['detail_url'];
+        $detailUrl    = $result['detail_url'];
         $preDetailUrl = $item['pre_detail_url'];
 
         $itemParams = [
             'name'                => $item['name'] . '-截图',
-            'resource_url'        => $detailUrl,
+            'resource_url'        => $preDetailUrl . $detailUrl, // TODO 需要判断detailURL完整性
             'pre_detail_url'      => $preDetailUrl,
             'associate_result_id' => $result['id'],
             'is_proxy'            => $item['is_proxy'],
@@ -208,8 +209,8 @@ class ItemResultController extends Controller
 
         // 入队列
         $jobParams = [
-            'id' =>  config('crawl_queue.' . $isTest . '.' . $item['data_type'] . '.' . $item['is_proxy']),
-            'item_id' => $captureItem->id
+            'id' =>  config('crawl_queue.' . $isTest . '.' . Item::DATA_TYPE_CAPTURE . '.' . $item['is_proxy']),
+            'item_id' => $captureItem['id']
         ];
         Log::debug('[dispatchJob __captureImage] 请求 /queue_info/job', $jobParams);
         $queueItem = InternalAPIService::post('/queue_info/job', $jobParams);
@@ -228,7 +229,7 @@ class ItemResultController extends Controller
     private function __downloadImage($item, $result)
     {
         // 判断图片
-        if (!array_key_exists("images", $result) || empty($result['images'])) {
+        if (!isset($result['images']) || empty($result['images'])) {
             return true;
         }
 
@@ -237,7 +238,7 @@ class ItemResultController extends Controller
             $is_test = true;
         }
 
-        if (array_key_exists("remove_images", $result) && !empty($result['remove_images'])) {
+        if (!isset($result["remove_images"]) && !empty($result['remove_images'])) {
             if (in_array($result['images'], $result['remove_images'])) {
                 $data = [
                     'id' => $result['id'],
@@ -248,7 +249,6 @@ class ItemResultController extends Controller
                 Redis::connection('queue')->lpush('crawl_image_queue', json_encode($data));
             }
         } else {
-            // 图片上传
             $data = [
                 'id' => $result['id'],
                 'resource_url' => $result['images'],
