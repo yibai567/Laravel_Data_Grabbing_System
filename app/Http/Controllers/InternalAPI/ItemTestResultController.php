@@ -261,7 +261,7 @@ class ItemTestResultController extends Controller
         $imageService = new ImageService();
         $imageInfo = $imageService->uploadByFile($image);
 
-        $itemTestResult->image = $imageInfo['image_url'];
+        $itemTestResult->image = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);
         if ($itemTestResult->counter > 0) { // 更新计数器
             $itemTestResult->counter -= 1;
         }
