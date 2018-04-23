@@ -31,6 +31,7 @@ class PlatformReportController extends Controller
             'is_test' => 'integer|required|between:1,2',
             'result' => 'required|string'
         ]);
+        Log::debug('[itemResultReport] 接收参数 $params : ', $params);
 
         $httpService = new HttpService();
         $params['result'] = json_decode($params['result']);
@@ -41,6 +42,7 @@ class PlatformReportController extends Controller
             $params['is_test'] = 0;
         }
         $reportParmas = sign($params);
+        Log::info('[itemResultReport] 请求 ' . config('url.platform_url') . ' $reportParmas : ', $reportParmas);
         $res = $httpService->post(config('url.platform_url'), $reportParmas, 'json');
         return $this->resObjectGet($res, 'item', $request->path());
     }
