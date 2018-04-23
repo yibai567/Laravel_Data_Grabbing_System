@@ -69,7 +69,7 @@ class ItemCrawl extends Command
         //根据队列id获取数据信息
         $httpService = new HttpService();
 
-        $resQueue = $httpService->get('http://api.webmagic.jinse.cn/v1/queue_info/job', ['id' => $queueId]);
+        $resQueue = $httpService->get(config('url.jinse_open_url') . '/v1/queue_info/job', ['id' => $queueId]);
         $queueInfo = json_decode($resQueue, true);
         if (empty($queueInfo['data'])) {
             echo "没有可处理的任务 \n";

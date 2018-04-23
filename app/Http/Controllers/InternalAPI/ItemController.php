@@ -300,16 +300,15 @@ class ItemController extends Controller
 
         $item = Item::find($params['id']);
 
-        $itemDetail = $item->toArray();
-
-        if (empty($itemDetail)) {
+        if (empty($item)) {
             Log::debug('[updateStatusTestFail] item not exist', $params);
             throw new \Dingo\Api\Exception\ResourceException(" item not exist");
         }
+        $itemDetail = $item->toArray();
 
         if ($itemDetail['status'] != Item::STATUS_TESTING) {
-            Log::debug('[updateStatusTestFail] item status does not allow to testSucess', $itemDetail);
-            throw new \Dingo\Api\Exception\ResourceException("item status does not allow to testSucess");
+            Log::debug('[updateStatusTestFail] item status does not allow to testFail', $itemDetail);
+            throw new \Dingo\Api\Exception\ResourceException("item status does not allow to testFail");
         }
 
         $item->status = Item::STATUS_TEST_FAIL;
