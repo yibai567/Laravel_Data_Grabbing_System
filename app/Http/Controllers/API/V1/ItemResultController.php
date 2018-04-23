@@ -83,7 +83,7 @@ class ItemResultController extends Controller
             'error_message'   => 'string|nullable'
         ]);
 
-        Log::debug('[dispatchJob] 接收参数 $params = ', $params);
+        // Log::debug('[dispatchJob] 接收参数 $params = ', $params);
         // 获取 item run Log
         Log::debug('[dispatchJob] 请求 /item_run_log  | 获取 Item_run_log 信息,', ['id' => $params['item_run_log_id']]);
         $itemRunLog = InternalAPIService::get('/item_run_log', ['id' => $params['item_run_log_id']]);
@@ -184,6 +184,10 @@ class ItemResultController extends Controller
         } else {
             if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
                 $this->__testResult($itemRunLog, $item);
+            } else {
+                // 修改 item_run_log 状态为成功
+                Log::debug('[dispatchJob] 请求 /item_run_log/status/success', ['id' => $params['item_run_log_id']]);
+                InternalAPIService::post('/item_run_log/status/success', ['id' => $params['item_run_log_id']]);
             }
         }
 
