@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Item;
 use App\Services\ImageService;
 use App\Services\InternalAPIService;
 use Illuminate\Console\Command;
@@ -56,7 +57,8 @@ class ImageCrawl extends Command
 
                     if (count($data['resource_url'])) {
                         foreach ($data['resource_url'] as $imageUrl) {
-                            $imageItem = $imageService->uploadByImageUrl($imageUrl, [], $data['is_proxy']);
+                            $proxy = ($data['is_proxy'] == Item::IS_PROXY_YES) ? true : false;
+                            $imageItem = $imageService->uploadByImageUrl($imageUrl, [], $proxy);
                             $imageItem['url'] = $imageItem['oss_url'];
                             $imageRes[] = $imageItem;
                         }
