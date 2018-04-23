@@ -48,7 +48,6 @@ class ImageCrawl extends Command
             try {
                 $data = Redis::connection('queue')->rpop('crawl_image_queue');
 //                $data = '{"id":1,"resource_url":"https://cdn.jin10.com/pic/67/276f4228e7cca4381fa575a7d8cbed6c.jpg","is_test":true}';
-                Log::debug('[jinse::image:crawl] get pop from image queue ' . json_encode($data));
                 $imageService = new ImageService();
                 if (!empty($data)) {
                     $data = json_decode($data, true);

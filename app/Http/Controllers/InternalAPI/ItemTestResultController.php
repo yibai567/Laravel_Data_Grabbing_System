@@ -127,12 +127,15 @@ class ItemTestResultController extends Controller
                     $counter += 1;
                 }
 
+                // 测试结束返回状态及计数器
                 $result[] = $item;
             }
         }
 
         $formatData['counter'] = $counter;
         $itemTestResult->update($formatData);
+        $result[0]['counter'] = $counter;
+        $result[0]['status'] = $itemTestResult->status;
 
         return $this->resObjectGet($result, 'item_test_result', $request->path());
     }
