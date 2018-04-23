@@ -19,6 +19,7 @@ class ItemRunLogController extends Controller
      */
     public function create(Request $request)
     {
+        Log::debug('[internal ItemRunLogController create] start!');
         $params = $request->all();
         ValidatorService::check($params, [
             'item_id' => 'required|integer',
@@ -50,6 +51,7 @@ class ItemRunLogController extends Controller
      */
     public function update(Request $request)
     {
+        Log::debug('[internal ItemRunLogController update] start!');
         $params = $request->all();
         ValidatorService::check($params, [
             'id' => 'required|integer',
@@ -81,6 +83,7 @@ class ItemRunLogController extends Controller
      */
     public function all(Request $request)
     {
+        Log::debug('[internal ItemRunLogController all] start!');
         $itemRunLogs = ItemRunLog::all();
 
         $result = [];
@@ -100,6 +103,7 @@ class ItemRunLogController extends Controller
      */
     public function retrieve(Request $request)
     {
+        Log::debug('[internal ItemRunLogController retrieve] start!');
         $params = $request->all();
         ValidatorService::check($params, [
             'id' => 'required|integer',
@@ -118,6 +122,7 @@ class ItemRunLogController extends Controller
      * @param Request $request
      */
     public function getByItemId(Request $request) {
+        Log::debug('[internal ItemRunLogController getByItemId] start!');
         $params = $request->all();
         ValidatorService::check($params, [
             'item_id' => 'required|integer',
@@ -146,6 +151,7 @@ class ItemRunLogController extends Controller
      */
     public function updateStatusSuccess(Request $request)
     {
+        Log::debug('[internal ItemRunLogController updateStatusSuccess] start!');
         $params = $request->all();
 
         ValidatorService::check($params, [
@@ -176,6 +182,7 @@ class ItemRunLogController extends Controller
      */
     public function updateStatusFail(Request $request)
     {
+        Log::debug('[internal ItemRunLogController updateStatusFail] start!');
         $params = $request->all();
 
         ValidatorService::check($params, [

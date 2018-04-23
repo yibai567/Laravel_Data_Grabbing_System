@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\InternalAPI;
 
 use App\Models\Item;
-use App\Models\ItemRunLog;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Log;
@@ -31,8 +30,8 @@ class ItemTestResultController extends Controller
      */
     public function getTestResult(Request $request)
     {
+        Log::debug('[internal ItemTestResultController getTestResult] start');
         $params = $request->all();
-
         ValidatorService::check($params, [
             'item_run_log_id' => 'required|integer'
         ]);
@@ -57,7 +56,7 @@ class ItemTestResultController extends Controller
      */
     public function updateHtml(Request $request)
     {
-        Log::debug('[updateHtml] start');
+        Log::debug('[internal ItemTestResultController updateHtml] start');
         $params = $request->all();
         ValidatorService::check($params, [
             'item_run_log_id' => 'integer|nullable',
@@ -147,9 +146,8 @@ class ItemTestResultController extends Controller
      */
     public function updateImage(Request $request)
     {
+        Log::debug('[internal ItemTestResultController updateImage] start');
         $params = $request->all();
-        Log::debug('[updateImage] 更新任务结果image信息' . json_encode($params, JSON_UNESCAPED_UNICODE));
-
         ValidatorService::check($params, [
             'id' => 'integer|required',
             'images' => 'string|required',
@@ -177,13 +175,12 @@ class ItemTestResultController extends Controller
         }
 
         $itemTestResult->short_contents = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
-        if ($itemTestResult->counter > 0) { // 更新计数器
-            $itemTestResult->counter -= 1;
-        }
 
         // 判断计数器是否为0 修改状态
+        $itemTestResult->counter -= 1;
         if ($itemTestResult->counter <= 0) {
-            $itemTestResult->status = ItemTestResult::STATUS_SUCCESS;
+            $itemTestResult->counter = 0;
+            $itemTestResult->status = ItemResult::STATUS_SUCCESS;
         }
 
         $itemTestResult->save();
@@ -195,6 +192,47 @@ class ItemTestResultController extends Controller
     }
 
     /**
+     * updateCapture
+     * 更新任务结果capture信息
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function updateCapture(Request $request)
+    {
+        Log::debug('[internal ItemTestResultController updateCapture] start');
+        $image = $request->file('image');
+        if (empty($image)) {
+            return response(500, 'image 参数错误');
+        }
+
+        $params['id'] = intval($request->get('id'));
+        $itemTestResult = ItemTestResult::find($params['id']);
+
+        if (empty($itemTestResult)) {
+            Log::debug('[updateCapture] 测试结果不存在');
+            throw new ResourceException("test result not exist");
+        }
+
+        Log::debug('[updateCapture] 图片上传');
+        $imageService = new ImageService();
+        $imageInfo = $imageService->uploadByFile($image);
+
+        // 更新测试结果
+        $itemTestResult->image = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);
+
+        $itemTestResult->counter -= 1;
+        if ($itemTestResult->counter <= 0) { // 判断计数器是否为0 修改状态
+            $itemTestResult->counter = 0;
+            $itemTestResult->status = ItemTestResult::STATUS_SUCCESS;
+        }
+
+        $itemTestResult->save();
+
+        return $this->resObjectGet($itemTestResult->toArray(), 'item_test_result', $request->path());
+    }
+
+    /**
      * create
      * 插入数据
      *
@@ -203,6 +241,7 @@ class ItemTestResultController extends Controller
     */
     public function create(Request $request)
     {
+        Log::debug('[internal ItemTestResultController create] start');
         $params = $request->all();
 
         ValidatorService::check($params, [
@@ -227,55 +266,6 @@ class ItemTestResultController extends Controller
         }
 
         return $this->resObjectGet($result, 'item_result', $request->path());
-    }
-
-    /**
-     * updateCapture
-     * 更新任务结果capture信息
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function updateCapture(Request $request)
-    {
-        Log::debug('[updateCapture] 更新任务结果capture信息');
-        $image = $request->file('image');
-        $params = $request->all();
-        if (empty($image)) {
-            return response(500, 'image 参数错误');
-        }
-
-        ValidatorService::check($params, [
-            'id' => 'integer|required',
-        ]);
-
-        $params['id'] = intval($params['id']);
-        $itemTestResult = ItemTestResult::find($params['id']);
-
-        if (empty($itemTestResult)) {
-            Log::debug('[updateCapture] 测试结果不存在');
-            throw new ResourceException("test result not exist");
-        }
-
-        Log::debug('[updateCapture] 图片上传');
-        $imageService = new ImageService();
-        $imageInfo = $imageService->uploadByFile($image);
-
-        $itemTestResult->image = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);
-        if ($itemTestResult->counter > 0) { // 更新计数器
-            $itemTestResult->counter -= 1;
-        }
-
-        // 判断计数器是否为0 修改状态
-        if ($itemTestResult->counter <= 0) {
-            $itemTestResult->status = ItemTestResult::STATUS_SUCCESS;
-        }
-
-        $itemTestResult->save();
-        Log::debug('[updateImage] 更新short_contents：' . $itemTestResult->short_contents);
-
-        $result = $itemTestResult->toArray();
-        return $this->resObjectGet($result, 'item_test_result', $request->path());
     }
 
     private function __formatData($params)

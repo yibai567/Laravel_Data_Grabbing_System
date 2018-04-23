@@ -25,7 +25,7 @@ class ImageController extends Controller
      */
     public function upload(Request $request)
     {
-        Log::debug('[upload] start!');
+        Log::debug('[internal ImageController upload] start!');
         $image = $request->file('image');
         Log::debug('[upload] start!' . json_encode($image));
         if (empty($image)) {

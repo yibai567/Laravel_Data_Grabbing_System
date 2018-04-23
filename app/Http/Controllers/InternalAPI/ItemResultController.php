@@ -32,6 +32,7 @@ class ItemResultController extends Controller
      */
     public function all(Request $request)
     {
+        Log::debug('[internal ItemResultController all] start!');
         $params = $request->all();
         ValidatorService::check($params, [
         ]);
@@ -50,6 +51,7 @@ class ItemResultController extends Controller
      */
     public function allByLast(Request $request)
     {
+        Log::debug('[internal ItemResultController allByLast] start!');
         $params = $request->all();
 
         ValidatorService::check($params, [
@@ -84,6 +86,7 @@ class ItemResultController extends Controller
      */
     public function updateImage(Request $request)
     {
+        Log::debug('[internal ItemResultController updateImage] start!');
         $params = $request->all();
         ValidatorService::check($params, [
             'id' => 'integer|required',
@@ -108,12 +111,11 @@ class ItemResultController extends Controller
         }
 
         $itemResult->short_contents = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
-        if ($itemResult->counter > 0) { // 更新计数器
-            $itemResult->counter -= 1;
-        }
 
         // 判断计数器是否为0 修改状态
+        $itemResult->counter -= 1;
         if ($itemResult->counter <= 0) {
+            $itemResult->counter = 0;
             $itemResult->status = ItemResult::STATUS_SUCCESS;
         }
 
@@ -132,39 +134,35 @@ class ItemResultController extends Controller
      */
     public function updateCapture(Request $request)
     {
-        $params = $request->all();
+        Log::debug('[internal ItemResultController updateCapture] start');
         $image = $request->file('image');
-        Log::debug('[updateCapture] 更新任务结果截图信息' . json_encode($params, JSON_UNESCAPED_UNICODE));
+        if (empty($image)) {
+            return response(500, 'image 参数错误');
+        }
 
-        ValidatorService::check($params, [
-            'id' => 'integer|required',
-            'image' => 'string|required',
-        ]);
-
-        $params['id'] = intval($params['id']);
+        $params['id'] = intval($request->get('id'));
         $itemResult = ItemTestResult::find($params['id']);
 
         if (empty($itemResult)) {
-            Log::debug('[updateImage] 结果不存在');
+            Log::debug('[updateCapture] 结果不存在');
             throw new ResourceException("result not exist");
         }
 
+        // 图片上传
         $imageService = new ImageService();
         $imageInfo = $imageService->uploadByFile($image);
 
+        // 更新结果
         $itemResult->image = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);
-        if ($itemResult->counter > 0) { // 更新计数器
-            $itemResult->counter -= 1;
-        }
 
-        // 判断计数器是否为0 修改状态
-        if ($itemResult->counter <= 0) {
+        $itemResult->counter -= 1;
+        if ($itemResult->counter <= 0) { // 判断计数器是否为0 修改状态
+            $itemResult->counter = 0;
             $itemResult->status = ItemResult::STATUS_SUCCESS;
         }
         $itemResult->save();
 
-        $result = $itemResult->toArray();
-        return $this->resObjectGet($result, 'item_test_result', $request->path());
+        return $this->resObjectGet($itemResult->toArray(), 'item_test_result', $request->path());
     }
 
     /**
@@ -176,6 +174,7 @@ class ItemResultController extends Controller
      */
     public function createHtml(Request $request)
     {
+        Log::debug('[internal ItemResultController createHtml] start');
         $params = $request->all();
         ValidatorService::check($params, [
             'item_id' => 'integer|required',
