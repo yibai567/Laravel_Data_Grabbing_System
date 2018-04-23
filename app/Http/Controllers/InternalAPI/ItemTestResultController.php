@@ -198,13 +198,13 @@ class ItemTestResultController extends Controller
 
                 $data['is_test'] = 1;
                 $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
-                InternalAPIService::post('/item/result/report', $data);
+//TODO              InternalAPIService::post('/item/result/report', $data);
             }
 
             $itemTestResult->save();
 
         } catch (\Exception $e) {
-            $itemTestResult->update('status', ItemTestResult::STATUS_FAIL);
+            $itemTestResult->update(['status' => ItemTestResult::STATUS_FAIL]);
             // 标记当前任务为失败状态
             Log::debug('[dispatchJob] 请求 /item_run_log/status/fail', ['id' => $itemTestResult->item_run_log_id]);
             InternalAPIService::post('/item_run_log/status/fail', ['id' => $itemTestResult->item_run_log_id]);
@@ -267,12 +267,12 @@ class ItemTestResultController extends Controller
 
                 $data['is_test'] = 1;
                 $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
-                InternalAPIService::post('/item/result/report', $data);
+//TODO              InternalAPIService::post('/item/result/report', $data);
             }
 
             $itemTestResult->save();
         } catch (\Exception $e) {
-            $itemTestResult->update('status', ItemTestResult::STATUS_FAIL);
+            $itemTestResult->update(['status' => ItemTestResult::STATUS_FAIL]);
             // 标记当前任务为失败状态
             Log::debug('[dispatchJob] 请求 /item_run_log/status/fail', ['id' => $itemTestResult->item_run_log_id]);
             InternalAPIService::post('/item_run_log/status/fail', ['id' => $itemTestResult->item_run_log_id]);

@@ -133,7 +133,7 @@ class ItemResultController extends Controller
                 $data['is_test'] = 2;
                 $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
 
-                InternalAPIService::post('/item/result/report', $data);
+//TODO                 InternalAPIService::post('/item/result/report', $data);
             }
             $itemResult->save();
         } catch (\Exception $e) {
@@ -202,7 +202,7 @@ class ItemResultController extends Controller
                 $data['is_test'] = 2;
                 $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
 
-                InternalAPIService::post('/item/result/report', $data);
+//TODO                InternalAPIService::post('/item/result/report', $data);
             }
             $itemResult->save();
         } catch (\Exception $e) {
