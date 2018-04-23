@@ -231,26 +231,29 @@ class ItemTestResultController extends Controller
     public function updateCapture(Request $request)
     {
         Log::debug('[internal ItemTestResultController updateCapture] start');
-        $image = $request->file('image');
-        if (empty($image)) {
+        $images = $request->file('images');
+        if (empty($images)) {
             return response(500, 'image 参数错误');
         }
 
-        $params['id'] = intval($request->get('id'));
-        $itemTestResult = ItemTestResult::find($params['id']);
+        $params['item_run_log_id'] = intval($request->get('item_run_log_id'));
+
+        //获取测试结果
+        $itemTestResult = ItemTestResult::where('item_run_log_id', $params['item_run_log_id'])
+                                        ->first();
 
         try {
             if (empty($itemTestResult)) {
-                Log::debug('[updateCapture] 测试结果不存在');
-                throw new ResourceException("test result not exist");
+                Log::debug('[updateHtml] item test result is empty ');
+                throw new ResourceException(" test result not exist");
             }
 
             Log::debug('[updateCapture] 图片上传');
             $imageService = new ImageService();
-            $imageInfo = $imageService->uploadByFile($image);
+            $imageInfo = $imageService->uploadByFile($images);
 
             // 更新测试结果
-            $itemTestResult->image = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);
+            $itemTestResult->images = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);
 
             $itemTestResult->counter -= 1;
             if ($itemTestResult->counter <= 0) { // 判断计数器是否为0 修改状态
@@ -258,10 +261,10 @@ class ItemTestResultController extends Controller
                 $itemTestResult->status = ItemTestResult::STATUS_SUCCESS;
 
                 // 标记当前任务为成功状态
-                Log::debug('[dispatchJob] 请求 /item_run_log/status/success', ['id' => $itemTestResult->item_run_log_id]);
+                Log::debug('[updateCapture] 请求 /item_run_log/status/success', ['id' => $itemTestResult->item_run_log_id]);
                 InternalAPIService::post('/item_run_log/status/success', ['id' => $itemTestResult->item_run_log_id]);
                 // 标记任务状态为成功
-                Log::debug('[dispatchJob] 请求 /item/status/test_success', ['id' => $itemTestResult->item_id]);
+                Log::debug('[updateCapture] 请求 /item/status/test_success', ['id' => $itemTestResult->item_id]);
                 InternalAPIService::post('/item/status/test_success', ['id' => $itemTestResult->item_id]);
 
                 $result = json_decode($itemTestResult->short_contents, true);

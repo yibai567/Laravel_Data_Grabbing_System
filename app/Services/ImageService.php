@@ -28,16 +28,15 @@ class ImageService extends Service
             $secret = config('aliyun.access_secret');
             $path = 'http://'.$host;
 
+            $getSize = getimagesize($url);
+            if (!$getSize) {
+                return '';
+            }
+
+            $width = $getSize[0];
+            $height = $getSize[1];
             // 判断快高规则是否符合
             if ($isSizeRule) {
-                $getSize = getimagesize($url);
-                if (!$getSize) {
-                    return '';
-                }
-
-                $width = $getSize[0];
-                $height = $getSize[1];
-
                 if ($width < $isSizeRule['width'] || $height < $isSizeRule['height']) {
                     return '';
                 }
@@ -72,6 +71,8 @@ class ImageService extends Service
 
             $image = new Image();
             $image->name = md5($url);
+            $image->height = $height;
+            $image->width = $width;
             $image->ext = $ext;
             $image->mime_type = $ext;
             $image->size = $size;
@@ -179,10 +180,17 @@ class ImageService extends Service
                 return ['data' => $image];
             }
 
+            $getSize = getimagesize($path);
+
+            $width = $getSize[0];
+            $height = $getSize[1];
+
             $image = new Image();
             $image->name = $name;
             $image->ext = $ext;
             $image->mime_type = $minType;
+            $image->height = $height;
+            $image->width = $width;
             $image->size = $size;
             $image->md5_content = $md5Content;
             if (!empty($isPrivate)) {

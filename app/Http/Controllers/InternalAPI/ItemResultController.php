@@ -158,13 +158,16 @@ class ItemResultController extends Controller
     public function updateCapture(Request $request)
     {
         Log::debug('[internal ItemResultController updateCapture] start');
-        $image = $request->file('image');
-        if (empty($image)) {
+        $images = $request->file('images');
+        if (empty($images)) {
             return response(500, 'image 参数错误');
         }
 
-        $params['id'] = intval($request->get('id'));
-        $itemResult = ItemTestResult::find($params['id']);
+        $params['item_run_log_id'] = intval($request->get('item_run_log_id'));
+
+        //获取测试结果
+        $itemResult = ItemResult::where('item_run_log_id', $params['item_run_log_id'])
+                                        ->first();
 
         try {
             if (empty($itemResult)) {
@@ -174,10 +177,10 @@ class ItemResultController extends Controller
 
             // 图片上传
             $imageService = new ImageService();
-            $imageInfo = $imageService->uploadByFile($image);
+            $imageInfo = $imageService->uploadByFile($images);
             $imageInfo['url'] = $imageInfo['oss_url'];
             // 更新结果
-            $itemResult->image = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);
+            $itemResult->images = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);
 
             $itemResult->counter -= 1;
             if ($itemResult->counter <= 0) { // 判断计数器是否为0 修改状态
