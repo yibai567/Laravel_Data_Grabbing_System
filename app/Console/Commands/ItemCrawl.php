@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Log;
 use App\Services\RequestService;
 use App\Services\InternalAPIService;
 use App\Services\HttpService;
@@ -144,7 +145,7 @@ class ItemCrawl extends Command
         } else {
             $item['long_content_selector'] = '';
         }
-        dd($item);
+
         $this->__createCrawlResult($item);
     }
 
@@ -156,9 +157,15 @@ class ItemCrawl extends Command
      */
     private function __createCrawlResult($item)
     {
+        dd($item);
         $httpService = new HttpService();
-        $data = $httpService->post('/v1/item/result/dispatch', $item, 'json');
-        dd($data);
+        try {
+
+            $httpService->post(config('url.jinse_open_url') . '/v1/item/result/dispatch', $item);
+
+        } catch (\Exception $e) {
+            Log::debug('[ItemCrawl] request dispatch api error_message: ' . $e->getMessage());
+        }
         return true;
     }
 }
