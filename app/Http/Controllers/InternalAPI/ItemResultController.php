@@ -157,17 +157,26 @@ class ItemResultController extends Controller
      */
     public function updateCapture(Request $request)
     {
-        Log::debug('[internal ItemResultController updateCapture] start');
-        $images = $request->file('images');
-        if (empty($images)) {
-            return response(500, 'image 参数错误');
+        Log::debug('[internal ItemTestResultController updateCapture] start' . json_encode($request->all()));
+        $imageId = $request->image_id;
+        $testResultId = intval($request->get('result_id'));
+
+        Log::debug('[internal ItemTestResultController] imageId=' . $imageId);
+        if (empty($imageId)) {
+            throw new ResourceException("imageId does not exist!");
         }
 
-        $params['item_run_log_id'] = intval($request->get('item_run_log_id'));
+        $imageInfo = Image::find($imageId);
+
+        if (empty($imageInfo)) {
+            return response(500, 'imageInfo 不存在');
+        }
+        $imageInfo = $imageInfo->toArray();
+
+        // TODO image字段过滤
 
         //获取测试结果
-        $itemResult = ItemResult::where('item_run_log_id', $params['item_run_log_id'])
-                                        ->first();
+        $itemResult = ItemResult::find($testResultId);
 
         try {
             if (empty($itemResult)) {
@@ -176,8 +185,7 @@ class ItemResultController extends Controller
             }
 
             // 图片上传
-            $imageService = new ImageService();
-            $imageInfo = $imageService->uploadByFile($images);
+
             $imageInfo['url'] = $imageInfo['oss_url'];
             // 更新结果
             $itemResult->images = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);

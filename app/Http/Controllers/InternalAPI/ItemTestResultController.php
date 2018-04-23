@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\InternalAPI;
 
+use App\Models\Image;
 use App\Models\Item;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
@@ -230,17 +231,25 @@ class ItemTestResultController extends Controller
      */
     public function updateCapture(Request $request)
     {
-        Log::debug('[internal ItemTestResultController updateCapture] start');
-        $images = $request->file('images');
-        if (empty($images)) {
-            return response(500, 'image 参数错误');
+        Log::debug('[internal ItemTestResultController updateCapture] start' . json_encode($request->all()));
+        $imageId = $request->post('image_id');
+
+        $testResultId = intval($request->get('result_id'));
+
+        Log::debug('[internal ItemTestResultController] imageId=' . $imageId);
+        if (empty($imageId)) {
+            throw new ResourceException("imageId does not exist!");
         }
 
-        $params['item_run_log_id'] = intval($request->get('item_run_log_id'));
+        $imageInfo = Image::find($imageId);
+
+        if (empty($imageInfo)) {
+            return response(500, 'imageInfo 不存在');
+        }
+        $imageInfo = $imageInfo->toArray();
 
         //获取测试结果
-        $itemTestResult = ItemTestResult::where('item_run_log_id', $params['item_run_log_id'])
-                                        ->first();
+        $itemTestResult = ItemTestResult::find($testResultId);
 
         try {
             if (empty($itemTestResult)) {
@@ -248,9 +257,9 @@ class ItemTestResultController extends Controller
                 throw new ResourceException(" test result not exist");
             }
 
-            Log::debug('[updateCapture] 图片上传');
-            $imageService = new ImageService();
-            $imageInfo = $imageService->uploadByFile($images);
+//            Log::debug('[updateCapture] 图片上传');
+//            $imageService = new ImageService();
+//            $imageInfo = $imageService->uploadByFile($images);
 
             // 更新测试结果
             $itemTestResult->images = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);
@@ -290,6 +299,7 @@ class ItemTestResultController extends Controller
             throw new ResourceException("item test result updateCapture fail");
         }
 
+        //TODO 内部接口返回对象即可
         return $this->resObjectGet($itemTestResult->toArray(), 'item_test_result', $request->path());
     }
 
