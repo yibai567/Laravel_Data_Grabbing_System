@@ -5,6 +5,7 @@ namespace App\Http\Controllers\InternalAPI;
 use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
+use App\Models\ItemRunLog;
 use App\Services\HttpService;
 
 /**
@@ -33,6 +34,12 @@ class PlatformReportController extends Controller
 
         $httpService = new HttpService();
         $params['result'] = json_decode($params['result']);
+
+        if ($params['is_test'] == ItemRunLog::TYPE_TEST) {
+            $params['is_test'] = 1;
+        } else {
+            $params['is_test'] = 0;
+        }
         $reportParmas = sign($params);
         $res = $httpService->post(config('url.platform_url'), $reportParmas, 'json');
         return $this->resObjectGet($res, 'item', $request->path());
