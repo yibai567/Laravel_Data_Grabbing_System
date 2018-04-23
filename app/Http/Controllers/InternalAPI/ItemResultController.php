@@ -247,12 +247,15 @@ class ItemResultController extends Controller
                 $params['short_contents'] = $shortContents;
                 $formatData = $this->__formatData($params);
 
-                $itemResult = ItemResult::firstOrCreate([
-                    'item_id' => $formatData['item_id'],
-                    'md5_short_contents' => $formatData['md5_short_contents'],
-                ]);
+                $itemResult = ItemResult::where('item_id', $formatData['item_id'])
+                                        ->where('md5_short_contents', $formatData['md5_short_contents'])
+                                        ->where('status', ItemResult::STATUS_SUCCESS)
+                                        ->first();
 
-                if ($itemResult->wasRecentlyCreated) {
+                if (empty($itemResult)) {
+                    $itemResult = new ItemResult();
+                    $itemResult->item_id = $formatData['item_id'];
+                    $itemResult->md5_short_contents = $formatData['md5_short_contents'];
                     $itemResult->item_run_log_id = $formatData['item_run_log_id'];
                     $itemResult->start_at = $formatData['start_at'];
                     $itemResult->end_at = $formatData['end_at'];
