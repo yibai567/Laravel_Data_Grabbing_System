@@ -28,7 +28,7 @@ class PlatformReportController extends Controller
     {
         $params = $request->all();
         ValidatorService::check($params, [
-            'is_test' => 'integer|required',
+            'is_test' => 'integer|required|between:1,2',
             'result' => 'required|string'
         ]);
 
