@@ -65,6 +65,7 @@ $api->version(
         $api->post('/item/start', 'ItemController@start');
         $api->post('/item/stop', 'ItemController@stop');
         $api->post('/item/test', 'ItemController@test');
+        $api->post('/item/last_job/update', 'ItemController@updateLastJobAt');
 
         $api->post('/item/result/report', 'PlatformReportController@itemResultReport');
 

@@ -82,14 +82,8 @@ class ItemResultController extends Controller
             'images'          => 'nullable',
             'error_message'   => 'string|nullable'
         ]);
-        if (isset($params['short_contents']) && !empty($params['short_contents'])) {
-            $params['short_contents'] = json_encode($params['short_contents'], JSON_UNESCAPED_UNICODE);
-        }
 
-        if (isset($params['long_contents']) && !empty($params['long_contents'])) {
-            $params['long_contents'] = json_encode($params['long_contents'], JSON_UNESCAPED_UNICODE);
-        }
-
+        // Log::debug('[dispatchJob] 接收参数 $params = ', $params);
         // 获取 item run Log
         Log::debug('[dispatchJob] 请求 /item_run_log  | 获取 Item_run_log 信息,', ['id' => $params['item_run_log_id']]);
         $itemRunLog = InternalAPIService::get('/item_run_log', ['id' => $params['item_run_log_id']]);
@@ -97,9 +91,14 @@ class ItemResultController extends Controller
             throw new \Dingo\Api\Exception\ResourceException("invalid item_run_log status");
         }
 
+        // 更改任务最后执行时间
+        Log::debug('[dispatchJob] 请求 /item/last_job/update | 更改任务最后执行时间,', ['id' => $itemRunLog['item_id']]);
+        $item = InternalAPIService::post('/item/last_job/update', ['id' => $itemRunLog['item_id']]);
+
         // 获取 item
         Log::debug('[dispatchJob] 请求 /item | 获取 Item 信息,', ['id' => $itemRunLog['item_id']]);
         $item = InternalAPIService::get('/item', ['id' => $itemRunLog['item_id']]);
+
 
         // 判断 任务类型（test or production）、数据类型
         switch ($item['data_type']) {
@@ -136,23 +135,52 @@ class ItemResultController extends Controller
             $results = InternalAPIService::post($path, $params);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
             // 标记当前任务为失败状态
-            Log::debug('[dispatchJob] 请求 /item_run_log/status/fail');
-            InternalAPIService::post('/item_run_log/status/fail', $params);
+            Log::debug('[dispatchJob] 请求 /item_run_log/status/fail', ['id' => $params['item_run_log_id']]);
+            InternalAPIService::post('/item_run_log/status/fail', ['id' => $params['item_run_log_id']]);
+            // 标记任务状态为失败
+            Log::debug('[dispatchJob] 请求 /item/status/test_fail', ['id' => $itemRunLog['item_id']]);
+            InternalAPIService::post('/item/status/test_fail', ['id' => $itemRunLog['item_id']]);
 
             throw new \Dingo\Api\Exception\ResourceException("invalid result");
         }
-
         // 任务结果的二次处理
+        Log::debug('[dispatchJob] 结果二次处理 $results', $results);
         if (!empty($results)) {
-            foreach ($results as $result) {
-                // 判断任务结果是否需要截图
-                $this->__captureImage($item, $result, $itemRunLog['type']);
+            // 测试时执行
+            if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
+                foreach ($results as $result) {
+                    if ($result['status'] == ItemTestResult::STATUS_SUCCESS && $result['counter'] == 0) {
+                        // 标记当前任务状态为失败
+                        Log::debug('[dispatchJob] 请求 /item_run_log/status/success', ['id' => $params['item_run_log_id']]);
+                        InternalAPIService::post('/item_run_log/status/success', ['id' => $params['item_run_log_id']]);
+                        // 标记任务状态为测试成功
+                        Log::debug('[dispatchJob] 请求 /item/status/test_success', ['id' => $itemRunLog['item_id']]);
+                        InternalAPIService::post('/item/status/test_success', ['id' => $itemRunLog['item_id']]);
 
-                // 判断任务是否需要图片资源
-                $this->__downloadImage($item, $result);
+                        // 上传结果
+                        Log::debug('[dispatchJob] 结果上报 /item/result/report');
+                        // InternalAPIService::post('/item/result/report', ['id' => $itemRunLog['item_id']]);
+                    } else {
+                        // 判断任务结果是否需要截图
+                        $this->__captureImage($item, $result, $itemRunLog['type']);
 
+                        // 判断任务是否需要图片资源
+                        $this->__downloadImage($item, $result);
+
+                    }
+                }
+            } else {
+                // 不截图也不需要抓图上报数据
+                foreach ($results as $result) {
+                    // 判断任务结果是否需要截图
+                    $this->__captureImage($item, $result, $itemRunLog['type']);
+
+                    // 判断任务是否需要图片资源
+                    $this->__downloadImage($item, $result);
+
+                }
             }
-            // 不截图也不需要抓图上报数据
+
         } else {
             if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
                 $this->__testResult($itemRunLog, $item);

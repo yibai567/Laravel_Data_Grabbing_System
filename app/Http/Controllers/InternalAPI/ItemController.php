@@ -320,6 +320,36 @@ class ItemController extends Controller
         return $this->resObjectGet($res, 'item', $request->path());
     }
 
+    /**
+     * updateLastJobAt
+     * 更新任务最后执行时间
+     *
+     * @param id (任务ID)
+     * @return array
+     */
+    public function updateLastJobAt(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'id' => 'integer|required',
+        ]);
+
+        $item = Item::find($params['id']);
+
+        $itemDetail = $item->toArray();
+
+        if (empty($itemDetail)) {
+            Log::debug('[updateLastJobAt] item not exist', $params);
+            throw new \Dingo\Api\Exception\ResourceException(" item not exist");
+        }
+
+        $item->last_job_at = date("Y-m-d H:i:s");
+        $item->save();
+        $res = $item->toArray();
+
+        return $this->resObjectGet($res, 'item', $request->path());
+    }
 
     /**
      * __createQueue
