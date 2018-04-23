@@ -96,39 +96,57 @@ class ItemResultController extends Controller
         $params['id'] = intval($params['id']);
         $itemResult = ItemResult::find($params['id']);
 
-        if (empty($itemResult)) {
-            throw new ResourceException("test result not exist");
+        try {
+            if (empty($itemResult)) {
+                throw new ResourceException("test result not exist");
+            }
+
+            $shortContents = json_decode($itemResult->short_contents, true);
+
+            if (empty($shortContents)) {
+                throw new ResourceException("result short_contents is empty");
+            }
+
+            if (!empty($shortContents['images'])) {
+                $shortContents['images'] = $params['images'];
+            }
+
+            $itemResult->short_contents = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
+
+            // 判断计数器是否为0 修改状态
+            $itemResult->counter -= 1;
+            if ($itemResult->counter <= 0) {
+                $itemResult->counter = 0;
+                $itemResult->status = ItemResult::STATUS_SUCCESS;
+
+                // 标记当前任务为成功状态
+                Log::debug('[dispatchJob] 请求 /item_run_log/status/success', ['id' => $itemResult->item_run_log_id]);
+                InternalAPIService::post('/item_run_log/status/success', ['id' => $itemResult->item_run_log_id]);
+                // 标记任务状态为成功
+                Log::debug('[dispatchJob] 请求 /item/status/test_success', ['id' => $itemResult->item_id]);
+                InternalAPIService::post('/item/status/test_success', ['id' => $itemResult->item_id]);
+
+                $result = json_decode($itemResult->short_contents, true);
+                $result['task_id'] = $itemResult->item_id;
+                $result['screenshot'] = $itemResult->images;
+
+                $data['is_test'] = 2;
+                $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
+
+                InternalAPIService::post('/item/result/report', $data);
+            }
+            $itemResult->save();
+        } catch (\Exception $e) {
+            $itemResult->status = ItemResult::STATUS_FAIL;
+            $itemResult->save();
+            // 标记当前任务为失败状态
+            Log::debug('[dispatchJob] 请求 /item_run_log/status/fail', ['id' => $itemResult->item_run_log_id]);
+            InternalAPIService::post('/item_run_log/status/fail', ['id' => $itemResult->item_run_log_id]);
+            // 标记任务状态为失败
+            Log::debug('[dispatchJob] 请求 /item/status/test_fail', ['id' => $itemResult->item_id]);
+            InternalAPIService::post('/item/status/test_fail', ['id' => $itemResult->item_id]);
+            throw new ResourceException("item result updateImage fail");
         }
-
-        $shortContents = json_decode($itemResult->short_contents, true);
-
-        if (empty($shortContents)) {
-            throw new ResourceException("result short_contents is empty");
-        }
-
-        if (!empty($shortContents['images'])) {
-            $shortContents['images'] = $params['images'];
-        }
-
-        $itemResult->short_contents = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
-
-        // 判断计数器是否为0 修改状态
-        $itemResult->counter -= 1;
-        if ($itemResult->counter <= 0) {
-            $itemResult->counter = 0;
-            $itemResult->status = ItemResult::STATUS_SUCCESS;
-
-            $result = json_decode($itemResult->short_contents, true);
-            $result['task_id'] = $itemResult->item_id;
-            $result['screenshot'] = $itemResult->images;
-
-            $data['is_test'] = 2;
-            $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
-
-            InternalAPIService::post('/item/result/report', $data);
-        }
-
-        $itemResult->save();
 
         $result = $itemResult->toArray();
         return $this->resObjectGet($result, 'item_test_result', $request->path());
@@ -152,33 +170,53 @@ class ItemResultController extends Controller
         $params['id'] = intval($request->get('id'));
         $itemResult = ItemTestResult::find($params['id']);
 
-        if (empty($itemResult)) {
-            Log::debug('[updateCapture] 结果不存在');
-            throw new ResourceException("result not exist");
+        try {
+            if (empty($itemResult)) {
+                Log::debug('[updateCapture] 结果不存在');
+                throw new ResourceException("result not exist");
+            }
+
+            // 图片上传
+            $imageService = new ImageService();
+            $imageInfo = $imageService->uploadByFile($image);
+            $imageInfo['url'] = $imageInfo['oss_url'];
+            // 更新结果
+            $itemResult->image = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);
+
+            $itemResult->counter -= 1;
+            if ($itemResult->counter <= 0) { // 判断计数器是否为0 修改状态
+                $itemResult->counter = 0;
+                $itemResult->status = ItemResult::STATUS_SUCCESS;
+
+                // 标记当前任务为成功状态
+                Log::debug('[dispatchJob] 请求 /item_run_log/status/success', ['id' => $itemResult->item_run_log_id]);
+                InternalAPIService::post('/item_run_log/status/success', ['id' => $itemResult->item_run_log_id]);
+                // 标记任务状态为成功
+                Log::debug('[dispatchJob] 请求 /item/status/test_success', ['id' => $itemResult->item_id]);
+                InternalAPIService::post('/item/status/test_success', ['id' => $itemResult->item_id]);
+
+                $result = json_decode($itemResult->short_contents, true);
+                $result['task_id'] = $itemResult->item_id;
+                $result['screenshot'] = $itemResult->images;
+
+                $data['is_test'] = 2;
+                $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
+
+                InternalAPIService::post('/item/result/report', $data);
+            }
+            $itemResult->save();
+        } catch (\Exception $e) {
+            $itemResult->status = ItemResult::STATUS_FAIL;
+            $itemResult->save();
+            // 标记当前任务为失败状态
+            Log::debug('[dispatchJob] 请求 /item_run_log/status/fail', ['id' => $itemResult->item_run_log_id]);
+            InternalAPIService::post('/item_run_log/status/fail', ['id' => $itemResult->item_run_log_id]);
+            // 标记任务状态为失败
+            Log::debug('[dispatchJob] 请求 /item/status/test_fail', ['id' => $itemResult->item_id]);
+            InternalAPIService::post('/item/status/test_fail', ['id' => $itemResult->item_id]);
+
+            throw new ResourceException("item result updateCapture fail");
         }
-
-        // 图片上传
-        $imageService = new ImageService();
-        $imageInfo = $imageService->uploadByFile($image);
-        $imageInfo['url'] = $imageInfo['oss_url'];
-        // 更新结果
-        $itemResult->image = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);
-
-        $itemResult->counter -= 1;
-        if ($itemResult->counter <= 0) { // 判断计数器是否为0 修改状态
-            $itemResult->counter = 0;
-            $itemResult->status = ItemResult::STATUS_SUCCESS;
-
-            $result = json_decode($itemResult->short_contents, true);
-            $result['task_id'] = $itemResult->item_id;
-            $result['screenshot'] = $itemResult->images;
-
-            $data['is_test'] = 2;
-            $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
-
-            InternalAPIService::post('/item/result/report', $data);
-        }
-        $itemResult->save();
 
         return $this->resObjectGet($itemResult->toArray(), 'item_test_result', $request->path());
     }

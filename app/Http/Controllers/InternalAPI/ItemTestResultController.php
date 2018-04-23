@@ -155,40 +155,64 @@ class ItemTestResultController extends Controller
             'id' => 'integer|required',
             'images' => 'string|required',
         ]);
-
         $params['id'] = intval($params['id']);
         $itemTestResult = ItemTestResult::find($params['id']);
 
-        if (empty($itemTestResult)) {
-            Log::debug('[updateImage] 测试结果不存在');
-            throw new ResourceException("test result not exist");
+        try {
+
+            if (empty($itemTestResult)) {
+                Log::debug('[updateImage] 测试结果不存在');
+                throw new ResourceException("test result not exist");
+            }
+
+            $shortContents = json_decode($itemTestResult->short_contents, true);
+            Log::debug('[updateImage] 测试结果short_contents' . $shortContents);
+
+            if (empty($shortContents)) {
+                Log::debug('[updateImage] short_contents为空');
+                throw new ResourceException("test result short_contents is empty");
+            }
+
+            if (!empty($shortContents[0]['images'])) {
+                Log::debug('[updateImage] short_contents第一个数组的images属性为：' . $shortContents[0]['images']);
+                $shortContents[0]['images'] = $params['images'];
+            }
+
+            $itemTestResult->short_contents = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
+
+            // 判断计数器是否为0 修改状态
+            $itemTestResult->counter -= 1;
+            if ($itemTestResult->counter <= 0) {
+                $itemTestResult->counter = 0;
+                $itemTestResult->status = ItemTestResult::STATUS_SUCCESS;
+                // 标记当前任务为成功状态
+                Log::debug('[dispatchJob] 请求 /item_run_log/status/success', ['id' => $itemTestResult->item_run_log_id]);
+                InternalAPIService::post('/item_run_log/status/success', ['id' => $itemTestResult->item_run_log_id]);
+                // 标记任务状态为成功
+                Log::debug('[dispatchJob] 请求 /item/status/test_success', ['id' => $itemTestResult->item_id]);
+                InternalAPIService::post('/item/status/test_success', ['id' => $itemTestResult->item_id]);
+
+                $result = json_decode($itemTestResult->short_contents, true);
+                $result['task_id'] = $itemTestResult->item_id;
+                $result['screenshot'] = $itemTestResult->images;
+
+                $data['is_test'] = 1;
+                $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
+                InternalAPIService::post('/item/result/report', $data);
+            }
+
+            $itemTestResult->save();
+
+        } catch (\Exception $e) {
+            $itemTestResult->update('status', ItemTestResult::STATUS_FAIL);
+            // 标记当前任务为失败状态
+            Log::debug('[dispatchJob] 请求 /item_run_log/status/fail', ['id' => $itemTestResult->item_run_log_id]);
+            InternalAPIService::post('/item_run_log/status/fail', ['id' => $itemTestResult->item_run_log_id]);
+            // 标记任务状态为失败
+            Log::debug('[dispatchJob] 请求 /item/status/test_fail', ['id' => $itemTestResult->item_id]);
+            InternalAPIService::post('/item/status/test_fail', ['id' => $itemTestResult->item_id]);
+            throw new ResourceException("item test result updateImage fail");
         }
-
-        $shortContents = json_decode($itemTestResult->short_contents, true);
-        Log::debug('[updateImage] 测试结果short_contents' . $shortContents);
-
-        if (empty($shortContents)) {
-            Log::debug('[updateImage] short_contents为空');
-            throw new ResourceException("test result short_contents is empty");
-        }
-
-        if (!empty($shortContents[0]['images'])) {
-            Log::debug('[updateImage] short_contents第一个数组的images属性为：' . $shortContents[0]['images']);
-            $shortContents[0]['images'] = $params['images'];
-        }
-
-        $itemTestResult->short_contents = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
-
-        // 判断计数器是否为0 修改状态
-        $itemTestResult->counter -= 1;
-        if ($itemTestResult->counter <= 0) {
-            $itemTestResult->counter = 0;
-            $itemTestResult->status = ItemResult::STATUS_SUCCESS;
-        }
-
-        $itemTestResult->save();
-
-        Log::debug('[updateImage] 更新short_contents：' . $itemTestResult->short_contents);
 
         $result = $itemTestResult->toArray();
         return $this->resObjectGet($result, 'item_test_result', $request->path());
@@ -212,33 +236,51 @@ class ItemTestResultController extends Controller
         $params['id'] = intval($request->get('id'));
         $itemTestResult = ItemTestResult::find($params['id']);
 
-        if (empty($itemTestResult)) {
-            Log::debug('[updateCapture] 测试结果不存在');
-            throw new ResourceException("test result not exist");
+        try {
+            if (empty($itemTestResult)) {
+                Log::debug('[updateCapture] 测试结果不存在');
+                throw new ResourceException("test result not exist");
+            }
+
+            Log::debug('[updateCapture] 图片上传');
+            $imageService = new ImageService();
+            $imageInfo = $imageService->uploadByFile($image);
+
+            // 更新测试结果
+            $itemTestResult->image = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);
+
+            $itemTestResult->counter -= 1;
+            if ($itemTestResult->counter <= 0) { // 判断计数器是否为0 修改状态
+                $itemTestResult->counter = 0;
+                $itemTestResult->status = ItemTestResult::STATUS_SUCCESS;
+
+                // 标记当前任务为成功状态
+                Log::debug('[dispatchJob] 请求 /item_run_log/status/success', ['id' => $itemTestResult->item_run_log_id]);
+                InternalAPIService::post('/item_run_log/status/success', ['id' => $itemTestResult->item_run_log_id]);
+                // 标记任务状态为成功
+                Log::debug('[dispatchJob] 请求 /item/status/test_success', ['id' => $itemTestResult->item_id]);
+                InternalAPIService::post('/item/status/test_success', ['id' => $itemTestResult->item_id]);
+
+                $result = json_decode($itemTestResult->short_contents, true);
+                $result['task_id'] = $itemTestResult->item_id;
+                $result['screenshot'] = $itemTestResult->images;
+
+                $data['is_test'] = 1;
+                $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
+                InternalAPIService::post('/item/result/report', $data);
+            }
+
+            $itemTestResult->save();
+        } catch (\Exception $e) {
+            $itemTestResult->update('status', ItemTestResult::STATUS_FAIL);
+            // 标记当前任务为失败状态
+            Log::debug('[dispatchJob] 请求 /item_run_log/status/fail', ['id' => $itemTestResult->item_run_log_id]);
+            InternalAPIService::post('/item_run_log/status/fail', ['id' => $itemTestResult->item_run_log_id]);
+            // 标记任务状态为失败
+            Log::debug('[dispatchJob] 请求 /item/status/test_fail', ['id' => $itemTestResult->item_id]);
+            InternalAPIService::post('/item/status/test_fail', ['id' => $itemTestResult->item_id]);
+            throw new ResourceException("item test result updateCapture fail");
         }
-
-        Log::debug('[updateCapture] 图片上传');
-        $imageService = new ImageService();
-        $imageInfo = $imageService->uploadByFile($image);
-
-        // 更新测试结果
-        $itemTestResult->image = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);
-
-        $itemTestResult->counter -= 1;
-        if ($itemTestResult->counter <= 0) { // 判断计数器是否为0 修改状态
-            $itemTestResult->counter = 0;
-            $itemTestResult->status = ItemTestResult::STATUS_SUCCESS;
-
-            $result = json_decode($itemTestResult->short_contents, true);
-            $result['task_id'] = $itemTestResult->item_id;
-            $result['screenshot'] = $itemTestResult->images;
-
-            $data['is_test'] = 1;
-            $data['result'][] = json_encode($result, JSON_UNESCAPED_UNICODE);
-            InternalAPIService::post('/item/result/report', $data);
-        }
-
-        $itemTestResult->save();
 
         return $this->resObjectGet($itemTestResult->toArray(), 'item_test_result', $request->path());
     }
