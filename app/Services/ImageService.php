@@ -44,6 +44,7 @@ class ImageService extends Service
             }
 
             $options = ['verify' => false];
+            //proxy example 'http' => 'http://username:password@199.220.220.105:2662'
             if ($isProxy) {
                 $options['proxy'] = 'tcp://127.0.0.1:8125';
             }
