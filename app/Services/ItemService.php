@@ -123,7 +123,7 @@ class ItemService extends Service
         if (!empty($data['short_content_selector'])) {
             $data['short_content_selector'] = json_decode($data['short_content_selector'], true);
             //短内容不为空时，detail_url键名不存在，默认键名
-            if (empty($data['short_content_selector']['detail_url'])) {
+            if (isset($data['short_content_selector']['detail_url']) && empty($data['short_content_selector']['detail_url'])) {
                 $data['short_content_selector']['detail_url'] = "";
             }
 

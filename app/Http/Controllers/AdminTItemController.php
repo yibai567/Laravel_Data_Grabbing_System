@@ -119,7 +119,7 @@
             $this->form[] = ['label'=>'Status','name'=>'status','type'=>'hidden','width'=>'col-sm-10'];
 
 			$this->form[] = ['label'=>'资源URL','name'=>'resource_url','type'=>'text','validation'=>'required|string','width'=>'col-sm-10'];
-            $this->form[] = ['label'=>'URL前缀','name'=>'pre_detail_url','type'=>'text','validation'=>'required|string','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'URL前缀','name'=>'pre_detail_url','type'=>'text','width'=>'col-sm-10'];
 
             $this->form[] = ['label'=>'行内选择器','name'=>'row_selector','type'=>'text','width'=>'col-sm-10'];
             $this->form[] = ['label'=>'短内容选择器','name'=>'short_content_selector','type'=>'textarea','width'=>'col-sm-10'];
@@ -440,27 +440,28 @@
 
         public function getTest($id)
         {
-            $result = InternalAPIService::post('/item/test', ['id' => intval($id)]);
-
-            if (empty($result)) {
+            try {
+                $result = InternalAPIService::post('/item/test', ['id' => intval($id)]);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
+
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试提交成功，请稍后查看测试结果", "success");
         }
 
         public function getTestResult($id)
         {
-            $itemRunLog = InternalAPIService::get('/item_run_log/item', ['item_id' => intval($id), 'type' => ItemRunLog::TYPE_TEST]);
-
-            if (empty($itemRunLog)) {
+            try {
+                $itemRunLog = InternalAPIService::get('/item_run_log/item', ['item_id' => intval($id), 'type' => ItemRunLog::TYPE_TEST]);
+                if (empty($itemRunLog['id'])) {
+                    CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+                }
+                $itemTestResult = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $itemRunLog['id']]);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
 
-            $itemTestResult = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $itemRunLog['id']]);
-
             if (!empty($itemTestResult['short_contents'])) {
-                //$short_contents = jsonFormat($itemTestResult['short_contents']);
-                //dd($itemTestResult['short_contents']);
                 echo "<script type=\"text/javascript\" >alert(JSON.stringify(" . $itemTestResult['short_contents'] . "));</script>";
             } else {
                 echo "<script type=\"text/javascript\" >alert( '暂无结果' );</script>";
@@ -470,19 +471,21 @@
 
         public function getStartUp($id)
         {
-            $result = InternalAPIService::post('/item/start', ['id' => intval($id)]);
-            if (empty($result)) {
+            try {
+                $result = InternalAPIService::post('/item/start', ['id' => intval($id)]);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
+
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "启动成功", "success");
         }
 
         public function getStopDown($id)
         {
 
-            $result = InternalAPIService::post('/item/stop', ['id' => intval($id)]);
-
-            if (empty($result)) {
+            try {
+                $result = InternalAPIService::post('/item/stop', ['id' => intval($id)]);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
 

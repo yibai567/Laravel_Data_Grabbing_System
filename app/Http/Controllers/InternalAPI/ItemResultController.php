@@ -212,7 +212,6 @@ class ItemResultController extends Controller
 
             // 判断任务是否需要截图
             $item = Item::find($params['item_id']);
-
             if ($item->is_capture_image == Item::IS_CAPTURE_IMAGE_TRUE) {
                 $counter += 1;
             }
@@ -223,16 +222,16 @@ class ItemResultController extends Controller
 
                 $itemResult = ItemResult::firstOrCreate([
                     'item_id' => $formatData['item_id'],
-                    'item_run_log_id' => $formatData['item_run_log_id'],
                     'md5_short_contents' => $formatData['md5_short_contents'],
                 ]);
 
                 if ($itemResult->wasRecentlyCreated) {
+                    $itemResult->item_run_log_id = $formatData['item_run_log_id'];
                     $itemResult->start_at = $formatData['start_at'];
                     $itemResult->end_at = $formatData['end_at'];
-                    $itemResult->short_contents = $formatData['short_contents'];
                     $shortContents = json_decode($shortContents, true);
                     $shortContents['url'] = $this->__formatURL($shortContents['url'], $item->pre_detail_url);
+                    $itemResult->short_contents = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
                     // 如果有图片信息则计数器增1
                     $newCounter = empty($shortContents['images']) ? $counter : $counter + 1;
 
@@ -298,11 +297,11 @@ class ItemResultController extends Controller
 
         $httpPre = substr($url, 0, 4);
         $urlArr = parse_url($preDetailUrl);
-        if ($httpPre != 'http:') {
+
+        if ($httpPre != 'http:' && $httpPre != 'https') {
             if (substr($url, 0, 2) == '//') {
                 $url = $urlArr['scheme'] . ':' . $url;
             } else {
-
                 if (substr($url, 0, 1) == '/') {
                     $url = $urlArr['scheme'] . '://' . $urlArr['host'] . $url;
                 } else {
@@ -310,7 +309,6 @@ class ItemResultController extends Controller
                 }
             }
         }
-
         return trim($url);
     }
 }
