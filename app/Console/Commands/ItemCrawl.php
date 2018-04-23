@@ -157,7 +157,6 @@ class ItemCrawl extends Command
      */
     private function __createCrawlResult($item)
     {
-        dd($item);
         $httpService = new HttpService();
         try {
 
