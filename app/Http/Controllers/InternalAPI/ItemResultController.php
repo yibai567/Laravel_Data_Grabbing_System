@@ -4,6 +4,7 @@ namespace App\Http\Controllers\InternalAPI;
 
 use App\Models\Item;
 use App\Models\ItemRunLog;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
@@ -132,11 +133,12 @@ class ItemResultController extends Controller
     public function updateCapture(Request $request)
     {
         $params = $request->all();
+        $image = $request->file('image');
         Log::debug('[updateCapture] 更新任务结果截图信息' . json_encode($params, JSON_UNESCAPED_UNICODE));
 
         ValidatorService::check($params, [
             'id' => 'integer|required',
-            'images' => 'string|required',
+            'image' => 'string|required',
         ]);
 
         $params['id'] = intval($params['id']);
@@ -147,7 +149,10 @@ class ItemResultController extends Controller
             throw new ResourceException("result not exist");
         }
 
-        $itemResult->images = json_encode($params['images'], JSON_UNESCAPED_UNICODE);
+        $imageService = new ImageService();
+        $imageInfo = $imageService->uploadByFile($image);
+
+        $itemResult->image = $imageInfo['image_url'];
         if ($itemResult->counter > 0) { // 更新计数器
             $itemResult->counter -= 1;
         }

@@ -17,7 +17,7 @@ class ImageService extends Service
      * 下载指定 url 的图片并上传到阿里云 oss
      *
      */
-    public function uploadByImageUrl($url, $isSizeRule = [])
+    public function uploadByImageUrl($url, $isSizeRule = [], $isProxy='false')
     {
         try {
             $domain = config('aliyun.oss.domain');
@@ -43,7 +43,12 @@ class ImageService extends Service
                 }
             }
 
-            $client = new Client(['verify' => false]);
+            $options = ['verify' => false];
+            if ($isProxy) {
+                $options['proxy'] = 'tcp://127.0.0.1:8125';
+            }
+
+            $client = new Client($options);
 
             $response = $client->request('GET', $url, ['timeout' => 30]);
             $content = $response->getBody();
@@ -51,7 +56,7 @@ class ImageService extends Service
             $ext = $this->getExt($url);
 
             if (!$ext) {
-                Log::error('not found url is url :  '.$url."\t foreach key is : ", -1);
+                Log::error('not found url is url :  ' . $url . " foreach key is : ", -1);
 
                 return null;
             }
@@ -260,4 +265,6 @@ class ImageService extends Service
 
         return ['data' => $image];
     }
+
+
 }

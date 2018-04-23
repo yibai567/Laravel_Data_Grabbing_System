@@ -4,6 +4,7 @@ namespace App\Http\Controllers\InternalAPI;
 
 use App\Models\Item;
 use App\Models\ItemRunLog;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
@@ -179,6 +180,12 @@ class ItemTestResultController extends Controller
         if ($itemTestResult->counter > 0) { // 更新计数器
             $itemTestResult->counter -= 1;
         }
+
+        // 判断计数器是否为0 修改状态
+        if ($itemTestResult->counter <= 0) {
+            $itemTestResult->status = ItemTestResult::STATUS_SUCCESS;
+        }
+
         $itemTestResult->save();
 
         Log::debug('[updateImage] 更新short_contents：' . $itemTestResult->short_contents);
@@ -231,25 +238,37 @@ class ItemTestResultController extends Controller
      */
     public function updateCapture(Request $request)
     {
+        Log::debug('[updateCapture] 更新任务结果capture信息');
+        $image = $request->file('image');
         $params = $request->all();
-        Log::debug('[updateImage] 更新任务结果image信息' . json_encode($params, JSON_UNESCAPED_UNICODE));
+        if (empty($image)) {
+            return response(500, 'image 参数错误');
+        }
 
         ValidatorService::check($params, [
             'id' => 'integer|required',
-            'images' => 'string|required',
         ]);
 
         $params['id'] = intval($params['id']);
         $itemTestResult = ItemTestResult::find($params['id']);
 
         if (empty($itemTestResult)) {
-            Log::debug('[updateImage] 测试结果不存在');
+            Log::debug('[updateCapture] 测试结果不存在');
             throw new ResourceException("test result not exist");
         }
 
-        $itemTestResult->images = $params['images'];
+        Log::debug('[updateCapture] 图片上传');
+        $imageService = new ImageService();
+        $imageInfo = $imageService->uploadByFile($image);
+
+        $itemTestResult->image = $imageInfo['image_url'];
         if ($itemTestResult->counter > 0) { // 更新计数器
             $itemTestResult->counter -= 1;
+        }
+
+        // 判断计数器是否为0 修改状态
+        if ($itemTestResult->counter <= 0) {
+            $itemTestResult->status = ItemTestResult::STATUS_SUCCESS;
         }
 
         $itemTestResult->save();
