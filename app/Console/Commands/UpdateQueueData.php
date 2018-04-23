@@ -43,8 +43,9 @@ class UpdateQueueData extends Command
     public function handle()
     {
         $this->info('jinse:update:queue_data start！');
-        $this->__updateQueueData();
-        $this->info('jinse:update:queue_data ended！');
+        while (1) {
+            $this->__updateQueueData();
+        }
     }
 
     /**
@@ -61,6 +62,7 @@ class UpdateQueueData extends Command
             if (!strpos($queueInfo->name, 'test') && $queueInfo->data_type !== Item::DATA_TYPE_CAPTURE) {
                 //非截图任务队列，如果队列有值不更新
                 if ($length > 0) {
+                    sleep(10);
                     continue;
                 }
 

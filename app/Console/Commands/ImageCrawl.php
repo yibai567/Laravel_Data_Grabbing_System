@@ -43,7 +43,8 @@ class ImageCrawl extends Command
     public function handle()
     {
         Log::debug('[jinse::image:crawl] start');
-        while (1) {
+        $i = 1;
+        while ($i <= 100) {
             try {
                 $data = Redis::connection('queue')->rpop('crawl_image_queue');
 //                $data = '{"id":1,"resource_url":"https://cdn.jin10.com/pic/67/276f4228e7cca4381fa575a7d8cbed6c.jpg","is_test":true}';
@@ -84,6 +85,7 @@ class ImageCrawl extends Command
             } catch (\Exception $e) {
                 DB::rollBack();
             }
+            $i++;
         }
     }
 }
