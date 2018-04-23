@@ -440,27 +440,25 @@
 
         public function getTest($id)
         {
-            $result = InternalAPIService::post('/item/test', ['id' => intval($id)]);
-
-            if (empty($result)) {
+            try {
+                $result = InternalAPIService::post('/item/test', ['id' => intval($id)]);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
+
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试提交成功，请稍后查看测试结果", "success");
         }
 
         public function getTestResult($id)
         {
-            $itemRunLog = InternalAPIService::get('/item_run_log/item', ['item_id' => intval($id), 'type' => ItemRunLog::TYPE_TEST]);
-
-            if (empty($itemRunLog)) {
+            try {
+                $itemRunLog = InternalAPIService::get('/item_run_log/item', ['item_id' => intval($id), 'type' => ItemRunLog::TYPE_TEST]);
+                $itemTestResult = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $itemRunLog['id']]);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
 
-            $itemTestResult = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $itemRunLog['id']]);
-
             if (!empty($itemTestResult['short_contents'])) {
-                //$short_contents = jsonFormat($itemTestResult['short_contents']);
-                //dd($itemTestResult['short_contents']);
                 echo "<script type=\"text/javascript\" >alert(JSON.stringify(" . $itemTestResult['short_contents'] . "));</script>";
             } else {
                 echo "<script type=\"text/javascript\" >alert( '暂无结果' );</script>";
@@ -470,19 +468,21 @@
 
         public function getStartUp($id)
         {
-            $result = InternalAPIService::post('/item/start', ['id' => intval($id)]);
-            if (empty($result)) {
+            try {
+                $result = InternalAPIService::post('/item/start', ['id' => intval($id)]);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
+
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "启动成功", "success");
         }
 
         public function getStopDown($id)
         {
 
-            $result = InternalAPIService::post('/item/stop', ['id' => intval($id)]);
-
-            if (empty($result)) {
+            try {
+                $result = InternalAPIService::post('/item/stop', ['id' => intval($id)]);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
 
