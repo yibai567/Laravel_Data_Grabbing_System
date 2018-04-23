@@ -150,14 +150,16 @@ class ItemResultController extends Controller
 
                 // 判断任务是否需要图片资源
                 $this->__downloadImage($item, $result);
+
             }
+            // 不截图也不需要抓图上报数据
         } else {
             if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
                 $this->__testResult($itemRunLog, $item);
             }
         }
 
-        // return $this->resObjectGet([], 'item_result', $request->path());
+        return $this->resObjectGet([], 'item_result', $request->path());
     }
 
     /**
@@ -215,7 +217,6 @@ class ItemResultController extends Controller
         Log::debug('[dispatchJob __captureImage] 请求 /queue_info/job', $jobParams);
         $queueItem = InternalAPIService::post('/queue_info/job', $jobParams);
 
-        return true;
     }
 
     /**
