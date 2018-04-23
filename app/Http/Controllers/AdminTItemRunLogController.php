@@ -4,6 +4,7 @@
 	use Request;
 	use DB;
     use App\Models\ItemRunLog;
+    use App\Models\Item;
 	use CRUDBooster;
     use Illuminate\Support\Facades\Route;
 
@@ -35,9 +36,9 @@
 			$this->col[] = ["label"=>"Id","name"=>"id"];
 			$this->col[] = ["label"=>"任务ID","name"=>"item_id"];
 			$this->col[] = ["label"=>"类型","name"=>"type","callback"=>function ($row) {
-                if ( $row->type == ItemRunLog::TYPE_TEST) {
+                if ( $row->type == Item::DATA_TYPE_HTML) {
                     return 'html';
-                } else if( $row->data_type == Item::TYPE_PRO) {
+                } else if( $row->data_type == Item::DATA_TYPE_JSON) {
                     return 'json';
                 } else {
                     return '截图';
