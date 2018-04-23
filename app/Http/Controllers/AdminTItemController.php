@@ -119,7 +119,7 @@
             $this->form[] = ['label'=>'Status','name'=>'status','type'=>'hidden','width'=>'col-sm-10'];
 
 			$this->form[] = ['label'=>'资源URL','name'=>'resource_url','type'=>'text','validation'=>'required|string','width'=>'col-sm-10'];
-            $this->form[] = ['label'=>'URL前缀','name'=>'pre_detail_url','type'=>'text','validation'=>'required|string','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'URL前缀','name'=>'pre_detail_url','type'=>'text','width'=>'col-sm-10'];
 
             $this->form[] = ['label'=>'行内选择器','name'=>'row_selector','type'=>'text','width'=>'col-sm-10'];
             $this->form[] = ['label'=>'短内容选择器','name'=>'short_content_selector','type'=>'textarea','width'=>'col-sm-10'];
@@ -453,6 +453,9 @@
         {
             try {
                 $itemRunLog = InternalAPIService::get('/item_run_log/item', ['item_id' => intval($id), 'type' => ItemRunLog::TYPE_TEST]);
+                if (empty($itemRunLog['id'])) {
+                    CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+                }
                 $itemTestResult = InternalAPIService::get('/item/test_result', ['item_run_log_id' => $itemRunLog['id']]);
             } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
