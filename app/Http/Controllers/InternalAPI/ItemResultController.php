@@ -4,6 +4,7 @@ namespace App\Http\Controllers\InternalAPI;
 
 use App\Models\Item;
 use App\Models\ItemRunLog;
+use App\Models\Image;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
 use App\Services\InternalAPIService;
@@ -271,7 +272,7 @@ class ItemResultController extends Controller
 
                 $itemResult = ItemResult::where('item_id', $formatData['item_id'])
                                         ->where('md5_short_contents', $formatData['md5_short_contents'])
-                                        ->where('status', ItemResult::STATUS_SUCCESS)
+                                        ->whereIn('status', [ItemResult::STATUS_SUCCESS, ItemResult::STATUS_INIT])
                                         ->first();
 
                 if (empty($itemResult)) {

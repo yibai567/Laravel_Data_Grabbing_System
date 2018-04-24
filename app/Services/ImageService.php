@@ -177,7 +177,7 @@ class ImageService extends Service
             $md5Content = md5(file_get_contents($path));
             $image = Image::where('md5_content', $md5Content)->first();
             if ($image) {
-                return ['data' => $image];
+                return $image->toArray();
             }
 
             $getSize = getimagesize($path);
@@ -275,8 +275,7 @@ class ImageService extends Service
 
             return ["msg" => 'upload exception', 'error' => -1];
         }
-
-        return ['data' => $image];
+        return $image->toArray();
     }
 
 

@@ -276,6 +276,11 @@ class ItemTestResultController extends Controller
                 Log::debug('[updateCapture] 请求 /item_run_log/status/success', ['id' => $itemTestResult->item_run_log_id]);
                 InternalAPIService::post('/item_run_log/status/success', ['id' => $itemTestResult->item_run_log_id]);
 
+                // 标记任务状态为成功
+                Log::debug('[updateCapture] 请求 /item/status/test_success', ['id' => $itemTestResult->item_id]);
+                InternalAPIService::post('/item/status/test_success', ['id' => $itemTestResult->item_id]);
+
+
                 $result = json_decode($itemTestResult->short_contents, true);
                 $result['task_id'] = $itemTestResult->item_id;
                 $result['screenshot'] = $itemTestResult->images;

@@ -83,7 +83,7 @@ class ItemResultController extends Controller
             'error_message'   => 'string|nullable'
         ]);
         $images = $request->file('images');
-        Log::debug('[dispatchJob] 接收参数 $params = ', $params);
+        // Log::debug('[dispatchJob] 接收参数 $params = ', $params);
         // 获取 item run Log
         Log::debug('[dispatchJob] 请求 /item_run_log  | 获取 Item_run_log 信息,', ['id' => $params['item_run_log_id']]);
         $itemRunLog = InternalAPIService::get('/item_run_log', ['id' => $params['item_run_log_id']]);
@@ -147,13 +147,22 @@ class ItemResultController extends Controller
             // 标记当前任务为失败状态
             Log::debug('[dispatchJob] 请求 /item_run_log/status/fail', ['id' => $params['item_run_log_id']]);
             InternalAPIService::post('/item_run_log/status/fail', ['id' => $params['item_run_log_id']]);
-            // 标记任务状态为失败
-            Log::debug('[dispatchJob] 请求 /item/status/test_fail', ['id' => $itemRunLog['item_id']]);
-            InternalAPIService::post('/item/status/test_fail', ['id' => $itemRunLog['item_id']]);
+
+            if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
+                // 标记任务状态为失败
+                Log::debug('[dispatchJob] 请求 /item/status/test_fail', ['id' => $itemRunLog['item_id']]);
+                InternalAPIService::post('/item/status/test_fail', ['id' => $itemRunLog['item_id']]);
+            } else {
+                // 标记正式结果失败
+            }
 
             throw new \Dingo\Api\Exception\ResourceException("invalid result");
         }
         if ($item['data_type'] == Item::DATA_TYPE_CAPTURE) {
+            // 标记当前任务状态为成功
+            Log::debug('[dispatchJob] 请求 /item_run_log/status/success', ['id' => $params['item_run_log_id']]);
+            InternalAPIService::post('/item_run_log/status/success', ['id' => $params['item_run_log_id']]);
+
             Log::debug('[dispatchJob] 截图任务处理完成');
             return $this->resObjectGet([], 'item_result', $request->path());
         }
