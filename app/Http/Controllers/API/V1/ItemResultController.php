@@ -153,7 +153,11 @@ class ItemResultController extends Controller
                 Log::debug('[dispatchJob] 请求 /item/status/test_fail', ['id' => $itemRunLog['item_id']]);
                 InternalAPIService::post('/item/status/test_fail', ['id' => $itemRunLog['item_id']]);
             } else {
-                // 标记正式结果失败
+                if ($item['data_type'] == Item::DATA_TYPE_CAPTURE) {
+                    // 标记结果为失败
+                    Log::debug('[dispatchJob] 请求 /item/result/status/fail', ['id' => $item['associate_result_id']]);
+                    InternalAPIService::post('/item/result/status/fail', ['id' => $item['associate_result_id']]);
+                }
             }
 
             throw new \Dingo\Api\Exception\ResourceException("invalid result");
