@@ -134,12 +134,11 @@ class ItemController extends Controller
 
         $item = Item::find($params['id']);
 
-        $itemDetail = $item->toArray();
-
-        if (empty($itemDetail)) {
+        if (empty($item)) {
             Log::debug('[start] item not exist', $params);
             throw new \Dingo\Api\Exception\ResourceException(" item not exist");
         }
+        $itemDetail = $item->toArray();
 
         if ($itemDetail['status'] != Item::STATUS_TEST_SUCCESS && $itemDetail['status'] != Item::STATUS_STOP) {
             Log::debug('[start] item status does not allow to start', $itemDetail);
@@ -174,12 +173,12 @@ class ItemController extends Controller
 
         $item = Item::find($params['id']);
 
-        $itemDetail = $item->toArray();
 
-        if (empty($itemDetail)) {
+        if (empty($item)) {
             Log::debug('[stop] item not exist', $params);
             throw new \Dingo\Api\Exception\ResourceException(" item not exist");
         }
+        $itemDetail = $item->toArray();
 
         if ($itemDetail['status'] != Item::STATUS_START) {
             Log::debug('[stop] item status does not allow to stop', $itemDetail);
@@ -215,12 +214,12 @@ class ItemController extends Controller
         ]);
 
         $item = Item::find($params['id']);
-        $itemDetail = $item->toArray();
 
-        if (empty($itemDetail)) {
+        if (empty($item)) {
             Log::debug('[test] item not exist', $params);
             throw new \Dingo\Api\Exception\ResourceException(" item not exist");
         }
+        $itemDetail = $item->toArray();
 
         if ($itemDetail['status'] == Item::STATUS_TESTING) {
             Log::debug('[test] status does not allow to update', $itemDetail);
@@ -335,12 +334,12 @@ class ItemController extends Controller
 
         $item = Item::find($params['id']);
 
-        $itemDetail = $item->toArray();
 
-        if (empty($itemDetail)) {
+        if (empty($item)) {
             Log::debug('[updateLastJobAt] item not exist', $params);
             throw new \Dingo\Api\Exception\ResourceException(" item not exist");
         }
+        $itemDetail = $item->toArray();
 
         $item->last_job_at = date("Y-m-d H:i:s");
         $item->save();
