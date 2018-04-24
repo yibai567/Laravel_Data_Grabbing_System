@@ -196,17 +196,22 @@ class ItemTestResultController extends Controller
                 $result = json_decode($itemTestResult->short_contents, true);
                 $result['task_id'] = $itemTestResult->item_id;
 
-                $result['screenshot'] = $itemTestResult->images;
                 if (empty($itemTestResult->images)) {
                     $result['screenshot'] = [];
+                } else {
+                    $screenshot = json_decode($itemTestResult->images, true);
+                    $result['screenshot'] = [
+                        'url' => $screenshot['oss_url'],
+                        'width' => $screenshot['width'],
+                        'height' => $screenshot['height'],
+                    ];
                 }
 
                 $data['is_test'] = 1;
                 $data['result'][] = $result;
                 $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
 
-                // TODO 上报
-                // InternalAPIService::post('/item/result/report', $data);
+                 InternalAPIService::post('/item/result/report', $data);
             }
 
             $itemTestResult->save();
@@ -288,16 +293,22 @@ class ItemTestResultController extends Controller
                 $result = json_decode($itemTestResult->short_contents, true);
                 $result['task_id'] = $itemTestResult->item_id;
 
-                $result['screenshot'] = $itemTestResult->images;
                 if (empty($itemTestResult->images)) {
                     $result['screenshot'] = [];
+                } else {
+                    $screenshot = json_decode($itemTestResult->images, true);
+                    $result['screenshot'] = [
+                        'url' => $screenshot['oss_url'],
+                        'width' => $screenshot['width'],
+                        'height' => $screenshot['height'],
+                    ];
                 }
 
                 $data['is_test'] = 1;
                 $data['result'][] = $result;
                 $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
-                // TODO 上报
-                // InternalAPIService::post('/item/result/report', $data);
+
+                InternalAPIService::post('/item/result/report', $data);
             }
 
             $itemTestResult->save();
