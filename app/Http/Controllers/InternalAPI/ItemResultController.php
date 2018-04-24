@@ -343,6 +343,19 @@ class ItemResultController extends Controller
                     $itemResult->status = $newCounter > 0 ? ItemResult::STATUS_INIT : ItemResult::STATUS_SUCCESS;
                     $itemResult->save();
 
+                    // 数据上报
+                    if ($newCounter == 0) {
+                        $res = json_decode($itemResult->short_contents, true);
+                        $res['task_id'] = $itemResult->item_id;
+
+                        $data['is_test'] = 1;
+                        $data['result'][] = array_except($res, array('images'));
+                        $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
+                        Log::debug('[report] 数据上报，数据：', $data);
+
+                        InternalAPIService::post('/item/result/report', $data);
+                    }
+
                     $shortContents['id'] = $itemResult->id;
                     $result[] = $shortContents;
                 }

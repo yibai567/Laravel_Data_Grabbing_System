@@ -138,6 +138,19 @@ class ItemTestResultController extends Controller
         $result[0]['counter'] = $counter;
         $result[0]['status'] = $itemTestResult->status;
 
+        // 数据上报
+        if ($counter == 0) {
+            $res = json_decode($itemTestResult->short_contents, true);
+            $res = $res[0];
+            $res['task_id'] = $itemTestResult->item_id;
+
+            $data['is_test'] = 1;
+            $data['result'][] = array_except($res, array('images'));
+            $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
+            Log::debug('[report] 数据上报，数据：', $data);
+
+            InternalAPIService::post('/item/result/report', $data);
+        }
         return $this->resObjectGet($result, 'item_test_result', $request->path());
     }
 
