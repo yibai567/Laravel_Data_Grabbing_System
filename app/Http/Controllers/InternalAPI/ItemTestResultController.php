@@ -145,7 +145,8 @@ class ItemTestResultController extends Controller
             $res['task_id'] = $itemTestResult->item_id;
 
             $data['is_test'] = 1;
-            $data['result'][] = array_except($res, array('images'));
+            $res['images'] = [];
+            $data['result'][] = $res;
             $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
             Log::debug('[report] 数据上报，数据：', $data);
 
