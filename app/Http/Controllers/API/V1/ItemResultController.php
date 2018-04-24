@@ -129,7 +129,7 @@ class ItemResultController extends Controller
                 if (empty($imageInfo)) {
                     // TODO 改runlog状态 result状态
                 }
-                Log::debug('[dispatchJob] $imageInfo["id"] ' , $imageInfo);
+                Log::debug('[dispatchJob] $imageInfo["id"] ' . $imageInfo["id"]);
                 $params['image_id'] = $imageInfo['id'];
                 $params['result_id'] = $item['associate_result_id'];
 
@@ -174,7 +174,6 @@ class ItemResultController extends Controller
         if (!empty($results)) {
             Log::debug('[dispatchJob] 结果二次处理 $results', $results);
             // 测试时执行
-                    // TODO 判断是截图 不需要走这些
             if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
                 foreach ($results as $result) {
                     if ($result['status'] == ItemTestResult::STATUS_SUCCESS && $result['counter'] == 0) {
@@ -184,10 +183,6 @@ class ItemResultController extends Controller
                         // 标记任务状态为测试成功
                         Log::debug('[dispatchJob] 请求 /item/status/test_success', ['id' => $itemRunLog['item_id']]);
                         InternalAPIService::post('/item/status/test_success', ['id' => $itemRunLog['item_id']]);
-
-                        // 上传结果
-                        Log::debug('[dispatchJob] 结果上报 /item/result/report');
-                        // InternalAPIService::post('/item/result/report', ['id' => $itemRunLog['item_id']]);
                     } else {
                         // 判断任务结果是否需要截图
                         $this->__captureImage($item, $result, $itemRunLog['type']);
