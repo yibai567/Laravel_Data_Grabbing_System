@@ -150,7 +150,7 @@ class ItemTestResultController extends Controller
                 $res = array_except($res, ['images', 'remove_images']);
             }
 
-            $data['result'][] = $res;
+            $data['result'] = [$res];
             $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
             Log::debug('[report] 数据上报，数据：', $data);
 
@@ -246,7 +246,7 @@ class ItemTestResultController extends Controller
                 if (!empty($result) && is_array($result)) {
                     $result = array_except($result, ['remove_images']);
                 }
-                $data['result'][] = $result;
+                $data['result'] = [$result];
                 $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
                 Log::debug('[report] 数据上报，数据：', $data);
                  InternalAPIService::post('/item/result/report', $data);
@@ -363,7 +363,7 @@ class ItemTestResultController extends Controller
                 if (!empty($result) && is_array($result)) {
                     $result = array_except($result, ['remove_images']);
                 }
-                $data['result'][] = $result;
+                $data['result'] = [$result];
                 $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
                 Log::debug('[report] 数据上报，数据：', $data);
 
