@@ -127,15 +127,39 @@ class ItemResultController extends Controller
 
                 $result = json_decode($itemResult->short_contents, true);
                 $result['task_id'] = $itemResult->item_id;
-                $result['screenshot'] = $itemResult->images;
+
+                if ($result['images']) {
+                    $images = [];
+                    $resultImages = json_decode($result['images'], true);
+                    foreach ($resultImages as $resultImage) {
+                        $images[] = [
+                            'url' => $resultImage['oss_url'],
+                            'width' => $resultImage['width'],
+                            'height' => $resultImage['height'],
+                        ];
+                    }
+
+                    $result['images'] = $images;
+                } else {
+                    $result['images'] = [];
+                }
+
                 if (empty($itemResult->images)) {
                     $result['screenshot'] = [];
+                } else {
+                    $screenshot = json_decode($itemResult->images, true);
+                    $result['screenshot'] = [
+                        'url' => $screenshot['oss_url'],
+                        'width' => $screenshot['width'],
+                        'height' => $screenshot['height'],
+                    ];
                 }
+
                 $data['is_test'] = 2;
                 $data['result'][] = $result;
                 $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
 
-                // InternalAPIService::post('/item/result/report', $data);
+                InternalAPIService::post('/item/result/report', $data);
             }
             $itemResult->save();
         } catch (\Exception $e) {
@@ -213,16 +237,38 @@ class ItemResultController extends Controller
                 $result = json_decode($itemResult->short_contents, true);
                 $result['task_id'] = $itemResult->item_id;
 
-                $result['screenshot'] = $itemResult->images;
+                if ($result['images']) {
+                    $images = [];
+                    $resultImages = json_decode($result['images'], true);
+                    foreach ($resultImages as $resultImage) {
+                        $images[] = [
+                            'url' => $resultImage['oss_url'],
+                            'width' => $resultImage['width'],
+                            'height' => $resultImage['height'],
+                        ];
+                    }
+
+                    $result['images'] = $images;
+                } else {
+                    $result['images'] = [];
+                }
+
                 if (empty($itemResult->images)) {
                     $result['screenshot'] = [];
+                } else {
+                    $screenshot = json_decode($itemResult->images, true);
+                    $result['screenshot'] = [
+                        'url' => $screenshot['oss_url'],
+                        'width' => $screenshot['width'],
+                        'height' => $screenshot['height'],
+                    ];
                 }
+
                 $data['is_test'] = 2;
                 $data['result'][] = $result;
                 $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
 
-                // TODO
-                // InternalAPIService::post('/item/result/report', $data);
+                InternalAPIService::post('/item/result/report', $data);
             }
             $itemResult->save();
         } catch (\Exception $e) {
