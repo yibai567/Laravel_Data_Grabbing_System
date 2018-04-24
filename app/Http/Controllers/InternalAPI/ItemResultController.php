@@ -212,6 +212,7 @@ class ItemResultController extends Controller
 
                 $result = json_decode($itemResult->short_contents, true);
                 $result['task_id'] = $itemResult->item_id;
+
                 $result['screenshot'] = $itemResult->images;
                 if (empty($itemResult->images)) {
                     $result['screenshot'] = [];

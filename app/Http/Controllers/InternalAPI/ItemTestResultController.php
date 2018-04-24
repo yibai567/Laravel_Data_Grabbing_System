@@ -196,6 +196,7 @@ class ItemTestResultController extends Controller
                 $result = json_decode($itemTestResult->short_contents, true);
                 $result['task_id'] = $itemTestResult->item_id;
 
+                $result['screenshot'] = $itemTestResult->images;
                 if (empty($itemTestResult->images)) {
                     $result['screenshot'] = [];
                 }
@@ -287,6 +288,7 @@ class ItemTestResultController extends Controller
                 $result = json_decode($itemTestResult->short_contents, true);
                 $result['task_id'] = $itemTestResult->item_id;
 
+                $result['screenshot'] = $itemTestResult->images;
                 if (empty($itemTestResult->images)) {
                     $result['screenshot'] = [];
                 }
