@@ -194,7 +194,24 @@ class ItemTestResultController extends Controller
                 InternalAPIService::post('/item/status/test_success', ['id' => $itemTestResult->item_id]);
 
                 $result = json_decode($itemTestResult->short_contents, true);
+                $result = $result[0];
                 $result['task_id'] = $itemTestResult->item_id;
+
+                if ($result['images']) {
+                    $images = [];
+                    $resultImages = json_decode($result['images'], true);
+                    foreach ($resultImages as $resultImage) {
+                        $images[] = [
+                            'url' => $resultImage['oss_url'],
+                            'width' => $resultImage['width'],
+                            'height' => $resultImage['height'],
+                        ];
+                    }
+
+                    $result['images'] = $images;
+                } else {
+                    $result['images'] = [];
+                }
 
                 if (empty($itemTestResult->images)) {
                     $result['screenshot'] = [];
@@ -210,7 +227,7 @@ class ItemTestResultController extends Controller
                 $data['is_test'] = 1;
                 $data['result'][] = $result;
                 $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
-
+                Log::debug('[report] 数据上报，数据：', $data);
                  InternalAPIService::post('/item/result/report', $data);
             }
 
@@ -291,7 +308,24 @@ class ItemTestResultController extends Controller
 
 
                 $result = json_decode($itemTestResult->short_contents, true);
+                $result = $result[0];
                 $result['task_id'] = $itemTestResult->item_id;
+
+                if ($result['images']) {
+                    $images = [];
+                    $resultImages = json_decode($result['images'], true);
+                    foreach ($resultImages as $resultImage) {
+                        $images[] = [
+                            'url' => $resultImage['oss_url'],
+                            'width' => $resultImage['width'],
+                            'height' => $resultImage['height'],
+                        ];
+                    }
+
+                    $result['images'] = $images;
+                } else {
+                    $result['images'] = [];
+                }
 
                 if (empty($itemTestResult->images)) {
                     $result['screenshot'] = [];
@@ -307,6 +341,7 @@ class ItemTestResultController extends Controller
                 $data['is_test'] = 1;
                 $data['result'][] = $result;
                 $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
+                Log::debug('[report] 数据上报，数据：', $data);
 
                 InternalAPIService::post('/item/result/report', $data);
             }

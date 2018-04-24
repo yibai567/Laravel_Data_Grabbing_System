@@ -128,6 +128,22 @@ class ItemResultController extends Controller
                 $result = json_decode($itemResult->short_contents, true);
                 $result['task_id'] = $itemResult->item_id;
 
+                if ($result['images']) {
+                    $images = [];
+                    $resultImages = json_decode($result['images'], true);
+                    foreach ($resultImages as $resultImage) {
+                        $images[] = [
+                            'url' => $resultImage['oss_url'],
+                            'width' => $resultImage['width'],
+                            'height' => $resultImage['height'],
+                        ];
+                    }
+
+                    $result['images'] = $images;
+                } else {
+                    $result['images'] = [];
+                }
+
                 if (empty($itemResult->images)) {
                     $result['screenshot'] = [];
                 } else {
@@ -220,6 +236,22 @@ class ItemResultController extends Controller
 
                 $result = json_decode($itemResult->short_contents, true);
                 $result['task_id'] = $itemResult->item_id;
+
+                if ($result['images']) {
+                    $images = [];
+                    $resultImages = json_decode($result['images'], true);
+                    foreach ($resultImages as $resultImage) {
+                        $images[] = [
+                            'url' => $resultImage['oss_url'],
+                            'width' => $resultImage['width'],
+                            'height' => $resultImage['height'],
+                        ];
+                    }
+
+                    $result['images'] = $images;
+                } else {
+                    $result['images'] = [];
+                }
 
                 if (empty($itemResult->images)) {
                     $result['screenshot'] = [];
