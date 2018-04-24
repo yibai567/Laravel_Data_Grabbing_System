@@ -157,7 +157,7 @@ class ItemResultController extends Controller
                 if (!empty($result) && is_array($result)) {
                     $result = array_except($result, ['remove_images']);
                 }
-                $data['is_test'] = 2;
+                $data['is_test'] = 0;
                 $data['result'] = [$result];
                 $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
 
@@ -266,7 +266,7 @@ class ItemResultController extends Controller
                     ];
                 }
 
-                $data['is_test'] = 2;
+                $data['is_test'] = 0;
                 if (!empty($result) && is_array($result)) {
                     $result = array_except($result, ['remove_images']);
                 }
@@ -353,7 +353,7 @@ class ItemResultController extends Controller
                         $res = json_decode($itemResult->short_contents, true);
                         $res['task_id'] = $itemResult->item_id;
 
-                        $data['is_test'] = 1;
+                        $data['is_test'] = 0;
                         if (!empty($res) && is_array($res)) {
                             $res = array_except($res, ['images', 'remove_images']);
                         }
