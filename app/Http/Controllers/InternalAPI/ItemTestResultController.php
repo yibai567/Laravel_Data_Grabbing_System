@@ -4,6 +4,7 @@ namespace App\Http\Controllers\InternalAPI;
 
 use App\Models\Image;
 use App\Models\Item;
+use App\Models\ItemRunLog;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Log;
@@ -144,7 +145,7 @@ class ItemTestResultController extends Controller
             $res = $res[0];
             $res['task_id'] = $itemTestResult->item_id;
 
-            $data['is_test'] = 1;
+            $data['is_test'] = ItemRunLog::TYPE_TEST;
 
             if (!empty($res) && is_array($res)) {
                 $res = array_except($res, ['images', 'remove_images']);
@@ -242,7 +243,7 @@ class ItemTestResultController extends Controller
                     ];
                 }
 
-                $data['is_test'] = 1;
+                $data['is_test'] = ItemRunLog::TYPE_TEST;
                 if (!empty($result) && is_array($result)) {
                     $result = array_except($result, ['remove_images']);
                 }
@@ -359,7 +360,7 @@ class ItemTestResultController extends Controller
                     ];
                 }
 
-                $data['is_test'] = 1;
+                $data['is_test'] = ItemRunLog::TYPE_TEST;
                 if (!empty($result) && is_array($result)) {
                     $result = array_except($result, ['remove_images']);
                 }
