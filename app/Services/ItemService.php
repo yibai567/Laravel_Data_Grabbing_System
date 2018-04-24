@@ -37,7 +37,6 @@ class ItemService extends Service
             "long_content_selector" => "nullable",
             "row_selector" => "nullable|string|max:100",
             "header" => "nullable",
-            "pre_detail_url" => "required|string",
         ];
     }
 
