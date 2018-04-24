@@ -157,9 +157,16 @@ class ItemResultController extends Controller
      */
     public function updateCapture(Request $request)
     {
-        Log::debug('[internal ItemTestResultController updateCapture] start' . json_encode($request->all()));
-        $imageId = $request->image_id;
-        $testResultId = intval($request->get('result_id'));
+        $params = $request->all();
+        Log::debug('[internal ItemTestResultController updateCapture] start', $params);
+
+        ValidatorService::check($params, [
+            'image_id' => 'required|integer',
+            'result_id' => 'integer|required',
+        ]);
+
+        $imageId = $params['image_id'];
+        $resultId = intval($params['result_id']);
 
         Log::debug('[internal ItemTestResultController] imageId=' . $imageId);
         if (empty($imageId)) {
@@ -169,14 +176,15 @@ class ItemResultController extends Controller
         $imageInfo = Image::find($imageId);
 
         if (empty($imageInfo)) {
-            return response(500, 'imageInfo 不存在');
+            Log::debug('[updateCapture] imageId=' . $imageId);
+            throw new ResourceException("imageInfo does not exist!");
         }
         $imageInfo = $imageInfo->toArray();
 
         // TODO image字段过滤
 
         //获取测试结果
-        $itemResult = ItemResult::find($testResultId);
+        $itemResult = ItemResult::find($resultId);
 
         try {
             if (empty($itemResult)) {

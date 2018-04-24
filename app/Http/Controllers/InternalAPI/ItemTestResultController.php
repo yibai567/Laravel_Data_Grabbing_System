@@ -231,10 +231,16 @@ class ItemTestResultController extends Controller
      */
     public function updateCapture(Request $request)
     {
-        Log::debug('[internal ItemTestResultController updateCapture] start' . json_encode($request->all()));
-        $imageId = $request->post('image_id');
+        $params = $request->all();
+        Log::debug('[internal ItemTestResultController updateCapture] start', $params);
 
-        $testResultId = intval($request->get('result_id'));
+        ValidatorService::check($params, [
+            'image_id' => 'required|integer',
+            'result_id' => 'integer|required',
+        ]);
+
+        $imageId = $params['image_id'];
+        $testResultId = intval($params['result_id']);
 
         Log::debug('[internal ItemTestResultController] imageId=' . $imageId);
         if (empty($imageId)) {
@@ -244,7 +250,8 @@ class ItemTestResultController extends Controller
         $imageInfo = Image::find($imageId);
 
         if (empty($imageInfo)) {
-            return response(500, 'imageInfo 不存在');
+            Log::debug('[updateCapture] imageId=' . $imageId);
+            throw new ResourceException("imageInfo does not exist!");
         }
         $imageInfo = $imageInfo->toArray();
 
@@ -257,10 +264,6 @@ class ItemTestResultController extends Controller
                 throw new ResourceException(" test result not exist");
             }
 
-//            Log::debug('[updateCapture] 图片上传');
-//            $imageService = new ImageService();
-//            $imageInfo = $imageService->uploadByFile($images);
-
             // 更新测试结果
             $itemTestResult->images = json_encode($imageInfo, JSON_UNESCAPED_UNICODE);
 
@@ -272,9 +275,6 @@ class ItemTestResultController extends Controller
                 // 标记当前任务为成功状态
                 Log::debug('[updateCapture] 请求 /item_run_log/status/success', ['id' => $itemTestResult->item_run_log_id]);
                 InternalAPIService::post('/item_run_log/status/success', ['id' => $itemTestResult->item_run_log_id]);
-                // 标记任务状态为成功
-                Log::debug('[updateCapture] 请求 /item/status/test_success', ['id' => $itemTestResult->item_id]);
-                InternalAPIService::post('/item/status/test_success', ['id' => $itemTestResult->item_id]);
 
                 $result = json_decode($itemTestResult->short_contents, true);
                 $result['task_id'] = $itemTestResult->item_id;
