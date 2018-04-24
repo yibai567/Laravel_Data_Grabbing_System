@@ -44,9 +44,9 @@ class PlatformReportController extends Controller
         }
         $reportParmas = sign($params);
 
-        Log::info('[itemResultReport] 请求 ' . config('url.new_platform_url') . ' $reportParmas : ', $reportParmas);
+        Log::info('[itemResultReport] 请求 ' . config('url.new_platform_url') . '/api/live/put_craw_data $reportParmas : ', $reportParmas);
 
-        $res = $httpService->post(config('url.new_platform_url'), $reportParmas, 'json');
+        $res = $httpService->post(config('url.new_platform_url') . '/api/live/put_craw_data', $reportParmas, 'json');
 
         Log::debug('[itemResultReport] $res = ' . $res);
         return $this->resObjectGet($res, 'item', $request->path());
