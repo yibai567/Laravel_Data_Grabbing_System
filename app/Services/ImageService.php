@@ -231,7 +231,7 @@ class ImageService extends Service
             return ["msg" => '上传图片失败，请重试', 'error' => -1];
         }
 
-        return ['data' => $image];
+        return $image->toArray();
     }
 
     /**
