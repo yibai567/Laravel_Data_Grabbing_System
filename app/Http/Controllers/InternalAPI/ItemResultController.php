@@ -128,7 +128,9 @@ class ItemResultController extends Controller
                 $result = json_decode($itemResult->short_contents, true);
                 $result['task_id'] = $itemResult->item_id;
                 $result['screenshot'] = $itemResult->images;
-
+                if (empty($itemResult->images)) {
+                    $result['screenshot'] = [];
+                }
                 $data['is_test'] = 2;
                 $data['result'][] = $result;
                 $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
@@ -211,7 +213,9 @@ class ItemResultController extends Controller
                 $result = json_decode($itemResult->short_contents, true);
                 $result['task_id'] = $itemResult->item_id;
                 $result['screenshot'] = $itemResult->images;
-
+                if (empty($itemResult->images)) {
+                    $result['screenshot'] = [];
+                }
                 $data['is_test'] = 2;
                 $data['result'][] = $result;
                 $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
