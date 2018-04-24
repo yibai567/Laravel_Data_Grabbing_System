@@ -302,6 +302,34 @@ class ItemResultController extends Controller
     }
 
     /**
+     * updateStatusFail
+     * 更改结果状态为失败
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateStatusFail(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'id' => 'integer|required',
+        ]);
+
+        $itemResult = ItemResult::find($params['id']);
+
+        if (empty($itemResult)) {
+            Log::debug('[updateStatusFail] itemResult not exist', $params);
+            throw new ResourceException(" item not exist");
+        }
+
+        $itemResult->status = ItemResult::STATUS_FAIL;
+        $itemResult->save();
+
+        return $this->resObjectGet($itemResult->toArray(), 'item', $request->path());
+    }
+
+    /**
      * __formatData
      * 格式化数据
      * @param $params
