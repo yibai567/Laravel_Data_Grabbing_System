@@ -132,7 +132,7 @@ class ItemResultController extends Controller
                 $data['result'][] = $result;
                 $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
 
-                InternalAPIService::post('/item/result/report', $data);
+                // InternalAPIService::post('/item/result/report', $data);
             }
             $itemResult->save();
         } catch (\Exception $e) {

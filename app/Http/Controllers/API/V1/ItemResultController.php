@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
 use App\Services\InternalAPIService;
+use App\Services\ImageService;
 use App\Models\ItemRunLog;
 use App\Models\Item;
 use App\Models\ItemTestResult;
@@ -79,11 +80,10 @@ class ItemResultController extends Controller
             'end_at'        => 'date|nullable',
             'short_contents'   => 'nullable',
             'long_contents'    => 'nullable',
-            'images'          => 'nullable',
             'error_message'   => 'string|nullable'
         ]);
-
-        // Log::debug('[dispatchJob] 接收参数 $params = ', $params);
+        $images = $request->file('images');
+        Log::debug('[dispatchJob] 接收参数 $params = ', $params);
         // 获取 item run Log
         Log::debug('[dispatchJob] 请求 /item_run_log  | 获取 Item_run_log 信息,', ['id' => $params['item_run_log_id']]);
         $itemRunLog = InternalAPIService::get('/item_run_log', ['id' => $params['item_run_log_id']]);
@@ -112,16 +112,26 @@ class ItemResultController extends Controller
             case Item::DATA_TYPE_JSON:
                 $path = '/item/result/json';
                 if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
-                    $path = '/item/test/result/json';
+                    $path = '/item/test_result/json';
                 }
 
                 break;
 
             case Item::DATA_TYPE_CAPTURE:
+
+                 // 图片上传
+                $imageService = new ImageService();
+                $imageInfo = $imageService->uploadByFile($images);
                 $path = '/item/result/capture';
                 if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
-                    $path = '/item/test/result/capture';
+                    $path = '/item/test_result/capture';
                 }
+                if (empty($imageInfo)) {
+                    // TODO 改runlog状态 result状态
+                }
+                Log::debug('[dispatchJob] $imageInfo["id"] ' , $imageInfo);
+                $params['image_id'] = $imageInfo['id'];
+                $params['result_id'] = $item['associate_result_id'];
 
                 break;
             default:
@@ -143,10 +153,15 @@ class ItemResultController extends Controller
 
             throw new \Dingo\Api\Exception\ResourceException("invalid result");
         }
+        if ($item['data_type'] == Item::DATA_TYPE_CAPTURE) {
+            Log::debug('[dispatchJob] 截图任务处理完成');
+            return $this->resObjectGet([], 'item_result', $request->path());
+        }
         // 任务结果的二次处理
-        Log::debug('[dispatchJob] 结果二次处理 $results', $results);
         if (!empty($results)) {
+            Log::debug('[dispatchJob] 结果二次处理 $results', $results);
             // 测试时执行
+                    // TODO 判断是截图 不需要走这些
             if ($itemRunLog['type'] == ItemRunLog::TYPE_TEST) {
                 foreach ($results as $result) {
                     if ($result['status'] == ItemTestResult::STATUS_SUCCESS && $result['counter'] == 0) {
@@ -205,14 +220,17 @@ class ItemResultController extends Controller
     private function __captureImage($item, $result, $runLogType)
     {
         if ($item['data_type'] == Item::DATA_TYPE_CAPTURE) {
+            Log::debug('[dispatchJob __captureImage] $item["data_type"]' . $item['data_type']);
             return true;
         }
 
         if ($item['is_capture_image'] != Item::IS_CAPTURE_IMAGE_TRUE) {
+            Log::debug('[dispatchJob __captureImage] $item["is_capture_image"]' . $item['is_capture_image']);
             return true;
         }
 
         if (!isset($result['detail_url']) || empty($result['detail_url'])) {
+            Log::debug('[dispatchJob __captureImage] $result["detail_url"]' . $result['detail_url']);
             return true;
         }
 
