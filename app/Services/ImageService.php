@@ -207,15 +207,19 @@ class ImageService extends Service
             $ossPath = 'http://'.$host;
 
             $oss = AliyunOSS::boot($ossPath, $accessKey, $secret);
-            $objectKey = config('aliyun.oss.base_key').$image->id;
+            $objectKey = config('aliyun.oss.base_key') . $image->id . '.' . $image->ext;
 
             if (!empty($isPrivate)) { // 加密上传
                 $oss->setBucket(config('aliyun.oss.bucket_private'));
             } else { // 普通上传
                 $oss->setBucket(config('aliyun.oss.bucket'));
             }
-            $oss->uploadFile($objectKey, $path);
 
+            $domain = config('aliyun.oss.domain');
+            $scheme = config('aliyun.oss.scheme');
+
+            $oss->uploadFile($objectKey, $path);
+            $image->update(['oss_url' => $scheme . $domain . '/' . $objectKey]);
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
