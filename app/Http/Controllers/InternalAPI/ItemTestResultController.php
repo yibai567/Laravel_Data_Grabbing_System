@@ -443,7 +443,7 @@ class ItemTestResultController extends Controller
             if (!empty($shortContents)) {
                 foreach ($shortContents as $key => $val) {
                     $val = json_decode($val, true);
-                    $val['url'] = $this->__formatUrl($val['url'], $item->pre_detail_url);
+                    $val['url'] = $this->__formatURL($val['url'], $item->pre_detail_url);
                     $shortContents[$key] = $val;
                 }
                 $data['short_contents'] = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
