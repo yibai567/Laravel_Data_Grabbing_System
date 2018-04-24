@@ -462,8 +462,8 @@ class ItemTestResultController extends Controller
      */
     private function __formatURL($url, $preDetailUrl)
     {
-        if (empty($preDetailUrl) || $url == 'undefined' || $url == 'javascript:;') {
-            return false;
+        if (empty($preDetailUrl)) {
+            return $url;
         }
 
         $httpPre = substr($url, 0, 4);
