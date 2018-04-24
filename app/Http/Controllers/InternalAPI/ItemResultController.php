@@ -154,7 +154,9 @@ class ItemResultController extends Controller
                         'height' => $screenshot['height'],
                     ];
                 }
-
+                if (!empty($result) && is_array($result)) {
+                    $result = array_except($result, ['remove_images']);
+                }
                 $data['is_test'] = 2;
                 $data['result'][] = $result;
                 $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
@@ -265,6 +267,9 @@ class ItemResultController extends Controller
                 }
 
                 $data['is_test'] = 2;
+                if (!empty($result) && is_array($result)) {
+                    $result = array_except($result, ['remove_images']);
+                }
                 $data['result'][] = $result;
                 $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
 
@@ -349,7 +354,9 @@ class ItemResultController extends Controller
                         $res['task_id'] = $itemResult->item_id;
 
                         $data['is_test'] = 1;
-                        $res['images'] = [];
+                        if (!empty($res) && is_array($res)) {
+                            $res = array_except($res, ['images', 'remove_images']);
+                        }
                         $data['result'][] = $res;
                         $data['result'] = json_encode($data['result'], JSON_UNESCAPED_UNICODE);
                         Log::debug('[report] 数据上报，数据：', $data);
