@@ -36,7 +36,6 @@ class TaskAlarmSend implements ShouldQueue
         }
 
         $alarmInfo = json_decode($this->alarm_parmas, true);
-
         //企业微信号发送
         if (!empty($alarmInfo['receive_wework'])) {
 
@@ -45,7 +44,7 @@ class TaskAlarmSend implements ShouldQueue
             foreach ($receiveWework as $value) {
                 try {
                     $weWork = new WeWorkService();
-                    $weWork->pushMessage('text', $alarmInfo['content'], $value);
+                    $weWork->pushMessage('text', "尊敬的管理员：" . $value . "\n" . $alarmInfo['content'], $value);
                 } catch (\Exception $e) {
                     infoLog('企业微信发送通知异常', $e);
                     return false;
