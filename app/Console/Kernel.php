@@ -30,8 +30,10 @@ class Kernel extends ConsoleKernel
             $crawlTaskAutomate
         )->everyMinute();
 
-        $schedule->command('task:crawl:alarm')->everyMinute();
-
+        $itemCrawlAutomate = 1; // 互斥锁存在时间，单位分钟
+        $schedule->command('item:crawl:alarm')->runInBackground()->withoutOverlapping(
+            $itemCrawlAutomate
+        )->everyMinute();
     }
 
     /**
