@@ -368,4 +368,38 @@ class ItemController extends Controller
         return $queueInfo;
 
     }
+
+    /**
+     * delete
+     * 任务删除
+     *
+     * @param id (任务ID)
+     * @return array
+     */
+    public function delete(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'id' => 'integer|required',
+        ]);
+
+        $item = Item::find($params['id']);
+
+        if (empty($item)) {
+            Log::debug('[delete] item not exist', $params);
+            throw new \Dingo\Api\Exception\ResourceException(" item not exist");
+        }
+
+        if ($item['status'] == Item::STATUS_START) {
+            Log::debug('[delete] start item not allowed delete status=' . $item['status']);
+            throw new \Dingo\Api\Exception\ResourceException(" start item not allowed delete");
+        }
+
+        $item->delete();
+
+        $res = $item->toArray();
+        return $this->resObjectGet($res['id'], 'item', $request->path());
+    }
+
 }
