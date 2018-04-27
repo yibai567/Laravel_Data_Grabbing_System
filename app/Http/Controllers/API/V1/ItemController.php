@@ -163,4 +163,24 @@ class ItemController extends Controller
         $result = InternalAPIService::post('/item/test', $params);
         return $this->resObjectGet($result, 'item', $request->path());
     }
+
+    /**
+     * delete
+     * 任务删除
+     *
+     * @param id (任务ID)
+     * @return array
+     */
+    public function delete(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'id' => 'integer|required',
+        ]);
+
+        $result = InternalAPIService::post('/item/delete', $params);
+
+        return $this->resObjectGet($result, 'item', $request->path());
+    }
 }
