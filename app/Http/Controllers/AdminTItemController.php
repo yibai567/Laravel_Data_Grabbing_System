@@ -985,13 +985,13 @@ class AdminTItemController extends \crocodicstudio\crudbooster\controllers\CBCon
         }
 
         if (!empty($row->short_content_selector)) {
-            $row->short_content_selector = json_encode(json_decode($row->short_content_selector), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+            $row->short_content_selector = "<pre>" . json_encode(json_decode($row->short_content_selector), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
         }
         if (!empty($row->long_content_selector)) {
-            $row->long_content_selector = json_encode(json_decode($row->long_content_selector), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+            $row->long_content_selector = "<pre>" . json_encode(json_decode($row->long_content_selector), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
         }
         if (!empty($row->header)) {
-            $row->header = json_encode(json_decode($row->header), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+            $row->header = "<pre>" . json_encode(json_decode($row->header), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
         }
         //dd($row);
 

@@ -374,9 +374,11 @@
             }
 
             if (!empty($row->short_contents)) {
-                $row->short_contents = json_encode(json_decode($row->short_contents), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+                $row->short_contents = "<pre>" . json_encode(json_decode($row->short_contents), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
             }
-
+            if (!empty($row->images)) {
+                $row->images = "<pre>" . json_encode(json_decode($row->images), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
+            }
             if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
                     CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
                     CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
