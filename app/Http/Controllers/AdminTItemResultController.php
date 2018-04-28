@@ -168,21 +168,14 @@
 	        |
 	        */
 	        $this->index_statistic = array();
-            // $this->index_statistic[] = ['label'=>'测试结果总数','count'=>DB::table('t_item_test_result')->where(function($query){
-            //         $parentId = $_GET['parent_id'];
-            //         if (isset($_GET['parent_id'])) {
-            //             $query -> where('t_item_test_result', $parentId);
-            //         }
-            // })->count(),'icon'=>'fa fa-check','color'=>'success'];
-
-
-            $this->index_statistic[] = ['label'=>'成功','count'=>DB::table('t_item_result')->where('status', ItemResult::STATUS_SUCCESS)->where(function($query){
+            $this->index_statistic[] = ['label'=>'成功','count'=>ItemResult::where('status', ItemResult::STATUS_SUCCESS)->where(function($query){
                     $parentId = $_GET['parent_id'];
                     if (isset($_GET['parent_id'])) {
                         $query -> where('item_id', $parentId);
                     }
             })->count(),'icon'=>'fa fa-check','color'=>'success'];
-            $this->index_statistic[] = ['label'=>'失败','count'=>DB::table('t_item_result')->where('status', ItemResult::STATUS_FAIL)->where(function($query){
+
+            $this->index_statistic[] = ['label'=>'失败','count'=>ItemResult::where('status', ItemResult::STATUS_FAIL)->where('deleted_at', null)->where(function($query){
                     $parentId = $_GET['parent_id'];
                     if (isset($_GET['parent_id'])) {
                         $query -> where('item_id', $parentId);
@@ -377,7 +370,7 @@
 	    //By the way, you can still create your own method in here... :)
         public function getDetail($id) {
             $this->cbLoader();
-            $row = DB::table('t_item_result')->where('id', $id)->first();
+            $row = ItemResult::where('id', $id)->first();
             if ( $row->status == ItemResult::STATUS_INIT) {
                 $row->status = '初始化';
             } else if( $row->status == ItemResult::STATUS_SUCCESS) {
