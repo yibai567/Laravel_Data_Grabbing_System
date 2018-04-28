@@ -35,6 +35,15 @@
 			$this->col = [];
 			$this->col[] = ["label"=>"Id","name"=>"id"];
 			$this->col[] = ["label"=>"任务ID","name"=>"item_id"];
+            $this->col[] = ["label"=>"图片","name"=>"images","callback"=>function ($row) {
+                if (!empty($row->images)) {
+                    $ossUrl = json_decode($row->images);
+                    return '<a data-lightbox="roadtrip" rel="group_{t_image}" title="图片: " href="'.$ossUrl->oss_url.'"><img width="40px" height="40px" src="'.$ossUrl->oss_url.'"></a>';
+                } else {
+                    return "";
+                }
+            }];
+
 			$this->col[] = ["label"=>"开始时间","name"=>"start_at"];
 			$this->col[] = ["label"=>"结束时间","name"=>"end_at"];
             $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
@@ -156,6 +165,9 @@
 	        |
 	        */
 	        $this->index_statistic = array();
+
+            $this->index_statistic[] = ['label'=>'成功','count'=>DB::table('t_item_test_result')->where('status', ItemTestResult::STATUS_SUCCESS)->count(),'icon'=>'fa fa-check','color'=>'success'];
+            $this->index_statistic[] = ['label'=>'失败','count'=>DB::table('t_item_test_result')->where('status', ItemTestResult::STATUS_FAIL)->count(),'icon'=>'ion-close-circled','color'=>'red'];
 
 
 
@@ -362,9 +374,11 @@
             }
 
             if (!empty($row->short_contents)) {
-                $row->short_contents = json_encode(json_decode($row->short_contents), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+                $row->short_contents = "<pre style='width:1000px;'>" . json_encode(json_decode($row->short_contents), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
             }
-
+            if (!empty($row->images)) {
+                $row->images = "<pre style='width:1000px;'>" . json_encode(json_decode($row->images), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
+            }
             if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
                     CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
                     CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));

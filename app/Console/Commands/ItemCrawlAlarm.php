@@ -91,35 +91,35 @@ class ItemCrawlAlarm extends Command
 
     private function __messageDispatch($timeDifference, $alarmResult)
     {
-        Log::debug('[item:crawl:alarm] $timeDifference = ' . $alarmResult['expression'] . ', $alarmResult', $alarmResult);
+        Log::debug('[item:crawl:alarm] $alarmResult: ', $alarmResult);
         switch ($alarmResult['expression']) {
             case '>':
-                Log::debug('[item:crawl:alarm] 表达式 $alarmResult["expression"] = ' . $alarmResult['expression']);
+                Log::debug('[item:crawl:alarm] 表达式 ' . $timeDifference . $alarmResult['expression'] . $alarmResult['expression_value']);
                 if ($timeDifference > $alarmResult['expression_value']) {
                     $this->__saveAlarmMessage($alarmResult);
                 }
                 break;
             case '<':
-                Log::debug('[item:crawl:alarm] 表达式 $alarmResult["expression"] = ' . $alarmResult['expression']);
+                Log::debug('[item:crawl:alarm] 表达式 ' . $timeDifference . $alarmResult['expression'] . $alarmResult['expression_value']);
                 if ($timeDifference < $alarmResult['expression_value']) {
                     $this->__saveAlarmMessage($alarmResult);
                 }
                 break;
             case '=':
-                Log::debug('[item:crawl:alarm] 表达式 $alarmResult["expression"] = ' . $alarmResult['expression']);
+                Log::debug('[item:crawl:alarm] 表达式 ' . $timeDifference . $alarmResult['expression'] . $alarmResult['expression_value']);
                 if ($timeDifference = $alarmResult['expression_value']) {
                     $this->__saveAlarmMessage($alarmResult);
                 }
                 break;
             case '>=':
-                Log::debug('[item:crawl:alarm] 表达式 $alarmResult["expression"] = ' . $alarmResult['expression']);
+                Log::debug('[item:crawl:alarm] 表达式 ' . $timeDifference . $alarmResult['expression'] . $alarmResult['expression_value']);
                 if ($timeDifference >= $alarmResult['expression_value']) {
                     $this->__saveAlarmMessage($alarmResult);
                 }
                 break;
 
             case '<=':
-                Log::debug('[item:crawl:alarm] 表达式 $alarmResult["expression"] = ' . $alarmResult['expression']);
+                Log::debug('[item:crawl:alarm] 表达式 ' . $timeDifference . $alarmResult['expression'] . $alarmResult['expression_value']);
                 if ($timeDifference <= $alarmResult['expression_value']) {
                     $this->__saveAlarmMessage($alarmResult);
                 }
