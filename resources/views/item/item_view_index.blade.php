@@ -120,6 +120,7 @@
         <th>最后执行时间</th>
         <th>状态</th>
         <th>修改时间</th>
+        <th>操作</th>
        </tr>
   </thead>
   <tbody>
