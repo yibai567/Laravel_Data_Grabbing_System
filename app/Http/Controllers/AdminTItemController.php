@@ -985,13 +985,13 @@ class AdminTItemController extends \crocodicstudio\crudbooster\controllers\CBCon
         }
 
         if (!empty($row->short_content_selector)) {
-            $row->short_content_selector = "<pre>" . json_encode(json_decode($row->short_content_selector), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
+            $row->short_content_selector = "<pre style='width:1000px;'>" . json_encode(json_decode($row->short_content_selector), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
         }
         if (!empty($row->long_content_selector)) {
-            $row->long_content_selector = "<pre>" . json_encode(json_decode($row->long_content_selector), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
+            $row->long_content_selector = "<pre style='width:1000px;'>" . json_encode(json_decode($row->long_content_selector), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
         }
         if (!empty($row->header)) {
-            $row->header = "<pre>" . json_encode(json_decode($row->header), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
+            $row->header = "<pre style='width:1000px;'>" . json_encode(json_decode($row->header), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
         }
         //dd($row);
 

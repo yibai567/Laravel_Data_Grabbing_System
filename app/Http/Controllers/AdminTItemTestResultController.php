@@ -374,10 +374,10 @@
             }
 
             if (!empty($row->short_contents)) {
-                $row->short_contents = "<pre>" . json_encode(json_decode($row->short_contents), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
+                $row->short_contents = "<pre style='width:1000px;'>" . json_encode(json_decode($row->short_contents), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
             }
             if (!empty($row->images)) {
-                $row->images = "<pre>" . json_encode(json_decode($row->images), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
+                $row->images = "<pre style='width:1000px;'>" . json_encode(json_decode($row->images), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "</pre>";
             }
             if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
                     CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
