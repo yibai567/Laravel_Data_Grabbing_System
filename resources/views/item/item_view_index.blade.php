@@ -106,7 +106,7 @@
         <br style="clear:both"/>
 
       </div>
-        <table class='table table-striped table-bordered'>
+        <table id='table_dashboard' class='table table-striped table-bordered'>
   <thead>
       <tr>
         <th>ID</th>
@@ -212,7 +212,7 @@
         <!-- <button class="btn btn-xs btn-warning" data-toggle="modal" data-target="#myModal">测试结果</button> -->
         <!-- 模态框（Modal） -->
         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog" style="width: 70%">
                 <div class="modal-content">
                     <div class="modal-body" id='modal-body'><div>
                     <div class="modal-footer">
