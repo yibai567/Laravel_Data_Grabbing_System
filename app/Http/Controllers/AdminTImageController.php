@@ -31,7 +31,7 @@
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
 			$this->col[] = ["label"=>"Id","name"=>"id"];
-			$this->col[] = ["label"=>"名称","name"=>"name"];
+            $this->col[] = array("label"=>"图片","name"=>"oss_url","image"=>1);
 			$this->col[] = ["label"=>"扩展","name"=>"ext"];
 			$this->col[] = ["label"=>"MIME类型","name"=>"mime_type"];
 			$this->col[] = ["label"=>"图片大小","name"=>"size"];

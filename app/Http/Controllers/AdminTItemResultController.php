@@ -34,9 +34,16 @@
 			$this->col = [];
 			$this->col[] = ["label"=>"Id","name"=>"id"];
 			$this->col[] = ["label"=>"任务ID","name"=>"item_id"];
+            $this->col[] = ["label"=>"图片","name"=>"images","callback"=>function ($row) {
+                if (!empty($row->images)) {
+                    $ossUrl = json_decode($row->images);
+                    return '<a data-lightbox="roadtrip" rel="group_{t_image}" title="图片: " href="'.$ossUrl->oss_url.'"><img width="40px" height="40px" src="'.$ossUrl->oss_url.'"></a>';
+                } else {
+                    return "";
+                }
+            }];
 			$this->col[] = ["label"=>"开始时间","name"=>"start_at"];
 			$this->col[] = ["label"=>"结束时间","name"=>"end_at"];
-			$this->col[] = ["label"=>"状态","name"=>"status"];
             $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
                 if ( $row->status == ItemResult::STATUS_INIT) {
                     return '初始化';
@@ -161,7 +168,26 @@
 	        |
 	        */
 	        $this->index_statistic = array();
+            // $this->index_statistic[] = ['label'=>'测试结果总数','count'=>DB::table('t_item_test_result')->where(function($query){
+            //         $parentId = $_GET['parent_id'];
+            //         if (isset($_GET['parent_id'])) {
+            //             $query -> where('t_item_test_result', $parentId);
+            //         }
+            // })->count(),'icon'=>'fa fa-check','color'=>'success'];
 
+
+            $this->index_statistic[] = ['label'=>'成功','count'=>DB::table('t_item_result')->where('status', ItemResult::STATUS_SUCCESS)->where(function($query){
+                    $parentId = $_GET['parent_id'];
+                    if (isset($_GET['parent_id'])) {
+                        $query -> where('item_id', $parentId);
+                    }
+            })->count(),'icon'=>'fa fa-check','color'=>'success'];
+            $this->index_statistic[] = ['label'=>'失败','count'=>DB::table('t_item_result')->where('status', ItemResult::STATUS_FAIL)->where(function($query){
+                    $parentId = $_GET['parent_id'];
+                    if (isset($_GET['parent_id'])) {
+                        $query -> where('item_id', $parentId);
+                    }
+            })->count(),'icon'=>'ion-close-circled','color'=>'red'];
 
 
 	        /*

@@ -26,7 +26,7 @@
             $this->button_add = false;
             $this->button_edit = false;
             $this->button_delete = false;
-            $this->button_detail = true;
+            $this->button_detail = false;
             $this->button_show = true;
             $this->button_filter = true;
             $this->button_import = false;
@@ -36,75 +36,12 @@
 
             # START COLUMNS DO NOT REMOVE THIS LINE
             $this->col = [];
-            $this->col[] = ["label"=>"ID","name"=>"id"];
-            $this->col[] = ["label"=>"任务名称","name"=>"name","width"=>'200'];
+            $this->col[] = ["label"=>"ID","name"=>"id",'width'=>'300'];
+            $this->col[] = ["label"=>"任务名称","name"=>"name","width"=>'500'];
             $this->col[] = ["label"=>"资源地址","name"=>"resource_url",'width'=>'200',"callback"=>function ($row) {
                 return '<a href="' . $row->resource_url . '" target="_brank" style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->resource_url .'</a>';
             }];
-            $this->col[] = ["label"=>"数据类型","name"=>"data_type","callback"=>function ($row) {
-                if ( $row->data_type == Item::DATA_TYPE_HTML) {
-                    return 'html';
-                } else if( $row->data_type == Item::DATA_TYPE_JSON) {
-                    return 'json';
-                } else {
-                    return '截图';
-                }
-            }];
 
-            $this->col[] = ["label"=>"内容类型","name"=>"content_type","callback"=>function ($row) {
-                if ( $row->content_type == Item::CONTENT_TYPE_SHORT) {
-                    return '短内容';
-                } else {
-                    return '长内容';
-                }
-            }];
-
-            $this->col[] = ["label"=>"执行频次","name"=>"cron_type","callback"=>function ($row) {
-                if ( $row->cron_type == Item::CRON_TYPE_KEEP) {
-                    return '持续执行';
-                } else if( $row->cron_type == Item::CRON_TYPE_ONLY_ONE) {
-                    return '执行一次';
-                } else if( $row->cron_type == Item::CRON_TYPE_EVERY_MINUTE) {
-                    return '每分钟执行';
-                } else if ($row->cron_type == Item::CRON_TYPE_EVERY_FIVE_MINIT) {
-                    return '每五分钟执行';
-                } else if ($row->cron_type == Item::CRON_TYPE_EVERY_FIFTHEEN_MINIT) {
-                    return '每十五分钟执行';
-                }
-            }];
-            $this->col[] = ["label"=>"是否翻墙","name"=>"is_proxy","callback"=>function ($row) {
-                if ( $row->is_proxy == Item::IS_PROXY_YES) {
-                    return '是';
-                } else {
-                    return '否';
-                }
-            }];
-
-            $this->col[] = ["label"=>"是否截图","name"=>"is_capture_image","callback"=>function ($row) {
-                if ( $row->is_capture_image == Item::IS_CAPTURE_IMAGE_TRUE) {
-                    return '截图';
-                } else {
-                    return '不截图';
-                }
-            }];
-
-            $this->col[] = ["label"=>"最后执行时间","name"=>"last_job_at"];
-            $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
-                if ( $row->status == Item::STATUS_INIT) {
-                    return '未启动';
-                } else if( $row->status == Item::STATUS_TESTING) {
-                    return '测试中';
-                } else if( $row->status == Item::STATUS_TEST_SUCCESS) {
-                    return '测试成功';
-                } else if( $row->status == Item::STATUS_TEST_FAIL) {
-                    return '测试失败';
-                } else if( $row->status == Item::STATUS_START) {
-                    return '运行中';
-                } else if( $row->status == Item::STATUS_STOP) {
-                    return '已停止';
-                }
-            }];
-            $this->col[] = ["label"=>"修改时间","name"=>"updated_at"];
             # END COLUMNS DO NOT REMOVE THIS LINE
 
             # START FORM DO NOT REMOVE THIS LINE
@@ -140,7 +77,7 @@
             |
             */
             $this->sub_module = array();
-            $this->sub_module[] = ['label'=>'任务结果', 'path'=>'t_item_result', 'foreign_key'=>'item_id', 'button_color'=>'success','button_icon'=>'fa fa-bars', 'parent_columns'=>'id', 'showIf'=>"[resource_type] != 0"];
+            $this->sub_module[] = ['label'=>'任务结果', 'path'=>'t_item_result', 'foreign_key'=>'id', 'button_color'=>'success','button_icon'=>'fa fa-bars', 'parent_columns'=>'associate_result_id', 'showIf'=>"[resource_type] != 0"];
 
 
             /*
