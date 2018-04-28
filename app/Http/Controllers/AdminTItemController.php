@@ -224,8 +224,8 @@ class AdminTItemController extends \crocodicstudio\crudbooster\controllers\CBCon
         */
         $this->index_statistic = array();
         $this->index_statistic[] = ['label'=>'任务总数','count'=>DB::table('t_item')->where('type',1)->where('deleted_at', null)->count(),'icon'=>'fa fa-check','color'=>'success'];
-        $this->index_statistic[] = ['label'=>'启动中','count'=>DB::table('t_item')->where('status', Item::STATUS_START)->count(),'icon'=>'fa fa-check','color'=>'success'];
-        $this->index_statistic[] = ['label'=>'测试失败','count'=>DB::table('t_item')->where('status', Item::STATUS_TEST_FAIL)->count(),'icon'=>'ion-close-circled','color'=>'red'];
+        $this->index_statistic[] = ['label'=>'启动中','count'=>DB::table('t_item')->where('status', Item::STATUS_START)->where('deleted_at', null)->count(),'icon'=>'fa fa-check','color'=>'success'];
+        $this->index_statistic[] = ['label'=>'测试失败','count'=>DB::table('t_item')->where('status', Item::STATUS_TEST_FAIL)->where('deleted_at', null)->count(),'icon'=>'ion-close-circled','color'=>'red'];
 
 
         /*
@@ -781,7 +781,63 @@ class AdminTItemController extends \crocodicstudio\crudbooster\controllers\CBCon
             $html_content[] = $number.'. ';
             $number++;
         }
+        if ($row->data_type == Item::DATA_TYPE_HTML) {
+            $row->data_type = 'html';
+        } else if ($row->data_type == Item::DATA_TYPE_JSON) {
+            $row->data_type = 'json';
+        } else {
+            $row->data_type = '截图';
+        }
 
+        if ($row->content_type == Item::CONTENT_TYPE_SHORT) {
+            $row->content_type = '短内容';
+        } else {
+            $row->content_type = '长内容';
+        }
+        if ($row->type == Item::TYPE_OUT) {
+            $row->type = '外部任务';
+        } else {
+            $row->type = '系统任务';
+        }
+
+        if ($row->is_capture_image == Item::IS_CAPTURE_IMAGE_TRUE) {
+            $row->is_capture_image = '需要截图';
+        } else {
+            $row->is_capture_image = '不需要截图';
+        }
+
+        if ( $row->cron_type == Item::CRON_TYPE_KEEP) {
+            $row->cron_type = '持续执行';
+        } else if( $row->cron_type == Item::CRON_TYPE_ONLY_ONE) {
+            $row->cron_type = '执行一次';
+        } else if( $row->cron_type == Item::CRON_TYPE_EVERY_MINUTE) {
+            $row->cron_type = '每分钟执行';
+        } else if ($row->cron_type == Item::CRON_TYPE_EVERY_FIVE_MINIT) {
+            $row->cron_type = '每五分钟执行';
+        } else if ($row->cron_type == Item::CRON_TYPE_EVERY_FIFTHEEN_MINIT) {
+            $row->cron_type = '每十五分钟执行';
+        }
+
+        if ( $row->status == Item::STATUS_INIT) {
+            $row->status_name = '初始化';
+        } else if( $row->status == Item::STATUS_TESTING) {
+            $row->status_name = '测试中';
+        } else if( $row->status == Item::STATUS_TEST_SUCCESS) {
+            $row->status_name = '测试成功';
+        } else if ($row->status == Item::STATUS_TEST_FAIL) {
+            $row->status_name = '测试失败';
+        } else if ($row->status == Item::STATUS_START) {
+            $row->status_name = '运行中';
+        } else if ($row->status == Item::STATUS_STOP) {
+            $row->status_name = '已停止';
+        }
+
+
+        if ($row->is_proxy == Item::IS_PROXY_YES) {
+            $row->is_proxy = '翻墙';
+        } else {
+            $row->is_proxy = '不翻墙';
+        }
         foreach($columns_table as $col) {
               if($col['visible']===FALSE) continue;
 
@@ -843,67 +899,9 @@ class AdminTItemController extends \crocodicstudio\crudbooster\controllers\CBCon
                         }
                     }
                 }
-            if ($row->data_type == Item::DATA_TYPE_HTML) {
-                $row->data_type = 'html';
-            } else if ($row->data_type == Item::DATA_TYPE_JSON) {
-                $row->data_type = 'json';
-            } else {
-                $row->data_type = '截图';
-            }
 
-            if ($row->content_type == Item::CONTENT_TYPE_SHORT) {
-                $row->content_type = '短内容';
-            } else {
-                $row->content_type = '长内容';
-            }
-
-            if ($row->type == Item::TYPE_OUT) {
-                $row->type = '外部任务';
-            } else {
-                $row->type = '系统任务';
-            }
-
-            if ($row->is_capture_image == Item::IS_CAPTURE_IMAGE_TRUE) {
-                $row->is_capture_image = '需要截图';
-            } else {
-                $row->is_capture_image = '不需要截图';
-            }
-
-            if ( $row->cron_type == Item::CRON_TYPE_KEEP) {
-                $row->cron_type = '持续执行';
-            } else if( $row->cron_type == Item::CRON_TYPE_ONLY_ONE) {
-                $row->cron_type = '执行一次';
-            } else if( $row->cron_type == Item::CRON_TYPE_EVERY_MINUTE) {
-                $row->cron_type = '每分钟执行';
-            } else if ($row->cron_type == Item::CRON_TYPE_EVERY_FIVE_MINIT) {
-                $row->cron_type = '每五分钟执行';
-            } else if ($row->cron_type == Item::CRON_TYPE_EVERY_FIFTHEEN_MINIT) {
-                $row->cron_type = '每十五分钟执行';
-            }
-
-            if ( $row->status == Item::STATUS_INIT) {
-                $row->status_name = '初始化';
-            } else if( $row->status == Item::STATUS_TESTING) {
-                $row->status_name = '测试中';
-            } else if( $row->status == Item::STATUS_TEST_SUCCESS) {
-                $row->status_name = '测试成功';
-            } else if ($row->status == Item::STATUS_TEST_FAIL) {
-                $row->status_name = '测试失败';
-            } else if ($row->status == Item::STATUS_START) {
-                $row->status_name = '运行中';
-            } else if ($row->status == Item::STATUS_STOP) {
-                $row->status_name = '已停止';
-            }
-
-
-            if ($row->is_proxy == Item::IS_PROXY_YES) {
-                $row->is_proxy = '翻墙';
-            } else {
-                $row->is_proxy = '不翻墙';
-            }
             $html_content[] = $value;
         } //end foreach columns_table
-
           if($this->button_table_action):
 
                 $button_action_style = $this->button_action_style;
@@ -932,7 +930,6 @@ class AdminTItemController extends \crocodicstudio\crudbooster\controllers\CBCon
                         'start' => Item::STATUS_START,
                         'stop' => Item::STATUS_STOP
                     ];
-
         $this->cbView("item/item_view_index", $data);
     }
 

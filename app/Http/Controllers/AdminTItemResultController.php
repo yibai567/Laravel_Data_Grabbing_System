@@ -168,21 +168,13 @@
 	        |
 	        */
 	        $this->index_statistic = array();
-            // $this->index_statistic[] = ['label'=>'测试结果总数','count'=>DB::table('t_item_test_result')->where(function($query){
-            //         $parentId = $_GET['parent_id'];
-            //         if (isset($_GET['parent_id'])) {
-            //             $query -> where('t_item_test_result', $parentId);
-            //         }
-            // })->count(),'icon'=>'fa fa-check','color'=>'success'];
-
-
-            $this->index_statistic[] = ['label'=>'成功','count'=>DB::table('t_item_result')->where('status', ItemResult::STATUS_SUCCESS)->where(function($query){
+            $this->index_statistic[] = ['label'=>'成功','count'=>DB::table('t_item_result')->where('status', ItemResult::STATUS_SUCCESS)->where('deleted_at', null)->where(function($query){
                     $parentId = $_GET['parent_id'];
                     if (isset($_GET['parent_id'])) {
                         $query -> where('item_id', $parentId);
                     }
             })->count(),'icon'=>'fa fa-check','color'=>'success'];
-            $this->index_statistic[] = ['label'=>'失败','count'=>DB::table('t_item_result')->where('status', ItemResult::STATUS_FAIL)->where(function($query){
+            $this->index_statistic[] = ['label'=>'失败','count'=>DB::table('t_item_result')->where('status', ItemResult::STATUS_FAIL)->where('deleted_at', null)->where(function($query){
                     $parentId = $_GET['parent_id'];
                     if (isset($_GET['parent_id'])) {
                         $query -> where('item_id', $parentId);

@@ -166,8 +166,8 @@
 	        */
 	        $this->index_statistic = array();
 
-            $this->index_statistic[] = ['label'=>'成功','count'=>DB::table('t_item_test_result')->where('status', ItemTestResult::STATUS_SUCCESS)->count(),'icon'=>'fa fa-check','color'=>'success'];
-            $this->index_statistic[] = ['label'=>'失败','count'=>DB::table('t_item_test_result')->where('status', ItemTestResult::STATUS_FAIL)->count(),'icon'=>'ion-close-circled','color'=>'red'];
+            $this->index_statistic[] = ['label'=>'成功','count'=>DB::table('t_item_test_result')->where('status', ItemTestResult::STATUS_SUCCESS)->where('deleted_at', null)->count(),'icon'=>'fa fa-check','color'=>'success'];
+            $this->index_statistic[] = ['label'=>'失败','count'=>DB::table('t_item_test_result')->where('status', ItemTestResult::STATUS_FAIL)->where('deleted_at', null)->count(),'icon'=>'ion-close-circled','color'=>'red'];
 
 
 
