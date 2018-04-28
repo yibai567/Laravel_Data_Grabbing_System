@@ -38,9 +38,10 @@
             $this->col = [];
             $this->col[] = ["label"=>"ID","name"=>"id",'width'=>'300'];
             $this->col[] = ["label"=>"任务名称","name"=>"name","width"=>'500'];
-            $this->col[] = ["label"=>"资源地址","name"=>"resource_url",'width'=>'200',"callback"=>function ($row) {
+            $this->col[] = ["label"=>"资源地址","name"=>"resource_url",'width'=>'300',"callback"=>function ($row) {
                 return '<a href="' . $row->resource_url . '" target="_brank" style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->resource_url .'</a>';
             }];
+            $this->col[] = ["label"=>"关联结果ID","name"=>"associate_result_id","width"=>'100'];
 
             # END COLUMNS DO NOT REMOVE THIS LINE
 
@@ -77,7 +78,7 @@
             |
             */
             $this->sub_module = array();
-            $this->sub_module[] = ['label'=>'任务结果', 'path'=>'t_item_result', 'foreign_key'=>'id', 'button_color'=>'success','button_icon'=>'fa fa-bars', 'parent_columns'=>'associate_result_id', 'showIf'=>"[resource_type] != 0"];
+            // $this->sub_module[] = ['label'=>'任务结果', 'path'=>'t_item_result/detail/[associate_result_id]', 'button_color'=>'success','button_icon'=>'fa fa-bars', 'showIf'=>"[resource_type] != 0"];
 
 
             /*
@@ -92,6 +93,7 @@
             |
             */
             $this->addaction = array();
+            $this->addaction[] = ['label'=>'任务结果', 'url'=>CRUDBooster::adminPath('t_item_result/detail/[associate_result_id]'), 'showIf'=>"[resource_type] != 0"];
             // $this->addaction[] = ['label'=>'测试', 'url'=>CRUDBooster::mainpath('test/[id]'),'color'=>'info', 'icon'=>'fa fa-play', 'showIf'=>'[status] == ' . Item::STATUS_TEST_SUCCESS . '|| [status] == ' . Item::STATUS_STOP . '|| [status] == ' . Item::STATUS_TEST_FAIL . '|| [status] == ' . Item::STATUS_START . '|| [status] == ' . Item::STATUS_INIT];
             // $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]'),'color'=>'success', 'icon'=>'fa fa-play', 'showIf'=>'[status] == ' . Item::STATUS_TEST_SUCCESS . '|| [status] == ' . Item::STATUS_STOP];
 
@@ -428,7 +430,7 @@
 
         public function getDetail($id) {
             $this->cbLoader();
-            $row = DB::table('t_item')->where('id', $id)->first();
+            $row = Item::where('id', $id)->first();
 
             if ($row->data_type == Item::DATA_TYPE_HTML) {
                 $row->data_type = 'html';

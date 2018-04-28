@@ -223,9 +223,9 @@ class AdminTItemController extends \crocodicstudio\crudbooster\controllers\CBCon
         |
         */
         $this->index_statistic = array();
-        $this->index_statistic[] = ['label'=>'任务总数','count'=>DB::table('t_item')->where('type',1)->where('deleted_at', null)->count(),'icon'=>'fa fa-check','color'=>'success'];
-        $this->index_statistic[] = ['label'=>'启动中','count'=>DB::table('t_item')->where('status', Item::STATUS_START)->where('deleted_at', null)->count(),'icon'=>'fa fa-check','color'=>'success'];
-        $this->index_statistic[] = ['label'=>'测试失败','count'=>DB::table('t_item')->where('status', Item::STATUS_TEST_FAIL)->where('deleted_at', null)->count(),'icon'=>'ion-close-circled','color'=>'red'];
+        $this->index_statistic[] = ['label'=>'任务总数','count'=>Item::where('type', 1)->count(),'icon'=>'fa fa-check','color'=>'success'];
+        $this->index_statistic[] = ['label'=>'启动中','count'=>Item::where('status', Item::STATUS_START)->count(),'icon'=>'fa fa-check','color'=>'success'];
+        $this->index_statistic[] = ['label'=>'测试失败','count'=>Item::where('status', Item::STATUS_TEST_FAIL)->count(),'icon'=>'ion-close-circled','color'=>'red'];
 
 
         /*
@@ -935,7 +935,7 @@ class AdminTItemController extends \crocodicstudio\crudbooster\controllers\CBCon
 
     public function getDetail($id) {
         $this->cbLoader();
-        $row = DB::table('t_item')->where('id', $id)->first();
+        $row = Item::where('id', $id)->first();
 
         if ($row->data_type == Item::DATA_TYPE_HTML) {
             $row->data_type = 'html';

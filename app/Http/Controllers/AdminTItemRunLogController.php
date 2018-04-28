@@ -351,7 +351,7 @@
 
         public function getDetail($id) {
             $this->cbLoader();
-            $row = DB::table('t_item_run_log')->where('id', $id)->first();
+            $row = ItemRunLog::where('id', $id)->first();
 
             if ( $row->status == ItemRunLog::STATUS_RUNNING) {
                 $row->status = '运行中';

@@ -366,7 +366,7 @@
 	    //By the way, you can still create your own method in here... :)
         public function getDetail($id) {
             $this->cbLoader();
-            $row = DB::table('t_queue_info')->where('id', $id)->first();
+            $row = QueueInfo::where('id', $id)->first();
 
             if ($row->is_proxy == Item::IS_PROXY_YES) {
                 $row->is_proxy = '翻墙';
