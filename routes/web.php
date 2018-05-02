@@ -14,3 +14,4 @@
 Route::get('/', function () {
     return response('', 404);
 });
+Route::get('/block_news', 'WWW\BlockNewsController@index');
