@@ -14,4 +14,4 @@
 Route::get('/', function () {
     return response('', 404);
 });
-Route::get('/block_news', 'WWW\BlockNewsController@index');
+Route::get('/block_news/{category?}', 'WWW\BlockNewsController@index')->name('block_news.category');

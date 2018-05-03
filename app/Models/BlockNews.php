@@ -9,6 +9,10 @@ class BlockNews extends Model
 {
     use SoftDeletes;
 
+    // 正常状态
+    const STATUS_NORMAL = 1;
+    // 已删除
+    const STATUS_DELETE = 2;
     /**
      * 表名
      */

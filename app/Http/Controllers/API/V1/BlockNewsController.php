@@ -9,19 +9,25 @@ class BlockNewsController extends Controller
 {
     /**
      * result
-     * 结果入库
+     * 存储结果
+     *
      * @param Request $request
+     * @return array
      */
-    public function create(Request $request)
+    public function result(Request $request)
     {
-        dd($request->all());
+        return $request->all();
     }
 
     /**
+     * results
+     * 批量存储结果
+     *
      * @param Request $request
+     * @return array
      */
     public function results(Request $request)
     {
-        dd($request->all());
+        return $request->all();
     }
 }

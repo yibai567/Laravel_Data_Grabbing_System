@@ -26,8 +26,8 @@
 
     <!-- Main jumbotron for a primary marketing message or call to action -->
       <div class="jumbotron">
-      <h1>Theme example</h1>
-      <p>This is a template showcasing the optional theme stylesheet included in Bootstrap. Use it as a starting point to create something more unique by building on or modifying it.</p>
+      <h1>区块链新闻<small>-竞品分析</small></h1>
+      <p>针对区块链新闻的竞评分析报告，汇集了当下热门平台信息，提供最准确、及时的区块链讯息。</p>
     </div>
 
       <ul class="nav nav-tabs">
