@@ -57,6 +57,10 @@ class BlockNewsController extends Controller
             }
 
             if (!empty($row)) {
+                if (!empty($value['read_count']) && $row->read_count != intval($value['read_count'])) {
+                    $row->read_count = intval($value['read_count']);
+                    $row->save();
+                }
                 continue;
             }
 
