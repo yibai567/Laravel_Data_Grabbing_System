@@ -11,8 +11,16 @@ class BlockNews extends Model
 
     // 正常状态
     const STATUS_NORMAL = 1;
-    // 已删除
-    const STATUS_DELETE = 2;
+
+    const CONTENT_TYPE_BANNER = 1; //Banner
+    // const CONTENT_TYPE_INDEX = 2; //头条/推荐
+    const CONTENT_TYPE_LIVE = 3; //快讯
+    const CONTENT_TYPES = array(
+                                BlockNews::CONTENT_TYPE_BANNER => '首页',
+                                // BlockNews::CONTENT_TYPE_INDEX => '头条/推荐',
+                                BlockNews::CONTENT_TYPE_LIVE => '快讯'
+                            );
+
     /**
      * 表名
      */
@@ -31,11 +39,5 @@ class BlockNews extends Model
         "deleted_at",
     ];
 
-    public $fillable = [
-        'content',
-        'title',
-        'last_updated_at',
-        'company',
-        'category',
-    ];
+
 }

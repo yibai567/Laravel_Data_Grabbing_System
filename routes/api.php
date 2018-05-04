@@ -45,7 +45,6 @@ $api->version(
 
         $api->get('/queue_info/job','QueueInfoController@getJob');
 
-        $api->post('/block_news/result', 'BlockNewsController@result');
-        $api->post('/block_news/results', 'BlockNewsController@results');
+        $api->post('/block_news/results', 'BlockNewsController@batchCreate');
     }
 );

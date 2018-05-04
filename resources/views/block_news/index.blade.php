@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>区块链新闻</title>
-
     <!-- Bootstrap -->
     <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
     <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -25,87 +24,71 @@
   <div class="container theme-showcase" role="main">
 
     <!-- Main jumbotron for a primary marketing message or call to action -->
-      <div class="jumbotron">
-      <h1>区块链新闻<small>-竞品分析</small></h1>
-      <p>针对区块链新闻的竞评分析报告，汇集了当下热门平台信息，提供最准确、及时的区块链讯息。</p>
+      <div class="jumbotron" style="height: 100px;">
+      <h4 style="margin-top: -30px;" align="center">行业最新内容</h4>
+      <p align="center"><font size="2">竞品分析，页面内容平均两分钟更新一次。数据字段描述："数量"(阅读数/点赞)如果是0，表示该内容没有数量展示;"时间"(网站内容展示时间/数据获取时间)</font></p>
     </div>
+    <ul class="nav nav-tabs">
+        @if (!empty($content_type))
+            @foreach($content_type as $key => $value)
+                <li role="presentation" @if ($key == $typeDefault) class="active" @endif><a href="http://{{$_SERVER['HTTP_HOST']}}/block_news/{{$key}}">{{$value}}</a></li>
+            @endforeach
+        @endif
 
-      <ul class="nav nav-tabs">
-        <li role="presentation" class="active"><a href="#">快讯</a></li>
-        <li role="presentation"><a href="#">栏目#2</a></li>
-        <li role="presentation"><a href="#">栏目#3</a></li>
       </ul>
-      <br />
-      <div class="news">
-        <div class="panel panel-default">
-          <div class="panel-heading">金十财经</div>
-          <div class="panel-body">
-            <ul class="list-group">
-              <li class="list-group-item"><span class="badge">2018-04-30 16:11:00</span>【股市收盘】香港恒生指数5月2日（周三）收盘下跌84.57点，跌幅：0.27%，报30723.88点。</li>
-              <li class="list-group-item"><span class="badge">2018-04-29 16:14:17</span>沙特资本市场管理局主席Mohammed El Kuwaiz：沙特已经准备好针对沙特阿美石油公司的监管框架。</li>
-              <li class="list-group-item"><span class="badge">2018-04-28 16:10:00</span>【一张好图】明日凌晨2:00美国FOMC政策声明强势来袭，市场即将迎来激烈战况?金十为您献上行情回溯，让您打有准备之仗！（以数据公布半小时内行情波动为例）</li>
-              <li class="list-group-item"><span class="badge">2018-04-27 16:09:30</span>市场研究机构Markit经济学家Williamson：欧元走强和价格上涨等其他问题抑制了需求，对贸易战和英国退欧的担忧加剧了不确定性，突显出前景的下行风险。</li>
-              <li class="list-group-item"><span class="badge">2018-04-26 16:09:20</span>市场研究机构Markit经济学家Williamson：鉴于当前增长步伐稳定，未来几个月的数据走向将为政策制定者评估经济是否健康提供重要参考。</li>
-            </ul>
-          </div>
-        </div>
-        <div class="panel panel-default">
-          <div class="panel-heading">公司名#1</div>
-          <div class="panel-body">
-            <ul class="list-group">
-              <li class="list-group-item"><span class="badge">2018-04-30</span>Cras justo odio</li>
-              <li class="list-group-item"><span class="badge">2018-04-29</span>Dapibus ac facilisis in</li>
-              <li class="list-group-item"><span class="badge">2018-04-28</span>Morbi leo risus</li>
-              <li class="list-group-item"><span class="badge">2018-04-27</span>Porta ac consectetur ac</li>
-              <li class="list-group-item"><span class="badge">2018-04-26</span>Vestibulum at eros</li>
-            </ul>
-          </div>
-        </div>
-        <div class="panel panel-default">
-          <div class="panel-heading">公司名#2</div>
-          <div class="panel-body">
-            <ul class="list-group">
-              <li class="list-group-item"><span class="badge">2018-04-30</span>Cras justo odio</li>
-              <li class="list-group-item"><span class="badge">2018-04-29</span>Dapibus ac facilisis in</li>
-              <li class="list-group-item"><span class="badge">2018-04-28</span>Morbi leo risus</li>
-              <li class="list-group-item"><span class="badge">2018-04-27</span>Porta ac consectetur ac</li>
-              <li class="list-group-item"><span class="badge">2018-04-26</span>Vestibulum at eros</li>
-            </ul>
-          </div>
-        </div>
-        <div class="panel panel-default">
-          <div class="panel-heading">公司名#3</div>
-          <div class="panel-body">
-            <ul class="list-group">
-              <li class="list-group-item"><span class="badge">2018-04-30</span>Cras justo odio</li>
-              <li class="list-group-item"><span class="badge">2018-04-29</span>Dapibus ac facilisis in</li>
-              <li class="list-group-item"><span class="badge">2018-04-28</span>Morbi leo risus</li>
-              <li class="list-group-item"><span class="badge">2018-04-27</span>Porta ac consectetur ac</li>
-              <li class="list-group-item"><span class="badge">2018-04-26</span>Vestibulum at eros</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+    @if (!empty($data))
+    @foreach($data as $key => $value)
+    <div class="panel panel-default">
+    <table class="table table-hover">
+    <!-- <span class="panel-heading" style="position: absolute;left: 0;top: 0;">{{$key}}</span> -->
+    <div class="panel-heading" style="text-align: center;font-size: 18px;">{{$key}}</div>
+    <thead>
+      <tr>
+         <th class="col-md-7">标题</th>
+         <th class="col-md-1"></th>
+         @if ($typeDefault!=3)
+            <th class="col-md-1">数量</th>
+         @endif
+         <th class="col-md-1">时间</th>
+      </tr>
+    </thead>
+    <tbody>
+    @foreach($value as $liestValue)
+      <tr>
+        <td class="col-md-7">
+            @if ($liestValue[content_type]==3)
+                    @if (empty($liestValue[detail_url]))
+                        <span>{{$liestValue[content]}}</span>
+                    @endif
+                    @if (!empty($liestValue[detail_url]))
+                        <a href="{{$liestValue['detail_url']}}" target="_blank" >{{$liestValue[content]}}</a>
+                    @endif
+            @else
+                <a href="{{$liestValue['detail_url']}}" target="_blank">{{$liestValue[title]}}</a>
+            @endif
+        </td>
+         <td class="col-md-1"></td>
+         @if ($liestValue[content_type]!=3)
+            <td class="col-md-1"><span class="badge">{{$liestValue[read_count]}}</span></td>
+         @endif
 
-      <nav aria-label="Page navigation">
-        <ul class="pagination pull-right">
-          <li>
-            <a href="#" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-          </li>
-          <li class="active"><a href="#">1</a></li>
-          <li><a href="#">2</a></li>
-          <li><a href="#">3</a></li>
-          <li><a href="#">4</a></li>
-          <li><a href="#">5</a></li>
-          <li>
-            <a href="#" aria-label="Next">
-              <span aria-hidden="true">&raquo;</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
+         <td class="col-md-1">
+             @if (empty($liestValue[show_time]))
+                <span class="badge">{{$liestValue[start_time]}}</span>
+             @endif
+             <span class="badge">{{$liestValue[show_time]}}</span>
+         </td>
+         <td class="col-md-1">
+            <span class="glyphicon glyphicon-info-sign" title="详细信息" data-container="body" data-toggle="popover" data-placement="right" data-content="任务抓取开始时间:<br>{{$liestValue[start_time]}} <br> 任务抓取结束时间:<br>{{$liestValue[end_time]}}<br>创建时间<br>{{$liestValue[created_time]}}" aria-hidden="true" data-html="true"></span>
+        </td>
+      </tr>
+    @endforeach
+    </tbody>
+    </table>
+  </div>
+    @endforeach
+    @endif
+
   </div> <!-- /container -->
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -114,3 +97,8 @@
     <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   </body>
 </html>
+<script>
+$(function () {
+    $("[data-toggle='popover']").popover();
+});
+</script>
