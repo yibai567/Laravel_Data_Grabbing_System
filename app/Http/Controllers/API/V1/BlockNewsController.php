@@ -19,7 +19,6 @@ class BlockNewsController extends Controller
     public function batchCreate(Request $request)
     {
         $params = $request->all();
-        Log::debug('[batchCreate] params = ', $params);
         ValidatorService::check($params, [
             'company' => 'required|string|max:500',
             'content_type' => 'required|integer|between:1,10',
@@ -33,12 +32,12 @@ class BlockNewsController extends Controller
         foreach ($params['result'] as $value) {
             if ($params['content_type'] == BlockNews::CONTENT_TYPE_LIVE) {
                 if (empty($value['content'])) {
-                    Log::debug('[batchCreate] $params["result"] value empty');
+                    Log::debug('[batchCreate] $value["content"] empty');
                     continue;
                 }
             } else {
                 if (empty($value['title'])) {
-                    Log::debug('[batchCreate] $params["result"] value empty');
+                    Log::debug('[batchCreate] $value["title"] value empty');
                     continue;
                 }
             }
