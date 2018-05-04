@@ -44,5 +44,7 @@ $api->version(
         $api->post('/item/results/dispatch', 'ItemResultController@dispatchJob');
 
         $api->get('/queue_info/job','QueueInfoController@getJob');
+
+        $api->post('/block_news/results', 'BlockNewsController@batchCreate');
     }
 );
