@@ -43,10 +43,12 @@ class BlockNewsController extends Controller
             }
 
             if (!empty($value['content'])) {
+                $value['content'] = trim($value['content']);
                 $value['md5_content'] = md5($value['content']);
             }
 
             if (!empty($value['title'])) {
+                $value['title'] = trim($value['title']);
                 $value['md5_title'] = md5($value['title']);
             }
 
@@ -56,9 +58,16 @@ class BlockNewsController extends Controller
                 $row = BlockNews::where('md5_title', $value['md5_title'])->first();
             }
 
+            $value['read_count'] = 0;
+            if (!empty($value['read_count'])) {
+                $value['read_count'] = intval($value['read_count']);
+            }
+
+
             if (!empty($row)) {
-                if (!empty($value['read_count']) && $row->read_count != intval($value['read_count'])) {
-                    $row->read_count = intval($value['read_count']);
+                if (!empty($value['read_count']) && $row->read_count != $value['read_count']) {
+                    $row->read_count = $value['read_count'];
+                    $row->updated_at = date('Y-m-d H:i:s');
                     $row->save();
                 }
                 continue;
@@ -70,6 +79,8 @@ class BlockNewsController extends Controller
             $value['end_time'] = $params['end_time'];
             $value['status'] = BlockNews::STATUS_NORMAL;
             $value['created_time'] = time();
+            $value['created_at'] = date('Y-m-d H:i:s');
+            $value['updated_at'] = date('Y-m-d H:i:s');
             $newData[] = $value;
         }
 

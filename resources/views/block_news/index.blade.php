@@ -74,12 +74,12 @@
 
          <td class="col-md-1">
              @if (empty($liestValue[show_time]))
-                <span class="badge">{{$liestValue[start_time]}}</span>
+                <span class="badge">{{$liestValue[created_at]}}</span>
              @endif
              <span class="badge">{{$liestValue[show_time]}}</span>
          </td>
          <td class="col-md-1">
-            <span class="glyphicon glyphicon-info-sign" title="详细信息" data-container="body" data-toggle="popover" data-placement="right" data-content="任务抓取开始时间:<br>{{$liestValue[start_time]}} <br> 任务抓取结束时间:<br>{{$liestValue[end_time]}}<br>创建时间<br>{{$liestValue[created_time]}}" aria-hidden="true" data-html="true"></span>
+            <span class="glyphicon glyphicon-info-sign" title="详细信息" data-container="body" data-toggle="popover" data-placement="right" data-content="创建时间:<br>{{$liestValue[created_at]}}<br>创建时间<br>{{$liestValue[updated_at]}}" aria-hidden="true" data-html="true"></span>
         </td>
       </tr>
     @endforeach
