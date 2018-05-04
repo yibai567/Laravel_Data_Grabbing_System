@@ -58,12 +58,6 @@ class BlockNewsController extends Controller
                 $row = BlockNews::where('md5_title', $value['md5_title'])->first();
             }
 
-            $value['read_count'] = 0;
-            if (!empty($value['read_count'])) {
-                $value['read_count'] = intval($value['read_count']);
-            }
-
-
             if (!empty($row)) {
                 if (!empty($value['read_count']) && $row->read_count != $value['read_count']) {
                     $row->read_count = $value['read_count'];

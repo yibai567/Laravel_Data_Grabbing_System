@@ -79,7 +79,7 @@
              <span class="badge">{{$liestValue[show_time]}}</span>
          </td>
          <td class="col-md-1">
-            <span class="glyphicon glyphicon-info-sign" title="详细信息" data-container="body" data-toggle="popover" data-placement="right" data-content="创建时间:<br>{{$liestValue[created_at]}}<br>创建时间<br>{{$liestValue[updated_at]}}" aria-hidden="true" data-html="true"></span>
+            <span class="glyphicon glyphicon-info-sign" title="详细信息" data-container="body" data-toggle="popover" data-placement="right" data-content=" 数据ID:<br>{{$liestValue[id]}}<br>创建时间:<br>{{$liestValue[created_at]}}<br>更新时间<br>{{$liestValue[updated_at]}}" aria-hidden="true" data-html="true"></span>
         </td>
       </tr>
     @endforeach

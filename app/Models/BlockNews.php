@@ -35,7 +35,6 @@ class BlockNews extends Model
      * 隐藏的字段
      */
     protected $hidden = [
-        "updated_at",
         "deleted_at",
     ];
 
