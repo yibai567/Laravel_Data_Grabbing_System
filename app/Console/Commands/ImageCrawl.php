@@ -45,9 +45,10 @@ class ImageCrawl extends Command
     public function handle()
     {
         Log::debug('[jinse::image:crawl] start');
-        echo '[jinse::image:crawl] start';
+        echo "[jinse::image:crawl] start \n";
         $i = 1;
         while ($i <= 100) {
+            echo '$i = ' . $i . "\n";
             try {
                 $data = Redis::connection('queue')->rpop('crawl_image_queue');
                 $imageService = new ImageService();
@@ -58,6 +59,7 @@ class ImageCrawl extends Command
 
                     if (count($data['resource_url'])) {
                         foreach ($data['resource_url'] as $imageUrl) {
+                            echo 'imageUrl = ' . $imageUrl. "\n";
                             $proxy = ($data['is_proxy'] == Item::IS_PROXY_YES) ? true : false;
                             $imageItem = $imageService->uploadByImageUrl($imageUrl, [], $proxy);
                             $imageItem['url'] = $imageItem['oss_url'];
