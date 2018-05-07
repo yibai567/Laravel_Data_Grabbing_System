@@ -306,7 +306,7 @@ class ItemResultController extends Controller
                     'is_test' => $is_test
                 ];
                 Log::debug('[dispatchJob __downloadImage] 入队列 crawl_image_queue', $data);
-                Redis::connection('queue')->lpush('crawl_image_queue', json_encode($data));
+                Redis::connection('queue')->lpush('crawl_image_queue', json_encode($data, JSON_UNESCAPED_UNICODE));
             }
         } else {
             $data = [
@@ -316,7 +316,7 @@ class ItemResultController extends Controller
                 'is_test' => $is_test
             ];
             Log::debug('[dispatchJob __downloadImage] 入队列 crawl_image_queue', $data);
-            Redis::connection('queue')->lpush('crawl_image_queue', json_encode($data));
+            Redis::connection('queue')->lpush('crawl_image_queue', json_encode($data, JSON_UNESCAPED_UNICODE));
         }
     }
 
