@@ -45,6 +45,7 @@ class ImageCrawl extends Command
     public function handle()
     {
         Log::debug('[jinse::image:crawl] start');
+        echo '[jinse::image:crawl] start';
         $i = 1;
         while ($i <= 100) {
             try {
@@ -70,8 +71,10 @@ class ImageCrawl extends Command
                         $result = [];
                         if ($data['is_test']) { // is_test 为真，将结果存入测试结果队列
                             Log::debug('[jinse::image:crawl] /item/test_result/image', $params);
+                            echo '[jinse::image:crawl] /item/test_result/image';
                             $result = InternalAPIService::post('/item/test_result/image', $params);
                         } else { // 否则，存入结果队列
+                            echo '[jinse::image:crawl] /item/result/image';
                             Log::debug('[jinse::image:crawl] /item/result/image', $params);
                             InternalAPIService::post('/item/result/image', $params);
                         }
