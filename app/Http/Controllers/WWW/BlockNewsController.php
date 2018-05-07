@@ -31,7 +31,7 @@ class BlockNewsController extends Controller
 
         $time = time() - 24*3600;
         //获取列表
-        $res = BlockNews::where('status', BlockNews::STATUS_NORMAL)->where('content_type', $contentType)->where('created_time', '>', $time)->orderBy('created_at', 'desc')->take(500)->get();
+        $res = BlockNews::where('status', BlockNews::STATUS_NORMAL)->where('content_type', $contentType)->where('created_time', '>', $time)->orderBy('id', 'desc')->take(2000)->get();
 
         $result = $res->toArray();
         if (empty($result)) {
