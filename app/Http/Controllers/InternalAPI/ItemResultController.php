@@ -339,7 +339,9 @@ class ItemResultController extends Controller
                     $itemResult->start_at = $formatData['start_at'];
                     $itemResult->end_at = $formatData['end_at'];
                     $shortContents = json_decode($shortContents, true);
-                    $shortContents['url'] = $this->__formatURL($shortContents['url'], $item->pre_detail_url);
+                    if (isset($shortContents['url']) && !empty($shortContents['url'])) {
+                        $shortContents['url'] = $this->__formatURL($shortContents['url'], $item->pre_detail_url);
+                    }
                     $itemResult->short_contents = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
                     // 如果有图片信息则计数器增1
                     $newCounter = empty($shortContents['images']) ? $counter : $counter + 1;
@@ -451,14 +453,14 @@ class ItemResultController extends Controller
         $httpPre = substr($url, 0, 4);
         $urlArr = parse_url($preDetailUrl);
 
-        if ($httpPre != 'http:' && $httpPre != 'https') {
+        if ($httpPre != 'http') {
             if (substr($url, 0, 2) == '//') {
                 $url = $urlArr['scheme'] . ':' . $url;
             } else {
                 if (substr($url, 0, 1) == '/') {
                     $url = $urlArr['scheme'] . '://' . $urlArr['host'] . $url;
                 } else {
-                    $url = $urlArr['scheme'] . '://' . $urlArr['host'] . '/' . $url;
+                    $url = $preDetailUrl . $url;
                 }
             }
         }

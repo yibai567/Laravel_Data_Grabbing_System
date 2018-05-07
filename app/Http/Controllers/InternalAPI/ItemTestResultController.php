@@ -454,7 +454,9 @@ class ItemTestResultController extends Controller
             if (!empty($shortContents)) {
                 foreach ($shortContents as $key => $val) {
                     $val = json_decode($val, true);
-                    $val['url'] = $this->__formatURL($val['url'], $item->pre_detail_url);
+                    if (isset($val['url']) && !empty($val['url'])) {
+                        $val['url'] = $this->__formatURL($val['url'], $item->pre_detail_url);
+                    }
                     $shortContents[$key] = $val;
                 }
                 $data['short_contents'] = json_encode($shortContents, JSON_UNESCAPED_UNICODE);
@@ -479,7 +481,7 @@ class ItemTestResultController extends Controller
 
         $httpPre = substr($url, 0, 4);
         $urlArr = parse_url($preDetailUrl);
-        if ($httpPre != 'http:') {
+        if ($httpPre != 'http') {
             if (substr($url, 0, 2) == '//') {
                 $url = $urlArr['scheme'] . ':' . $url;
             } else {
@@ -487,11 +489,10 @@ class ItemTestResultController extends Controller
                 if (substr($url, 0, 1) == '/') {
                     $url = $urlArr['scheme'] . '://' . $urlArr['host'] . $url;
                 } else {
-                    $url = $urlArr['scheme'] . '://' . $urlArr['host'] . '/' . $url;
+                    $url = $preDetailUrl . $url;
                 }
             }
         }
-
         return trim($url);
     }
 }
