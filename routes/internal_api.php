@@ -87,5 +87,17 @@ $api->version(
         $api->post('/item/test_result/capture', 'ItemTestResultController@updateCapture');
 
         $api->post('/image/upload', 'ImageController@upload');
+
+        $api->post('/script','ScriptController@create');
+        $api->post('/script/update','ScriptController@update');
+        $api->get('/script','ScriptController@retrieve');
+        $api->get('/scripts','ScriptController@all');
+        $api->get('/script/generate','ScriptController@generateScript');
+
+        $api->post('/script_model','ScriptModelController@create');
+        $api->post('/script_model/update','ScriptModelController@update');
+        $api->get('/script_model','ScriptModelController@retrieve');
+        $api->get('/script_models','ScriptModelController@all');
+        $api->get('/script_model/ids','ScriptModelController@listByIds');
     }
 );
