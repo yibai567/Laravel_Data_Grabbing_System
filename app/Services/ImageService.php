@@ -24,6 +24,9 @@ class ImageService extends Service
             $scheme = config('aliyun.oss.scheme');
             $separator = config('aliyun.oss.separator');
             $host = config('aliyun.oss.internal_host');
+            if (env('APP_ENV') == 'production') {
+                $host = config('aliyun.oss.production_host');
+            }
             $accessKey = config('aliyun.access_key');
             $secret = config('aliyun.access_secret');
             $path = 'http://'.$host;
@@ -80,7 +83,7 @@ class ImageService extends Service
 
             DB::beginTransaction();
             $image->save();
-            $objectKey = config('aliyun.oss.base_key') . $image->id . '.' . $image->ext;
+            $objectKey = config('aliyun.oss.base_key') . $image->id;
 
             $oss = AliyunOSS::boot($path, $accessKey, $secret);
             $oss->setBucket(config('aliyun.oss.bucket'));
@@ -129,7 +132,10 @@ class ImageService extends Service
         $secret = config('aliyun.access_secret');
 
         $scheme = config('aliyun.oss.scheme');
-        $host = config('aliyun.oss.production_host');
+        $host = config('aliyun.oss.internal_host');
+        if (env('APP_ENV') == 'production') {
+            $host = config('aliyun.oss.production_host');
+        }
         $ossPath = $scheme.$host;
 
         $oss = AliyunOSS::boot($ossPath, $accessKey, $secret);
@@ -204,6 +210,10 @@ class ImageService extends Service
             $secret = config('aliyun.access_secret');
 
             $host = config('aliyun.oss.internal_host');
+            if (env('APP_ENV') == 'production') {
+                $host = config('aliyun.oss.production_host');
+            }
+
             $ossPath = 'http://'.$host;
 
             $oss = AliyunOSS::boot($ossPath, $accessKey, $secret);
@@ -260,7 +270,12 @@ class ImageService extends Service
 
             $accessKey = config('aliyun.access_key');
             $secret = config('aliyun.access_secret');
+
             $host = config('aliyun.oss.internal_host');
+            if (env('APP_ENV') == 'production') {
+                $host = config('aliyun.oss.production_host');
+            }
+
             $ossPath = 'http://'.$host;
 
             $oss = AliyunOSS::boot($ossPath, $accessKey, $secret);
