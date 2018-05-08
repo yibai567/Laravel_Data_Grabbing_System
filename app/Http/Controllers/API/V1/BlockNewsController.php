@@ -50,12 +50,10 @@ class BlockNewsController extends Controller
             ];
             if ($params['content_type'] == BlockNews::CONTENT_TYPE_LIVE) {
                 if (empty($value['content'])) {
-                    Log::debug('[batchCreate] $value["content"] empty');
                     continue;
                 }
             } else {
                 if (empty($value['title'])) {
-                    Log::debug('[batchCreate] $value["title"] value empty');
                     continue;
                 }
             }
@@ -87,8 +85,7 @@ class BlockNewsController extends Controller
             $company = trim($params['company']);
 
             if (mb_strlen($company) > 50) {
-                Log::debug('[batchCreate] $company 字符过长');
-                return response()->json(false);
+                continue;
             }
 
             $content_type = trim($params['content_type']);
@@ -106,8 +103,7 @@ class BlockNewsController extends Controller
         }
 
         if (empty($newData)) {
-            Log::debug('[batchCreate] $newData empty');
-            return response()->json(false);
+            return response()->json(true);
         }
 
         $data = [];
@@ -139,7 +135,6 @@ class BlockNewsController extends Controller
             try {
                 BlockNews::insert($data);
             } catch (Exception $e) {
-                Log::debug('[batchCreate] error message = ' . $e->getMessage());
                 return response()->json(false);
             }
         }
