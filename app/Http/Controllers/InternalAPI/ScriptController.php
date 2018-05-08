@@ -240,26 +240,39 @@ class ScriptController extends Controller
         $loadPlugins = $init['load_plugins'] == 1 ? "true" : "false";
         $verbose = $init['verbose'] == 1 ? "true" : "false";
         //获取模板
-        $content = file_get_contents(public_path().'/js/alphacj_index-news.js');
+        $templatePath = config('script.script_template_path');
+        //获取内容
+        $content = file_get_contents($templatePath);
         //替换模板中的配置参数
         $content = str_replace("{{load_images}}", $loadImages, $content);
         $content = str_replace("{{load_plugins}}", $loadPlugins, $content);
         $content = str_replace("{{log_level}}", $init['log_level'], $content);
         $content = str_replace("{{verbose}}",$verbose, $content);
-        $content = str_replace("{{width}}", $init['width'], $content);
-        $content = str_replace("{{height}}",$init['height'], $content);
+        if (empty($init['height'])) {
+            $content = str_replace("{{height}}", '', $content);
+        } else {
+            $content = str_replace("{{height}}","height: " . $init['height'] . ",", $content);
+        }
+        if (empty($init['width'])) {
+            $content = str_replace("{{width}}", '', $content);
+        } else {
+            $content = str_replace("{{width}}","width: " . $init['width'] . ",", $content);
+        }
         //将代码数据和原来模板内容合并
         $content = $content.$result;
 
-        $lastGenerateAt = time();
         //命名js名称
-        $filename = public_path().'/js/script_' . $scriptInfo['id'] . '_'.$lastGenerateAt.'.js';
+        $lastGenerateAt = time();
+        $filename = 'script_' . $scriptInfo['id'] . '_' . $lastGenerateAt . '.js';
+        //拼接路径和名称
+        $filePath = config('script.script_generate_path');
+        $file = $filePath.$filename;
 
         //写入文件
-        file_put_contents($filename, $content);
+        file_put_contents($file, $content);
 
         //检查文件是否生成成功
-        if (!file_exists($filename)){
+        if (!file_exists($file)){
             return $this->resError(404, 'file generation fail!');
         }
 
@@ -368,11 +381,11 @@ class ScriptController extends Controller
             if($paramNum > 1){
                 for ($j = 1; $j < $paramNum; $j++) {
                     //参数替换
-                    $structure = str_replace("$".$j, '"'.$stepArr[$i][$j].'"', $structure);
+                $structure = str_replace("~" . $j . "~", $stepArr[$i][$j], $structure);
                 }
             }
 
-            $structures .= $structure."\n"."\n";
+            $structures .= $structure . PHP_EOL . PHP_EOL;
 
         }
 

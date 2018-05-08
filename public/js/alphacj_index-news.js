@@ -6,8 +6,8 @@ var config = {
     verbose: {{verbose}},
     logLevel: "{{log_level}}",
     viewportSize: {
-        width: {{width}},
-        height: {{height}},
+        {{width}}
+        {{height}}
     },
     pageSettings: {
         loadImages: {{load_images}},

@@ -99,5 +99,6 @@ $api->version(
         $api->get('/script_model','ScriptModelController@retrieve');
         $api->get('/script_models','ScriptModelController@all');
         $api->get('/script_model/ids','ScriptModelController@listByIds');
+        $api->get('/script_models/languages_type/{languages_type}','ScriptModelController@listByLanguagesType');
     }
 );

@@ -9,6 +9,7 @@
 
 namespace App\Http\Controllers\InternalAPI;
 
+use Illuminate\Support\Facades\Input;
 use Log;
 use App\Models\ScriptModel;
 use App\Services\ValidatorService;
@@ -98,6 +99,55 @@ class ScriptModelController extends Controller
         if (!empty($scriptModel)) {
             $result = $scriptModel->toArray();
         }
+
+        return $this->resObjectGet($result, 'script_model', $request->path());
+    }
+
+    /**
+     * listByLanguagesType
+     * 根据languages_type查询列表
+     *
+     * @param
+     * @return array
+     */
+    public function listByLanguagesType(Request $request, $languages_type)
+    {
+        Log::debug('[internal ScriptController all] start!');
+        $params = $request->all();
+        $params['languages_type'] = $languages_type;
+        //验证参数
+        ValidatorService::check($params, [
+            'languages_type' => 'nullable|integer',
+            'page' => 'nullable|integer',
+            'num' => 'nullable|integer',
+        ]);
+        if (empty($params['page'])) {
+            $params['page'] = 1;
+        }
+
+        if (empty($params['num'])) {
+            $params['num'] = 500;
+        }
+
+        $where = [];
+        if (!empty($params['languages_type'])){
+            $where [] = ['languages_type', $params['languages_type']];
+        }
+        //求出跳过数据个数
+        $offset = $params['num'] * ($params['page'] - 1);
+
+        //获取数据
+        $items = ScriptModel::where($where)
+            ->take($params['num'])
+            ->skip($offset)
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $result = [];
+        if (!empty($items)) {
+            $result = $items->toArray();
+        }
+
 
         return $this->resObjectGet($result, 'script_model', $request->path());
     }
