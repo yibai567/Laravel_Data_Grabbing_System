@@ -34,7 +34,7 @@ class ScriptController extends Controller
         ValidatorService::check($params, [
             'name' => 'required|string|max:100',
             'description' => 'nullable|string|max:255',
-            'step' => 'nullable|array',
+            'step' => 'required|array',
             'cron_type' => 'nullable|integer',
             'operate_user' => 'required|string|max:50',
             'init' => 'nullable|json'
@@ -106,7 +106,9 @@ class ScriptController extends Controller
         $init = $params['init'];
         unset($params['init']);
 
+        //将step数组转化为json存入数据库
         $params['step'] = json_encode($params['step']);
+        //开启事务
         try {
             //修改script数据
             $script->update($params);
@@ -148,6 +150,8 @@ class ScriptController extends Controller
         if (!empty($script)) {
             $result = $script->toArray();
         }
+
+        $result['init'] = [];
         if (!empty($scriptInit)) {
             $result['init'] = $scriptInit->toArray();
         }
@@ -205,7 +209,7 @@ class ScriptController extends Controller
      */
     public function generateScript(Request $request)
     {
-        Log::debug('[internal ScriptController retrieve] start!');
+        Log::debug('[internal ScriptController generateScript] start!');
         $params = $request->all();
         //验证参数
         ValidatorService::check($params, [
@@ -216,6 +220,7 @@ class ScriptController extends Controller
         $script = Script::find($params['id']);
         $scriptInit = $script->init;
 
+        //判断script数据和配置是否存在
         if (empty($script)) {
             return $this->resError(405, 'script is not exists!');
         }
@@ -227,34 +232,40 @@ class ScriptController extends Controller
         $scriptInfo = $script->toArray();
         $init = $scriptInit->toArray();
 
-        //整理代码数据,并替换模板中的数据
+        //整理代码数据
         $result = $this->__arrangeData($scriptInfo);
 
+        //转化参数值,将数据中的1对应true,2对应false
+        $loadImages = $init['load_images'] == 1 ? "true" : "false";
+        $loadPlugins = $init['load_plugins'] == 1 ? "true" : "false";
+        $verbose = $init['verbose'] == 1 ? "true" : "false";
         //获取模板
         $content = file_get_contents(public_path().'/js/alphacj_index-news.js');
         //替换模板中的配置参数
-        $content = str_replace("{{load_images}}", '"'.$init['load_images'].'"', $content);
-        $content = str_replace("{{load_plugins}}", '"'.$init['load_plugins'].'"', $content);
-        $content = str_replace("{{log_level}}", '"'.$init['log_level'].'"', $content);
-        $content = str_replace("{{verbose}}", '"'.$init['verbose'].'"', $content);
-        $content = str_replace("{{width}}", '"'.$init['width'].'"', $content);
-        $content = str_replace("{{height}}", '"'.$init['height'].'"', $content);
+        $content = str_replace("{{load_images}}", $loadImages, $content);
+        $content = str_replace("{{load_plugins}}", $loadPlugins, $content);
+        $content = str_replace("{{log_level}}", $init['log_level'], $content);
+        $content = str_replace("{{verbose}}",$verbose, $content);
+        $content = str_replace("{{width}}", $init['width'], $content);
+        $content = str_replace("{{height}}",$init['height'], $content);
         //将代码数据和原来模板内容合并
         $content = $content.$result;
 
+        $lastGenerateAt = time();
         //命名js名称
-        $filename = public_path().'/js/script_' . $script->id . '_'.$script->last_generate_at.'.js';
+        $filename = public_path().'/js/script_' . $scriptInfo['id'] . '_'.$lastGenerateAt.'.js';
+
         //写入文件
         file_put_contents($filename, $content);
 
-        //检查文件是否存在
+        //检查文件是否生成成功
         if (!file_exists($filename)){
-            return $this->resObjectGet(false, 'script', $request->path());
+            return $this->resError(404, 'file generation fail!');
         }
 
         //更新状态和时
         $script->status = Script::STATUS_GENERATE;
-        $script->last_generate_at = date('Y-m-d H:i:s',time());
+        $script->last_generate_at = $lastGenerateAt;
         $script->save();
 
         return $this->resObjectGet(true, 'script', $request->path());
@@ -280,9 +291,13 @@ class ScriptController extends Controller
                 'width' => 'nullable|string|max:10',
                 'height' => 'nullable|string|max:10'
             ]);
-        } else {
-            $init = [];
         }
+        //设置默认值
+        $init['load_images'] = $init['load_images'] ?? ScriptInit::DEFAULT_LOAD_IMAGES;
+        $init['load_plugins'] = $init['load_plugins'] ?? ScriptInit::DEFAULT_LOAD_PLUGINS;
+        $init['log_level'] = $init['log_level'] ?? ScriptInit::DEFAULT_LOG_LEVEL;
+        $init['verbose'] = $init['verbose'] ?? ScriptInit::DEFAULT_VERBOSE;
+
         $scriptInit = ScriptInit::create($init);
 
         $result = [];
@@ -353,14 +368,14 @@ class ScriptController extends Controller
             if($paramNum > 1){
                 for ($j = 1; $j < $paramNum; $j++) {
                     //参数替换
-                    $structure = str_replace("$".$j, $stepArr[$i][$j], $structure);
+                    $structure = str_replace("$".$j, '"'.$stepArr[$i][$j].'"', $structure);
                 }
             }
 
             $structures .= $structure."\n"."\n";
 
         }
-        dd($structures);
+
         return $structures;
     }
 

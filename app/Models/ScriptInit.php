@@ -9,7 +9,14 @@ class ScriptInit extends Model
 {
     use SoftDeletes;
 
-    const CRON_TYPE = 1;
+    //执行规则
+    const DEFAULT_CRON_TYPE = 1;
+
+    //默认值
+    const DEFAULT_LOAD_IMAGES = 2;
+    const DEFAULT_LOAD_PLUGINS = 2;
+    const DEFAULT_VERBOSE = 2;
+    const DEFAULT_LOG_LEVEL = 'debug';
 
     /**
      * 表名
