@@ -32,11 +32,13 @@ class ScriptModelController extends Controller
             'name' => 'required|string|max:50',
             'description' => 'nullable|string|max:255',
             'structure' => 'required|string',
+            'languages_type' => 'required|integer|between:1,3',
             'parameters' => 'required|json',
             'operate_user' => 'required|string|max:50',
         ]);
-
         $params['system_type'] = ScriptModel::DEFAULT_SYSTEM_TYPE;
+        //整理structure的换行符
+        $params['structure'] = str_replace(array("\r\n", "\r", "\n"), PHP_EOL,  $params['structure']);
         $scriptModel = ScriptModel::create($params);
 
         $result = [];
@@ -63,9 +65,15 @@ class ScriptModelController extends Controller
             'name' => 'nullable|string|max:50',
             'description' => 'nullable|string|max:255',
             'structure' => 'nullable|string',
+            'languages_type' => 'required|integer|between:1,3',
             'parameters' => 'nullable|json',
             'operate_user' => 'nullable|string|max:50',
         ]);
+
+        if (!empty($params['structure'])) {
+            //整理structure的换行符
+            $params['structure'] = str_replace(array("\r\n", "\r", "\n"), PHP_EOL,  $params['structure']);
+        }
 
         $scriptModel = ScriptModel::find($params['id']);
 

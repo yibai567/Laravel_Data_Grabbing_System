@@ -14,6 +14,11 @@ class Script extends Model
     const STATUS_INIT = 1; // 初始化
     const STATUS_GENERATE = 2; // 已生成
 
+    //脚本类型
+    const CASPERJS_LANGUAGES_TYPE = 1;
+    const HTML_LANGUAGES_TYPE = 2;
+    const API_LANGUAGES_TYPE = 3;
+
     //任务执行类型 1、保持 2、每分钟 3、每五分钟 4、每十分钟 5、每十五分钟 6、每二十分钟
     const CRON_TYPE_KEEP = 1;
     const CRON_TYPE_EVERY_MINUTE = 2;
@@ -47,6 +52,7 @@ class Script extends Model
         'step',
         'cron_type',
         'last_generate_at',
+        'languages_type',
         'status',
         'operate_user',
     ];

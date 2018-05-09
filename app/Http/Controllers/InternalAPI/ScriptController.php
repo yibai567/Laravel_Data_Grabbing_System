@@ -34,6 +34,7 @@ class ScriptController extends Controller
         ValidatorService::check($params, [
             'name' => 'required|string|max:100',
             'description' => 'nullable|string|max:255',
+            'languages_type' => 'required|integer|between:1,3',
             'step' => 'required|array',
             'cron_type' => 'nullable|integer',
             'operate_user' => 'required|string|max:50',
@@ -48,10 +49,12 @@ class ScriptController extends Controller
         $init = $params['init'];
         //开启事务
         try {
-            //调用添加配置的方法
-            $scriptInit = $this->__createInit($init);
-            $params['script_init_id'] = $scriptInit['id'];
-
+            //判断脚本类型是否添加配置
+            if ($params['languages_type'] == Script::CASPERJS_LANGUAGES_TYPE) {
+                //调用添加配置的方法
+                $scriptInit = $this->__createInit($init);
+                $params['script_init_id'] = $scriptInit['id'];
+            }
             unset($params['init']);
             //给定默认值
             $params['status'] = Script::STATUS_INIT;
@@ -68,7 +71,9 @@ class ScriptController extends Controller
         if (!empty($script)) {
             //整理数据
             $result = $script->toArray();
-            $result['init'] = $scriptInit;
+            if (!empty($scriptInit)) {
+                $result['init'] = $scriptInit;
+            }
         }
 
         return $this->resObjectGet($result, 'script', $request->path());
@@ -90,6 +95,7 @@ class ScriptController extends Controller
             'id' => 'required|integer',
             'name' => 'nullable|string|max:100',
             'description' => 'nullable|string|max:255',
+            'languages_type' => 'required|integer|between:1,3',
             'step' => 'nullable|array',
             'cron_type' => 'nullable|integer',
             'operate_user' => 'nullable|string|max:50',
@@ -115,7 +121,7 @@ class ScriptController extends Controller
             $result = $script->toArray();
 
             //判断是否修改配置,有数据就修改,无跳过
-            if (!empty($init)) {
+            if (!empty($init) && $params['languages_type'] == Script::CASPERJS_LANGUAGES_TYPE) {
                 $result['init'] = $this->__updateInit($init, $script);
             }
         } catch (Exception $e){
@@ -142,18 +148,19 @@ class ScriptController extends Controller
             'id' => 'required|integer',
         ]);
         $script = Script::find($params['id']);
-        //根据一对一关系,查询该script的配置数据
-        $scriptInit = $script->init;
 
         $result = [];
         //整理数据
         if (!empty($script)) {
             $result = $script->toArray();
-        }
-
-        $result['init'] = [];
-        if (!empty($scriptInit)) {
-            $result['init'] = $scriptInit->toArray();
+            if ($result == Script::CASPERJS_LANGUAGES_TYPE) {
+                //根据一对一关系,查询该script的配置数据
+                $scriptInit = $script->init;
+                $result['init'] = [];
+                if (!empty($scriptInit)) {
+                    $result['init'] = $scriptInit->toArray();
+                }
+            }
         }
 
         return $this->resObjectGet($result, 'script', $request->path());
@@ -216,58 +223,47 @@ class ScriptController extends Controller
             'id' => 'required|integer',
         ]);
 
-        //查询配置数据和script数据
+        //查询script数据
         $script = Script::find($params['id']);
-        $scriptInit = $script->init;
 
         //判断script数据和配置是否存在
         if (empty($script)) {
             return $this->resError(405, 'script is not exists!');
         }
 
-        if (empty($scriptInit)) {
-            return $this->resError(405, 'scriptInit is not exists!');
-        }
-        //将script数据和配置转为数组
-        $scriptInfo = $script->toArray();
-        $init = $scriptInit->toArray();
-
         //整理代码数据
-        $result = $this->__arrangeData($scriptInfo);
+        $result = $this->__arrangeData($script);
 
-        //转化参数值,将数据中的1对应true,2对应false
-        $loadImages = $init['load_images'] == 1 ? "true" : "false";
-        $loadPlugins = $init['load_plugins'] == 1 ? "true" : "false";
-        $verbose = $init['verbose'] == 1 ? "true" : "false";
-        //获取模板
-        $templatePath = config('script.script_template_path');
-        //获取内容
-        $content = file_get_contents($templatePath);
-        //替换模板中的配置参数
-        $content = str_replace("{{load_images}}", $loadImages, $content);
-        $content = str_replace("{{load_plugins}}", $loadPlugins, $content);
-        $content = str_replace("{{log_level}}", $init['log_level'], $content);
-        $content = str_replace("{{verbose}}",$verbose, $content);
-        if (empty($init['height'])) {
-            $content = str_replace("{{height}}", '', $content);
-        } else {
-            $content = str_replace("{{height}}","height: " . $init['height'] . ",", $content);
+        //通过文件类型获取不同模板内容
+        switch ($script->languages_type) {
+            case  Script::CASPERJS_LANGUAGES_TYPE:
+                //获取casperjs的模板内容并替换配置
+                $content = $this->__getCasperJsTemplateData($script);
+                break;
+            case Script::HTML_LANGUAGES_TYPE:
+                //获取模板路径
+                $templatePath = config('script.html_template_path');
+                //获取内容
+                $content = file_get_contents($templatePath);
+                break;
+            case Script::API_LANGUAGES_TYPE:
+                //获取模板路径
+                $templatePath = config('script.api_template_path');
+                //获取内容
+                $content = file_get_contents($templatePath);
+                break;
         }
-        if (empty($init['width'])) {
-            $content = str_replace("{{width}}", '', $content);
-        } else {
-            $content = str_replace("{{width}}","width: " . $init['width'] . ",", $content);
-        }
-        //将代码数据和原来模板内容合并
-        $content = $content.$result;
+
+        //连接模板内容和代码
+        $content = $content . $result;
 
         //命名js名称
         $lastGenerateAt = time();
-        $filename = 'script_' . $scriptInfo['id'] . '_' . $lastGenerateAt . '.js';
+        $filename = 'script_' . $script->id . '_' . $lastGenerateAt . '.js';
+
         //拼接路径和名称
         $filePath = config('script.script_generate_path');
         $file = $filePath.$filename;
-
         //写入文件
         file_put_contents($file, $content);
 
@@ -356,13 +352,16 @@ class ScriptController extends Controller
 
     /**
      * __arrangeData
-     * 更新
+     * 整理代码数据
      *
      * @param $id
      * @return array
      */
     private function __arrangeData($script)
     {
+        //$script转化为数组
+        $script = $script->toArray();
+        //获取步骤
         $steps = $script['step'];
         //json转数组
         $stepArr = json_decode($steps,true);
@@ -370,7 +369,6 @@ class ScriptController extends Controller
         for ($i = 0; $i < $num; $i++) {
             //获取模块信息
             $scriptModel = ScriptModel::find($stepArr[$i][0]);
-
             if (empty($scriptModel)) {
                 return $this->resError(405, 'scriptModel is not exists!');
             }
@@ -381,15 +379,61 @@ class ScriptController extends Controller
             if($paramNum > 1){
                 for ($j = 1; $j < $paramNum; $j++) {
                     //参数替换
-                $structure = str_replace("~" . $j . "~", $stepArr[$i][$j], $structure);
+                    $structure = str_replace("~" . $j . "~", $stepArr[$i][$j], $structure);
                 }
             }
 
             $structures .= $structure . PHP_EOL . PHP_EOL;
-
         }
 
         return $structures;
+    }
+
+    /**
+     * __getCasperJsTemplateData
+     * 获取casperjs的模板内容
+     *
+     * @param $id
+     * @return array
+     */
+    private function __getCasperJsTemplateData($script)
+    {
+        //获取script配置数据
+        $scriptInit = $script->init;
+        if (empty($scriptInit)) {
+            return $this->resError(405, 'scriptInit is not exists!');
+        }
+
+        //将配置数据转化为数组处理
+        $init = $scriptInit->toArray();
+
+        //转化参数值,将数据中的1对应true,2对应false
+        $loadImages = $init['load_images'] == 1 ? "true" : "false";
+        $loadPlugins = $init['load_plugins'] == 1 ? "true" : "false";
+        $verbose = $init['verbose'] == 1 ? "true" : "false";
+
+        //获取模板路径
+        $templatePath = config('script.script_template_path');
+        //获取内容
+        $content = file_get_contents($templatePath);
+
+        //替换模板中的配置参数
+        $content = str_replace("{{load_images}}", $loadImages, $content);
+        $content = str_replace("{{load_plugins}}", $loadPlugins, $content);
+        $content = str_replace("{{log_level}}", $init['log_level'], $content);
+        $content = str_replace("{{verbose}}",$verbose, $content);
+        if (empty($init['height'])) {
+            $content = str_replace("{{height}}", '', $content);
+        } else {
+            $content = str_replace("{{height}}","height: " . $init['height'] . ",", $content);
+        }
+        if (empty($init['width'])) {
+            $content = str_replace("{{width}}", '', $content);
+        } else {
+            $content = str_replace("{{width}}","width: " . $init['width'] . ",", $content);
+        }
+
+        return $content;
     }
 
 }

@@ -34,6 +34,7 @@ class ScriptModel extends Model
         'description',
         'structure',
         'parameters',
+        'languages_type',
         'system_type',
         'operate_user',
     ];
