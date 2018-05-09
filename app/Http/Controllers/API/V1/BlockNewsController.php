@@ -71,9 +71,15 @@ class BlockNewsController extends Controller
             }
 
             if (empty($value['title'])) {
-                $row = BlockNews::where('md5_content', $insertParams['md5_content'])->first();
+                $row = BlockNews::where('md5_content', $insertParams['md5_content'])
+                                ->where('company', trim($params['company']))
+                                ->where('content_type', trim($params['content_type']))
+                                ->first();
             } else {
-                $row = BlockNews::where('md5_title', $insertParams['md5_title'])->first();
+                $row = BlockNews::where('md5_title', $insertParams['md5_title'])
+                                ->where('company', trim($params['company']))
+                                ->where('content_type', trim($params['content_type']))
+                                ->first();
             }
             if (!empty($row)) {
                 if (!empty($value['read_count']) && $row->read_count != $value['read_count']) {
