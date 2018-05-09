@@ -15,10 +15,12 @@ class BlockNews extends Model
     const CONTENT_TYPE_BANNER = 1; //Banner
     // const CONTENT_TYPE_INDEX = 2; //头条/推荐
     const CONTENT_TYPE_LIVE = 3; //快讯
+    const CONTENT_TYPE_TOP = 4; //快讯
     const CONTENT_TYPES = array(
                                 BlockNews::CONTENT_TYPE_BANNER => '首页',
                                 // BlockNews::CONTENT_TYPE_INDEX => '头条/推荐',
-                                BlockNews::CONTENT_TYPE_LIVE => '快讯'
+                                // BlockNews::CONTENT_TYPE_LIVE => '快讯'
+                                BlockNews::CONTENT_TYPE_TOP => '排行'
                             );
 
     /**
