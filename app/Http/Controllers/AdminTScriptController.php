@@ -68,7 +68,8 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $this->form[] = ['label'=>'width','name'=>'width','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'height','name'=>'height','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
 
-		$this->form[] = ['label'=>'步骤','name'=>'step','type'=>'textarea','validation'=>'required','width'=>'col-sm-10'];
+        $this->form[] = ['label'=>'步骤','name'=>'step','type'=>'textarea','validation'=>'required','width'=>'col-sm-10'];
+        $this->form[] = ['name'=>'script_model_params','type'=>'text'];
 		$this->form[] = ['label'=>'执行规则','name'=>'cron_type','type'=>'radio','validation'=>'nullable|integer','width'=>'col-sm-10','dataenum'=>'1|持续执行;2|每分钟执行一次;3|每小时执行一次;4|每天执行一次','value'=>'1'];
 		# END FORM DO NOT REMOVE THIS LINE
 
@@ -290,7 +291,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
     |
     */
     public function hook_before_add(&$postdata) {
-        dd($postdata);
         //Your code here
 
     }
@@ -362,10 +362,13 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
         }
 
+        $res = DB::table('t_script_model')->get();
+        $scriptModel = $res->toArray();
+
         $data = [];
         $data['page_title'] = '增加脚本生成信息';
-
-        $this->cbView('script/script_add_view',$data);
+        $data['script_model'] = $scriptModel;
+        $this->cbView('script/index',$data);
     }
 
     public function getEdit($id) {
@@ -435,6 +438,17 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
         $data = [];
         $formParams = $this->arr;
+        $newData = [];
+
+        if (!empty($formParams['script_model_params'])) {
+            foreach ($formParams['script_model_params'] as $key => $value) {
+                array_push($value, $key);
+                $newData[] = $value;
+            }
+            $data['step'] = $newData;
+        } else {
+            $data['step'] = [];
+        }
         $data['name'] = $formParams['name'];
         $data['description'] = $formParams['description'];
 
@@ -446,10 +460,8 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
                                     'width' => $formParams['width'],
                                     'height' => $formParams['height'],
                                      ]);
-        $data['step'] = json_decode($formParams['step']);
         $data['cron_type'] = $formParams['cron_type'];
         $data['operate_user'] = CRUDBooster::myName();
-
         try {
             $res = InternalAPIService::post('/script', $data);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
@@ -497,6 +509,9 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             $data['row']['status'] = '已生成';
         }
 
+        if (!empty($data['row']['last_generate_at'])) {
+            $data['row']['last_generate_at'] = date('Y-m-d H:i:s', $data['row']['last_generate_at']);
+        }
 
         $this->cbView('script/script_detail_view',$data);
     }
