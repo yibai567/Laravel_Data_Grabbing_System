@@ -5,6 +5,7 @@
 	use DB;
 	use CRUDBooster;
     use App\Models\ScriptModel;
+    use App\Services\InternalAPIService;
     use Illuminate\Support\Facades\Route;
 
 	class AdminTScriptModelController extends \crocodicstudio\crudbooster\controllers\CBController {
@@ -33,7 +34,16 @@
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
 			$this->col[] = ["label"=>"ID","name"=>"id"];
-			$this->col[] = ["label"=>"模块名称","name"=>"name"];
+            $this->col[] = ["label"=>"模块名称","name"=>"name"];
+			$this->col[] = ["label"=>"脚本语言","name"=>"languages_type","callback"=>function ($row) {
+            if ( $row->languages_type == 1) {
+                return 'casperjs';
+            } elseif ($row->languages_type == 2) {
+                return 'html';
+            } elseif ($row->languages_type == 3) {
+                return 'api';
+            }
+            }];
             $this->col[] = ["label"=>"类型","name"=>"system_type","callback"=>function ($row) {
             if ( $row->system_type == ScriptModel::DEFAULT_SYSTEM_TYPE) {
                 return '预生成模块';
@@ -48,7 +58,9 @@
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
 			$this->form[] = ['label'=>'模块名称','name'=>'name','type'=>'text','validation'=>'required|string|max:50','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'模块描述','name'=>'description','type'=>'text','validation'=>'nullable|max:255','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'模块描述','name'=>'description','type'=>'text','validation'=>'nullable|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'脚本语言','name'=>'languages_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|casperjs;2|html;3|api','value'=>'1'];
+
 			$this->form[] = ['label'=>'代码结构','name'=>'structure','type'=>'textarea','validation'=>'required|string','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'参数规则','name'=>'parameters','type'=>'textarea','validation'=>'required|json','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'类型','name'=>'system_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|预生成模块;2|用户自定义模块','value'=>'1'];
@@ -270,7 +282,6 @@
 	    |
 	    */
 	    public function hook_before_add(&$postdata) {
-            $postdata['operate_user'] = CRUDBooster::myName();
 	        //Your code here
 
 	    }
@@ -296,7 +307,6 @@
 	    |
 	    */
 	    public function hook_before_edit(&$postdata,$id) {
-            $postdata['operate_user'] = CRUDBooster::myName();
 	        //Your code here
 
 	    }
@@ -336,6 +346,54 @@
 	        //Your code here
 
 	    }
+        public function postAddSave() {
+            $this->cbLoader();
+            if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE) {
+                CRUDBooster::insertLog(trans('crudbooster.log_try_add_save',['name'=>Request::input($this->title_field),'module'=>CRUDBooster::getCurrentModule()->name ]));
+                CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
+            }
+
+            $this->validation();
+            $this->input_assignment();
+
+            $formParams = $this->arr;
+
+            $formParams['operate_user'] = CRUDBooster::myName();
+
+            try {
+                $res = InternalAPIService::post('/script_model', $formParams);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+            }
+
+            CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script_model", "创建成功", "success");
+        }
+
+        public function postEditSave($id) {
+            $this->cbLoader();
+            $row = DB::table($this->table)->where($this->primary_key,$id)->first();
+
+            if(!CRUDBooster::isUpdate() && $this->global_privilege==FALSE) {
+                CRUDBooster::insertLog(trans("crudbooster.log_try_add",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
+                CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
+            }
+
+            $this->validation($id);
+            $this->input_assignment($id);
+
+            $data = [];
+            $formParams = $this->arr;
+
+            $formParams['id'] = $id;
+            $formParams['operate_user'] = CRUDBooster::myName();
+            try {
+                $res = InternalAPIService::post('/script_model/update', $formParams);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+            }
+
+            CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script_model", "修改成功", "success");
+        }
 
         public function getDetail($id) {
             $this->cbLoader();
@@ -345,6 +403,14 @@
                 $row->system_type = '预生成模块';
             } else {
                 $row->system_type = '用户自定义模块';
+            }
+
+            if ($row->languages_type == 1) {
+                $row->languages_type = 'casperjs';
+            } elseif ($row->languages_type == 2) {
+                $row->languages_type = 'html';
+            } elseif ($row->languages_type == 3) {
+                $row->languages_type = 'api';
             }
 
 
