@@ -20,91 +20,80 @@ class BlockNewsController extends Controller
     {
         $params = $request->all();
         ValidatorService::check($params, [
-            'company' => 'required|string|max:500',
+            'company'      => 'required|string|min:1|max:100',
             'content_type' => 'required|integer|between:1,10',
-            'start_time' => 'required|date',
-            'end_time' => 'required|date',
-            'result' => 'required'
+            'start_time'   => 'required|date',
+            'end_time'     => 'required|date',
+            'result'       => 'required'
         ]);
 
-        $newData = [];
+        $newData     = [];
+        $contentType = intval($params['content_type']);
+        $company     = trim($params['company']);
+        $startTime   = trim($params['start_time']);
+        $endTime     = trim($params['end_time']);
+
+        if (empty($params['result']) || !is_array($params['result'])) {
+            return response()->json(true);
+        }
 
         foreach ($params['result'] as $value) {
+            $readCount  = trim($value['read_count']);
+            $showTime   = trim($value['show_time']);
+            $detailUrl  = trim($value['detail_url']);
+            $title      = trim($value['title']);
+            $content    = trim($value['content']);
+            $md5Title   = '';
+            $md5Content = '';
+
+            // 长度等标准判断 TODO
+
+            if (empty($content) && empty($title)) {
+                continue;
+            }
+
+            if (!empty($content)) {
+                $md5Content = md5($content);
+            }
+
+            if (!empty($title)) {
+                $md5Title = md5($title);
+            }
+
+            if (empty($md5Title)) {
+                $row = BlockNews::where('md5_content', $md5Content);
+            } else {
+                $row = BlockNews::where('md5_title', $md5Title);
+            }
+
+            $row->where('company', $company)->where('content_type', $contentType)->first();
+
+            if (!empty($row) && !empty($readCount) && $row->read_count != $readCount) {
+                $row->read_count = $readCount;
+                $row->updated_at = date('Y-m-d H:i:s');
+                $row->save();
+
+                continue;
+            }
+
             $insertParams = [
-                'content_type' => BlockNews::CONTENT_TYPE_BANNER,
-                'company' => '',
-                'title' => '',
-                'md5_title' => '',
-                'md5_content' => '',
-                'content' => '',
-                'detail_url' => '',
-                'show_time' => '',
-                'read_count' => '',
-                'status' => BlockNews::STATUS_NORMAL,
-                'start_time' => '',
-                'end_time' => '',
+                'content_type' => $contentType,
+                'company'      => $company,
+                'title'        => $title,
+                'md5_title'    => $md5Title,
+                'md5_content'  => $md5Content,
+                'content'      => $content,
+                'detail_url'   => $detailUrl,
+                'show_time'    => $showTime,
+                'read_count'   => $readCount,
+                'status'       => BlockNews::STATUS_NORMAL,
+                'start_time'   => $startTime,
+                'end_time'     => $endTime,
                 'created_time' => time(),
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-
+                'created_at'   => date('Y-m-d H:i:s'),
+                'updated_at'   => date('Y-m-d H:i:s'),
             ];
-            if ($params['content_type'] == BlockNews::CONTENT_TYPE_LIVE) {
-                if (empty($value['content'])) {
-                    continue;
-                }
-            } else {
-                if (empty($value['title'])) {
-                    continue;
-                }
-            }
 
-            if (!empty($value['content'])) {
-                $insertParams['content'] = trim($value['content']);
-                $insertParams['md5_content'] = md5($value['content']);
-            }
-
-            if (!empty($value['title'])) {
-                $insertParams['title'] = trim($value['title']);
-                $insertParams['md5_title'] = md5($value['title']);
-            }
-
-            if (empty($value['title'])) {
-                $row = BlockNews::where('md5_content', $insertParams['md5_content'])
-                                ->where('company', trim($params['company']))
-                                ->where('content_type', trim($params['content_type']))
-                                ->first();
-            } else {
-                $row = BlockNews::where('md5_title', $insertParams['md5_title'])
-                                ->where('company', trim($params['company']))
-                                ->where('content_type', trim($params['content_type']))
-                                ->first();
-            }
-            if (!empty($row)) {
-                if (!empty($value['read_count']) && $row->read_count != $value['read_count']) {
-                    $row->read_count = $value['read_count'];
-                    $row->updated_at = date('Y-m-d H:i:s');
-                    $row->save();
-                }
-                continue;
-            }
-
-            $company = trim($params['company']);
-
-            if (mb_strlen($company) > 50) {
-                continue;
-            }
-
-            $content_type = trim($params['content_type']);
-
-            if (!empty($content_type)) {
-                $insertParams['content_type'] = $content_type;
-            }
-            $insertParams['company'] = $company;
-            $insertParams['detail_url'] = $value['detail_url'];
-            $insertParams['show_time'] = $value['show_time'];
-            $insertParams['read_count'] = trim($value['read_count']);
-            $insertParams['start_time'] = $params['start_time'];
-            $insertParams['end_time'] = $params['end_time'];
             $newData[] = $insertParams;
         }
 
