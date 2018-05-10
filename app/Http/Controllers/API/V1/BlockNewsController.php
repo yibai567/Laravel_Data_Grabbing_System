@@ -46,9 +46,15 @@ class BlockNewsController extends Controller
             $md5Title   = '';
             $md5Content = '';
 
-            // 长度等标准判断 TODO
-
             if (empty($content) && empty($title)) {
+                continue;
+            }
+            // 长度等标准判断 TODO
+            if (mb_strlen($title) > 255) {
+                continue;
+            }
+
+            if (strlen($title) > 65535) {
                 continue;
             }
 
@@ -66,13 +72,14 @@ class BlockNewsController extends Controller
                 $row = BlockNews::where('md5_title', $md5Title);
             }
 
-            $row->where('company', $company)->where('content_type', $contentType)->first();
+            $blockNews = $row->where('company', $company)->where('content_type', $contentType)->first();
 
-            if (!empty($row) && !empty($readCount) && $row->read_count != $readCount) {
-                $row->read_count = $readCount;
-                $row->updated_at = date('Y-m-d H:i:s');
-                $row->save();
-
+            if (!empty($blockNews)) {
+                if (!empty($readCount) && $blockNews->read_count != $readCount) {
+                    $blockNews->read_count = $readCount;
+                    $blockNews->updated_at = date('Y-m-d H:i:s');
+                    $blockNews->save();
+                }
                 continue;
             }
 
@@ -102,6 +109,7 @@ class BlockNewsController extends Controller
         }
 
         $data = [];
+
         foreach ($newData as $key => $value) {
             $isHas = false;
             if (!empty($data)) {
