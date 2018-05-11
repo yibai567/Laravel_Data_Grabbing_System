@@ -395,7 +395,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
                 $newScriptModel[$id] = $value;
             }
             $data['row']['step'] = $newScriptModel;
-            $script_models = InternalAPIService::get('/script_model/ids', ['ids' => rtrim($scriptModelId, ",")]);
+            $script_models = InternalAPIService::get('/script_models/ids', ['ids' => rtrim($scriptModelId, ",")]);
             foreach ($script_models as $key => $value) {
                 $newScriptModelParams[$value['id']] = json_decode($value['parameters']);
                 $newScriptModelList[$value['id']] = $value;
