@@ -10,6 +10,8 @@ class ScriptModel extends Model
     use SoftDeletes;
 
     const DEFAULT_SYSTEM_TYPE = 1;
+    const SYSTEM_TYPE_DEFINED = 2;
+    const SYSTEM_TYPE_BASE = 3;
 
     /**
      * 表名

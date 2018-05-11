@@ -253,22 +253,27 @@ class ScriptController extends Controller
         //通过文件类型获取不同模板内容
         switch ($script->languages_type) {
             case  Script::LANGUAGES_TYPE_CASPERJS:
-                //获取casperjs的模板内容并替换配置
-                $content = $this->__getCasperJsTemplateData($script);
+                //获取基础模板内容
+                $content = $this->__getBaseScriptModel(Script::LANGUAGES_TYPE_CASPERJS);
+
+                //获取script配置数据
+                $scriptInit = $script->init;
+                if (empty($scriptInit)) {
+                    throw new \Dingo\Api\Exception\ResourceException("scriptInit is not found");;
+                }
+                //将配置数据转化为数组处理
+                $init = $scriptInit->toArray();
+
+                //替换模板中的配置
+                $content = $this->__getScriptInitData($content, $init);
 
                 break;
             case Script::LANGUAGES_TYPE_HTML:
-                //获取模板路径
-                $templatePath = config('script.html_template_path');
-                //获取内容
-                $content = file_get_contents($templatePath);
+                $content = $this->__getBaseScriptModel(Script::LANGUAGES_TYPE_HTML);
 
                 break;
             case Script::LANGUAGES_TYPE_API:
-                //获取模板路径
-                $templatePath = config('script.api_template_path');
-                //获取内容
-                $content = file_get_contents($templatePath);
+                $content = $this->__getBaseScriptModel(Script::LANGUAGES_TYPE_API);
 
                 break;
             default:
@@ -278,7 +283,7 @@ class ScriptController extends Controller
         }
 
         //连接模板内容和代码
-        $content = $content . $result;
+        $content = $content . PHP_EOL . PHP_EOL . $result;
 
         //命名js名称
         $filename = 'script_' . $script->id . '.js';
@@ -386,6 +391,30 @@ class ScriptController extends Controller
     }
 
     /**
+     * __getBaseScriptModel
+     * 获取基础模板内容
+     *
+     * @param
+     * @return string
+     */
+    private function __getBaseScriptModel($languagesType)
+    {
+        //根据脚本类型选择模块
+        $baseScriptModel = ScriptModel::where('system_type',ScriptModel::SYSTEM_TYPE_BASE)
+                                    ->where('languages_type',$languagesType)
+                                    ->first();
+
+        if (empty($baseScriptModel)) {
+            throw new \Dingo\Api\Exception\ResourceException("scriptModel is not found");
+        }
+
+        //获取代码内容
+        $structure = $baseScriptModel->structure;
+
+        return $structure;
+    }
+
+    /**
      * __formatData
      * 整理代码数据
      *
@@ -429,33 +458,32 @@ class ScriptController extends Controller
     }
 
     /**
-     * __getCasperJsTemplateData
+     * __getScriptInitData
      * 获取casperjs的模板内容
      *
      * @param $script
      * @return string
      */
-    private function __getCasperJsTemplateData($script)
+    private function __getScriptInitData($content, $init)
     {
-        //获取script配置数据
-        $scriptInit = $script->init;
-        if (empty($scriptInit)) {
-            throw new \Dingo\Api\Exception\ResourceException("scriptInit is not found");;
+        //转化参数值,将数据中的1对应true,2对应false
+        if ($init['load_images'] == 1){
+            $loadImages = 'true';
+        } else {
+            $loadImages = 'false';
         }
 
-        //将配置数据转化为数组处理
-        $init = $scriptInit->toArray();
+        if ($init['load_plugins'] == 1){
+            $loadPlugins = 'true';
+        } else {
+            $loadPlugins = 'false';
+        }
 
-        //转化参数值,将数据中的1对应true,2对应false
-        $loadImages = $init['load_images'] == 1 ? "true" : "false";
-        $loadPlugins = $init['load_plugins'] == 1 ? "true" : "false";
-        $verbose = $init['verbose'] == 1 ? "true" : "false";
-
-        //获取模板路径
-        $templatePath = config('script.casperjs_template_path');
-
-        //获取内容
-        $content = file_get_contents($templatePath);
+        if ($init['verbose'] == 1){
+            $verbose = 'true';
+        } else {
+            $verbose = 'false';
+        }
 
         //替换模板中的配置参数
         $content = str_replace("{{load_images}}", $loadImages, $content);
