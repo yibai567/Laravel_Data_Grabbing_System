@@ -42,6 +42,7 @@
 
                                 <div class="col-sm-10">
                                 <input type='text' title="脚本名称" required maxlength=70 class='form-control' name="name" id="name" value='{{$row[name]}}'/>
+                                 <input type='hidden' maxlength=70 class='form-control' name="name" id="languages_type" value='{{$languages_type}}'/>
                                 <div class="text-danger"></div>
                                 <p class='help-block'></p>
                                 </div>
@@ -54,6 +55,7 @@
                                 <p class='help-block'></p>
                                 </div>
                             </div>
+                            @if ($languages_type == 1)
                             <div class='form-group header-group-0 ' id='form-group-load_images' style="">
                                 <label class='control-label col-sm-2'>load_images
                                     <span class='text-danger' title='This field is required'>*</span>
@@ -207,6 +209,7 @@
                                 <p class='help-block'></p>
                                 </div>
                             </div>
+                            @endif
                             <div class='form-group header-group-0 ' id='form-group-step' style="">
                                 <label class='control-label col-sm-2'>步骤
                                     <span class='text-danger' title='This field is required'>*</span>
@@ -343,6 +346,9 @@
                 <!-- </span> -->
                 <!-- </span> -->
                 <!-- @endfor -->
+                @if (empty(json_decode($value->parameters, true)))
+                    <span><input type="hidden" {{$requires}} name="script_model_params[{{$value->id}}][]" value=""></span>
+                @else
                 @foreach(json_decode($value->parameters, true) as $parametersValue)
                     <span>{{$parametersValue[name]}}:</span>
                     @if ($parametersValue[requires] == 'true')
@@ -356,7 +362,7 @@
                         <br>
                     @elseif ($parametersValue[type] == 'json')
                         <span>
-                        <textarea {{$requires}} name="script_model_params[{{$parametersValue->id}}][]" maxlength=5000 rows="3" cols="50"></textarea>
+                        <textarea {{$requires}} name="script_model_params[{{$value->id}}][]" maxlength=5000 rows="3" cols="50"></textarea>
                         </span>
                         <br>
                     @elseif ($parametersValue[type] == 'boole')
@@ -375,8 +381,10 @@
                         <span>
                         <textarea {{$requires}} name="script_model_params[{{$value->id}}][]" maxlength=5000 rows="3" cols="50"></textarea>
                         </span>
+                        <br>
                     @endif
                 @endforeach
+                @endif
             </li>
             @endforeach
         </ul>
