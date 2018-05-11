@@ -9,9 +9,15 @@ class ScriptModel extends Model
 {
     use SoftDeletes;
 
-    const DEFAULT_SYSTEM_TYPE = 1;
+    //模块类型
+    const SYSTEM_TYPE_DEFAULT = 1;
     const SYSTEM_TYPE_DEFINED = 2;
     const SYSTEM_TYPE_BASE = 3;
+
+    //脚本类型
+    const LANGUAGES_TYPE_CASPERJS = 1;
+    const LANGUAGES_TYPE_HTML = 2;
+    const LANGUAGES_TYPE_API = 3;
 
     /**
      * 表名
