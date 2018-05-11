@@ -4,17 +4,18 @@ var Casper = require('casper')
 
 var config = {
     verbose: {{verbose}},
-    logLevel: "{{log_level}}",
+logLevel: "{{log_level}}",
     viewportSize: {
-        {{width}}
-        {{height}}
-    },
-    pageSettings: {
-        loadImages: {{load_images}},
-        loadPlugins: {{load_plugins}},
-    },
+    {{width}}
+    {{height}}
+},
+pageSettings: {
+    loadImages: {{load_images}},
+    loadPlugins: {{load_plugins}},
+},
 }
 
 var casper = Casper.create(config)
 var startOn = utilJS.getDate()
-
+var res = []
+var responseData = {}

@@ -10,6 +10,7 @@
 namespace App\Http\Controllers\InternalAPI;
 
 use App\Models\ScriptModel;
+use Illuminate\Support\Facades\DB;
 use Log;
 use App\Models\Script;
 use App\Models\ScriptInit;
@@ -36,44 +37,57 @@ class ScriptController extends Controller
             'description' => 'nullable|string|max:255',
             'languages_type' => 'required|integer|between:1,3',
             'step' => 'required|array',
-            'cron_type' => 'nullable|integer',
+            'cron_type' => 'nullable|integer|default',
             'operate_user' => 'required|string|max:50',
             'init' => 'nullable|json'
         ]);
 
         //默认值
         if (empty($params['cron_type'])) {
-            $params['cron_type'] = Script::IS_INIT;
+            $params['cron_type'] = Script::CRON_TYPE_KEEP;
         }
 
         $init = $params['init'];
-        //开启事务
+
+        DB::beginTransaction();
         try {
-            //判断脚本类型是否添加配置
-            if ($params['languages_type'] == Script::CASPERJS_LANGUAGES_TYPE) {
+            //判断当模板类型等于script的时候需要添加配置
+            if ($params['languages_type'] == Script::LANGUAGES_TYPE_CASPERJS) {
                 //调用添加配置的方法
-                $scriptInit = $this->__createInit($init);
-                $params['script_init_id'] = $scriptInit['id'];
+                $scriptInit = $this->__createScriptInit($init);
             }
-            unset($params['init']);
-            //给定默认值
-            $params['status'] = Script::STATUS_INIT;
-            //数组转json
-            $params['step'] = json_encode($params['step']);
-            //添加script
-            $script = Script::create($params);
-        } catch (Exception $e) {
-            errorLog($e->getMessage(), $e->getCode());
-            return $this->resError($e->getCode(), $e->getMessage());
+            //整理入库数据
+            $data = [
+                'name' => $params['name'],
+                'description' => $params['description'],
+                'languages_type' => $params['languages_type'],
+                'step' => $params['step'],
+                'status' => Script::STATUS_INIT,
+                'operate_user' => $params['operate_user'],
+                'cron_type' => $params['cron_type']
+            ];
+
+            if (!empty($scriptInit)) {
+                $data['script_init_id'] = $scriptInit['id'];
+            }
+
+            $script = Script::create($data);
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            Log::error('Script create or __createScriptInit    Exception:'."\t".$e->getCode()."\t".$e->getMessage());
+            throw new \Dingo\Api\Exception\ResourceException("create script or create scriptInit is failed");
         }
 
         $result = [];
         if (!empty($script)) {
-            //整理数据
             $result = $script->toArray();
-            if (!empty($scriptInit)) {
-                $result['init'] = $scriptInit;
-            }
+        }
+
+        if (!empty($scriptInit)) {
+            $result['init'] = $scriptInit;
         }
 
         return $this->resObjectGet($result, 'script', $request->path());
@@ -90,12 +104,13 @@ class ScriptController extends Controller
     {
         Log::debug('[internal ScriptController update] start!');
         $params = $request->all();
+
         //验证参数
         ValidatorService::check($params, [
             'id' => 'required|integer',
             'name' => 'nullable|string|max:100',
             'description' => 'nullable|string|max:255',
-            'languages_type' => 'required|integer|between:1,3',
+            'languages_type' => 'nullable|integer|between:1,3',
             'step' => 'nullable|array',
             'cron_type' => 'nullable|integer',
             'operate_user' => 'nullable|string|max:50',
@@ -106,27 +121,27 @@ class ScriptController extends Controller
 
         //检测数据是否存在
         if (empty($script)) {
-            return $this->resError(405, 'script is not exists!');
+            throw new \Dingo\Api\Exception\ResourceException("script is not found");
         }
 
-        $init = $params['init'];
-        unset($params['init']);
+        DB::beginTransaction();
 
-        //将step数组转化为json存入数据库
-        $params['step'] = json_encode($params['step']);
-        //开启事务
         try {
-            //修改script数据
             $script->update($params);
+
             $result = $script->toArray();
 
             //判断是否修改配置,有数据就修改,无跳过
-            if (!empty($init) && $params['languages_type'] == Script::CASPERJS_LANGUAGES_TYPE) {
-                $result['init'] = $this->__updateInit($init, $script);
+            if (!empty($params['init']) && $params['languages_type'] == Script::LANGUAGES_TYPE_CASPERJS) {
+                $result['init'] = $this->__updateScriptInit($params['init'], $script);
             }
-        } catch (Exception $e){
-            errorLog($e->getMessage(), $e->getCode());
-            return $this->resError($e->getCode(), $e->getMessage());
+
+            DB::commit();
+        } catch (\Exception $e){
+            DB::rollback();
+
+            Log::error('Script update or __updateScriptInit    Exception:'."\t".$e->getCode()."\t".$e->getMessage());
+            throw new \Dingo\Api\Exception\ResourceException("update script or update scriptInit is failed");
         }
 
         return $this->resObjectGet($result, 'script', $request->path());
@@ -143,26 +158,28 @@ class ScriptController extends Controller
     {
         Log::debug('[internal ScriptController retrieve] start!');
         $params = $request->all();
+
         //检测参数
         ValidatorService::check($params, [
             'id' => 'required|integer',
         ]);
+
         $script = Script::find($params['id']);
-
-        $result = [];
-        //整理数据
-        if (!empty($script)) {
-            $result = $script->toArray();
-            if ($result == Script::CASPERJS_LANGUAGES_TYPE) {
-                //根据一对一关系,查询该script的配置数据
-                $scriptInit = $script->init;
-                $result['init'] = [];
-                if (!empty($scriptInit)) {
-                    $result['init'] = $scriptInit->toArray();
-                }
-            }
+        if (empty($script)) {
+            throw new \Dingo\Api\Exception\ResourceException("script is not found");
         }
+        $result = $script->toArray();
 
+        if ($result == Script::LANGUAGES_TYPE_CASPERJS) {
+            //根据一对一关系,查询该script的配置数据
+            $scriptInit = $script->init;
+            $result['init'] = [];
+
+            if (empty($scriptInit)) {
+                throw new \Dingo\Api\Exception\ResourceException("scriptInit is not found");
+            }
+            $result['init'] = $scriptInit->toArray();
+        }
         return $this->resObjectGet($result, 'script', $request->path());
     }
 
@@ -177,47 +194,46 @@ class ScriptController extends Controller
     {
         Log::debug('[internal ScriptController all] start!');
         $params = $request->all();
+
         //验证参数
-        ValidatorService::check($params, [
-            'page' => 'nullable|integer',
-            'num' => 'nullable|integer',
+        ValidatorService::check($request->all(), [
+            'limit' => 'nullable|integer|min:1|max:500',
+            'offset' => 'nullable|integer|min:0',
         ]);
 
-        if (empty($params['page'])) {
-            $params['page'] = 1;
+        if (empty($params['limit'])) {
+            $params['limit'] = 20;
         }
-        if (empty($params['num'])) {
-            $params['num'] = 20;
-        }
-        //求出跳过数据个数
-        $offset = $params['num'] * ($params['page'] - 1);
 
-        //获取数据
-        $items = Script::take($params['num'])
-            ->skip($offset)
-            ->orderBy('id', 'desc')
-            ->get();
+        if (empty($params['offset'])) {
+            $params['offset'] = 0;
+        }
+
+        $items = Script::take($params['limit'])
+                    ->skip($params['offset'])
+                    ->orderBy('id', 'desc')
+                    ->get();
 
         $result = [];
         if (!empty($items)) {
             $result = $items->toArray();
         }
 
-
         return $this->resObjectGet($result, 'script', $request->path());
     }
 
     /**
-     * generateScript()
+     * generateScript
      * 生成脚本
      *
-     * @param
+     * @param $id
      * @return array
      */
     public function generateScript(Request $request)
     {
         Log::debug('[internal ScriptController generateScript] start!');
         $params = $request->all();
+
         //验证参数
         ValidatorService::check($params, [
             'id' => 'required|integer',
@@ -228,29 +244,36 @@ class ScriptController extends Controller
 
         //判断script数据和配置是否存在
         if (empty($script)) {
-            return $this->resError(405, 'script is not exists!');
+            throw new \Dingo\Api\Exception\ResourceException("script is not found");
         }
 
         //整理代码数据
-        $result = $this->__arrangeData($script);
+        $result = $this->__formatData($script);
 
         //通过文件类型获取不同模板内容
         switch ($script->languages_type) {
-            case  Script::CASPERJS_LANGUAGES_TYPE:
+            case  Script::LANGUAGES_TYPE_CASPERJS:
                 //获取casperjs的模板内容并替换配置
                 $content = $this->__getCasperJsTemplateData($script);
+
                 break;
-            case Script::HTML_LANGUAGES_TYPE:
+            case Script::LANGUAGES_TYPE_HTML:
                 //获取模板路径
                 $templatePath = config('script.html_template_path');
                 //获取内容
                 $content = file_get_contents($templatePath);
+
                 break;
-            case Script::API_LANGUAGES_TYPE:
+            case Script::LANGUAGES_TYPE_API:
                 //获取模板路径
                 $templatePath = config('script.api_template_path');
                 //获取内容
                 $content = file_get_contents($templatePath);
+
+                break;
+            default:
+                throw new \Dingo\Api\Exception\ResourceException("template is not found");
+
                 break;
         }
 
@@ -258,38 +281,40 @@ class ScriptController extends Controller
         $content = $content . $result;
 
         //命名js名称
-        $lastGenerateAt = time();
-        $filename = 'script_' . $script->id . '_' . $lastGenerateAt . '.js';
+        $filename = 'script_' . $script->id . '.js';
 
         //拼接路径和名称
-        $filePath = config('script.script_generate_path');
+        $filePath = config('script.casperjs_generate_path');
         $file = $filePath.$filename;
+
         //写入文件
         file_put_contents($file, $content);
 
         //检查文件是否生成成功
         if (!file_exists($file)){
-            return $this->resError(404, 'file generation fail!');
+            throw new \Dingo\Api\Exception\ResourceException("file generation failed");
         }
 
         //更新状态和时
         $script->status = Script::STATUS_GENERATE;
-        $script->last_generate_at = $lastGenerateAt;
+        $script->last_generate_at = time();
         $script->save();
 
         return $this->resObjectGet(true, 'script', $request->path());
     }
 
     /**
-     * __creteInit()
+     * __createScriptInit
      * 创建script配置
+     *
      * @param
      * @return array
      */
-    private function __createInit($init)
+    private function __createScriptInit($scriptInit)
     {
         //解析json转数组
-        $init = json_decode($init,true);
+        $init = json_decode($scriptInit,true);
+
         //判断配置数据存在,存在则验证参数,无则赋予空数组
         if (!empty($init)) {
             ValidatorService::check($init, [
@@ -302,11 +327,21 @@ class ScriptController extends Controller
             ]);
         }
         //设置默认值
-        $init['load_images'] = $init['load_images'] ?? ScriptInit::DEFAULT_LOAD_IMAGES;
-        $init['load_plugins'] = $init['load_plugins'] ?? ScriptInit::DEFAULT_LOAD_PLUGINS;
-        $init['log_level'] = $init['log_level'] ?? ScriptInit::DEFAULT_LOG_LEVEL;
-        $init['verbose'] = $init['verbose'] ?? ScriptInit::DEFAULT_VERBOSE;
+        if (empty($init['load_images'])) {
+            $init['load_images'] = ScriptInit::DEFAULT_LOAD_IMAGES;
+        }
 
+        if (empty($init['load_plugins'])) {
+            $init['load_plugins'] = ScriptInit::DEFAULT_LOAD_PLUGINS;
+        }
+
+        if (empty($init['log_level'])) {
+            $init['log_level'] = ScriptInit::DEFAULT_LOG_LEVEL;
+        }
+
+        if (empty($init['verbose'])) {
+            $init['verbose'] = ScriptInit::DEFAULT_VERBOSE;
+        }
         $scriptInit = ScriptInit::create($init);
 
         $result = [];
@@ -318,18 +353,18 @@ class ScriptController extends Controller
     }
 
     /**
-     * __updateInit
+     * __updateScriptInit
      * 更新
      *
      * @param
      * @return array
      */
-    public function __updateInit($init, $script)
+    public function __updateScriptInit($postScriptInit, $script)
     {
         //解析json转数组
-        $init = json_decode($init,true);
+        $postScriptInit = json_decode($postScriptInit,true);
         //判断配置数据存在,存在则验证参数,无则赋予空数组
-        ValidatorService::check($init, [
+        ValidatorService::check($postScriptInit, [
             'load_images' => 'nullable|integer|between:1,2',
             'load_plugins' => 'nullable|integer|between:1,2',
             'log_level' => 'nullable|string|max:10',
@@ -341,40 +376,43 @@ class ScriptController extends Controller
         $scriptInit = $script->init;
 
         if (empty($scriptInit)) {
-            return $this->resError(405, 'scriptInit is not exists!');
+            throw new \Dingo\Api\Exception\ResourceException("scriptInit is not found");
         }
 
-        $scriptInit->update($init);
+        $scriptInit->update($postScriptInit);
         $result = $scriptInit->toArray();
 
         return $result;
     }
 
     /**
-     * __arrangeData
+     * __formatData
      * 整理代码数据
      *
-     * @param $id
-     * @return array
+     * @param $script
+     * @return string
      */
-    private function __arrangeData($script)
+    private function __formatData($script)
     {
         //$script转化为数组
         $script = $script->toArray();
+
         //获取步骤
         $steps = $script['step'];
-        //json转数组
         $stepArr = json_decode($steps,true);
+
         $num = count($stepArr);
         for ($i = 0; $i < $num; $i++) {
             //获取模块信息
             $scriptModel = ScriptModel::find($stepArr[$i][0]);
             if (empty($scriptModel)) {
-                return $this->resError(405, 'scriptModel is not exists!');
+                throw new \Dingo\Api\Exception\ResourceException("ScriptModel is not found");
             }
             $modelInfo = $scriptModel->toArray();
+
             //获取代码
             $structure = $modelInfo['structure'];
+
             $paramNum = count($stepArr[$i]);
             if($paramNum > 1){
                 for ($j = 1; $j < $paramNum; $j++) {
@@ -383,6 +421,7 @@ class ScriptController extends Controller
                 }
             }
 
+            //代码两次换行,可以生成脚本时隔开一行
             $structures .= $structure . PHP_EOL . PHP_EOL;
         }
 
@@ -393,15 +432,15 @@ class ScriptController extends Controller
      * __getCasperJsTemplateData
      * 获取casperjs的模板内容
      *
-     * @param $id
-     * @return array
+     * @param $script
+     * @return string
      */
     private function __getCasperJsTemplateData($script)
     {
         //获取script配置数据
         $scriptInit = $script->init;
         if (empty($scriptInit)) {
-            return $this->resError(405, 'scriptInit is not exists!');
+            throw new \Dingo\Api\Exception\ResourceException("scriptInit is not found");;
         }
 
         //将配置数据转化为数组处理
@@ -413,7 +452,8 @@ class ScriptController extends Controller
         $verbose = $init['verbose'] == 1 ? "true" : "false";
 
         //获取模板路径
-        $templatePath = config('script.script_template_path');
+        $templatePath = config('script.casperjs_template_path');
+
         //获取内容
         $content = file_get_contents($templatePath);
 
@@ -422,11 +462,13 @@ class ScriptController extends Controller
         $content = str_replace("{{load_plugins}}", $loadPlugins, $content);
         $content = str_replace("{{log_level}}", $init['log_level'], $content);
         $content = str_replace("{{verbose}}",$verbose, $content);
+
         if (empty($init['height'])) {
             $content = str_replace("{{height}}", '', $content);
         } else {
             $content = str_replace("{{height}}","height: " . $init['height'] . ",", $content);
         }
+
         if (empty($init['width'])) {
             $content = str_replace("{{width}}", '', $content);
         } else {

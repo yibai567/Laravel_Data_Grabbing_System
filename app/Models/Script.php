@@ -15,9 +15,9 @@ class Script extends Model
     const STATUS_GENERATE = 2; // 已生成
 
     //脚本类型
-    const CASPERJS_LANGUAGES_TYPE = 1;
-    const HTML_LANGUAGES_TYPE = 2;
-    const API_LANGUAGES_TYPE = 3;
+    const LANGUAGES_TYPE_CASPERJS = 1;
+    const LANGUAGES_TYPE_HTML = 2;
+    const LANGUAGES_TYPE_API = 3;
 
     //任务执行类型 1、保持 2、每分钟 3、每五分钟 4、每十分钟 5、每十五分钟 6、每二十分钟
     const CRON_TYPE_KEEP = 1;
@@ -61,4 +61,16 @@ class Script extends Model
     {
         return $this->hasOne('App\Models\ScriptInit', 'id', 'script_init_id');
     }
+
+    /**
+     * 设置step字段入口前转化为json
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function setStepAttribute($value)
+    {
+        $this->attributes['step'] = json_encode($value, JSON_UNESCAPED_UNICODE);
+    }
+
 }
