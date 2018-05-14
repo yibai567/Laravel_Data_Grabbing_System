@@ -16,8 +16,6 @@ use App\Models\Script;
 use App\Models\ScriptInit;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redis;
-
 
 class ScriptController extends Controller
 {
@@ -47,6 +45,15 @@ class ScriptController extends Controller
         //默认值
         if (empty($params['cron_type'])) {
             $params['cron_type'] = Script::CRON_TYPE_KEEP;
+        }
+
+        //去name和description空白字符
+        if (!empty($params['name'])) {
+            $params['name'] = trim($params['name']);
+        }
+
+        if (!empty($params['description'])) {
+            $params['description'] = trim($params['description']);
         }
 
         $init = $params['init'];
@@ -118,6 +125,15 @@ class ScriptController extends Controller
             'operate_user' => 'nullable|string|max:50',
             'init' => 'nullable|json'
         ]);
+
+        //去name和description空白字符
+        if (!empty($params['name'])) {
+            $params['name'] = trim($params['name']);
+        }
+
+        if (!empty($params['description'])) {
+            $params['description'] = trim($params['description']);
+        }
 
         $script = Script::find($params['id']);
 
@@ -431,7 +447,7 @@ class ScriptController extends Controller
         //获取步骤
         $steps = $script['step'];
         $stepArr = json_decode($steps,true);
-
+        $structures = '';
         $num = count($stepArr);
         for ($i = 0; $i < $num; $i++) {
             //获取模块信息
@@ -508,34 +524,4 @@ class ScriptController extends Controller
         return $content;
     }
 
-    /**
-     * 根据队列名获取队列数据
-     * @param $name 队列名称
-     */
-    public function getByQueueName(Request $request)
-    {
-        $params = $request->all();
-        ValidatorService::check($params, [
-            'name' => 'string|required|max:100',
-        ]);
-
-        try {
-            $data = [];
-
-            if (Redis::connection('queue')->lLen($params['name']) > 0 ) {
-                for ($i = 0; $i < 10; $i++) {
-                    $value = Redis::connection('queue')->rpop($params['name']);
-
-                    if (is_null($value)) {
-                        break;
-                    }
-                    $data[$i] = json_decode($value, true);
-                }
-            }
-        } catch (Exception $e) {
-            return $this->resError($e->getCode(), $e->getMessage());
-        }
-
-        return $this->resObjectGet($data, 'list', $request->path());
-    }
 }

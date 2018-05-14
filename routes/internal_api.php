@@ -101,5 +101,7 @@ $api->version(
         $api->get('/script_models','ScriptModelController@all');
         $api->get('/script_models/ids','ScriptModelController@listByIds');
         $api->get('/script_models/languages_type/{languages_type}','ScriptModelController@listByLanguagesType');
+
+        $api->post('/data/results','DataController@batchCreate');
     }
 );
