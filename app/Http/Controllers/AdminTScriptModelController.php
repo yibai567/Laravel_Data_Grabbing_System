@@ -36,16 +36,16 @@
 			$this->col[] = ["label"=>"ID","name"=>"id"];
             $this->col[] = ["label"=>"模块名称","name"=>"name"];
 			$this->col[] = ["label"=>"脚本语言","name"=>"languages_type","callback"=>function ($row) {
-            if ( $row->languages_type == 1) {
+            if ( $row->languages_type == ScriptModel::LANGUAGES_TYPE_CASPERJS) {
                 return 'casperjs';
-            } elseif ($row->languages_type == 2) {
+            } elseif ($row->languages_type == ScriptModel::LANGUAGES_TYPE_HTML) {
                 return 'html';
-            } elseif ($row->languages_type == 3) {
+            } elseif ($row->languages_type == ScriptModel::LANGUAGES_TYPE_API) {
                 return 'api';
             }
             }];
             $this->col[] = ["label"=>"类型","name"=>"system_type","callback"=>function ($row) {
-            if ( $row->system_type == ScriptModel::DEFAULT_SYSTEM_TYPE) {
+            if ( $row->system_type == ScriptModel::SYSTEM_TYPE_DEFAULT) {
                 return '预生成模块';
             } else {
                 return '用户自定义模块';
@@ -399,17 +399,17 @@
             $this->cbLoader();
             $row = ScriptModel::where('id', $id)->first();
 
-            if ($row->system_type == ScriptModel::DEFAULT_SYSTEM_TYPE) {
+            if ($row->system_type == ScriptModel::SYSTEM_TYPE_DEFAULT) {
                 $row->system_type = '预生成模块';
             } else {
                 $row->system_type = '用户自定义模块';
             }
 
-            if ($row->languages_type == 1) {
+            if ($row->languages_type == ScriptModel::LANGUAGES_TYPE_CASPERJS) {
                 $row->languages_type = 'casperjs';
-            } elseif ($row->languages_type == 2) {
+            } elseif ($row->languages_type == ScriptModel::LANGUAGES_TYPE_HTML) {
                 $row->languages_type = 'html';
-            } elseif ($row->languages_type == 3) {
+            } elseif ($row->languages_type == ScriptModel::LANGUAGES_TYPE_API) {
                 $row->languages_type = 'api';
             }
 
