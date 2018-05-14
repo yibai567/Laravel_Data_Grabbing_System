@@ -8,13 +8,11 @@
     @endif
 @endif
 
-<div class="panel panel-default">
+<div class="panel panel-default" style="position: relative;">
     <div class="panel-heading">
         <strong>
             <i class='{{CRUDBooster::getCurrentModule()->icon}}'></i> {!! $page_title or "Page Title" !!}
         </strong>
-        <strong>
-            <a href="#" class='btn-show-sidebar' data-toggle="control-sidebar"><i class='fa fa-bars'></i> Add Widget</a></strong>
         </div>
     <div class="panel-body" style="padding:20px 0px 0px 0px">
     <?php
@@ -38,8 +36,8 @@
             <span class='text-danger' title='This field is required'>*</span>
         </label>
         <div class="col-sm-10">
-        <input type='text' title="脚本名称" required maxlength=70 class='form-control' name="name" id="name" value='{{$row[name]}}'/>
-         <input type='hidden' maxlength=70 class='form-control' name="languages_type" id="languages_type" value='{{$row[languages_type]}}'/>
+        <input type='text' title="脚本名称" required maxlength=70 style="width: 50%;" class='form-control' name="name" id="name" value='{{$row[name]}}'/>
+         <input type='hidden' maxlength=70 class='form-control' style="width: 50%;" name="languages_type" id="languages_type" value='{{$row[languages_type]}}'/>
         <div class="text-danger"></div>
         <p class='help-block'></p>
         </div>
@@ -47,7 +45,9 @@
     <div class='form-group header-group-0 ' id='form-group-description' style="">
         <label class='control-label col-sm-2'>脚本描述 </label>
         <div class="col-sm-10">
-            <textarea name="description" id="description" maxlength=5000 class='form-control' rows='5'>{{$row[description]}}</textarea>
+            <textarea name="description" id="description" maxlength=5000 style="width: 50%;" class='form-control' rows='2'>
+                {{$row[description]}}
+            </textarea>
         <div class="text-danger"></div>
         <p class='help-block'></p>
         </div>
@@ -60,7 +60,7 @@
     <div>
         <div class="col-sm-10">
             @if (empty($row[init][load_images]))
-                <label class='radio-inline'>
+                <label class='radio-inline' style="width: 20%;">
                     <input type="radio" name="load_images" value="1"> true
                 </label>
                 <label class='radio-inline'>
@@ -68,14 +68,14 @@
                 </label>
             @else
                 @if ($row[init][load_images] == 1)
-                    <label class='radio-inline'>
+                    <label class='radio-inline' style="width: 20%;>
                         <input type="radio" checked name="load_images" value="1"> true
                     </label>
                     <label class='radio-inline'>
                         <input type="radio" name="load_images" value="2"> false
                     </label>
                 @else
-                    <label class='radio-inline'>
+                    <label class='radio-inline' style="width: 20%;>
                         <input type="radio" name="load_images" value="1"> true
                     </label>
                     <label class='radio-inline'>
@@ -94,7 +94,7 @@
     <div>
         <div class="col-sm-10">
             @if (empty($row[init][load_plugins]))
-                <label class='radio-inline'>
+                <label class='radio-inline' style="width: 20%;">
                     <input type="radio" name="load_plugins" value="1"> true
                 </label>
                 <label class='radio-inline'>
@@ -102,14 +102,14 @@
                 </label>
             @else
                 @if ($row[init][load_plugins] == 1)
-                    <label class='radio-inline'>
+                    <label class='radio-inline' style="width: 20%;">
                         <input type="radio" checked name="load_plugins" value="1"> true
                     </label>
                     <label class='radio-inline'>
                         <input type="radio" name="load_plugins" value="2"> false
                     </label>
                 @else
-                    <label class='radio-inline'>
+                    <label class='radio-inline' style="width: 20%;">
                         <input type="radio" name="load_plugins" value="1"> true
                     </label>
                     <label class='radio-inline'>
@@ -128,7 +128,7 @@
     <div>
         <div class="col-sm-10">
             @if (empty($row[init][log_level]))
-                <label class='radio-inline'>
+                <label class='radio-inline' style="width: 20%;">
                     <input type="radio" name="log_level" value="debug"> debug
                 </label>
                 <label class='radio-inline'>
@@ -136,14 +136,14 @@
                 </label>
             @else
                 @if ($row[init][log_level] == 'debug')
-                    <label class='radio-inline'>
+                    <label class='radio-inline' style="width: 20%;">
                         <input type="radio" checked name="log_level" value="debug"> debug
                     </label>
                     <label class='radio-inline'>
                         <input type="radio" name="log_level" value="error"> error
                     </label>
                 @else
-                    <label class='radio-inline'>
+                    <label class='radio-inline' style="width: 20%;">
                         <input type="radio" name="log_level" value="debug"> debug
                     </label>
                     <label class='radio-inline'>
@@ -162,7 +162,7 @@
     <div>
         <div class="col-sm-10">
             @if (empty($row[init][verbose]))
-                <label class='radio-inline'>
+                <label class='radio-inline' style="width: 20%;">
                     <input type="radio" name="verbose" value="1"> true
                 </label>
                 <label class='radio-inline'>
@@ -170,14 +170,14 @@
                 </label>
             @else
                 @if ($row[init][verbose] == 1)
-                    <label class='radio-inline'>
+                    <label class='radio-inline' style="width: 20%;">
                         <input type="radio" checked name="verbose" value="1"> true
                     </label>
                     <label class='radio-inline'>
                         <input type="radio" name="verbose" value="2"> false
                     </label>
                 @else
-                    <label class='radio-inline'>
+                    <label class='radio-inline' style="width: 20%;">
                         <input type="radio" name="verbose" value="1"> true
                     </label>
                     <label class='radio-inline'>
@@ -192,7 +192,7 @@
         <label class='control-label col-sm-2'>width</label>
 
         <div class="col-sm-10">
-        <input type='text' maxlength=70 class='form-control' name="width" id="width" value='{{$row[init][width]}}'/>
+        <input type='text' maxlength=70 class='form-control' style="width: 50%; name="width" id="width" value='{{$row[init][width]}}'/>
         <div class="text-danger"></div>
         <p class='help-block'></p>
         </div>
@@ -201,7 +201,7 @@
         <label class='control-label col-sm-2'>height</label>
 
         <div class="col-sm-10">
-        <input type='text' maxlength=70 class='form-control' name="height" id="height" value='{{$row[init][height]}}'/>
+        <input type='text' maxlength=70 class='form-control' style="width: 50%; name="height" id="height" value='{{$row[init][height]}}'/>
         <div class="text-danger"></div>
         <p class='help-block'></p>
         </div>
@@ -348,6 +348,8 @@
     </div>
     </div>
     @endif
+
+
     </div><!-- /.box-body -->
 
     <div class="box-footer" style="background: #F5F5F5">
@@ -377,9 +379,7 @@
     </div>
     </div><!-- /.box-footer-->
     </form>
-</div>
-</div>
-    <aside class="control-sidebar control-sidebar-dark" style="position: fixed;">
+    <aside class="control-sidebar control-sidebar-dark" style="width: 20%; left: 80%">
     <ul id="foo" class="block__list block__list_words" style="overflow-y: auto; overflow-x: hidden;">
         @foreach($script_model as $key=>$value)
         <li>
@@ -442,6 +442,8 @@
         @endforeach
     </ul>
 </aside>
+</div>
+</div>
 </div><!--END AUTO MARGIN-->
 
 <script src="http://rubaxa.github.io/Sortable/Sortable.js"></script>
@@ -474,8 +476,11 @@
         display: block;
         padding: 10px;
         border: solid;
+        border-color: #0000FF;
     }
-
+    .control-sidebar-dark, .control-sidebar-dark+.control-sidebar-bg {
+        background:#605ca8;
+    }
 </style>
 <script>
 Sortable.create(document.getElementById('foo'), {
@@ -488,14 +493,16 @@ Sortable.create(document.getElementById('foo'), {
     sort: false,
 });
 
-Sortable.create(document.getElementById('bar'), {
+    Sortable.create(document.getElementById('bar'), {
     group: {
         name:"words",
         pull: true,
         put: true
     },
     animation: 150, //动画参数
-});
-
+    onRemove: function (evt){ //删除拖拽节点的时候促发该事件
+       evt.item.parentNode.removeChild(evt.item);
+      },
+    });
 </script>
 @endsection

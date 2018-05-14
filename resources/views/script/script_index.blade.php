@@ -133,7 +133,11 @@
         <td>{{$row->name}}</td>
         <td>{{$row->cron_type}}</td>
         <td>{{$row->last_generate_at}}</td>
-        <td>{{$row->status_name}}</td>
+        @if ($row->status == 1)
+        <td><a class='btn btn-xs btn-warning' title='初始化'><i></i>初始化</a></td>
+        @else
+        <td><a class='btn btn-xs btn-success' title='已发布'><i></i>已发布</a></td>
+        @endif
         <td style="float: right;">
           <!-- To make sure we have read access, wee need to validate the privilege -->
 
