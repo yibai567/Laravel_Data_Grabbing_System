@@ -68,14 +68,14 @@
                 </label>
             @else
                 @if ($row[init][load_images] == 1)
-                    <label class='radio-inline' style="width: 20%;>
+                    <label class='radio-inline' style="width: 20%;">
                         <input type="radio" checked name="load_images" value="1"> true
                     </label>
                     <label class='radio-inline'>
                         <input type="radio" name="load_images" value="2"> false
                     </label>
                 @else
-                    <label class='radio-inline' style="width: 20%;>
+                    <label class='radio-inline' style="width: 20%;">
                         <input type="radio" name="load_images" value="1"> true
                     </label>
                     <label class='radio-inline'>
@@ -192,7 +192,7 @@
         <label class='control-label col-sm-2'>width</label>
 
         <div class="col-sm-10">
-        <input type='text' maxlength=70 class='form-control' style="width: 50%; name="width" id="width" value='{{$row[init][width]}}'/>
+        <input type='text' maxlength=70 class='form-control' style="width: 50%;" name="width" id="width" value='{{$row[init][width]}}'/>
         <div class="text-danger"></div>
         <p class='help-block'></p>
         </div>
@@ -201,7 +201,7 @@
         <label class='control-label col-sm-2'>height</label>
 
         <div class="col-sm-10">
-        <input type='text' maxlength=70 class='form-control' style="width: 50%; name="height" id="height" value='{{$row[init][height]}}'/>
+        <input type='text' maxlength=70 class='form-control' style="width: 50%;" name="height" id="height" value='{{$row[init][height]}}'/>
         <div class="text-danger"></div>
         <p class='help-block'></p>
         </div>
@@ -214,16 +214,16 @@
         <div class="col-sm-10">
             <div data-force="18" class="layer-block" style="float: left;width: 50%;border: double">
                 <ul id="bar" class="block__list block__list_tags">
-                @foreach($row[step] as $key => $value)
+                @foreach($row['step'] as $key => $value)
                 <li>
                     <p>模块名:{{$row[script_model_list][$key][name]}}</p>
                     <p>模块描述:{{$row[script_model_list][$key][description]}}</p>
                     @foreach($value as $stepKey => $stepValue)
-                        <?php $parameters = $row[script_model_params][$key][$stepKey]?>
+                        <?php $parameters = $row['script_model_params'][$key][$stepKey]?>
                         <span>{{$parameters->name}}:</span>
                         <br>
                         @if ($parameters->requires == 'true')
-                            <?php $requires = required ?>
+                            <?php $requires = 'required' ?>
                         @else
                             <?php $requires = '' ?>
                         @endif
