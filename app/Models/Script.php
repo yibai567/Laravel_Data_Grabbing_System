@@ -63,14 +63,24 @@ class Script extends Model
     }
 
     /**
-     * 设置step字段入口前转化为json
+     * 设置step字段入库前转化为json
      *
-     * @param  string  $value
-     * @return void
+     * @param  array  $value
+     * @return string
      */
     public function setStepAttribute($value)
     {
         $this->attributes['step'] = json_encode($value, JSON_UNESCAPED_UNICODE);
     }
 
+//    /**
+//     * 获取step字段时转化为array
+//     *
+//     * @param  string  $value
+//     * @return array
+//     */
+//    public function getStepAttribute($value)
+//    {
+//        return json_decode($value, true);
+//    }
 }

@@ -37,7 +37,7 @@ class ScriptController extends Controller
             'description' => 'nullable|string|max:255',
             'languages_type' => 'required|integer|between:1,3',
             'step' => 'required|array',
-            'cron_type' => 'nullable|integer|default',
+            'cron_type' => 'nullable|integer',
             'operate_user' => 'required|string|max:50',
             'init' => 'nullable|json'
         ]);
@@ -188,7 +188,7 @@ class ScriptController extends Controller
         }
         $result = $script->toArray();
 
-        if ($result == Script::LANGUAGES_TYPE_CASPERJS) {
+        if ($result['languages_type'] == Script::LANGUAGES_TYPE_CASPERJS) {
             //根据一对一关系,查询该script的配置数据
             $scriptInit = $script->init;
             $result['init'] = [];
@@ -198,6 +198,7 @@ class ScriptController extends Controller
             }
             $result['init'] = $scriptInit->toArray();
         }
+
         return $this->resObjectGet($result, 'script', $request->path());
     }
 
@@ -450,6 +451,7 @@ class ScriptController extends Controller
         $structures = '';
         $num = count($stepArr);
         for ($i = 0; $i < $num; $i++) {
+
             //获取模块信息
             $scriptModel = ScriptModel::find($stepArr[$i][0]);
             if (empty($scriptModel)) {
@@ -460,14 +462,19 @@ class ScriptController extends Controller
             //获取代码
             $structure = $modelInfo['structure'];
 
+            //如果只有一个参数,跳出本次循环
             $paramNum = count($stepArr[$i]);
-            if($paramNum > 1){
-                for ($j = 1; $j < $paramNum; $j++) {
-                    //参数替换
-                    $structure = str_replace("~" . $j . "~", $stepArr[$i][$j], $structure);
-                }
+            if($paramNum <= 1){
+                continue;
             }
 
+            for ($j = 1; $j < $paramNum; $j++) {
+                if (empty($stepArr[$i][$j])) {
+                    $stepArr[$i][$j] = '""';
+                }
+                //参数替换
+                $structure = str_replace("~" . $j . "~", $stepArr[$i][$j], $structure);
+            }
             //代码两次换行,可以生成脚本时隔开一行
             $structures .= $structure . PHP_EOL . PHP_EOL;
         }

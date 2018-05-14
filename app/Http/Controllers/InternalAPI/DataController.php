@@ -26,7 +26,6 @@ class DataController extends Controller
      */
     public function batchCreate(Request $request)
     {
-
         Log::debug('[internal DataController create] start!');
         $params = $request->all();
 
@@ -37,6 +36,7 @@ class DataController extends Controller
             'end_time' => 'required|date',
             'result' => 'required|array'
         ]);
+
         $newData = [];
         foreach ($params['result'] as $value) {
             if ($params['content_type'] == Data::CONTENT_TYPE_LIVE) {
@@ -92,11 +92,12 @@ class DataController extends Controller
                 'status' => Data::STATUS_NORMAL,
                 'start_time' => $params['start_time'],
                 'end_time' => $params['end_time'],
-                'created_time' => $params['created_time'],
+                'created_time' => time(),
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ];
         }
+
         if (!empty($newData)) {
             try {
                 Data::insert($newData);
