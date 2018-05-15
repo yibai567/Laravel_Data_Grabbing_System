@@ -205,18 +205,6 @@
                 <p class="hidden">模块id:{{$value->id}}</p>
                 <div class="text-danger" style="font-size: 20px;font-weight: bold;">{{$value->name}}</div>
                 <blockquote class="text-muted blockquote_description">{{$value->description}}</blockquote>
-
-                <!-- <div class='form-group header-group-0 ' id='form-group-name'>
-                    <label class='control-label col-sm-2'>脚本名称
-                        <span class='text-danger' title='This field is required'>*</span>
-                    </label>
-                    <div class="col-xs-5">
-                        <input type='text' title="脚本名称" required maxlength='70' class='form-control' name="name" id="name" value='{{$row[name]}}'/>
-                        <input type='hidden' maxlength="70" class='form-control' name="languages_type" value='{{$languages_type}}'/>
-                        <div class="text-danger"></div>
-                        <p class='help-block'></p>
-                    </div>
-                </div> -->
                 <div class="params">
                 @if (empty(json_decode($value->parameters, true)))
                     <span><input type="hidden" {{$requires}} name="script_model_params[{{$value->id}}][]" value=""></span>
