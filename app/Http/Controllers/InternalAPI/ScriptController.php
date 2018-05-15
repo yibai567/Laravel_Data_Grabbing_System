@@ -472,6 +472,10 @@ class ScriptController extends Controller
                 if (empty($stepArr[$i][$j])) {
                     $stepArr[$i][$j] = '""';
                 }
+
+                //替换步骤中的换行符
+                $stepArr[$i][$j] = str_replace(array("\r\n", "\r", "\n"), PHP_EOL,  $stepArr[$i][$j]);
+
                 //参数替换
                 $structure = str_replace("~" . $j . "~", $stepArr[$i][$j], $structure);
             }
