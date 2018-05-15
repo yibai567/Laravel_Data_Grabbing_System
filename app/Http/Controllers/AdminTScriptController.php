@@ -358,8 +358,11 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
     }
 
-    public function getAdd($languagesType) {
-
+    public function getAdd() {
+        $languagesType = Request::get('languagesType');
+        if (!$languagesType) {
+            $languagesType = Script::LANGUAGES_TYPE_CASPERJS;
+        }
         if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE || $this->button_add==FALSE) {
             CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
         }

@@ -57,13 +57,13 @@
     <div class="box">
       <div class="box-header">
 
-            <a href='{{CRUDBooster::mainpath("add/1")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
+            <a href='{{CRUDBooster::mainpath("add?languagesType=1")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
               <i class="fa fa-plus-circle"></i> casperJs
             </a>
-            <a href='{{CRUDBooster::mainpath("add/2")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
+            <a href='{{CRUDBooster::mainpath("add?languagesType=2")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
               <i class="fa fa-plus-circle"></i> Html
             </a>
-            <a href='{{CRUDBooster::mainpath("add/3")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
+            <a href='{{CRUDBooster::mainpath("add?languagesType=3")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
               <i class="fa fa-plus-circle"></i> Api
             </a>
         <div class="box-tools pull-{{ trans('crudbooster.right') }}" style="position: relative;margin-top: -5px;margin-right: -10px">
