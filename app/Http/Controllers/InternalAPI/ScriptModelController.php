@@ -148,11 +148,11 @@ class ScriptModelController extends Controller
 
         //获取数据
         $items = ScriptModel::where($where)
-                        ->whereIn('system_type', [1,2])
-                        ->take($params['limit'])
-                        ->skip($params['offset'])
-                        ->orderBy('sort', 'asc')
-                        ->get();
+                            ->whereIn('system_type', [1,2])
+                            ->take($params['limit'])
+                            ->skip($params['offset'])
+                            ->orderBy('sort', 'asc')
+                            ->get();
 
         $result = [];
         if (!empty($items)) {
@@ -190,10 +190,10 @@ class ScriptModelController extends Controller
 
         //获取数据
         $items = ScriptModel::whereIn('system_type', [1,2])
-            ->take($params['limit'])
-            ->skip($params['offset'])
-            ->orderBy('sort', 'asc')
-            ->get();
+                            ->take($params['limit'])
+                            ->skip($params['offset'])
+                            ->orderBy('sort', 'asc')
+                            ->get();
 
         $result = [];
         if (!empty($items)) {
