@@ -387,57 +387,6 @@
     </aside>
 </div>
 <script src="http://rubaxa.github.io/Sortable/Sortable.js"></script>
-<style type="text/css">
-.control-sidebar ul {
-    height: 800px;
-    padding:0;
-    margin:0;
-    list-style-type:none;
-}
-.control-sidebar ul li {
-    padding: 10px;
-    border: 1px solid #D3D3D3;
-    border-left-width: 2px;
-    border-right-width: 2px;
-}
-.control-sidebar ul li .params {
-    display: none;
-}
-.control-sidebar ul li .blockquote_description {
-    margin: 5px 0;
-    font-size: 14px;
-    padding: 10px 5px;
-}
-
-.control-sidebar ul li:hover {
-    background: #D6D6D6;
-}
-
-.layer-block ul li .blockquote_description {
-    display: none;
-}
-.layer-block ul li .params {
-    margin-top: 10px;
-}
-.layer-block ul {
-    padding:0;
-    margin:0;
-    min-height: 100px;
-    list-style-type:none;
-    border: 1px dashed #D6D6D6;
-}
-.layer-block ul li {
-    display: block;
-    margin: 0 10px;
-    padding: 10px;
-    border-bottom:1px dashed #D6D6D6;
-}
-.control-sidebar-dark, .control-sidebar-bg {
-    background:#FFF;
-}
-
-</style>
-
 <script>
 Sortable.create(document.getElementById('foo'), {
     group: {

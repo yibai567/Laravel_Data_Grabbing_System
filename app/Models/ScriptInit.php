@@ -21,7 +21,7 @@ class ScriptInit extends Model
     /**
      * 表名
      */
-    protected $table = 't_script_init';
+    protected $table = 't_script_config';
 
     /**
      * 主键
