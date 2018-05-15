@@ -359,16 +359,34 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
     }
 
     public function getAdd($languagesType) {
+
         if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE || $this->button_add==FALSE) {
             CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
         }
 
-        $res = InternalAPIService::get('/script_models/languages_type/' . $languagesType);
-        $scriptModel = json_decode(json_encode($res));
-
         $data = [];
+        $data['script_model'] = [];
+        $data['new_step'] = [];
+        $res = InternalAPIService::get('/script_models/languages_type/' . $languagesType);
+
+        if (!empty($res)) {
+            $data['script_model'] = json_decode(json_encode($res));
+            foreach ($data['script_model'] as $key => $value) {
+                $step = [];
+                if ($languagesType == Script::LANGUAGES_TYPE_HTML) {
+                    if ($value->id == 13) {
+                        $step[] = $value;
+                    }
+                } else if ($languagesType == Script::LANGUAGES_TYPE_API) {
+                    if ($value->id == 17 || $value->id == 12) {
+                        $step[] = $value;
+                    }
+                }
+                $data['new_step'] = $step;
+            }
+            array_multisort($data['new_step'], SORT_DESC);
+        }
         $data['page_title'] = '增加脚本生成信息';
-        $data['script_model'] = $scriptModel;
         $data['languages_type'] = $languagesType;
         $this->cbView('script/script_add_view',$data);
     }
@@ -381,30 +399,37 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data = [];
         $data['page_title'] = '编辑脚本生成信息';
         $data['row'] = InternalAPIService::get('/script', ['id' => $id]);
+
         if (empty($data['row'])) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "数据信息有误", "error");
         }
         if (!empty($data['row']['step'])) {
-            $step = $data['row']['step'];
+            $step = json_decode($data['row']['step'], true);
             $newScriptModel = [];
+
             foreach ($step as $key => $value) {
                 $scriptModelId .= $value[0] . ',';
                 $id = $value[0];
                 array_splice($value, 0, 1);
                 $newScriptModel[$id] = $value;
             }
+
             $data['row']['step'] = $newScriptModel;
             $script_models = InternalAPIService::get('/script_models/ids', ['ids' => rtrim($scriptModelId, ",")]);
             foreach ($script_models as $key => $value) {
                 $newScriptModelParams[$value['id']] = json_decode($value['parameters']);
                 $newScriptModelList[$value['id']] = $value;
             }
+
             $data['row']['script_model_params'] = $newScriptModelParams;
             $data['row']['script_model_list'] = $newScriptModelList;
-          }
+        }
+
+        $data['script_model'] = [];
         $res = InternalAPIService::get('/script_models/languages_type/' . $data['row']['languages_type']);
-        $data['script_model'] = json_decode(json_encode($res));
-        // dd($data);
+        if (!empty($res)) {
+            $data['script_model'] = json_decode(json_encode($res));
+        }
         $this->cbView('script/script_edit_view',$data);
     }
 
@@ -423,16 +448,17 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data = [];
         $formParams = $this->arr;
         $newData = [];
-        if (!empty($formParams['script_model_params'])) {
-            foreach ($formParams['script_model_params'] as $key => $value) {
-                array_unshift($value, $key);
-                $newData[] = $value;
-            }
-            $data['step'] = $newData;
-        } else {
-            $data['step'] = [];
+
+        if (empty($formParams['script_model_params'])) {
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "步骤必填", "error");
         }
 
+        foreach ($formParams['script_model_params'] as $key => $value) {
+            array_unshift($value, $key);
+            $newData[] = $value;
+        }
+
+        $data['step'] = $newData;
         $data['status'] = Script::STATUS_INIT;
         $data['name'] = $formParams['name'];
         $data['description'] = $formParams['description'];
@@ -471,18 +497,19 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data = [];
         $formParams = $this->arr;
         $newData = [];
-        if (!empty($formParams['script_model_params'])) {
-            foreach ($formParams['script_model_params'] as $key => $value) {
-                array_unshift($value, $key);
-                $newData[] = $value;
-            }
-            $data['step'] = $newData;
-        } else {
-            $data['step'] = [];
+
+        if (empty($formParams['script_model_params'])) {
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "步骤必填", "error");
         }
+
+        foreach ($formParams['script_model_params'] as $key => $value) {
+            array_unshift($value, $key);
+            $newData[] = $value;
+        }
+        $data['step'] = $newData;
+
         $data['name'] = $formParams['name'];
         $data['description'] = $formParams['description'];
-
 
         $data['init'] = [
                         'load_images' => $formParams['load_images'],

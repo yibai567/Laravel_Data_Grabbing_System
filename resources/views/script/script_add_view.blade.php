@@ -144,7 +144,56 @@
                         <div data-force="18" class="layer-block">
                             <p class='help-block'>请将右侧代码块拖拽至下方虚框内</p>
                             <ul id="bar" class="block__list block__list_tags">
-                                <li class="text-center hidden"></li>
+                                @if (!empty($new_step))
+                                    @foreach($new_step as $key=>$value)
+                                        <li>
+                                        <div class="text-danger" style="font-size: 20px;font-weight: bold;">{{$value->name}}</div>
+                                        <blockquote class="text-muted blockquote_description">{{$value->description}}</blockquote>
+                                        <div class="params">
+                                        @if (empty(json_decode($value->parameters, true)))
+                                            <span><input type="hidden" {{$requires}} name="script_model_params[{{$value->id}}][]" value=""></span>
+                                        @else
+                                            @foreach(json_decode($value->parameters, true) as $parametersValue)
+                                            <div class='form-group' id='form-group-name'>
+                                                <label class='control-label col-sm-2' style="text-align: left;">{{$parametersValue[name]}}:
+                                                @if ($parametersValue['requires'] == 'true')
+                                                    <?php $requires = 'required' ?>
+                                                    <span class='text-danger' title='必填'>*</span>
+                                                @else
+                                                    <?php $requires = '' ?>
+                                                @endif
+                                                </label>
+                                                @if ($parametersValue[type] == 'string')
+                                                    <div class="col-xs-10">
+                                                        <input type="type" {{$requires}} class="form-control" name="script_model_params[{{$value->id}}][]" value="{{$parametersValue['default']}}">
+                                                    </div>
+                                                @elseif ($parametersValue[type] == 'json')
+                                                    <div class="col-xs-10">
+                                                        <textarea {{$requires}} class="form-control" name="script_model_params[{{$value->id}}][]" maxlength=5000 rows="3">{{$parametersValue['default']}}</textarea>
+                                                    </div>
+                                                @elseif ($parametersValue[type] == 'boole')
+                                                    <div class="col-sm-10">
+                                                        <label class='radio-inline'>
+                                                            <input type="radio" {{($parametersValue['default'] == 'true') ? 'checked' : ''}} name="script_model_params[{{$value->id}}][]" value="1">true
+                                                        </label>
+                                                        <label class='radio-inline'>
+                                                            <input type="radio"  {{($parametersValue['default'] == 'false') ? 'checked' : ''}} name="script_model_params[{{$value->id}}][]" value="2"> false
+                                                        </label>
+                                                    </div>
+                                                @elseif ($parametersValue[type] == 'text')
+                                                <div class="col-sm-10">
+                                                    <textarea {{$requires}} name="script_model_params[{{$value->id}}][]" maxlength='5000' rows="3" class="form-control">{{$parametersValue['default']}}</textarea>
+                                                </div>
+                                                @endif
+                                            </div>
+                                            @endforeach
+                                        @endif
+                                        </div>
+                                        </li>
+                                    @endforeach
+                                @else
+                                    <li class="text-center hidden"></li>
+                                @endif
                             </ul>
                         </div>
 
@@ -200,8 +249,9 @@
     </form>
     <aside class="control-sidebar control-sidebar-dark" style="width: 330px; right:0; height: 100%">
         <ul id="foo" class="block__list block__list_words">
-            @foreach($script_model as $key=>$value)
-            <li>
+            @if (!empty($script_model))
+                @foreach($script_model as $key=>$value)
+                <li>
                 <p class="hidden">模块id:{{$value->id}}</p>
                 <div class="text-danger" style="font-size: 20px;font-weight: bold;">{{$value->name}}</div>
                 <blockquote class="text-muted blockquote_description">{{$value->description}}</blockquote>
@@ -245,8 +295,11 @@
                     @endforeach
                 @endif
                 </div>
-            </li>
-            @endforeach
+                </li>
+                @endforeach
+            @else
+                <li></li>
+            @endif
         </ul>
     </aside>
 </div>

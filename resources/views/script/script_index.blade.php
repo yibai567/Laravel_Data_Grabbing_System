@@ -152,12 +152,6 @@
             </a>
         @endif
 
-
-        @if(CRUDBooster::isView() && $button_edit)
-            <a class='btn btn-xs btn-primary btn-detail' href='{{CRUDBooster::mainpath("detail/$row->id")}}'>
-                <i class="fa fa-eye"></i>
-            </a>
-        @endif
         @if(CRUDBooster::isDelete() && $button_edit && $row->status != $item_status['start'])
         <a class='btn btn-xs btn-warning btn-delete' href='javascript:void(0)' onclick="swal({
                 title: '确认删除吗 ?',

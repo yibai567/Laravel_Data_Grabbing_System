@@ -51,7 +51,7 @@
                 return '用户自定义模块';
             }
             }];
-
+            $this->col[] = ["label"=>"排序","name"=>"sort"];
 			$this->col[] = ["label"=>"操作用户","name"=>"operate_user"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
@@ -63,7 +63,9 @@
 
 			$this->form[] = ['label'=>'代码结构','name'=>'structure','type'=>'textarea','validation'=>'required|string','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'参数规则','name'=>'parameters','type'=>'textarea','validation'=>'required|json','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'排序','name'=>'sort','type'=>'text','validation'=>'required|integer|max:99','width'=>'col-sm-10', 'value' => 99];
 			$this->form[] = ['label'=>'类型','name'=>'system_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|预生成模块;2|用户自定义模块','value'=>'1'];
+
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
@@ -260,6 +262,7 @@
 	    |
 	    */
 	    public function hook_query_index(&$query) {
+            $query->orderBy('sort', 'asc');
 	        //Your code here
 
 	    }
@@ -346,6 +349,7 @@
 	        //Your code here
 
 	    }
+
         public function postAddSave() {
             $this->cbLoader();
             if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE) {
@@ -386,6 +390,7 @@
 
             $formParams['id'] = $id;
             $formParams['operate_user'] = CRUDBooster::myName();
+
             try {
                 $res = InternalAPIService::post('/script_model/update', $formParams);
             } catch (\Dingo\Api\Exception\ResourceException $e) {
