@@ -45,8 +45,10 @@
             }
             }];
             $this->col[] = ["label"=>"类型","name"=>"system_type","callback"=>function ($row) {
-            if ( $row->system_type == ScriptModel::SYSTEM_TYPE_DEFAULT) {
+            if ($row->system_type == ScriptModel::SYSTEM_TYPE_DEFAULT) {
                 return '预生成模块';
+            } elseif ($row->system_type == ScriptModel::SYSTEM_TYPE_BASE) {
+                return '基础模版';
             } else {
                 return '用户自定义模块';
             }
@@ -64,7 +66,7 @@
 			$this->form[] = ['label'=>'代码结构','name'=>'structure','type'=>'textarea','validation'=>'required|string','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'参数规则','name'=>'parameters','type'=>'textarea','validation'=>'required|json','width'=>'col-sm-10'];
             $this->form[] = ['label'=>'排序','name'=>'sort','type'=>'text','validation'=>'required|integer|max:99','width'=>'col-sm-10', 'value' => 99];
-			$this->form[] = ['label'=>'类型','name'=>'system_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|预生成模块;2|用户自定义模块','value'=>'1'];
+			$this->form[] = ['label'=>'类型','name'=>'system_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|预生成模块;2|用户自定义模块;3|基础模版','value'=>'1'];
 
 			# END FORM DO NOT REMOVE THIS LINE
 
@@ -406,6 +408,8 @@
 
             if ($row->system_type == ScriptModel::SYSTEM_TYPE_DEFAULT) {
                 $row->system_type = '预生成模块';
+            } elseif ($row->system_type == ScriptModel::SYSTEM_TYPE_BASE) {
+                $row->system_type = '基础模版';
             } else {
                 $row->system_type = '用户自定义模块';
             }
