@@ -264,6 +264,7 @@
 	    |
 	    */
 	    public function hook_query_index(&$query) {
+            $query->where('system_type', '!=', ScriptModel::SYSTEM_TYPE_BASE);
             $query->orderBy('sort', 'asc');
 	        //Your code here
 

@@ -403,8 +403,9 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         if (empty($data['row'])) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "数据信息有误", "error");
         }
+
         if (!empty($data['row']['step'])) {
-            $step = json_decode($data['row']['step'], true);
+            $step = $data['row']['step'];
             $newScriptModel = [];
 
             foreach ($step as $key => $value) {
