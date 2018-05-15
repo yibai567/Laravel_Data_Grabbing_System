@@ -37,7 +37,7 @@ class ScriptModelController extends Controller
             'parameters' => 'required|json',
             'system_type' => 'required|integer|between:1,2',
             'operate_user' => 'required|string|max:50',
-            'sort' => 'required|integer'
+            'sort' => 'nullable|integer'
         ]);
 
         $scriptModel = ScriptModel::create($params);
@@ -71,7 +71,7 @@ class ScriptModelController extends Controller
             'system_type' => 'nullable|integer|between:1,2',
             'parameters' => 'nullable|json',
             'operate_user' => 'nullable|string|max:50',
-            'sort' => 'required|integer'
+            'sort' => 'nullable|integer'
         ]);
 
         $scriptModel = ScriptModel::find($params['id']);
@@ -152,6 +152,7 @@ class ScriptModelController extends Controller
                             ->take($params['limit'])
                             ->skip($params['offset'])
                             ->orderBy('sort', 'asc')
+                            ->orderBy('id', 'desc')
                             ->get();
 
         $result = [];
@@ -193,6 +194,7 @@ class ScriptModelController extends Controller
                             ->take($params['limit'])
                             ->skip($params['offset'])
                             ->orderBy('sort', 'asc')
+                            ->orderBy('id', 'desc')
                             ->get();
 
         $result = [];
