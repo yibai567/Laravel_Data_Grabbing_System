@@ -371,8 +371,8 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
         if (!empty($res)) {
             $data['script_model'] = json_decode(json_encode($res));
+            $step = [];
             foreach ($data['script_model'] as $key => $value) {
-                $step = [];
                 if ($languagesType == Script::LANGUAGES_TYPE_HTML) {
                     if ($value->id == 13) {
                         $step[] = $value;
