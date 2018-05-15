@@ -45,16 +45,6 @@ class ScriptModel extends Model
         'languages_type',
         'system_type',
         'operate_user',
+        'sort'
     ];
-
-    /**
-     * 设置structure替换换行符
-     *
-     * @param  string  $value
-     * @return void
-     */
-    public function setStructureAttribute($value)
-    {
-        $this->attributes['structure'] = str_replace(array("\r\n", "\r", "\n"), PHP_EOL,  $value);
-    }
 }

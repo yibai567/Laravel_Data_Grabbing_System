@@ -73,14 +73,14 @@ class Script extends Model
         $this->attributes['step'] = json_encode($value, JSON_UNESCAPED_UNICODE);
     }
 
-//    /**
-//     * 获取step字段时转化为array
-//     *
-//     * @param  string  $value
-//     * @return array
-//     */
-//    public function getStepAttribute($value)
-//    {
-//        return json_decode($value, true);
-//    }
+    /**
+     * 获取step字段时转化为array
+     *
+     * @param  string  $value
+     * @return array
+     */
+    public function getStepAttribute($value)
+    {
+        return json_decode($value, true);
+    }
 }

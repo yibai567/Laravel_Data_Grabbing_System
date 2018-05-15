@@ -39,7 +39,7 @@ class ScriptController extends Controller
             'step' => 'required|array',
             'cron_type' => 'nullable|integer',
             'operate_user' => 'required|string|max:50',
-            'init' => 'nullable|json'
+            'init' => 'nullable|array'
         ]);
 
         //默认值
@@ -123,7 +123,7 @@ class ScriptController extends Controller
             'step' => 'nullable|array',
             'cron_type' => 'nullable|integer',
             'operate_user' => 'nullable|string|max:50',
-            'init' => 'nullable|json'
+            'init' => 'nullable|array'
         ]);
 
         //去name和description空白字符
@@ -272,7 +272,7 @@ class ScriptController extends Controller
         //通过文件类型获取不同模板内容
         switch ($script->languages_type) {
             case  Script::LANGUAGES_TYPE_CASPERJS:
-                //获取基础模板内容
+                //获取casperJs基础模板内容
                 $content = $this->__getBaseScriptModel(Script::LANGUAGES_TYPE_CASPERJS);
 
                 //获取script配置数据
@@ -288,10 +288,12 @@ class ScriptController extends Controller
 
                 break;
             case Script::LANGUAGES_TYPE_HTML:
+                //获取html基础模板内容
                 $content = $this->__getBaseScriptModel(Script::LANGUAGES_TYPE_HTML);
 
                 break;
             case Script::LANGUAGES_TYPE_API:
+                //获取API基础模板内容
                 $content = $this->__getBaseScriptModel(Script::LANGUAGES_TYPE_API);
 
                 break;
@@ -303,6 +305,9 @@ class ScriptController extends Controller
 
         //连接模板内容和代码
         $content = $content . PHP_EOL . PHP_EOL . $result;
+
+        //替换步骤中的换行符
+        $content = str_replace(array("\r\n", "\r", "\n"), PHP_EOL,  $content);
 
         //命名js名称
         $filename = 'script_' . $script->id . '.js';
@@ -336,12 +341,9 @@ class ScriptController extends Controller
      */
     private function __createScriptInit($scriptInit)
     {
-        //解析json转数组
-        $init = json_decode($scriptInit,true);
-
         //判断配置数据存在,存在则验证参数,无则赋予空数组
-        if (!empty($init)) {
-            ValidatorService::check($init, [
+        if (!empty($scriptInit)) {
+            ValidatorService::check($scriptInit, [
                 'load_images' => 'nullable|integer|between:1,2',
                 'load_plugins' => 'nullable|integer|between:1,2',
                 'log_level' => 'nullable|string|max:10',
@@ -351,22 +353,23 @@ class ScriptController extends Controller
             ]);
         }
         //设置默认值
-        if (empty($init['load_images'])) {
-            $init['load_images'] = ScriptInit::DEFAULT_LOAD_IMAGES;
+        if (empty($scriptInit['load_images'])) {
+            $scriptInit['load_images'] = ScriptInit::DEFAULT_LOAD_IMAGES;
         }
 
-        if (empty($init['load_plugins'])) {
-            $init['load_plugins'] = ScriptInit::DEFAULT_LOAD_PLUGINS;
+        if (empty($scriptInit['load_plugins'])) {
+            $scriptInit['load_plugins'] = ScriptInit::DEFAULT_LOAD_PLUGINS;
         }
 
-        if (empty($init['log_level'])) {
-            $init['log_level'] = ScriptInit::DEFAULT_LOG_LEVEL;
+        if (empty($scriptInit['log_level'])) {
+            $scriptInit['log_level'] = ScriptInit::DEFAULT_LOG_LEVEL;
         }
 
-        if (empty($init['verbose'])) {
-            $init['verbose'] = ScriptInit::DEFAULT_VERBOSE;
+        if (empty($scriptInit['verbose'])) {
+            $scriptInit['verbose'] = ScriptInit::DEFAULT_VERBOSE;
         }
-        $scriptInit = ScriptInit::create($init);
+
+        $scriptInit = ScriptInit::create($scriptInit);
 
         $result = [];
         if (!empty($scriptInit)) {
@@ -385,8 +388,6 @@ class ScriptController extends Controller
      */
     public function __updateScriptInit($postScriptInit, $script)
     {
-        //解析json转数组
-        $postScriptInit = json_decode($postScriptInit,true);
         //判断配置数据存在,存在则验证参数,无则赋予空数组
         ValidatorService::check($postScriptInit, [
             'load_images' => 'nullable|integer|between:1,2',
@@ -447,13 +448,13 @@ class ScriptController extends Controller
 
         //获取步骤
         $steps = $script['step'];
-        $stepArr = json_decode($steps,true);
+
         $structures = '';
-        $num = count($stepArr);
+        $num = count($steps);
         for ($i = 0; $i < $num; $i++) {
 
             //获取模块信息
-            $scriptModel = ScriptModel::find($stepArr[$i][0]);
+            $scriptModel = ScriptModel::find($steps[$i][0]);
             if (empty($scriptModel)) {
                 throw new \Dingo\Api\Exception\ResourceException("ScriptModel is not found");
             }
@@ -462,24 +463,24 @@ class ScriptController extends Controller
             //获取代码
             $structure = $modelInfo['structure'];
 
-            //如果只有一个参数,跳出本次循环
-            $paramNum = count($stepArr[$i]);
-            if($paramNum <= 1){
+            //如果只有两个参数,第二个参数为null,直接连接字符串,跳出本次循环
+            $paramNum = count($steps[$i]);
+            if ($paramNum <= 2 && empty($steps[$i][1])) {
+                //代码两次换行,生成脚本时代码分块
+                $structures .= $structure . PHP_EOL . PHP_EOL;
+
                 continue;
             }
 
             for ($j = 1; $j < $paramNum; $j++) {
-                if (empty($stepArr[$i][$j])) {
-                    $stepArr[$i][$j] = '""';
+                if (empty($steps[$i][$j])) {
+                    $steps[$i][$j] = '""';
                 }
-
-                //替换步骤中的换行符
-                $stepArr[$i][$j] = str_replace(array("\r\n", "\r", "\n"), PHP_EOL,  $stepArr[$i][$j]);
-
                 //参数替换
-                $structure = str_replace("~" . $j . "~", $stepArr[$i][$j], $structure);
+                $structure = str_replace("~" . $j . "~", $steps[$i][$j], $structure);
             }
-            //代码两次换行,可以生成脚本时隔开一行
+
+            //代码两次换行,生成脚本时代码分块
             $structures .= $structure . PHP_EOL . PHP_EOL;
         }
 
@@ -488,9 +489,9 @@ class ScriptController extends Controller
 
     /**
      * __getScriptInitData
-     * 获取casperjs的模板内容
+     * 获取ScriptInit的配置内容,并替换模板
      *
-     * @param $script
+     * @param $content $init
      * @return string
      */
     private function __getScriptInitData($content, $init)
