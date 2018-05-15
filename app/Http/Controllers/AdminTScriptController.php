@@ -382,8 +382,8 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
                         $step[] = $value;
                     }
                 }
-                $data['new_step'] = $step;
             }
+            $data['new_step'] = $step;
             array_multisort($data['new_step'], SORT_DESC);
         }
         $data['page_title'] = '增加脚本生成信息';
