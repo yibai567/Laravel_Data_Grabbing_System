@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Models\Item;
-use App\Services\APIService;
+use App\Services\InternalAPIService;
 use Log;
 use App\Events\DataResultReportEvent;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -29,7 +29,16 @@ class DataResultReportListener implements ShouldQueue
     public function handle(DataResultReportEvent $event)
     {
         Log::debug('[DataResultReportListener handle] ------- start -------');
+
+        // 获取事件中的信息
         $data = $event->data;
+        Log::debug('[DataResultReportListener handle] data: '.json_encode($data, JSON_UNESCAPED_UNICODE));
+
+        if (!$data) {
+            Log::debug('[DataResultReportListener handle] data is not exists');
+
+            return true;
+        }
 
         //这批数据的来源同一个script
         $scriptId = $data[0]['script_id'];
@@ -40,7 +49,7 @@ class DataResultReportListener implements ShouldQueue
         $task = Item::find($taskId);
 
         if (empty($task)) {
-            Log::debug('[DataResultReportListener] Item is not found');
+            Log::debug('[DataResultReportListener handle] Item is not found');
             return true;
         }
         //获取选择器内容
@@ -51,7 +60,7 @@ class DataResultReportListener implements ShouldQueue
         $selectorKeys = array_keys($selector);
 
         //去除数组中的元素remove_images
-        foreach ($selectorKeys as $key => $selectorKey){
+        foreach ($selectorKeys as $key => $selectorKey) {
             if ($selectorKey == 'remove_images') {
                 unset($selectorKeys[$key]);
             }
@@ -60,31 +69,51 @@ class DataResultReportListener implements ShouldQueue
         $newData = [];
         $postNum = 0;
 
-        foreach($data as $info){
+        foreach ($data as $info) {
 
             //遍历上报的字段
-            foreach($selectorKeys as $selectorKey){
+            foreach ($selectorKeys as $selectorKey) {
 
                 //判断上报的字段是否存在
                 if (!array_key_exists($selectorKey, $info)) {
-
                     //上报字段是否为images
                     if ($selectorKey == 'images') {
                         $newData[$postNum][$selectorKey] = [];
+
                     } else {
                         $newData[$postNum][$selectorKey] = "";
+
                     }
                     continue;
+
                 }
 
                 $newData[$postNum][$selectorKey] = $info[$selectorKey];
+
             }
+
             $newData[$postNum]['task_id'] = 612;
+            $newData[$postNum]['url'] = $info['detail_url'];
             $postNum += 1;
         }
 
+        //整理数据
         $params['is_test'] = 1;
         $params['result'] = json_encode($newData, JSON_UNESCAPED_UNICODE);
-        APIService::internalPost('/internal/item/result/report', $params);
+
+        //调用上传数据接口
+        $result = InternalAPIService::post('/item/result/report', $params);
+
+        if (!$result) {
+            Log::debug('[DataResultReportListener handle] data is upload failed');
+
+        } else {
+            Log::debug('[DataResultReportListener handle] data is upload success');
+
+        }
+
+        Log::debug('[DataResultReportListener handle] ------- end -------');
+
+        return true;
     }
 }

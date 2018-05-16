@@ -100,6 +100,7 @@ class DataController extends Controller
                 'updated_at' => date('Y-m-d H:i:s'),
             ];
         }
+
         if (!empty($newData)) {
             try {
                 Data::insert($newData);
