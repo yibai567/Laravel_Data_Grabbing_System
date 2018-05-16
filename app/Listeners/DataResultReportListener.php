@@ -69,30 +69,30 @@ class DataResultReportListener implements ShouldQueue
         $newData = [];
         $postNum = 0;
 
+        //遍历上报数据
         foreach ($data as $info) {
 
             //遍历上报的字段
             foreach ($selectorKeys as $selectorKey) {
 
                 //判断上报的字段是否存在
-                if (!array_key_exists($selectorKey, $info)) {
-                    //上报字段是否为images
-                    if ($selectorKey == 'images') {
-                        $newData[$postNum][$selectorKey] = [];
-
-                    } else {
-                        $newData[$postNum][$selectorKey] = "";
-
-                    }
+                if (array_key_exists($selectorKey, $info)) {
+                    $newData[$postNum][$selectorKey] = $info[$selectorKey];
                     continue;
 
                 }
 
-                $newData[$postNum][$selectorKey] = $info[$selectorKey];
+                //上报字段是否为images
+                if ($selectorKey == 'images') {
+                    $newData[$postNum][$selectorKey] = [];
 
+                } else {
+                    $newData[$postNum][$selectorKey] = "";
+
+                }
             }
 
-            $newData[$postNum]['task_id'] = 612;
+            $newData[$postNum]['task_id'] = $taskId;
             $newData[$postNum]['url'] = $info['detail_url'];
             $postNum += 1;
         }
