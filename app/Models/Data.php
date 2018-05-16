@@ -37,5 +37,15 @@ class Data extends Model
         "deleted_at",
     ];
 
-
+    protected $fillable = [
+        'name',
+        'description',
+        'script_init_id',
+        'step',
+        'cron_type',
+        'last_generate_at',
+        'languages_type',
+        'status',
+        'operate_user',
+    ];
 }

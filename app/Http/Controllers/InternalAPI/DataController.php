@@ -9,6 +9,7 @@
 
 namespace App\Http\Controllers\InternalAPI;
 
+use App\Events\DataResultReportEvent;
 use App\Models\Data;
 use Log;
 use App\Services\ValidatorService;
@@ -32,6 +33,7 @@ class DataController extends Controller
         ValidatorService::check($params, [
             'company' => 'required|string|max:500',
             'content_type' => 'required|integer|between:1,10',
+            'script_id' => 'required|integer',
             'start_time' => 'required|date',
             'end_time' => 'required|date',
             'result' => 'required|array'
@@ -86,6 +88,7 @@ class DataController extends Controller
                 'md5_title' => $value['md5_title'],
                 'md5_content' => $value['md5_content'],
                 'content' => $value['content'],
+                'script_id' => $params['script_id'],
                 'detail_url' => $value['detail_url'],
                 'show_time' => $value['show_time'],
                 'read_count' => $value['read_count'],
@@ -97,10 +100,12 @@ class DataController extends Controller
                 'updated_at' => date('Y-m-d H:i:s'),
             ];
         }
-
         if (!empty($newData)) {
             try {
                 Data::insert($newData);
+
+                //事件监听,处理上报数据
+                event(new DataResultReportEvent($newData));
             } catch (\Exception $e) {
                 Log::debug('[batchCreate] error message = ' . $e->getMessage());
                 return response()->json(false);

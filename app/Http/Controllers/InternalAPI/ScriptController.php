@@ -288,7 +288,7 @@ class ScriptController extends Controller
 
                 break;
             case Script::LANGUAGES_TYPE_HTML:
-                //获取html基础模板内容
+                //获取HTML基础模板内容
                 $content = $this->__getBaseScriptModel(Script::LANGUAGES_TYPE_HTML);
 
                 break;
@@ -302,6 +302,8 @@ class ScriptController extends Controller
 
                 break;
         }
+        //替换基础模板内容中的scriptId将script_id传递给脚本
+        $content = str_replace("{{script_id}}", $script->id,  $content);
 
         //连接模板内容和代码
         $content = $content . PHP_EOL . PHP_EOL . $result;
