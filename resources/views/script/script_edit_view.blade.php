@@ -268,39 +268,30 @@
                     <div class="col-sm-10">
                         @if ($row[cron_type] == 1)
                             <label class='radio'>
-                                <input type="radio" checked name="cron_type" value="1"> 持续执行
+                                <input type="radio" checked name="cron_type" value="1"> 每分钟执行一次
                             </label>
                         @else
                             <label class='radio'>
-                                <input type="radio" name="cron_type" value="1"> 持续执行
+                                <input type="radio" name="cron_type" value="1"> 每分钟执行一次
                             </label>
                         @endif
                         @if ($row[cron_type] == 2)
                             <label class='radio'>
-                                <input type="radio" checked name="cron_type" value="2"> 每分钟执行一次
+                                <input type="radio" checked name="cron_type" value="2"> 每五分钟执行一次
                             </label>
                         @else
                             <label class='radio'>
-                                <input type="radio" name="cron_type" value="2"> 每分钟执行一次
+                                <input type="radio" name="cron_type" value="2"> 每五分钟执行一次
                             </label>
                         @endif
 
                         @if ($row[cron_type] == 3)
                             <label class='radio'>
-                                <input type="radio" checked name="cron_type" value="3"> 每五分钟执行一次
+                                <input type="radio" checked name="cron_type" value="3"> 每十分钟执行一次
                             </label>
                         @else
                             <label class='radio'>
-                                <input type="radio" name="cron_type" value="3"> 每五分钟执行一次
-                            </label>
-                        @endif
-                        @if ($row[cron_type] == 4)
-                            <label class='radio'>
-                                <input type="radio" checked name="cron_type" value="4"> 每十五分钟执行一次
-                            </label>
-                        @else
-                            <label class='radio'>
-                                <input type="radio" name="cron_type" value="4"> 每十五分钟执行一次
+                                <input type="radio" name="cron_type" value="3"> 每十分钟执行一次
                             </label>
                         @endif
                     </div>
@@ -337,7 +328,7 @@
                 <li>
                 <p class="hidden">模块id:{{$value->id}}</p>
                 <div class="text-danger" style="font-size: 20px;font-weight: bold;">{{$value->name}}</div>
-                <blockquote class="text-muted blockquote_description">{{$value->description}}</blockquote>
+                <blockquote class="text-muted blockquote_description">{!!$value->description!!}</blockquote>
                 <div class="params">
                 @if (empty(json_decode($value->parameters, true)))
                     <span><input type="hidden" {{$requires}} name="script_model_params[{{$value->id}}][]" value=""></span>

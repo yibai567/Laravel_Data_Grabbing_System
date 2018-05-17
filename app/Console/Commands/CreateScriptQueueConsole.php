@@ -3,7 +3,10 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Models\Task;
 use App\Models\Script;
+use App\Models\TaskRunLog;
+use App\Services\InternalAPIService;
 use Illuminate\Support\Facades\Redis;
 use Log;
 
@@ -40,6 +43,7 @@ class CreateScriptQueueConsole extends Command
      */
     public function handle()
     {
+
         $scriptList = $this->__getScriptList();
         if (empty($scriptList)) {
             $this->info("还没有已生成的脚本，稍请后重试");
@@ -47,11 +51,12 @@ class CreateScriptQueueConsole extends Command
         }
         $queueList = [];
         foreach ($scriptList as $key => $value) {
-            $driver = $this->__getDriver($value['languages_type'], $value['id']);
-            $cron = $this->__getCron($value['cron_type'], $value['id']);
+            $driver = $this->__getDriver($value['languages_type'], $value['script_id']);
+            $cron = $this->__getCron($value['cron_type'], $value['script_id']);
             $queueName = 'script_queue_' . $driver . '_' . $cron;
             $queueList[$queueName][] = [
-                'path' => 'script_' . $value['id'] . '.js'
+                'path' => 'script_' . $value['script_id'] . '.js',
+                'task_id' => $value['id'],
             ];
         }
 
@@ -63,6 +68,12 @@ class CreateScriptQueueConsole extends Command
         foreach ($queueList as $k => $v) {
             if (Redis::connection('queue')->lLen($k) <= 0 && $v > 0) {
                 foreach($v as $item) {
+                    $taskRunLog = InternalAPIService::post('/task_run_log', ['task_id' => $item['task_id']]);
+                    if (empty($taskRunLog)) {
+                        $this->info("task_run_log添加失败，请后重试");
+                        continue;
+                    }
+                    $item['task_run_log_id'] = $taskRunLog['id'];
                     Redis::connection('queue')->lpush($k, json_encode($item));
                 }
             } else {
@@ -78,8 +89,8 @@ class CreateScriptQueueConsole extends Command
     private function __getScriptList()
     {
         $data = [];
-        Script::select(['id', 'languages_type', 'cron_type'])
-                ->where('status', Script::STATUS_GENERATE)
+        Task::select(['id', 'languages_type', 'cron_type', 'script_id'])
+                ->where('status', Task::STATUS_START)
                 ->chunk(500, function ($script) use(&$data) {
                     if ($script) {
                         $script = $script->toArray();
@@ -93,9 +104,9 @@ class CreateScriptQueueConsole extends Command
         return $data;
     }
 
-    private function __getDriver($languages_type, $id)
+    private function __getDriver($languagesType, $scriptId)
     {
-        switch ($languages_type) {
+        switch ($languagesType) {
             case Script::LANGUAGES_TYPE_CASPERJS:
                 $driver = 'casper';
                 break;
@@ -109,26 +120,22 @@ class CreateScriptQueueConsole extends Command
                 break;
 
             default:
-                Log::error('script_id 为 [' . $id . '] 的 languages_type 值不对 = ' . $value['languages_type']);
+                Log::error('script_id 为 [' . $scriptId . '] 的 languagesType 值不对 = ' . $languagesType);
                 $driver = '';
                 break;
             }
         return $driver;
     }
 
-    private function __getCron($cron_type, $id)
+    private function __getCron($cronType, $scriptId)
     {
 
-        switch ($cron_type) {
+        switch ($cronType) {
             case Script::CRON_TYPE_KEEP;
                 $cron = '1m';
                 break;
 
-            case Script::CRON_TYPE_EVERY_MINUTE;
-                $cron = '1m';
-                break;
-
-            case Script::CRON_TYPE_EVERY_FIVE_MINUTES:
+            case Script::CRON_TYPE_EVERY_FIVE_MINUTES;
                 $cron = '5m';
                 break;
 
@@ -136,16 +143,8 @@ class CreateScriptQueueConsole extends Command
                 $cron = '10m';
                 break;
 
-            case Script::CRON_TYPE_EVERY_TEN_MINUTES:
-                $cron = '15m';
-                break;
-
-            case Script::CRON_TYPE_EVERY_TWENTY_MINUTES:
-                $cron = '20m';
-                break;
-
             default:
-                Log::error('script_id 为 [' . $id . '] 的 cron_type 值不对 = ' . $value['cron_type']);
+                Log::error('script_id 为 [' . $scriptId . '] 的 cron_type 值不对 = ' . $cronType);
                 $cron = '';
                 break;
             }

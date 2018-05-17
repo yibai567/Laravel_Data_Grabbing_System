@@ -13,7 +13,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
     public function cbInit() {
 
 		# START CONFIGURATION DO NOT REMOVE THIS LINE
-		$this->title_field = "name";
 		$this->limit = "20";
 		$this->orderby = "id,desc";
 		$this->global_privilege = false;
@@ -34,19 +33,15 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 		# START COLUMNS DO NOT REMOVE THIS LINE
 		$this->col = [];
 		$this->col[] = ["label"=>"Id","name"=>"id"];
-        $this->col[] = ["label"=>"名称","name"=>"name"];
-        $this->col[] = ["label"=>"执行规则","name"=>"cron_type","callback"=>function ($row) {
-            if ( $row->cron_type == Script::CRON_TYPE_KEEP) {
-                return '持续执行';
-            } else if( $row->cron_type == Script::CRON_TYPE_EVERY_MINUTE) {
-                return '每分钟执行';
-            } else if ($row->cron_type == Script::CRON_TYPE_EVERY_FIVE_MINUTES) {
-                return '每五分钟执行';
-            } else if ($row->cron_type == Script::CRON_TYPE_EVERY_FIFTEEN_MINUTES) {
-                return '每十五分钟执行';
+        $this->col[] = ["label"=>"语言类型","name"=>"languages_type","callback"=>function ($row) {
+            if( $row->languages_type == Script::LANGUAGES_TYPE_CASPERJS) {
+                return 'casperJs';
+            } else if ($row->languages_type == Script::LANGUAGES_TYPE_HTML) {
+                return 'html';
+            } else if ($row->languages_type == Script::LANGUAGES_TYPE_API) {
+                return 'api';
             }
         }];
-
 		$this->col[] = ["label"=>"最后生成时间","name"=>"last_generate_at"];
         $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
             if ( $row->status == Script::STATUS_INIT) {
@@ -72,20 +67,8 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
         $this->form[] = ['label'=>'步骤','name'=>'step','type'=>'textarea','validation'=>'required','width'=>'col-sm-10'];
         $this->form[] = ['name'=>'script_model_params','type'=>'text'];
-		$this->form[] = ['label'=>'执行规则','name'=>'cron_type','type'=>'radio','validation'=>'nullable|integer','width'=>'col-sm-10','dataenum'=>'1|持续执行;2|每分钟执行一次;3|每小时执行一次;4|每天执行一次','value'=>'1'];
+		$this->form[] = ['label'=>'执行规则','name'=>'cron_type','type'=>'radio','validation'=>'nullable|integer','width'=>'col-sm-10','dataenum'=>'1|每分钟执行一次;2|每五分钟执行一次;3|每十五分钟执行一次;','value'=>'1'];
 		# END FORM DO NOT REMOVE THIS LINE
-
-		# OLD START FORM
-		//$this->form = [];
-		//$this->form[] = ["label"=>"Name","name"=>"name","type"=>"text","required"=>TRUE,"validation"=>"required|string|min:3|max:70","placeholder"=>"请输入字母"];
-		//$this->form[] = ["label"=>"Description","name"=>"description","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-		//$this->form[] = ["label"=>"Script Init Id","name"=>"script_init_id","type"=>"select2","required"=>TRUE,"validation"=>"required|integer|min:0","datatable"=>"script_init,id"];
-		//$this->form[] = ["label"=>"Step","name"=>"step","type"=>"textarea","required"=>TRUE,"validation"=>"required|string|min:5|max:5000"];
-		//$this->form[] = ["label"=>"Cron Type","name"=>"cron_type","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-		//$this->form[] = ["label"=>"Last Generate At","name"=>"last_generate_at","type"=>"datetime","required"=>TRUE,"validation"=>"required|date_format:Y-m-d H:i:s"];
-		//$this->form[] = ["label"=>"Status","name"=>"status","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-		//$this->form[] = ["label"=>"Operate User","name"=>"operate_user","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-		# OLD END FORM
 
 		/*
         | ----------------------------------------------------------------------
@@ -402,7 +385,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data = [];
         $data['page_title'] = '编辑脚本生成信息';
         $data['row'] = InternalAPIService::get('/script', ['id' => $id]);
-
         if (empty($data['row'])) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "数据信息有误", "error");
         }
@@ -479,6 +461,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data['languages_type'] = $formParams['languages_type'];
         $data['operate_user'] = CRUDBooster::myName();
         $data['id'] = $id;
+
         try {
             $res = InternalAPIService::post('/script/update', $data);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
@@ -558,13 +541,11 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         }
 
         if ($data['row']['cron_type'] == Script::CRON_TYPE_KEEP) {
-            $data['row']['cron_type'] = '持续执行';
-        } else if($data['row']['cron_type'] == Script::CRON_TYPE_EVERY_MINUTE) {
             $data['row']['cron_type'] = '每分钟执行一次';
-        } else if( $data['row']['cron_type'] == Script::CRON_TYPE_EVERY_FIVE_MINIT) {
+        } else if($data['row']['cron_type'] == Script::CRON_TYPE_EVERY_FIVE_MINUTES) {
             $data['row']['cron_type'] = '每五分钟执行一次';
-        } else if ($data['row']['cron_type'] == Script::CRON_TYPE_EVERY_FIFTEEN_MINUTES) {
-            $data['row']['cron_type'] = '每十五分钟执行';
+        } else if( $data['row']['cron_type'] == Script::CRON_TYPE_EVERY_TEN_MINUTES) {
+            $data['row']['cron_type'] = '每十分钟执行一次';
         }
 
         if ($data['row']['status'] == Script::STATUS_INIT) {
@@ -862,16 +843,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         if($this->show_numbering) {
             $html_content[] = $number.'. ';
             $number++;
-        }
-
-        if ( $row->cron_type == Script::CRON_TYPE_KEEP) {
-            $row->cron_type = '持续执行';
-        } else if( $row->cron_type == Script::CRON_TYPE_EVERY_MINUTE) {
-            $row->cron_type = '每分钟执行一次';
-        } else if( $row->cron_type == Script::CRON_TYPE_EVERY_FIVE_MINIT) {
-            $row->cron_type = '每五分钟执行一次';
-        } else if ($row->cron_type == Script::CRON_TYPE_EVERY_FIFTEEN_MINUTES) {
-            $row->cron_type = '每十五分钟执行';
         }
 
         if ($row->status == Script::STATUS_INIT) {
