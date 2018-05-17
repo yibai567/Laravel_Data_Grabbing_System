@@ -13,7 +13,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
     public function cbInit() {
 
 		# START CONFIGURATION DO NOT REMOVE THIS LINE
-		$this->title_field = "name";
 		$this->limit = "20";
 		$this->orderby = "id,desc";
 		$this->global_privilege = false;
@@ -34,17 +33,15 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 		# START COLUMNS DO NOT REMOVE THIS LINE
 		$this->col = [];
 		$this->col[] = ["label"=>"Id","name"=>"id"];
-        $this->col[] = ["label"=>"名称","name"=>"name"];
-        $this->col[] = ["label"=>"执行规则","name"=>"cron_type","callback"=>function ($row) {
-            if ( $row->cron_type == Script::CRON_TYPE_KEEP) {
-                return '每分钟执行一次';
-            } else if( $row->cron_type == Script::CRON_TYPE_EVERY_FIVE_MINUTES) {
-                return '每五分钟执行一次';
-            } else if ($row->cron_type == Script::CRON_TYPE_EVERY_FIVE_MINUTES) {
-                return '每十分钟执行一次';
+        $this->col[] = ["label"=>"语言类型","name"=>"languages_type","callback"=>function ($row) {
+            if( $row->languages_type == Script::LANGUAGES_TYPE_CASPERJS) {
+                return 'casperJs';
+            } else if ($row->languages_type == Script::LANGUAGES_TYPE_HTML) {
+                return 'html';
+            } else if ($row->languages_type == Script::LANGUAGES_TYPE_API) {
+                return 'api';
             }
         }];
-
 		$this->col[] = ["label"=>"最后生成时间","name"=>"last_generate_at"];
         $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
             if ( $row->status == Script::STATUS_INIT) {
@@ -388,7 +385,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data = [];
         $data['page_title'] = '编辑脚本生成信息';
         $data['row'] = InternalAPIService::get('/script', ['id' => $id]);
-
         if (empty($data['row'])) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "数据信息有误", "error");
         }
@@ -465,6 +461,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data['languages_type'] = $formParams['languages_type'];
         $data['operate_user'] = CRUDBooster::myName();
         $data['id'] = $id;
+
         try {
             $res = InternalAPIService::post('/script/update', $data);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
@@ -846,14 +843,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         if($this->show_numbering) {
             $html_content[] = $number.'. ';
             $number++;
-        }
-
-        if ( $row->cron_type == Script::CRON_TYPE_KEEP) {
-            $row->cron_type = '每分钟执行一次';
-        } else if( $row->cron_type == Script::CRON_TYPE_EVERY_FIVE_MINUTES) {
-            $row->cron_type = '每五分钟执行一次';
-        } else if( $row->cron_type == Script::CRON_TYPE_EVERY_TEN_MINUTES) {
-            $row->cron_type = '每十分钟执行一次';
         }
 
         if ($row->status == Script::STATUS_INIT) {

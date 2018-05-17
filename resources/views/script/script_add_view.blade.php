@@ -301,7 +301,7 @@
     </aside>
 </div>
 
-<script src="http://rubaxa.github.io/Sortable/Sortable.js"></script>sc
+<script src="http://rubaxa.github.io/Sortable/Sortable.js"></script>
 <script>
     Sortable.create(document.getElementById('foo'), {
         group: {

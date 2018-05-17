@@ -19,13 +19,10 @@ class Script extends Model
     const LANGUAGES_TYPE_HTML = 2;
     const LANGUAGES_TYPE_API = 3;
 
-    //任务执行类型 1、保持 2、每分钟 3、每五分钟 4、每十分钟 5、每十五分钟 6、每二十分钟
+    //任务执行类型 1、每分钟 2、每五分钟 3、每十分钟
     const CRON_TYPE_KEEP = 1;
-    const CRON_TYPE_EVERY_MINUTE = 2;
-    const CRON_TYPE_EVERY_FIVE_MINUTES = 3;
-    const CRON_TYPE_EVERY_TEN_MINUTES = 4;
-    const CRON_TYPE_EVERY_FIFTEEN_MINUTES = 5;
-    const CRON_TYPE_EVERY_TWENTY_MINUTES = 6;
+    const CRON_TYPE_EVERY_FIVE_MINUTES = 2;
+    const CRON_TYPE_EVERY_TEN_MINUTES = 3;
 
     /**
      * 表名

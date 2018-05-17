@@ -119,8 +119,7 @@
   <thead>
       <tr>
         <th>ID</th>
-        <th>任务名称</th>
-        <th>执行规则</th>
+        <th>语言类型</th>
         <th>最后生成时间</th>
         <th>状态</th>
         <th style="float: right;">操作</th>
@@ -130,8 +129,13 @@
     @foreach($result as $row)
       <tr>
         <td>{{$row->id}}</td>
-        <td>{{$row->name}}</td>
-        <td>{{$row->cron_type}}</td>
+        @if ($row->languages_type == 1)
+            <td>casperJs</td>
+        @elseif ($row->languages_type == 2)
+            <td>html</td>
+        @else
+            <td>api</td>
+        @endif
         <td>{{$row->last_generate_at}}</td>
         @if ($row->status == 1)
         <td><a class='btn btn-xs btn-warning' title='初始化'><i></i>初始化</a></td>
