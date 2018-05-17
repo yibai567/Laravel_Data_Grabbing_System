@@ -10,6 +10,8 @@
 namespace App\Http\Controllers\InternalAPI;
 
 use App\Models\ScriptModel;
+use App\Models\Task;
+use App\Models\TaskStatistics;
 use Illuminate\Support\Facades\DB;
 use Log;
 use App\Models\Script;
@@ -66,22 +68,31 @@ class ScriptController extends Controller
                 //调用添加配置的方法
                 $scriptInit = $this->__createScriptInit($init);
             }
-            //整理入库数据
-            $data = [
-                'name' => $params['name'],
-                'description' => $params['description'],
+            //整理script入库数据
+            $scriptData = [
                 'languages_type' => $params['languages_type'],
                 'step' => $params['step'],
                 'status' => Script::STATUS_INIT,
                 'operate_user' => $params['operate_user'],
-                'cron_type' => $params['cron_type']
             ];
 
             if (!empty($scriptInit)) {
-                $data['script_init_id'] = $scriptInit['id'];
+                $scriptData['script_init_id'] = $scriptInit['id'];
             }
 
-            $script = Script::create($data);
+            $script = Script::create($scriptData);
+
+            //整理task数据
+            $taskData = [
+                'languages_type' => $params['languages_type'],
+                'script_id' => $script->id,
+                'name' => $params['name'],
+                'description' => $params['description'],
+                'cron_type' => $params['cron_type'],
+                'status' => Task::STATUS_INIT,
+            ];
+
+            $task = Task::create($taskData);
 
             DB::commit();
         } catch (\Exception $e) {
@@ -98,6 +109,11 @@ class ScriptController extends Controller
 
         if (!empty($scriptInit)) {
             $result['init'] = $scriptInit;
+        }
+
+        if (!empty($task)) {
+            $taskInfo = $task->toArray();
+            $result['task'] = $taskInfo;
         }
 
         return $this->resObjectGet($result, 'script', $request->path());
@@ -146,9 +162,23 @@ class ScriptController extends Controller
         DB::beginTransaction();
 
         try {
-            $script->update($params);
+            $scriptData = [
+                'languages_type' => $params['languages_type'],
+                'step' => $params['step'],
+                'status' => Script::STATUS_INIT,
+                'operate_user' => $params['operate_user'],
+            ];
 
-            $result = $script->toArray();
+            $script->update($scriptData);
+
+            if (!empty($script)) {
+                $result = $script->toArray();
+            }
+
+            //更改或创建task信息
+            $task = $this->__updateTask($params);
+
+            $result['task'] = $task;
 
             //判断是否修改配置,有数据就修改,无跳过
             if (!empty($params['init']) && $params['languages_type'] == Script::LANGUAGES_TYPE_CASPERJS) {
@@ -199,6 +229,18 @@ class ScriptController extends Controller
             }
             $result['init'] = $scriptInit->toArray();
         }
+
+        $task = Task::where('script_id',$params['id'])
+                    ->whereIn('status',[0,1])
+                    ->first();
+
+        if (empty($task)) {
+            throw new \Dingo\Api\Exception\ResourceException("task is not found");
+        }
+        //整理task数据岛返回结果
+        $result['name'] = $task->name;
+        $result['description'] = $task->description;
+        $result['cron_type'] = $task->cron_type;
 
         return $this->resObjectGet($result, 'script', $request->path());
     }
@@ -324,13 +366,11 @@ class ScriptController extends Controller
 
         //检查文件是否生成成功
         if (!file_exists($file)){
-            throw new \Dingo\Api\Exception\ResourceException("file generation failed");
+            throw new \Dingo\Api\Exception\ResourceException("file generation is failed");
         }
 
-        //更新状态和时
-        $script->status = Script::STATUS_GENERATE;
-        $script->last_generate_at = time();
-        $script->save();
+        //生成脚本之后,做的一系列状态操作
+        $this->__afterScriptGenerated($script);
 
         return $this->resObjectGet(true, 'script', $request->path());
     }
@@ -377,6 +417,67 @@ class ScriptController extends Controller
         $result = [];
         if (!empty($scriptInit)) {
             $result = $scriptInit->toArray();
+        }
+
+        return $result;
+    }
+
+    /**
+     * __updateTask
+     * 更新task信息
+     *
+     * @param $uploadData
+     * @return array
+     */
+    public function __updateTask($uploadData)
+    {
+        //更改script对应的task为停止
+        $startTasks = Task::where('script_id',$uploadData['id'])->where('status',Task::STATUS_START)->get();
+        if (empty($startTasks)) {
+            throw new \Dingo\Api\Exception\ResourceException("task is not found");
+        }
+
+        foreach($startTasks as $task){
+            $task->status = Task::STATUS_STOP;
+            $task->save();
+        }
+
+        //查询script是否有未启动的task
+        $task = Task::where('script_id',$uploadData['id'])->where('status',Task::STATUS_INIT)->first();
+
+        //查看是否有初始化的task,有则在原基础上该,无则创建
+        if (empty($task)) {
+            //整理task数据
+            $taskData = [
+                'languages_type' => $uploadData['languages_type'],
+                'script_id' => $uploadData['id'],
+                'name' => $uploadData['name'],
+                'description' => $uploadData['description'],
+                'cron_type' => $uploadData['cron_type'],
+                'status' => Task::STATUS_INIT,
+            ];
+
+            $taskInfo = Task::create($taskData);
+        } else {
+            //整理task数据
+            $taskData = [
+                'languages_type' => $uploadData['languages_type'],
+                'name' => $uploadData['name'],
+                'description' => $uploadData['description'],
+                'cron_type' => $uploadData['cron_type'],
+                'status' => Task::STATUS_INIT,
+            ];
+
+            $task->update($taskData);
+
+            $taskInfo =$task;
+        }
+
+        $result = [];
+
+        if (!empty($taskInfo)) {
+
+            $result = $taskInfo->toArray();
         }
 
         return $result;
@@ -540,6 +641,44 @@ class ScriptController extends Controller
     }
 
     /**
+     * __afterScriptGenerated
+     * 生成脚本后,更改script和task状态,生成task_statistics
+     *
+     * @param Script $script
+     * @return boolean
+     */
+    private function __afterScriptGenerated($script)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            //更新script状态和最后生成时间
+            $script->status = Script::STATUS_GENERATE;
+            $script->last_generate_at = time();
+            $script->save();
+
+            //查找script对应的初始化的task,修改状态
+            $task = Task::where('script_id',$script->id)->where('status',Task::STATUS_INIT)->first();
+            $task->status = Task::STATUS_START;
+            $task->save();
+
+            //生成task_statistics
+            $taskStatistics = new TaskStatistics;
+
+            $taskStatistics->task_id = $task->id;
+            $taskStatistics->save();
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            Log::error('__afterScriptGenerated    Exception:'."\t".$e->getCode()."\t".$e->getMessage());
+            throw new \Dingo\Api\Exception\ResourceException("status update is failed");
+        }
+    }
+
+    /**
      * 根据队列名获取队列数据
      * @param $name 队列名称
      */
@@ -563,7 +702,7 @@ class ScriptController extends Controller
                     $data[$i] = json_decode($value, true);
                 }
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->resError($e->getCode(), $e->getMessage());
         }
 

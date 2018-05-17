@@ -109,6 +109,7 @@ class DataController extends Controller
                     //事件监听,处理上报数据
                     event(new DataResultReportEvent($newData));
                 }
+
             } catch (\Exception $e) {
                 Log::debug('[batchCreate] error message = ' . $e->getMessage());
                 return response()->json(false);
