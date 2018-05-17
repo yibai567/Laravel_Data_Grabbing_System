@@ -20,6 +20,7 @@ class TaskRunLog extends Model
      * 可更新的字段
      */
     protected $fillable = [
+        'task_id',
         'start_job_at',
         'end_job_at',
         'result_count',

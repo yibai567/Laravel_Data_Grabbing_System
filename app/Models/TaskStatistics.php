@@ -20,6 +20,7 @@ class TaskStatistics extends Model
      * 可更新的字段
      */
     protected $fillable = [
+        'task_id',
         'last_job_at',
         'run_times',
         'result_count',

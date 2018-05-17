@@ -9,6 +9,11 @@ class Task extends Model
 {
     use SoftDeletes;
 
+    //任务状态
+    const STATUS_INIT = 0;
+    const STATUS_START = 1;
+    const STATUS_STOP = 2;
+
     protected $dates = ['deleted_at'];
 
     /**
@@ -20,6 +25,7 @@ class Task extends Model
      * 可更新的字段
      */
     protected $fillable = [
+        'script_id',
         'name',
         'description',
         'cron_type',

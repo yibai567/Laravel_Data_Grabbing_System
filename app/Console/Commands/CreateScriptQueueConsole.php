@@ -3,7 +3,10 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Models\Task;
 use App\Models\Script;
+use App\Models\TaskRunLog;
+use App\Services\InternalAPIService;
 use Illuminate\Support\Facades\Redis;
 use Log;
 
@@ -40,6 +43,7 @@ class CreateScriptQueueConsole extends Command
      */
     public function handle()
     {
+
         $scriptList = $this->__getScriptList();
         if (empty($scriptList)) {
             $this->info("还没有已生成的脚本，稍请后重试");
@@ -49,9 +53,17 @@ class CreateScriptQueueConsole extends Command
         foreach ($scriptList as $key => $value) {
             $driver = $this->__getDriver($value['languages_type'], $value['id']);
             $cron = $this->__getCron($value['cron_type'], $value['id']);
+
+            $taskRunLog = InternalAPIService::post('/task_run_log', ['task_id' => $value['id']]);
+            if (empty($taskRunLog)) {
+                $this->info("task_run_log添加失败，请后重试");
+            }
+            $taskRunLogId = $taskRunLog['id'];
             $queueName = 'script_queue_' . $driver . '_' . $cron;
             $queueList[$queueName][] = [
-                'path' => 'script_' . $value['id'] . '.js'
+                'path' => 'script_' . $value['id'] . '.js',
+                'task_id' => $value['id'],
+                'task_run_log_id' => $taskRunLogId
             ];
         }
 
@@ -78,8 +90,8 @@ class CreateScriptQueueConsole extends Command
     private function __getScriptList()
     {
         $data = [];
-        Script::select(['id', 'languages_type', 'cron_type'])
-                ->where('status', Script::STATUS_GENERATE)
+        Task::select(['id', 'languages_type', 'cron_type'])
+                ->where('status', Task::STATUS_START)
                 ->chunk(500, function ($script) use(&$data) {
                     if ($script) {
                         $script = $script->toArray();
