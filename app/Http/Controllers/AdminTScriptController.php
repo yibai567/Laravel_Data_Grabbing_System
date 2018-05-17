@@ -38,7 +38,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $this->col[] = ["label"=>"执行规则","name"=>"cron_type","callback"=>function ($row) {
             if ( $row->cron_type == Script::CRON_TYPE_KEEP) {
                 return '每分钟执行一次';
-            } else if( $row->cron_type == Script::CRON_TYPE_EVERY_MINUTE) {
+            } else if( $row->cron_type == Script::CRON_TYPE_EVERY_FIVE_MINUTES) {
                 return '每五分钟执行一次';
             } else if ($row->cron_type == Script::CRON_TYPE_EVERY_FIVE_MINUTES) {
                 return '每十分钟执行一次';
@@ -545,7 +545,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
         if ($data['row']['cron_type'] == Script::CRON_TYPE_KEEP) {
             $data['row']['cron_type'] = '每分钟执行一次';
-        } else if($data['row']['cron_type'] == Script::CRON_TYPE_EVERY_MINUTE) {
+        } else if($data['row']['cron_type'] == Script::CRON_TYPE_EVERY_FIVE_MINUTES) {
             $data['row']['cron_type'] = '每五分钟执行一次';
         } else if( $data['row']['cron_type'] == Script::CRON_TYPE_EVERY_TEN_MINUTES) {
             $data['row']['cron_type'] = '每十分钟执行一次';
@@ -850,7 +850,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
         if ( $row->cron_type == Script::CRON_TYPE_KEEP) {
             $row->cron_type = '每分钟执行一次';
-        } else if( $row->cron_type == Script::CRON_TYPE_EVERY_MINUTE) {
+        } else if( $row->cron_type == Script::CRON_TYPE_EVERY_FIVE_MINUTES) {
             $row->cron_type = '每五分钟执行一次';
         } else if( $row->cron_type == Script::CRON_TYPE_EVERY_TEN_MINUTES) {
             $row->cron_type = '每十分钟执行一次';

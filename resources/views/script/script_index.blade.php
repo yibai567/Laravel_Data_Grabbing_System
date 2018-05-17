@@ -146,6 +146,11 @@
             <i class='glyphicon glyphicon-send'></i> 发布</a>
         @endif
 
+        @if($row->status == 2)
+            <a class='btn btn-xs btn-warning' target="_blank" title='下载' href="http://{{$_SERVER['HTTP_HOST']}}/vendor/script/script_{{$row->id}}.js" download >
+            <i class='glyphicon glyphicon-download'></i></a>
+        @endif
+
         @if(CRUDBooster::isUpdate() && $button_edit)
             <a class='btn btn-xs btn-success btn-edit' href='{{CRUDBooster::mainpath("edit/$row->id")}}'>
                 <i class="fa fa-pencil"></i>
