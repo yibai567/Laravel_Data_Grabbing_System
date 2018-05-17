@@ -103,10 +103,12 @@ class DataController extends Controller
 
         if (!empty($newData)) {
             try {
-                Data::insert($newData);
+                $result = Data::insert($newData);
 
-                //事件监听,处理上报数据
-                event(new DataResultReportEvent($newData));
+                if ($result) {
+                    //事件监听,处理上报数据
+                    event(new DataResultReportEvent($newData));
+                }
             } catch (\Exception $e) {
                 Log::debug('[batchCreate] error message = ' . $e->getMessage());
                 return response()->json(false);

@@ -59,6 +59,11 @@ class DataResultReportListener implements ShouldQueue
         //获取选择器中的元素
         $selectorKeys = array_keys($selector);
 
+        if (empty($selectorKeys)) {
+            Log::debug('[DataResultReportListener handle] selectorKeys is empty');
+            return true;
+        }
+
         //去除数组中的元素remove_images
         foreach ($selectorKeys as $key => $selectorKey) {
             if ($selectorKey == 'remove_images') {
