@@ -51,4 +51,76 @@ class TaskRunLogController extends Controller
         return $this->resObjectGet($result, 'task_run_log', $request->path());
     }
 
+    /**
+     * updateStatusSuccess
+     * 修改状态为成功
+     *
+     * @param id 主键ID
+     * @param result_count 结果总数
+     * @return array
+     */
+
+    public function updateStatusSuccess(Request $request)
+    {
+        $end_job_at = date('Y-m-d H:i:s');
+        $params = $request->all();
+
+        Log::debug('[updateStatusSuccess] 接收参数:', $params);
+
+        ValidatorService::check($params, [
+            'id' => 'required|integer',
+            'result_count' => 'required|integer',
+        ]);
+
+        $taskRunLog = TaskRunLog::find($params['id']);
+
+        if (empty($taskRunLog)) {
+            Log::debug('[updateStatusSuccess] task run log not exist id = ' . $params['id']);
+            throw new \Dingo\Api\Exception\ResourceException(" task run log not exist");
+        }
+
+        $taskRunLog->status = TaskRunLog::STATUS_SUCCESS;
+        $taskRunLog->end_job_at = $end_job_at;
+        $taskRunLog->result_count = $params['result_count'];
+        $taskRunLog->save();
+        $res = $taskRunLog->toArray();
+
+        return $this->resObjectGet($res, 'task_run_log', $request->path());
+
+    }
+
+    /**
+     * updateStatusFAIL
+     * 修改状态为失败
+     *
+     * @param id 主键
+     * @return array
+     */
+
+    public function updateStatusFAIL(Request $request)
+    {
+        $end_job_at = date('Y-m-d H:i:s');
+        $params = $request->all();
+
+        Log::debug('[updateStatusFAIL] 接收参数:', $params);
+
+        ValidatorService::check($params, [
+            'id' => 'required|integer',
+        ]);
+
+        $taskRunLog = TaskRunLog::find($params['id']);
+        if (empty($taskRunLog)) {
+            Log::debug('[updateStatusFAIL] task run log not exist id = ' . $params['id']);
+            throw new \Dingo\Api\Exception\ResourceException(" task run log not exist");
+        }
+
+        $taskRunLog->status = TaskRunLog::STATUS_FAIL;
+        $taskRunLog->end_job_at = $end_job_at;
+        $taskRunLog->save();
+        $res = $taskRunLog->toArray();
+
+        return $this->resObjectGet($res, 'task_run_log', $request->path());
+
+    }
+
 }

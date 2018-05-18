@@ -104,10 +104,9 @@ $api->version(
 
         $api->post('/data/results','DataController@batchCreate');
 
-<<<<<<< HEAD
         $api->post('/task_statistics/update','TaskStatisticsController@update');
-=======
         $api->post('/task_run_log','TaskRunLogController@create');
->>>>>>> c619af53780f8ad6e5348d275a8f3833e1217511
+        $api->post('/task_run_log/status/success','TaskRunLogController@updateStatusSuccess');
+        $api->post('/task_run_log/status/fail','TaskRunLogController@updateStatusFail');
     }
 );
