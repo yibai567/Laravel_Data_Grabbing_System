@@ -3,7 +3,6 @@ build
 bower_components
 /public/hot
 /public/storage
-/storage/*
 composer.phar
 /.idea
 /.vagrant
