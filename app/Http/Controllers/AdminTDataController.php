@@ -19,7 +19,7 @@
 			$this->button_action_style = "button_icon";
 			$this->button_add = false;
 			$this->button_edit = false;
-			$this->button_delete = false;
+			$this->button_delete = true;
 			$this->button_detail = true;
 			$this->button_show = true;
 			$this->button_filter = true;
@@ -30,10 +30,12 @@
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
+            $this->col[] = ["label"=>"ID","name"=>"id"];
 			$this->col[] = ["label"=>"分类","name"=>"content_type"];
 			$this->col[] = ["label"=>"公司名","name"=>"company"];
-			$this->col[] = ["label"=>"标题","name"=>"title"];
-			$this->col[] = ["label"=>"地址","name"=>"detail_url"];
+			$this->col[] = ["label"=>"标题","name"=>"title",'width'=>'30%'];
+            $this->col[] = ["label"=>"地址","name"=>"detail_url"];
+			$this->col[] = ["label"=>"创建时间","name"=>"created_at"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
