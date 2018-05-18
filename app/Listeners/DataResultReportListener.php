@@ -39,21 +39,19 @@ class DataResultReportListener implements ShouldQueue
 
             return true;
         }
-
         //这批数据的来源同一个script
-        $scriptId = $data[0]['script_id'];
+        $taskId = $data[0]['task_id'];
 
         //通过script_id映射task_id
-        $taskId = config('data.'.$scriptId);
+        $itemId = config('data.'.$taskId);
         //查询抓取任务详情
-        $task = Item::find($taskId);
-
-        if (empty($task)) {
+        $Item = Item::find($itemId);
+        if (empty($Item)) {
             Log::debug('[DataResultReportListener handle] Item is not found');
             return true;
         }
         //获取选择器内容
-        $short_content_selector = $task->short_content_selector;
+        $short_content_selector = $Item->short_content_selector;
         $selector = json_decode($short_content_selector,true);
 
         //获取选择器中的元素
@@ -97,7 +95,7 @@ class DataResultReportListener implements ShouldQueue
                 }
             }
 
-            $newData[$postNum]['task_id'] = $taskId;
+            $newData[$postNum]['task_id'] = $itemId;
             $newData[$postNum]['url'] = $info['detail_url'];
             $postNum += 1;
         }

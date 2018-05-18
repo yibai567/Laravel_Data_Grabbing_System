@@ -25,7 +25,7 @@ class TaskStatisticsController extends Controller
      */
     public function update(Request $request)
     {
-        Log::debug('[internal ScriptController create] start!');
+        Log::debug('[internal TaskStatisticsController update] start!');
         $params = $request->all();
 
         //验证参数
@@ -39,6 +39,7 @@ class TaskStatisticsController extends Controller
 
             //检测task是否存在
             if (empty($task)) {
+                Log::error('[internal TaskStatisticsController update] task is not found');
                 throw new \Dingo\Api\Exception\ResourceException("task is not found");
             }
             //根据一对一关系,查询taskStatistics信息
@@ -46,6 +47,7 @@ class TaskStatisticsController extends Controller
 
             //检测taskStatistics是否存在
             if (empty($taskStatistics)) {
+                Log::error('[internal TaskStatisticsController update] taskStatistics is not found');
                 throw new \Dingo\Api\Exception\ResourceException("taskStatistics is not found");
             }
 
@@ -55,12 +57,12 @@ class TaskStatisticsController extends Controller
             $taskStatistics->save();
 
         } catch (\Exception $e) {
+            Log::error('Script update    Exception:'."\t".$e->getCode()."\t".$e->getMessage());
             return $this->resError($e->getCode(), $e->getMessage());
+
         }
 
-        $data = $taskStatistics->toArray();
-
-        return $this->resObjectGet($data, 'task_statistics', $request->path());
+        return $this->resObjectGet(true, 'task_statistics', $request->path());
 
     }
 }

@@ -11,6 +11,7 @@ namespace App\Http\Controllers\InternalAPI;
 
 use App\Events\DataResultReportEvent;
 use App\Models\Data;
+use App\Services\InternalAPIService;
 use Log;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
@@ -33,12 +34,31 @@ class DataController extends Controller
         ValidatorService::check($params, [
             'company' => 'required|string|max:500',
             'content_type' => 'required|integer|between:1,10',
-            'script_id' => 'required|integer',
+            'task_id' => 'nullable|integer',
+            'task_run_log_id' => 'nullable|integer',
             'start_time' => 'required|date',
             'end_time' => 'required|date',
             'result' => 'required|array'
         ]);
 
+        //如果未传task_id或task_run_log_id,是为测试脚本,直接返回结果
+        if (empty($params['task_id']) || empty($params['task_run_log_id'])) {
+            return response()->json(true);
+        }
+
+        $updateTaskStatisticsData['task_id'] = $params['task_id'];
+
+        //记录脚本运行记录
+        $result = InternalAPIService::post('/task_statistics/update', $updateTaskStatisticsData);
+        if (!$result) {
+            Log::debug('[batchCreate] update task statistics is failed ');
+
+            $updateTaskRunLogData['id'] = $params['task_run_log_id'];
+            //更改task_runRunLog状态
+            InternalAPIService::post('/task_run_log/status/fail', $updateTaskRunLogData);
+
+            return response()->json(false);
+        }
         $newData = [];
         foreach ($params['result'] as $value) {
             if ($params['content_type'] == Data::CONTENT_TYPE_LIVE) {
@@ -88,9 +108,11 @@ class DataController extends Controller
                 'md5_title' => $value['md5_title'],
                 'md5_content' => $value['md5_content'],
                 'content' => $value['content'],
-                'script_id' => $params['script_id'],
+                'task_id' => $params['task_id'],
+                'task_run_log_id' => $params['task_run_log_id'],
                 'detail_url' => $value['detail_url'],
                 'show_time' => $value['show_time'],
+                'author' => $value['author'],
                 'read_count' => $value['read_count'],
                 'status' => Data::STATUS_NORMAL,
                 'start_time' => $params['start_time'],
@@ -104,8 +126,15 @@ class DataController extends Controller
         if (!empty($newData)) {
             try {
                 $result = Data::insert($newData);
-
                 if ($result) {
+                    //修改task_run_log信息;
+                    $result_count = count($newData);
+                    $updateTaskRunLogData['result_count'] = $result_count;
+                    $updateTaskRunLogData['id'] = $params['task_run_log_id'];
+
+                    //更改task_runRunLog状态
+                    InternalAPIService::post('/task_run_log/status/success', $updateTaskRunLogData);
+
                     //事件监听,处理上报数据
                     event(new DataResultReportEvent($newData));
                 }

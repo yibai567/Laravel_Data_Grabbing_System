@@ -51,13 +51,10 @@ class Task extends Model
     protected $hidden = [
         'deleted_at',
     ];
-<<<<<<< HEAD
 
     public function taskStatistics()
     {
         return $this->hasOne('App\Models\TaskStatistics', 'task_id', 'id');
     }
 
-=======
->>>>>>> c619af53780f8ad6e5348d275a8f3833e1217511
 }
