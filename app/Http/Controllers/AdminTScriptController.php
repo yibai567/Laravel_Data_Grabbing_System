@@ -341,6 +341,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
     }
 
+    //增加界面
     public function getAdd() {
         $languagesType = Request::get('languagesType');
         if (!$languagesType) {
@@ -377,48 +378,51 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $this->cbView('script/script_add_view',$data);
     }
 
+    //编辑界面
     public function getEdit($id) {
+
         if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE || $this->button_add==FALSE) {
             CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
         }
 
         $data = [];
         $data['page_title'] = '编辑脚本生成信息';
-        $data['row'] = InternalAPIService::get('/script', ['id' => $id]);
-        if (empty($data['row'])) {
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "数据信息有误", "error");
-        }
+        try {
+            $data['row'] = InternalAPIService::get('/script', ['id' => $id]);
+            if (!empty($data['row']['step'])) {
+                $step = $data['row']['step'];
+                $newScriptModel = [];
 
-        if (!empty($data['row']['step'])) {
-            $step = $data['row']['step'];
-            $newScriptModel = [];
+                foreach ($step as $key => $value) {
+                    $scriptModelId .= $value[0] . ',';
+                    $id = $value[0];
+                    array_splice($value, 0, 1);
+                    $newScriptModel[$id] = $value;
+                }
 
-            foreach ($step as $key => $value) {
-                $scriptModelId .= $value[0] . ',';
-                $id = $value[0];
-                array_splice($value, 0, 1);
-                $newScriptModel[$id] = $value;
+                $data['row']['step'] = $newScriptModel;
+                $script_models = InternalAPIService::get('/script_models/ids', ['ids' => rtrim($scriptModelId, ",")]);
+                foreach ($script_models as $key => $value) {
+                    $newScriptModelParams[$value['id']] = json_decode($value['parameters']);
+                    $newScriptModelList[$value['id']] = $value;
+                }
+
+                $data['row']['script_model_params'] = $newScriptModelParams;
+                $data['row']['script_model_list'] = $newScriptModelList;
+
+                $data['script_model'] = [];
+                $res = InternalAPIService::get('/script_models/languages_type/' . $data['row']['languages_type']);
+                if (!empty($res)) {
+                    $data['script_model'] = json_decode(json_encode($res));
+                }
             }
-
-            $data['row']['step'] = $newScriptModel;
-            $script_models = InternalAPIService::get('/script_models/ids', ['ids' => rtrim($scriptModelId, ",")]);
-            foreach ($script_models as $key => $value) {
-                $newScriptModelParams[$value['id']] = json_decode($value['parameters']);
-                $newScriptModelList[$value['id']] = $value;
-            }
-
-            $data['row']['script_model_params'] = $newScriptModelParams;
-            $data['row']['script_model_list'] = $newScriptModelList;
-        }
-
-        $data['script_model'] = [];
-        $res = InternalAPIService::get('/script_models/languages_type/' . $data['row']['languages_type']);
-        if (!empty($res)) {
-            $data['script_model'] = json_decode(json_encode($res));
+        } catch (\Dingo\Api\Exception\ResourceException $e) {
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "该数据信息有误", "error");
         }
         $this->cbView('script/script_edit_view',$data);
     }
 
+    //保存编辑信息
     public function postEditSave($id) {
         $this->cbLoader();
         $row = DB::table($this->table)->where($this->primary_key,$id)->first();
@@ -471,6 +475,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script", "修改成功", "success");
     }
 
+    //保存增加信息
     public function postAddSave() {
         $this->cbLoader();
         if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE) {
@@ -518,6 +523,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script", "创建成功", "success");
     }
 
+    //详情
     public function getDetail($id) {
 
         if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_edit==FALSE) {
@@ -561,6 +567,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $this->cbView('script/script_detail_view',$data);
     }
 
+    //列表
     public function getIndex() {
         $this->cbLoader();
 
@@ -938,6 +945,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $this->cbView("script/script_index", $data);
     }
 
+    //发布
     public function getPublish($id) {
         try {
             $res = InternalAPIService::get('/script/generate', ['id' => $id]);
