@@ -31,6 +31,7 @@
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
+            $this->col[] = ["label"=>"任务ID","name"=>"id"];
 			$this->col[] = ["label"=>"脚本ID","name"=>"script_id"];
 			$this->col[] = ["label"=>"任务名称","name"=>"name"];
 			$this->col[] = ["label"=>"任务描述","name"=>"description"];
@@ -38,7 +39,7 @@
                 $taskStatistics = DB::table('t_task_statistics')->where('task_id', $row->id)->first();
                 return $taskStatistics->last_job_at;
             }];
-            $this->col[] = ["label"=>"执行时间","name"=>"name","callback"=>function ($row) {
+            $this->col[] = ["label"=>"执行次数","name"=>"name","callback"=>function ($row) {
                 $taskStatistics = DB::table('t_task_statistics')->where('task_id', $row->id)->first();
                 return $taskStatistics->run_times;
             }];
