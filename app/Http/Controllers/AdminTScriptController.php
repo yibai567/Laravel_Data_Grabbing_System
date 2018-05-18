@@ -156,7 +156,8 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         |
         */
         $this->index_statistic = array();
-
+        $this->index_statistic[] = ['label'=>'待发布','count'=>Script::where('status', Script::STATUS_INIT)->count(),'icon'=>'glyphicon glyphicon-send','color'=>'btn btn-xs btn-warning'];
+        $this->index_statistic[] = ['label'=>'已发布','count'=>Script::where('status', Script::STATUS_GENERATE)->count(),'icon'=>'fa fa-check','color'=>'btn btn-xs btn-success'];
 
 
         /*

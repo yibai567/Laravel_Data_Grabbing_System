@@ -138,11 +138,15 @@
         @else
             <td>api</td>
         @endif
-        <td>{{$row->last_generate_at}}</td>
-        @if ($row->status == 1)
-        <td><a class='btn btn-xs btn-warning' title='初始化'><i></i>初始化</a></td>
+        @if (!empty($row->last_generate_at))
+            <td>{{date('Y-m-d H:i:s',$row->last_generate_at)}}</td>
         @else
-        <td><a class='btn btn-xs btn-success' title='已发布'><i></i>已发布</a></td>
+            <td>{{$row->last_generate_at}}</td>
+        @endif
+        @if ($row->status == 1)
+        <td><a class='btn btn-xs btn-warning'><i></i>待发布</a></td>
+        @else
+        <td><a class='btn btn-xs btn-success'><i></i>已发布</a></td>
         @endif
         <td style="float: right;">
           <!-- To make sure we have read access, wee need to validate the privilege -->
