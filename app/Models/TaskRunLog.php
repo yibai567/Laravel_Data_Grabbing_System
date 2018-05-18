@@ -9,6 +9,10 @@ class TaskRunLog extends Model
 {
     use SoftDeletes;
 
+    //状态
+    const STATUS_SUCCESS = 1;   //成功
+    const STATUS_FAIL = 2;  //失败
+
     protected $dates = ['deleted_at'];
 
     /**

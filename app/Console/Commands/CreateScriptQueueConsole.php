@@ -43,7 +43,7 @@ class CreateScriptQueueConsole extends Command
      */
     public function handle()
     {
-
+        $startTime = date('Y-m-d H:i:s');
         $scriptList = $this->__getScriptList();
         if (empty($scriptList)) {
             $this->info("还没有已生成的脚本，稍请后重试");
@@ -64,11 +64,10 @@ class CreateScriptQueueConsole extends Command
             $this->info("还没有已生成的脚本，请稍后重试");
             return false;
         }
-
         foreach ($queueList as $k => $v) {
             if (Redis::connection('queue')->lLen($k) <= 0 && $v > 0) {
                 foreach($v as $item) {
-                    $taskRunLog = InternalAPIService::post('/task_run_log', ['task_id' => $item['task_id']]);
+                    $taskRunLog = InternalAPIService::post('/task_run_log', ['task_id' => $item['task_id'], 'start_job_at' => $startTime]);
                     if (empty($taskRunLog)) {
                         $this->info("task_run_log添加失败，请后重试");
                         continue;

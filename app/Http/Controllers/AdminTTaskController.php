@@ -34,6 +34,14 @@
 			$this->col[] = ["label"=>"脚本ID","name"=>"script_id"];
 			$this->col[] = ["label"=>"任务名称","name"=>"name"];
 			$this->col[] = ["label"=>"任务描述","name"=>"description"];
+            $this->col[] = ["label"=>"最后执行时间","name"=>"name","callback"=>function ($row) {
+                $taskStatistics = DB::table('t_task_statistics')->where('task_id', $row->id)->first();
+                return $taskStatistics->last_job_at;
+            }];
+            $this->col[] = ["label"=>"执行时间","name"=>"name","callback"=>function ($row) {
+                $taskStatistics = DB::table('t_task_statistics')->where('task_id', $row->id)->first();
+                return $taskStatistics->run_times;
+            }];
             $this->col[] = ["label"=>"执行规则","name"=>"cron_type","callback"=>function ($row) {
                 if( $row->cron_type == Task::CRON_TYPE_KEEP) {
                     return '每分钟执行';
@@ -99,7 +107,7 @@
 	        |
 	        */
 	        $this->sub_module = array();
-
+            $this->sub_module[] = ['label'=>'上报结果','path'=>'t_data','foreign_key'=>'task_id','button_color'=>'success','button_icon'=>'fa fa-bars', 'parent_columns'=>'id'];
 
 	        /*
 	        | ----------------------------------------------------------------------
