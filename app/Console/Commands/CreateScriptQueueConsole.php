@@ -72,8 +72,9 @@ class CreateScriptQueueConsole extends Command
                         $this->info("task_run_log添加失败，请后重试");
                         continue;
                     }
-                    $item['task_run_log_id'] = $taskRunLog['id'];
-                    Redis::connection('queue')->lpush($k, json_encode($item));
+                    $newItem['path'] = $item['path'];
+                    $newItem['task_run_log_id'] = $taskRunLog['id'];
+                    Redis::connection('queue')->lpush($k, json_encode($newItem));
                 }
             } else {
                 continue;
