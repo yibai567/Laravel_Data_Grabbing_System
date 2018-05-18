@@ -11,6 +11,7 @@ namespace App\Http\Controllers\InternalAPI;
 
 use App\Events\DataResultReportEvent;
 use App\Models\Data;
+use App\Models\TaskRunLog;
 use App\Services\InternalAPIService;
 use Log;
 use App\Services\ValidatorService;
@@ -34,24 +35,30 @@ class DataController extends Controller
         ValidatorService::check($params, [
             'company' => 'required|string|max:500',
             'content_type' => 'required|integer|between:1,10',
-            'task_id' => 'nullable|integer',
             'task_run_log_id' => 'nullable|integer',
             'start_time' => 'required|date',
             'end_time' => 'required|date',
             'result' => 'required|array'
         ]);
 
-        //如果未传task_id或task_run_log_id,是为测试脚本,直接返回结果
-        if (empty($params['task_id']) || empty($params['task_run_log_id'])) {
+        //如果未传task_run_log_id,是为测试脚本,直接返回结果
+        if (empty($params['task_run_log_id'])) {
             return response()->json(true);
         }
 
-        $updateTaskStatisticsData['task_id'] = $params['task_id'];
+        $taskRunLog = TaskRunLog::find($params['task_run_log_id']);
+        if (empty($taskRunLog)) {
+            Log::debug('[DataController batchCreate]  taskRunLog is not found,task_run_log_id : '.$params['task_run_log_id']);
+        }
+        //查询taskRunLog对应的taskId
+        $taskId = $taskRunLog->task_id;
 
+        $updateTaskStatisticsData['task_id'] = $taskId;
         //记录脚本运行记录
         $result = InternalAPIService::post('/task_statistics/update', $updateTaskStatisticsData);
+
         if (!$result) {
-            Log::debug('[batchCreate] update task statistics is failed ');
+            Log::debug('[DataController batchCreate] update task statistics is failed,task_id : '.$taskId);
 
             $updateTaskRunLogData['id'] = $params['task_run_log_id'];
             //更改task_runRunLog状态
@@ -59,6 +66,7 @@ class DataController extends Controller
 
             return response()->json(false);
         }
+
         $newData = [];
         foreach ($params['result'] as $value) {
             if ($params['content_type'] == Data::CONTENT_TYPE_LIVE) {
@@ -108,7 +116,7 @@ class DataController extends Controller
                 'md5_title' => $value['md5_title'],
                 'md5_content' => $value['md5_content'],
                 'content' => $value['content'],
-                'task_id' => $params['task_id'],
+                'task_id' => $taskId,
                 'task_run_log_id' => $params['task_run_log_id'],
                 'detail_url' => $value['detail_url'],
                 'show_time' => $value['show_time'],
@@ -126,7 +134,9 @@ class DataController extends Controller
         if (!empty($newData)) {
             try {
                 $result = Data::insert($newData);
+
                 if ($result) {
+
                     //修改task_run_log信息;
                     $result_count = count($newData);
                     $updateTaskRunLogData['result_count'] = $result_count;
@@ -140,7 +150,8 @@ class DataController extends Controller
                 }
 
             } catch (\Exception $e) {
-                Log::debug('[batchCreate] error message = ' . $e->getMessage());
+                Log::debug('[DataController batchCreate] error message = ' . $e->getMessage());
+
                 return response()->json(false);
             }
         }
