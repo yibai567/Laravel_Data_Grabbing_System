@@ -153,6 +153,10 @@ class DataController extends Controller
         } catch (\Exception $e) {
             Log::debug('[DataController batchCreate] error message = ' . $e->getMessage());
 
+            $updateTaskRunLogData['id'] = $params['task_run_log_id'];
+            //更改task_runRunLog状态
+            InternalAPIService::post('/task_run_log/status/fail', $updateTaskRunLogData);
+
             return response()->json(false);
         }
 
