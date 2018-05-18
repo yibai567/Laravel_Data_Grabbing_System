@@ -47,7 +47,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             if ( $row->status == Script::STATUS_INIT) {
                 return '初始化';
             } else {
-                return '以生成';
+                return '已生成';
             }
         }];
 
