@@ -581,7 +581,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $tablePK = $data['table_pk'];
         $table_columns = CB::getTableColumns($this->table);
         $result = DB::table($this->table)->select(DB::raw($this->table.".".$this->primary_key));
-
         $this->hook_query_index($result);
 
         if(in_array('deleted_at', $table_columns)) {
@@ -850,6 +849,8 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         } else {
             $row->status_name = '已生成';
         }
+        $task = DB::table('t_task')->select('name')->where('script_id', $row->id)->orderBy('id', 'desc')->first();
+        $row->name = $task->name;
         foreach($columns_table as $col) {
               if($col['visible']===FALSE) continue;
 
