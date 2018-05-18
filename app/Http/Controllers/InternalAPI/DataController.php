@@ -131,33 +131,24 @@ class DataController extends Controller
             ];
         }
 
-        if (empty($newData)) {
+        try {
+            if (!empty($newData)) {
+                $result = Data::insert($newData);
+
+                if ($result) {
+                    //事件监听,处理上报数据
+                    event(new DataResultReportEvent($newData));
+                }
+            }
+
             //修改task_run_log信息;
-            $updateTaskRunLogData['result_count'] = 0;
+            $result_count = count($newData);
+            $updateTaskRunLogData['result_count'] = $result_count;
             $updateTaskRunLogData['id'] = $params['task_run_log_id'];
 
             //更改task_runRunLog状态
             InternalAPIService::post('/task_run_log/status/success', $updateTaskRunLogData);
 
-            return response()->json(true);
-        }
-
-        try {
-            $result = Data::insert($newData);
-
-            if ($result) {
-
-                //修改task_run_log信息;
-                $result_count = count($newData);
-                $updateTaskRunLogData['result_count'] = $result_count;
-                $updateTaskRunLogData['id'] = $params['task_run_log_id'];
-
-                //更改task_runRunLog状态
-                InternalAPIService::post('/task_run_log/status/success', $updateTaskRunLogData);
-
-                //事件监听,处理上报数据
-                event(new DataResultReportEvent($newData));
-            }
 
         } catch (\Exception $e) {
             Log::debug('[DataController batchCreate] error message = ' . $e->getMessage());
