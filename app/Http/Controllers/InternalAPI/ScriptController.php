@@ -231,7 +231,7 @@ class ScriptController extends Controller
         }
 
         $task = Task::where('script_id',$params['id'])
-                    ->whereIn('status',[0,1])
+                    ->whereIn('status',[Task::STATUS_INIT,Task::STATUS_START])
                     ->first();
 
         if (empty($task)) {

@@ -19,11 +19,11 @@ class Task extends Model
     const CRON_TYPE_EVERY_FIVE_MINUTES = 2;
     const CRON_TYPE_EVERY_TEN_MINUTES = 3;
 
-    //任务状态 0、初始化，1、启动，2停止
+    //任务状态 1、初始化，2、启动，3停止
 
-    const STATUS_INIT = 0;
-    const STATUS_START = 1;
-    const STATUS_STOP = 2;
+    const STATUS_INIT = 1;
+    const STATUS_START = 2;
+    const STATUS_STOP = 3;
 
     protected $dates = ['deleted_at'];
 
@@ -33,7 +33,7 @@ class Task extends Model
     protected $table = 't_task';
 
     /**
-
+     *
      * 可更新的字段
      */
     protected $fillable = [

@@ -31,7 +31,7 @@ class ScriptModelController extends Controller
 
         ValidatorService::check($params, [
             'name' => 'required|string|max:50',
-            'description' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
             'structure' => 'required|string',
             'languages_type' => 'required|integer|between:1,3',
             'parameters' => 'required|json',
@@ -65,7 +65,7 @@ class ScriptModelController extends Controller
         ValidatorService::check($params, [
             'id' => 'required|integer',
             'name' => 'nullable|string|max:50',
-            'description' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
             'structure' => 'nullable|string',
             'languages_type' => 'nullable|integer|between:1,3',
             'system_type' => 'nullable|integer|between:1,2',
