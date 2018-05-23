@@ -103,6 +103,8 @@ $api->version(
         $api->get('/script_models/languages_type/{languages_type}','ScriptModelController@listByLanguagesType');
 
         $api->post('/data/results','DataController@batchCreate');
+        $api->post('/datas','DataController@batchSave');
+        $api->get('/datas/ids','DataController@listByIds');
 
         $api->post('/task_statistics/update','TaskStatisticsController@update');
 

@@ -37,6 +37,10 @@ class ScriptModel extends Model
         "deleted_at",
     ];
 
+    /**
+     *
+     * 可更新的字段
+     */
     protected $fillable = [
         'name',
         'description',

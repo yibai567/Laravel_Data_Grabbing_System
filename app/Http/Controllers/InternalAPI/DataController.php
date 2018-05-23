@@ -164,4 +164,116 @@ class DataController extends Controller
 
     }
 
+    /**
+     * batchCreate
+     * 批量插入
+     *
+     * @param
+     * @return boolean
+     */
+    public function batchSave(Request $request)
+    {
+        Log::debug('[internal DataController batchSave] start!');
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'company' => 'required|string|max:500',
+            'content_type' => 'required|integer|between:1,9',
+            'task_run_log_id' => 'required|integer',
+            'task_id' => 'required|integer',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date',
+            'result' => 'required|array'
+        ]);
+
+        $result = [];
+        foreach ($params['result'] as $value) {
+
+            ValidatorService::check($value, [
+                'title' => 'nullable|string|max:255',
+                'content' => 'nullable|string',
+                'detail_url' => 'nullable|url',
+                'show_time' => 'nullable|string|max:100',
+                'author' => 'nullable|string|max:50',
+                'read_count' => 'nullable|integer|max:100'
+            ]);
+
+            //监测content内容和title,有则进行加密,便于后面查重
+            if (!empty($value['content'])) {
+                $value['content'] = trim($value['content']);
+                $value['md5_content'] = md5($value['content']);
+            }
+            if (!empty($value['title'])) {
+                $value['title'] = trim($value['title']);
+                $value['md5_title'] = md5($value['title']);
+            }
+
+            //检测数据库是否已存在数据
+            if (empty($value['title'])) {
+                $row = Data::where('md5_content', $value['md5_content'])->first();
+            } else {
+                $row = Data::where('md5_title', $value['md5_title'])->first();
+            }
+
+            //内容已存在,更新信息
+            if (!empty($row)) {
+                if (!empty($value['read_count']) && $row->read_count != $value['read_count']) {
+                    $row->read_count = $value['read_count'];
+                    $row->save();
+                }
+                continue;
+            }
+
+            //整理保存数据
+            $data = [
+                'content_type' => $params['content_type'],
+                'company' => $params['company'],
+                'title' => $value['title'],
+                'md5_title' => $value['md5_title'],
+                'md5_content' => $value['md5_content'],
+                'content' => $value['content'],
+                'task_id' => $params['task_id'],
+                'task_run_log_id' => $params['task_run_log_id'],
+                'detail_url' => $value['detail_url'],
+                'show_time' => $value['show_time'],
+                'author' => $value['author'],
+                'read_count' => $value['read_count'],
+                'status' => Data::STATUS_NORMAL,
+                'start_time' => $params['start_time'],
+                'end_time' => $params['end_time'],
+                'created_time' => time()
+            ];
+
+            $result[] = Data::create($data);
+        }
+
+        return $this->resObjectGet($result, 'data', $request->path());
+    }
+
+    /**
+     * listByIds
+     * 根据多个id查模块信息
+     *
+     * @param ids
+     * @return array
+     */
+    public function listByIds(Request $request)
+    {
+        Log::debug('[internal ScriptModelController listByIds] start!');
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'ids' => 'required|string|max:100',
+        ]);
+
+        $ids = explode(',', $params['ids']);
+        $datas = Data::whereIn('id', $ids)->get();
+
+        $result = [];
+        if (!empty($datas)) {
+            $result = $datas->toArray();
+        }
+
+        return $this->resObjectGet($result, 'data', $request->path());
+    }
 }

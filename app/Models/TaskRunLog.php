@@ -13,6 +13,9 @@ class TaskRunLog extends Model
     const STATUS_SUCCESS = 1;   //成功
     const STATUS_FAIL = 2;  //失败
 
+    const TYPE_TEST = 1; // 测试
+    const TYPE_PRO = 2; // 生产
+
     protected $dates = ['deleted_at'];
 
     /**

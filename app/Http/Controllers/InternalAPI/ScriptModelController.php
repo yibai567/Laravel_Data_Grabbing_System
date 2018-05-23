@@ -121,7 +121,7 @@ class ScriptModelController extends Controller
      */
     public function listByLanguagesType(Request $request, $languages_type)
     {
-        Log::debug('[internal ScriptController all] start!');
+        Log::debug('[internal ScriptController listByLanguagesType] start!');
         $params = $request->all();
         $params['languages_type'] = $languages_type;
 
@@ -214,7 +214,7 @@ class ScriptModelController extends Controller
      */
     public function listByIds(Request $request)
     {
-        Log::debug('[internal ScriptModelController update] start!');
+        Log::debug('[internal ScriptModelController listByIds] start!');
         $params = $request->all();
 
         ValidatorService::check($params, [

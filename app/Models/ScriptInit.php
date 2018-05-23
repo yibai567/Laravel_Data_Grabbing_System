@@ -36,6 +36,10 @@ class ScriptInit extends Model
         "deleted_at",
     ];
 
+    /**
+     *
+     * 可更新的字段
+     */
     protected $fillable = [
         'load_images',
         'load_plugins',

@@ -42,6 +42,10 @@ class Script extends Model
         "deleted_at",
     ];
 
+    /**
+     *
+     * 可更新的字段
+     */
     protected $fillable = [
         'script_init_id',
         'step',

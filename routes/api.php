@@ -47,5 +47,7 @@ $api->version(
 
         $api->post('/block_news/results', 'BlockNewsController@batchCreate');
         $api->get('/script/queue', 'ScriptController@allByQueue');
+
+        $api->post('/datas/report', 'DataController@dataResultReport');
     }
 );

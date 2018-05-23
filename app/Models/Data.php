@@ -36,4 +36,27 @@ class Data extends Model
     protected $hidden = [
         "deleted_at",
     ];
+
+    /**
+     *
+     * 可更新的字段
+     */
+    protected $fillable = [
+        'content_type',
+        'company',
+        'task_id',
+        'task_run_log_id',
+        'title',
+        'md5_title',
+        'md5_content',
+        'content',
+        'detail_url',
+        'show_time',
+        'author',
+        'read_count',
+        'status',
+        'start_time',
+        'end_time',
+        'created_time',
+    ];
 }
