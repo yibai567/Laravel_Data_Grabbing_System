@@ -9,7 +9,6 @@
 
 namespace App\Http\Controllers\InternalAPI;
 
-use Illuminate\Support\Facades\Input;
 use Log;
 use App\Models\ScriptModel;
 use App\Services\ValidatorService;
@@ -26,18 +25,17 @@ class ScriptModelController extends Controller
      */
     public function create(Request $request)
     {
-        Log::debug('[internal ScriptModelController create] start!');
         $params = $request->all();
 
         ValidatorService::check($params, [
-            'name' => 'required|string|max:50',
-            'description' => 'nullable|string',
-            'structure' => 'required|string',
+            'name'           => 'required|string|max:50',
+            'description'    => 'nullable|string',
+            'structure'      => 'required|string',
             'languages_type' => 'required|integer|between:1,3',
-            'parameters' => 'required|json',
-            'system_type' => 'required|integer|between:1,2',
-            'operate_user' => 'required|string|max:50',
-            'sort' => 'nullable|integer'
+            'parameters'     => 'required|json',
+            'system_type'    => 'required|integer|between:1,2',
+            'operate_user'   => 'required|string|max:50',
+            'sort'           => 'nullable|integer'
         ]);
 
         $scriptModel = ScriptModel::create($params);
@@ -59,25 +57,24 @@ class ScriptModelController extends Controller
      */
     public function update(Request $request)
     {
-        Log::debug('[internal ScriptModelController update] start!');
         $params = $request->all();
 
         ValidatorService::check($params, [
-            'id' => 'required|integer',
-            'name' => 'nullable|string|max:50',
-            'description' => 'nullable|string',
-            'structure' => 'nullable|string',
+            'id'             => 'required|integer',
+            'name'           => 'nullable|string|max:50',
+            'description'    => 'nullable|string',
+            'structure'      => 'nullable|string',
             'languages_type' => 'nullable|integer|between:1,3',
-            'system_type' => 'nullable|integer|between:1,2',
-            'parameters' => 'nullable|json',
-            'operate_user' => 'nullable|string|max:50',
-            'sort' => 'nullable|integer'
+            'system_type'    => 'nullable|integer|between:1,2',
+            'parameters'     => 'nullable|json',
+            'operate_user'   => 'nullable|string|max:50',
+            'sort'           => 'nullable|integer'
         ]);
 
         $scriptModel = ScriptModel::find($params['id']);
 
         if (empty($scriptModel)) {
-            throw new \Dingo\Api\Exception\ResourceException("ScriptModel is not found");
+            throw new \Dingo\Api\Exception\ResourceException('$scriptModel is not found');
         }
 
         $scriptModel->update($params);
@@ -95,7 +92,6 @@ class ScriptModelController extends Controller
      */
     public function retrieve(Request $request)
     {
-        Log::debug('[internal ScriptModelController retrieve] start!');
         $params = $request->all();
 
         ValidatorService::check($params, [
@@ -121,15 +117,14 @@ class ScriptModelController extends Controller
      */
     public function listByLanguagesType(Request $request, $languages_type)
     {
-        Log::debug('[internal ScriptController listByLanguagesType] start!');
         $params = $request->all();
         $params['languages_type'] = $languages_type;
 
         //验证参数
         ValidatorService::check($params, [
             'languages_type' => 'nullable|integer',
-            'limit' => 'nullable|integer|min:1|max:500',
-            'offset' => 'nullable|integer|min:0',
+            'limit'          => 'nullable|integer|min:1|max:500',
+            'offset'         => 'nullable|integer|min:0',
         ]);
 
         if (empty($params['limit'])) {
@@ -173,11 +168,10 @@ class ScriptModelController extends Controller
      */
     public function all(Request $request)
     {
-        Log::debug('[internal ScriptController all] start!');
         $params = $request->all();
         //验证参数
         ValidatorService::check($params, [
-            'limit' => 'nullable|integer|min:1|max:500',
+            'limit'  => 'nullable|integer|min:1|max:500',
             'offset' => 'nullable|integer|min:0',
         ]);
 
@@ -214,7 +208,6 @@ class ScriptModelController extends Controller
      */
     public function listByIds(Request $request)
     {
-        Log::debug('[internal ScriptModelController listByIds] start!');
         $params = $request->all();
 
         ValidatorService::check($params, [

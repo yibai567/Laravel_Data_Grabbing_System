@@ -111,6 +111,7 @@ $api->version(
         $api->post('/task_run_log','TaskRunLogController@create');
         $api->post('/task_run_log/status/success','TaskRunLogController@updateStatusSuccess');
         $api->post('/task_run_log/status/fail','TaskRunLogController@updateStatusFail');
+        $api->post('/task_run_log','TaskRunLogController@retrieve');
 
     }
 );

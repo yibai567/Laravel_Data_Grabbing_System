@@ -41,7 +41,7 @@ class TaskStatisticsController extends Controller
             if (empty($task)) {
                 Log::error('[internal TaskStatisticsController update] task is not found,id = '.$params['task_id']);
 
-                throw new \Dingo\Api\Exception\ResourceException("task is not found");
+                throw new \Dingo\Api\Exception\ResourceException('$task is not found');
             }
 
             //根据一对一关系,查询taskStatistics信息
@@ -51,7 +51,7 @@ class TaskStatisticsController extends Controller
             if (empty($taskStatistics)) {
                 Log::error('[internal TaskStatisticsController update] taskStatistics is not found');
 
-                throw new \Dingo\Api\Exception\ResourceException("taskStatistics is not found");
+                throw new \Dingo\Api\Exception\ResourceException('$taskStatistics is not found');
             }
 
             //更新taskStatistics信息

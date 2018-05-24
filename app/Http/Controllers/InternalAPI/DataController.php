@@ -29,7 +29,6 @@ class DataController extends Controller
      */
     public function batchCreate(Request $request)
     {
-        Log::debug('[internal DataController create] start!');
         $params = $request->all();
 
         ValidatorService::check($params, [
@@ -48,7 +47,7 @@ class DataController extends Controller
 
         $taskRunLog = TaskRunLog::find($params['task_run_log_id']);
         if (empty($taskRunLog)) {
-            Log::debug('[DataController batchCreate]  taskRunLog is not found,task_run_log_id : '.$params['task_run_log_id']);
+            Log::debug('[DataController batchCreate]  $taskRunLog is not found,task_run_log_id : '.$params['task_run_log_id']);
         }
         //查询taskRunLog对应的taskId
         $taskId = $taskRunLog->task_id;
@@ -173,28 +172,27 @@ class DataController extends Controller
      */
     public function batchSave(Request $request)
     {
-        Log::debug('[internal DataController batchSave] start!');
         $params = $request->all();
 
         ValidatorService::check($params, [
-            'company' => 'required|string|max:500',
-            'content_type' => 'required|integer|between:1,9',
+            'company'         => 'required|string|max:500',
+            'content_type'    => 'required|integer|between:1,9',
             'task_run_log_id' => 'required|integer',
-            'task_id' => 'required|integer',
-            'start_time' => 'required|date',
-            'end_time' => 'required|date',
-            'result' => 'required|array'
+            'task_id'         => 'required|integer',
+            'start_time'      => 'required|date',
+            'end_time'        => 'required|date',
+            'result'          => 'required|array'
         ]);
 
         $result = [];
         foreach ($params['result'] as $value) {
 
             ValidatorService::check($value, [
-                'title' => 'nullable|string|max:255',
-                'content' => 'nullable|string',
-                'detail_url' => 'nullable|url',
-                'show_time' => 'nullable|string|max:100',
-                'author' => 'nullable|string|max:50',
+                'title'      => 'nullable|string|max:255',
+                'content'    => 'nullable|string',
+                'detail_url' => 'nullable|string',
+                'show_time'  => 'nullable|string|max:100',
+                'author'     => 'nullable|string|max:50',
                 'read_count' => 'nullable|integer|max:100'
             ]);
 
@@ -226,22 +224,22 @@ class DataController extends Controller
 
             //整理保存数据
             $data = [
-                'content_type' => $params['content_type'],
-                'company' => $params['company'],
-                'title' => $value['title'],
-                'md5_title' => $value['md5_title'],
-                'md5_content' => $value['md5_content'],
-                'content' => $value['content'],
-                'task_id' => $params['task_id'],
+                'content_type'    => $params['content_type'],
+                'company'         => $params['company'],
+                'title'           => $value['title'],
+                'md5_title'       => $value['md5_title'],
+                'md5_content'     => $value['md5_content'],
+                'content'         => $value['content'],
+                'task_id'         => $params['task_id'],
                 'task_run_log_id' => $params['task_run_log_id'],
-                'detail_url' => $value['detail_url'],
-                'show_time' => $value['show_time'],
-                'author' => $value['author'],
-                'read_count' => $value['read_count'],
-                'status' => Data::STATUS_NORMAL,
-                'start_time' => $params['start_time'],
-                'end_time' => $params['end_time'],
-                'created_time' => time()
+                'detail_url'      => $value['detail_url'],
+                'show_time'       => $value['show_time'],
+                'author'          => $value['author'],
+                'read_count'      => $value['read_count'],
+                'status'          => Data::STATUS_NORMAL,
+                'start_time'      => $params['start_time'],
+                'end_time'        => $params['end_time'],
+                'created_time'    => time()
             ];
 
             $result[] = Data::create($data);
@@ -252,14 +250,13 @@ class DataController extends Controller
 
     /**
      * listByIds
-     * 根据多个id查模块信息
+     * 根据多个id查数据信息
      *
      * @param ids
      * @return array
      */
     public function listByIds(Request $request)
     {
-        Log::debug('[internal ScriptModelController listByIds] start!');
         $params = $request->all();
 
         ValidatorService::check($params, [
