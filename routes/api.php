@@ -50,5 +50,7 @@ $api->version(
 
         $api->post('/datas/report', 'DataController@dataResultReport');
         $api->post('/datas/results', 'DataController@batchHandle');
+
+        $api->post('/image/upload', 'ImageController@upload');
     }
 );

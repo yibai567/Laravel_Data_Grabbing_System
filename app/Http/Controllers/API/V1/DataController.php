@@ -47,7 +47,7 @@ class DataController extends Controller
             $selectTaskRunLogData['id'] = $params['task_run_log_id'];
             $taskRunLog = InternalAPIService::post('/task_run_log', $selectTaskRunLogData);
             if (empty($taskRunLog)) {
-                Log::debug('[v1/DataController batchHandle]  $taskRunLog is not found,task_run_log_id : ' . $params['task_run_log_id']);
+                Log::debug('[v1 DataController batchHandle]  $taskRunLog is not found,task_run_log_id : ' . $params['task_run_log_id']);
                 return $this->resObjectGet(false, 'data', $request->path());
             }
 
@@ -59,7 +59,7 @@ class DataController extends Controller
 
             if (!$result) {
 
-                Log::debug('[v1/DataController batchHandle] update task statistics is failed,task_id : '.$taskId);
+                Log::debug('[v1 DataController batchHandle] update task statistics is failed,task_id : '.$taskId);
                 $updateTaskRunLogData['id'] = $params['task_run_log_id'];
                 //更改task_runRunLog状态
                 InternalAPIService::post('/task_run_log/status/fail', $updateTaskRunLogData);
@@ -80,7 +80,7 @@ class DataController extends Controller
                 //TODO 加入队列处理
             }
         } catch (\Exception $e) {
-            Log::debug('[v1/DataController batchHandle] error message = ' . $e->getMessage());
+            Log::debug('[v1 DataController batchHandle] error message = ' . $e->getMessage());
 
             $updateTaskRunLogData['id'] = $params['task_run_log_id'];
             //更改task_runRunLog状态

@@ -105,6 +105,8 @@ $api->version(
         $api->post('/data/results','DataController@batchCreate');
         $api->post('/datas','DataController@batchSave');
         $api->get('/datas/ids','DataController@listByIds');
+        $api->get('/datas/task_run_log_id','DataController@listByTaskRunLogId');
+        $api->post('/datas/update/task_run_log_id','DataController@updateByTaskRunLogId');
 
         $api->post('/task_statistics/update','TaskStatisticsController@update');
 

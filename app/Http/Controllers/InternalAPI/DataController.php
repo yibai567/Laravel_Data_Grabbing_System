@@ -273,4 +273,59 @@ class DataController extends Controller
 
         return $this->resObjectGet($result, 'data', $request->path());
     }
+
+    /**
+     * listByTaskRunLogId
+     * 根据task_run_log_id查询data数据
+     *
+     * @param id
+     * @return array
+     */
+    public function listByTaskRunLogId(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'task_run_log_id' => 'required|integer',
+        ]);
+
+        $datas = Data::where('task_run_log_id',$params['task_run_log_id'])->get();
+
+        $result = [];
+        if (!empty($datas)) {
+            $result = $datas->toArray();
+        }
+
+        return $this->resObjectGet($result, 'data', $request->path());
+    }
+
+    /**
+     * updateByTaskRunLogId
+     * 根据task_run_log_id查询data数据
+     *
+     * @param id
+     * @return array
+     */
+    public function updateByTaskRunLogId(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'task_run_log_id' => 'required|integer',
+            'screenshot' => 'required|array',
+        ]);
+
+        $datas = Data::where('task_run_log_id',$params['task_run_log_id'])->get();
+
+        foreach ($datas as $data) {
+            $data->update($params);
+        }
+
+        $result = [];
+        if (!empty($datas)) {
+            $result = $datas->toArray();
+        }
+
+        return $this->resObjectGet($result, 'data', $request->path());
+    }
 }
