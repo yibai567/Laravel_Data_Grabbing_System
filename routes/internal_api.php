@@ -88,6 +88,11 @@ $api->version(
 
         $api->post('/image/upload', 'ImageController@upload');
 
+        $api->post('/image/get_by_result', 'ImageController@getByResult');
+        $api->post('/image/download', 'ImageController@download');
+        $api->post('/image/replace', 'ImageController@replacement');
+
+
         $api->post('/script','ScriptController@create');
         $api->post('/script/update','ScriptController@update');
         $api->get('/script','ScriptController@retrieve');

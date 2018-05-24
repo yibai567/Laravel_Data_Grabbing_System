@@ -7,6 +7,8 @@
     "require": {
         "php": ">=7.1.3",
         "aliyuncs/oss-sdk-php": "^2.3",
+        "amphp/amp": "^2.0",
+        "amphp/artax": "^3.0",
         "arcanedev/log-viewer": "^4.5",
         "crocodicstudio/crudbooster": "v5.4.0.15",
         "dingo/api": "2.0.0-alpha2@dev",

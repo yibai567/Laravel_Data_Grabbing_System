@@ -56,7 +56,79 @@
                     </div>
                 </div>
                 @if ($languages_type == 1)
-                    <div class='form-group header-group-0 ' id='form-group-load_images'>
+                    <table class="table">
+                        <tr>
+                            <td>是否加载图片<span class='text-danger' title='This field is required'>*</span></td>
+                            <td><input type="radio" name="load_images" value="1">&nbsp true</td>
+                            <td><input type="radio" checked name="load_images" value="2">&nbsp false</td>
+
+                            <td>是否加载插件<span class='text-danger' title='This field is required'>*</span></td>
+                            <td><input type="radio" name="load_plugins" value="1">&nbsp true</td>
+                            <td><input type="radio" checked name="load_plugins" value="2">&nbsp false</td>
+                        </tr>
+                        <tr>
+                            <td>verbose<span class='text-danger' title='This field is required'>*</span></td>
+                            <td><input type="radio" name="verbose" value="1">&nbsp true</td>
+                            <td><input type="radio" checked name="verbose" value="2">&nbsp false</td>
+                            <td>log_level<span class='text-danger' title='This field is required'>*</span></td>
+                            <td><input type="radio" name="log_level" value="debug" checked>&nbsp debug</td>
+                            <td><input type="radio" name="log_level" value="info">&nbsp info</td>
+                            <td><input type="radio" name="log_level" value="error">&nbsp error</td>
+
+                        </tr>
+                    </table>
+                    <!-- <div class="row">
+                        <div class="col-xs-5">
+                            <label>是否加载图片
+                                <span class='text-danger' title='This field is required'>*</span>
+                                <input type="radio" name="load_images" value="1" style="margin-left: 10px;">&nbsp true
+                                <input type="radio" checked name="load_images" value="2" style="margin-left: 10px;">&nbsp false
+                            </label>
+                        </div>
+                        <div class="col-xs-5">
+                            <label>是否加载插件
+                                <span class='text-danger' title='This field is required'>*</span>
+                                <input type="radio" name="load_plugins" value="1" style="margin-left: 10px;">&nbsp true
+                                <input type="radio" checked name="load_plugins" value="2" style="margin-left: 10px;">&nbsp false
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-5">
+                            <label>log_level
+                                <span class='text-danger' title='This field is required'>*</span>
+                                <input type="radio" name="log_level" value="debug" checked>&nbsp debug
+                                <input type="radio" name="log_level" value="info">&nbsp info
+                                <input type="radio" name="log_level" value="error">&nbsp error
+                            </label>
+                        </div>
+                        <div class="col-xs-5">
+                            <label>verbose
+                                <span class='text-danger' title='This field is required'>*</span>
+                                <input type="radio" name="verbose" value="1">&nbsp true
+                                <input type="radio" checked name="verbose" value="2">&nbsp false
+                            </label>
+                        </div>
+                    </div> -->
+
+                    <!-- <div class="row">
+                        <div class="col-xs-5">
+                            <span>log_level</span>
+                            <span class='text-danger' title='This field is required'>*</span>
+                                <input type="radio" name="log_level" value="debug" checked> debug
+                                <input type="radio" name="log_level" value="info"> info
+                                <input type="radio" name="log_level" value="error">error
+                            </div>
+                        <div class="col-xs-5">
+                            <span>verbose</span>
+                            <span class='text-danger' title='This field is required'>*</span>
+                            <input type="radio" name="verbose" value="1"> true
+                            <input type="radio" checked name="verbose" value="2"> false
+                        </div>
+                    </div> -->
+
+
+                    <!-- <div class='form-group header-group-0 ' id='form-group-load_images'>
                         <label class='control-label col-sm-2'>是否加载图片
                             <span class='text-danger' title='This field is required'>*</span>
                         </label>
@@ -118,7 +190,7 @@
                                 </label>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                     <div class='form-group header-group-0' id='form-group-width'>
                         <label class='control-label col-sm-2'>width</label>
                         <div class="col-sm-2">
@@ -126,8 +198,6 @@
                             <div class="text-danger"></div>
                             <p class='help-block'></p>
                         </div>
-                    </div>
-                    <div class='form-group header-group-0 ' id='form-group-height'>
                         <label class='control-label col-sm-2'>height</label>
                         <div class="col-sm-2">
                             <input type='text' maxlength='70' class='form-control' name="height" value=''/>
