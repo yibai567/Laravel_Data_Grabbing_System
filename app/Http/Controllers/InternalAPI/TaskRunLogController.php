@@ -123,4 +123,30 @@ class TaskRunLogController extends Controller
 
     }
 
+    /**
+     * retrieve
+     * 根据id查数据详情
+     *
+     * @param id
+     * @return array
+     */
+    public function retrieve(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'id' => 'required|integer',
+        ]);
+
+        $id = intval($params['id']);
+        $taskRunLog = TaskRunLog::find($id);
+
+        $result = [];
+        if (!empty($taskRunLog)) {
+            $result = $taskRunLog->toArray();
+        }
+
+        return $this->resObjectGet($result, 'task_run_log', $request->path());
+    }
+
 }

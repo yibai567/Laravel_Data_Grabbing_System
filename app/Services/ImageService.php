@@ -17,7 +17,7 @@ class ImageService extends Service
      * 下载指定 url 的图片并上传到阿里云 oss
      *
      */
-    public function uploadByImageUrl($url, $isSizeRule = [], $isProxy='false')
+    public function uploadByImageUrl($url, $isSizeRule = [], $isProxy = false)
     {
         try {
             $domain = config('aliyun.oss.domain');
@@ -35,7 +35,6 @@ class ImageService extends Service
             if (!$getSize) {
                 return '';
             }
-
             $width = $getSize[0];
             $height = $getSize[1];
             // 判断快高规则是否符合
@@ -50,7 +49,6 @@ class ImageService extends Service
             if ($isProxy) {
                 $options['proxy'] = config('proxy.url');
             }
-
             $client = new Client($options);
 
             $response = $client->request('GET', $url, ['timeout' => 30]);
@@ -84,7 +82,6 @@ class ImageService extends Service
             DB::beginTransaction();
             $image->save();
             $objectKey = config('aliyun.oss.base_key') . $image->id;
-
             $oss = AliyunOSS::boot($path, $accessKey, $secret);
             $oss->setBucket(config('aliyun.oss.bucket'));
             $oss->uploadContent($objectKey, $object);

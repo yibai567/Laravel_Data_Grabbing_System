@@ -88,6 +88,11 @@ $api->version(
 
         $api->post('/image/upload', 'ImageController@upload');
 
+        $api->post('/image/get_by_result', 'ImageController@getByResult');
+        $api->post('/image/download', 'ImageController@download');
+        $api->post('/image/replace', 'ImageController@replacement');
+
+
         $api->post('/script','ScriptController@create');
         $api->post('/script/update','ScriptController@update');
         $api->get('/script','ScriptController@retrieve');
@@ -105,12 +110,15 @@ $api->version(
         $api->post('/data/results','DataController@batchCreate');
         $api->post('/datas','DataController@batchSave');
         $api->get('/datas/ids','DataController@listByIds');
+        $api->get('/datas/task_run_log_id','DataController@listByTaskRunLogId');
+        $api->post('/datas/update/task_run_log_id','DataController@updateByTaskRunLogId');
 
         $api->post('/task_statistics/update','TaskStatisticsController@update');
 
         $api->post('/task_run_log','TaskRunLogController@create');
         $api->post('/task_run_log/status/success','TaskRunLogController@updateStatusSuccess');
         $api->post('/task_run_log/status/fail','TaskRunLogController@updateStatusFail');
+        $api->get('/task_run_log','TaskRunLogController@retrieve');
 
     }
 );

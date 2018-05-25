@@ -55,9 +55,9 @@ class Script extends Model
         'operate_user',
     ];
 
-    public function init()
+    public function config()
     {
-        return $this->hasOne('App\Models\ScriptInit', 'id', 'script_init_id');
+        return $this->hasOne('App\Models\ScriptConfig', 'id', 'script_init_id');
     }
 
     /**

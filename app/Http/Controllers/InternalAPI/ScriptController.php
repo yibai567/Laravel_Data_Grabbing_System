@@ -15,7 +15,7 @@ use App\Models\TaskStatistics;
 use Illuminate\Support\Facades\DB;
 use Log;
 use App\Models\Script;
-use App\Models\ScriptInit;
+use App\Models\ScriptConfig;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
@@ -31,18 +31,17 @@ class ScriptController extends Controller
      */
     public function create(Request $request)
     {
-        Log::debug('[internal ScriptController create] start!');
         $params = $request->all();
 
         //验证参数
         ValidatorService::check($params, [
-            'name' => 'required|string|max:100',
-            'description' => 'nullable|string|max:255',
+            'name'           => 'required|string|max:100',
+            'description'    => 'nullable|string|max:255',
             'languages_type' => 'required|integer|between:1,3',
-            'step' => 'required|array',
-            'cron_type' => 'nullable|integer',
-            'operate_user' => 'required|string|max:50',
-            'init' => 'nullable|array'
+            'step'           => 'required|array',
+            'cron_type'      => 'nullable|integer',
+            'operate_user'   => 'required|string|max:50',
+            'init'           => 'nullable|array'
         ]);
 
         //默认值
@@ -59,14 +58,15 @@ class ScriptController extends Controller
             $params['description'] = trim($params['description']);
         }
 
-        $init = $params['init'];
+        $config = $params['init'];
 
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
+
             //判断当模板类型等于script的时候需要添加配置
             if ($params['languages_type'] == Script::LANGUAGES_TYPE_CASPERJS) {
                 //调用添加配置的方法
-                $scriptInit = $this->__createScriptInit($init);
+                $scriptConfig = $this->__createScriptConfig($config);
             }
             //整理script入库数据
             $scriptData = [
@@ -76,8 +76,8 @@ class ScriptController extends Controller
                 'operate_user' => $params['operate_user'],
             ];
 
-            if (!empty($scriptInit)) {
-                $scriptData['script_init_id'] = $scriptInit['id'];
+            if (!empty($scriptConfig)) {
+                $scriptData['script_init_id'] = $scriptConfig['id'];
             }
 
             $script = Script::create($scriptData);
@@ -85,11 +85,11 @@ class ScriptController extends Controller
             //整理task数据
             $taskData = [
                 'languages_type' => $params['languages_type'],
-                'script_id' => $script->id,
-                'name' => $params['name'],
-                'description' => $params['description'],
-                'cron_type' => $params['cron_type'],
-                'status' => Task::STATUS_INIT,
+                'script_id'      => $script->id,
+                'name'           => $params['name'],
+                'description'    => $params['description'],
+                'cron_type'      => $params['cron_type'],
+                'status'         => Task::STATUS_INIT,
             ];
 
             $task = Task::create($taskData);
@@ -98,8 +98,8 @@ class ScriptController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
 
-            Log::error('Script create or __createScriptInit    Exception:'."\t".$e->getCode()."\t".$e->getMessage());
-            throw new \Dingo\Api\Exception\ResourceException("create script or create scriptInit is failed");
+            Log::error('Script create or __createScriptConfig    Exception:'."\t".$e->getCode()."\t".$e->getMessage());
+            throw new \Dingo\Api\Exception\ResourceException("create script or create script config is failed");
         }
 
         $result = [];
@@ -107,13 +107,12 @@ class ScriptController extends Controller
             $result = $script->toArray();
         }
 
-        if (!empty($scriptInit)) {
-            $result['init'] = $scriptInit;
+        if (!empty($scriptConfig)) {
+            $result['init'] = $scriptConfig;
         }
 
         if (!empty($task)) {
-            $taskInfo = $task->toArray();
-            $result['task'] = $taskInfo;
+            $result['task'] = $task->toArray();
         }
 
         return $this->resObjectGet($result, 'script', $request->path());
@@ -128,19 +127,18 @@ class ScriptController extends Controller
      */
     public function update(Request $request)
     {
-        Log::debug('[internal ScriptController update] start!');
         $params = $request->all();
 
         //验证参数
         ValidatorService::check($params, [
-            'id' => 'required|integer',
-            'name' => 'nullable|string|max:100',
-            'description' => 'nullable|string|max:255',
+            'id'             => 'required|integer',
+            'name'           => 'nullable|string|max:100',
+            'description'    => 'nullable|string|max:255',
             'languages_type' => 'nullable|integer|between:1,3',
-            'step' => 'nullable|array',
-            'cron_type' => 'nullable|integer',
-            'operate_user' => 'nullable|string|max:50',
-            'init' => 'nullable|array'
+            'step'           => 'nullable|array',
+            'cron_type'      => 'nullable|integer',
+            'operate_user'   => 'nullable|string|max:50',
+            'init'           => 'nullable|array'
         ]);
 
         //去name和description空白字符
@@ -156,24 +154,22 @@ class ScriptController extends Controller
 
         //检测数据是否存在
         if (empty($script)) {
-            throw new \Dingo\Api\Exception\ResourceException("script is not found");
+            throw new \Dingo\Api\Exception\ResourceException('$script is not found');
         }
 
-        DB::beginTransaction();
-
         try {
+            DB::beginTransaction();
+
             $scriptData = [
                 'languages_type' => $params['languages_type'],
-                'step' => $params['step'],
-                'status' => Script::STATUS_INIT,
-                'operate_user' => $params['operate_user'],
+                'step'           => $params['step'],
+                'status'         => Script::STATUS_INIT,
+                'operate_user'   => $params['operate_user'],
             ];
 
             $script->update($scriptData);
 
-            if (!empty($script)) {
-                $result = $script->toArray();
-            }
+            $result = $script->toArray();
 
             //更改或创建task信息
             $task = $this->__updateTask($params);
@@ -182,15 +178,15 @@ class ScriptController extends Controller
 
             //判断是否修改配置,有数据就修改,无跳过
             if (!empty($params['init']) && $params['languages_type'] == Script::LANGUAGES_TYPE_CASPERJS) {
-                $result['init'] = $this->__updateScriptInit($params['init'], $script);
+                $result['init'] = $this->__updateScriptConfig($params['init'], $script);
             }
 
             DB::commit();
         } catch (\Exception $e){
             DB::rollback();
 
-            Log::error('Script update or __updateScriptInit    Exception:'."\t".$e->getCode()."\t".$e->getMessage());
-            throw new \Dingo\Api\Exception\ResourceException("update script or update scriptInit is failed");
+            Log::error('Script update or __updateScriptConfig    Exception:'."\t".$e->getCode()."\t".$e->getMessage());
+            throw new \Dingo\Api\Exception\ResourceException("update script or update script config is failed");
         }
 
         return $this->resObjectGet($result, 'script', $request->path());
@@ -205,7 +201,6 @@ class ScriptController extends Controller
      */
     public function retrieve(Request $request)
     {
-        Log::debug('[internal ScriptController retrieve] start!');
         $params = $request->all();
 
         //检测参数
@@ -214,20 +209,22 @@ class ScriptController extends Controller
         ]);
 
         $script = Script::find($params['id']);
+
         if (empty($script)) {
-            throw new \Dingo\Api\Exception\ResourceException("script is not found");
+            throw new \Dingo\Api\Exception\ResourceException('$script is not found');
         }
+
         $result = $script->toArray();
 
         if ($result['languages_type'] == Script::LANGUAGES_TYPE_CASPERJS) {
             //根据一对一关系,查询该script的配置数据
-            $scriptInit = $script->init;
+            $scriptConfig = $script->config;
             $result['init'] = [];
 
-            if (empty($scriptInit)) {
-                throw new \Dingo\Api\Exception\ResourceException("scriptInit is not found");
+            if (empty($scriptConfig)) {
+                throw new \Dingo\Api\Exception\ResourceException('$scriptConfig is not found');
             }
-            $result['init'] = $scriptInit->toArray();
+            $result['init'] = $scriptConfig->toArray();
         }
 
         $task = Task::where('script_id',$params['id'])
@@ -235,7 +232,7 @@ class ScriptController extends Controller
                     ->first();
 
         if (empty($task)) {
-            throw new \Dingo\Api\Exception\ResourceException("task is not found");
+            throw new \Dingo\Api\Exception\ResourceException('$task is not found');
         }
         //整理task数据岛返回结果
         $result['name'] = $task->name;
@@ -254,12 +251,11 @@ class ScriptController extends Controller
      */
     public function all(Request $request)
     {
-        Log::debug('[internal ScriptController all] start!');
         $params = $request->all();
 
         //验证参数
         ValidatorService::check($request->all(), [
-            'limit' => 'nullable|integer|min:1|max:500',
+            'limit'  => 'nullable|integer|min:1|max:500',
             'offset' => 'nullable|integer|min:0',
         ]);
 
@@ -293,7 +289,6 @@ class ScriptController extends Controller
      */
     public function generateScript(Request $request)
     {
-        Log::debug('[internal ScriptController generateScript] start!');
         $params = $request->all();
 
         //验证参数
@@ -306,49 +301,34 @@ class ScriptController extends Controller
 
         //判断script数据和配置是否存在
         if (empty($script)) {
-            throw new \Dingo\Api\Exception\ResourceException("script is not found");
+            throw new \Dingo\Api\Exception\ResourceException('$script is not found');
+        }
+
+        $scriptLanguagesType = $script->languages_type;
+
+        //获取script基础模板内容
+        $content = $this->__getBaseScriptModel($scriptLanguagesType);
+
+        if ($scriptLanguagesType == Script::LANGUAGES_TYPE_CASPERJS) {
+
+            //获取script配置数据
+            $scriptConfig = $script->config;
+
+            if (empty($scriptConfig)) {
+                throw new \Dingo\Api\Exception\ResourceException('$scriptConfig is not found');;
+            }
+
+            //将配置数据转化为数组处理
+            $scriptConfig = $scriptConfig->toArray();
+
+            //替换模板中的配置
+            $content = $this->__replaceScriptContentByScriptConfig($content, $scriptConfig);
         }
 
         //整理代码数据
-        $result = $this->__formatData($script);
+        $result = $this->__arrangeStructureContentByScriptStep($script);
 
-        //通过文件类型获取不同模板内容
-        switch ($script->languages_type) {
-            case  Script::LANGUAGES_TYPE_CASPERJS:
-                //获取casperJs基础模板内容
-                $content = $this->__getBaseScriptModel(Script::LANGUAGES_TYPE_CASPERJS);
-
-                //获取script配置数据
-                $scriptInit = $script->init;
-                if (empty($scriptInit)) {
-                    throw new \Dingo\Api\Exception\ResourceException("scriptInit is not found");;
-                }
-                //将配置数据转化为数组处理
-                $init = $scriptInit->toArray();
-
-                //替换模板中的配置
-                $content = $this->__getScriptInitData($content, $init);
-
-                break;
-            case Script::LANGUAGES_TYPE_HTML:
-                //获取HTML基础模板内容
-                $content = $this->__getBaseScriptModel(Script::LANGUAGES_TYPE_HTML);
-
-                break;
-            case Script::LANGUAGES_TYPE_API:
-                //获取API基础模板内容
-                $content = $this->__getBaseScriptModel(Script::LANGUAGES_TYPE_API);
-
-                break;
-            default:
-                throw new \Dingo\Api\Exception\ResourceException("template is not found");
-
-                break;
-        }
-        //替换基础模板内容中的scriptId将script_id传递给脚本
-        $content = str_replace("{{script_id}}", $script->id,  $content);
-
-        //连接模板内容和代码
+        //连接基础模板内容和script代码
         $content = $content . PHP_EOL . PHP_EOL . $result;
 
         //替换步骤中的换行符
@@ -359,64 +339,64 @@ class ScriptController extends Controller
 
         //拼接路径和名称
         $filePath = config('script.casperjs_generate_path');
-        $file = $filePath.$filename;
+        $file = $filePath . $filename;
 
         //写入文件
         file_put_contents($file, $content);
 
         //检查文件是否生成成功
-        if (!file_exists($file)){
+        if (!file_exists($file)) {
             throw new \Dingo\Api\Exception\ResourceException("file generation is failed");
         }
 
         //生成脚本之后,做的一系列状态操作
-        $this->__afterScriptGenerated($script);
+        $result =$this->__afterScriptGenerated($script);
 
-        return $this->resObjectGet(true, 'script', $request->path());
+        return $this->resObjectGet($result, 'script', $request->path());
     }
 
     /**
-     * __createScriptInit
+     * __createScriptConfig
      * 创建script配置
      *
      * @param
      * @return array
      */
-    private function __createScriptInit($scriptInit)
+    private function __createScriptConfig($config)
     {
         //判断配置数据存在,存在则验证参数,无则赋予空数组
-        if (!empty($scriptInit)) {
-            ValidatorService::check($scriptInit, [
-                'load_images' => 'nullable|integer|between:1,2',
+        if (!empty($config)) {
+            ValidatorService::check($config, [
+                'load_images'  => 'nullable|integer|between:1,2',
                 'load_plugins' => 'nullable|integer|between:1,2',
-                'log_level' => 'nullable|string|max:10',
-                'verbose' => 'nullable|integer',
-                'width' => 'nullable|string|max:10',
-                'height' => 'nullable|string|max:10'
+                'log_level'    => 'nullable|string|max:10',
+                'verbose'      => 'nullable|integer',
+                'width'        => 'nullable|string|max:10',
+                'height'       => 'nullable|string|max:10'
             ]);
         }
         //设置默认值
-        if (empty($scriptInit['load_images'])) {
-            $scriptInit['load_images'] = ScriptInit::DEFAULT_LOAD_IMAGES;
+        if (empty($config['load_images'])) {
+            $config['load_images'] = ScriptConfig::DEFAULT_LOAD_IMAGES;
         }
 
-        if (empty($scriptInit['load_plugins'])) {
-            $scriptInit['load_plugins'] = ScriptInit::DEFAULT_LOAD_PLUGINS;
+        if (empty($config['load_plugins'])) {
+            $config['load_plugins'] = ScriptConfig::DEFAULT_LOAD_PLUGINS;
         }
 
-        if (empty($scriptInit['log_level'])) {
-            $scriptInit['log_level'] = ScriptInit::DEFAULT_LOG_LEVEL;
+        if (empty($config['log_level'])) {
+            $config['log_level'] = ScriptConfig::DEFAULT_LOG_LEVEL;
         }
 
-        if (empty($scriptInit['verbose'])) {
-            $scriptInit['verbose'] = ScriptInit::DEFAULT_VERBOSE;
+        if (empty($config['verbose'])) {
+            $config['verbose'] = ScriptConfig::DEFAULT_VERBOSE;
         }
 
-        $scriptInit = ScriptInit::create($scriptInit);
+        $scriptConfig = ScriptConfig::create($config);
 
         $result = [];
-        if (!empty($scriptInit)) {
-            $result = $scriptInit->toArray();
+        if (!empty($scriptConfig)) {
+            $result = $scriptConfig->toArray();
         }
 
         return $result;
@@ -432,12 +412,12 @@ class ScriptController extends Controller
     public function __updateTask($uploadData)
     {
         //更改script对应的task为停止
-        $startTasks = Task::where('script_id',$uploadData['id'])->where('status',Task::STATUS_START)->get();
-        if (empty($startTasks)) {
-            throw new \Dingo\Api\Exception\ResourceException("task is not found");
+        $tasks = Task::where('script_id',$uploadData['id'])->where('status',Task::STATUS_START)->get();
+        if (empty($tasks)) {
+            throw new \Dingo\Api\Exception\ResourceException('$tasks is not found');
         }
 
-        foreach($startTasks as $task){
+        foreach($tasks as $task){
             $task->status = Task::STATUS_STOP;
             $task->save();
         }
@@ -450,11 +430,11 @@ class ScriptController extends Controller
             //整理task数据
             $taskData = [
                 'languages_type' => $uploadData['languages_type'],
-                'script_id' => $uploadData['id'],
-                'name' => $uploadData['name'],
-                'description' => $uploadData['description'],
-                'cron_type' => $uploadData['cron_type'],
-                'status' => Task::STATUS_INIT,
+                'script_id'      => $uploadData['id'],
+                'name'           => $uploadData['name'],
+                'description'    => $uploadData['description'],
+                'cron_type'      => $uploadData['cron_type'],
+                'status'         => Task::STATUS_INIT,
             ];
 
             $taskInfo = Task::create($taskData);
@@ -462,10 +442,10 @@ class ScriptController extends Controller
             //整理task数据
             $taskData = [
                 'languages_type' => $uploadData['languages_type'],
-                'name' => $uploadData['name'],
-                'description' => $uploadData['description'],
-                'cron_type' => $uploadData['cron_type'],
-                'status' => Task::STATUS_INIT,
+                'name'           => $uploadData['name'],
+                'description'    => $uploadData['description'],
+                'cron_type'      => $uploadData['cron_type'],
+                'status'         => Task::STATUS_INIT,
             ];
 
             $task->update($taskData);
@@ -484,34 +464,33 @@ class ScriptController extends Controller
     }
 
     /**
-     * __updateScriptInit
+     * __updateScriptConfig
      * 更新
      *
      * @param
      * @return array
      */
-    public function __updateScriptInit($postScriptInit, $script)
+    public function __updateScriptConfig($postScriptConfig, $script)
     {
         //判断配置数据存在,存在则验证参数,无则赋予空数组
-        ValidatorService::check($postScriptInit, [
-            'load_images' => 'nullable|integer|between:1,2',
+        ValidatorService::check($postScriptConfig, [
+            'load_images'  => 'nullable|integer|between:1,2',
             'load_plugins' => 'nullable|integer|between:1,2',
-            'log_level' => 'nullable|string|max:10',
-            'verbose' => 'nullable|integer',
-            'width' => 'nullable|string|max:10',
-            'height' => 'nullable|string|max:10'
+            'log_level'    => 'nullable|string|max:10',
+            'verbose'      => 'nullable|integer',
+            'width'        => 'nullable|string|max:10',
+            'height'       => 'nullable|string|max:10'
         ]);
 
-        $scriptInit = $script->init;
+        $scriptConfig = $script->config;
 
-        if (empty($scriptInit)) {
-            throw new \Dingo\Api\Exception\ResourceException("scriptInit is not found");
+        if (empty($scriptConfig)) {
+            throw new \Dingo\Api\Exception\ResourceException('$scriptConfig is not found');
         }
 
-        $scriptInit->update($postScriptInit);
-        $result = $scriptInit->toArray();
+        $scriptConfig->update($postScriptConfig);
 
-        return $result;
+        return $scriptConfig->toArray();
     }
 
     /**
@@ -524,28 +503,26 @@ class ScriptController extends Controller
     private function __getBaseScriptModel($languagesType)
     {
         //根据脚本类型选择模块
-        $baseScriptModel = ScriptModel::where('system_type',ScriptModel::SYSTEM_TYPE_BASE)
+        $scriptModel = ScriptModel::where('system_type',ScriptModel::SYSTEM_TYPE_BASE)
                                     ->where('languages_type',$languagesType)
                                     ->first();
 
-        if (empty($baseScriptModel)) {
-            throw new \Dingo\Api\Exception\ResourceException("scriptModel is not found");
+        if (empty($scriptModel)) {
+            throw new \Dingo\Api\Exception\ResourceException('$scriptModel is not found');
         }
 
-        //获取代码内容
-        $structure = $baseScriptModel->structure;
-
-        return $structure;
+        //返回代码内容
+        return $scriptModel->structure;
     }
 
     /**
-     * __formatData
-     * 整理代码数据
+     * __arrangeStructureContentByScriptStep
+     * 整理script代码数据
      *
      * @param $script
      * @return string
      */
-    private function __formatData($script)
+    private function __arrangeStructureContentByScriptStep($script)
     {
         //$script转化为数组
         $script = $script->toArray();
@@ -560,7 +537,7 @@ class ScriptController extends Controller
             //获取模块信息
             $scriptModel = ScriptModel::find($steps[$i][0]);
             if (empty($scriptModel)) {
-                throw new \Dingo\Api\Exception\ResourceException("ScriptModel is not found");
+                throw new \Dingo\Api\Exception\ResourceException('$scriptModel is not found');
             }
             $modelInfo = $scriptModel->toArray();
 
@@ -592,28 +569,28 @@ class ScriptController extends Controller
     }
 
     /**
-     * __getScriptInitData
-     * 获取ScriptInit的配置内容,并替换模板
+     * __replaceScriptContentByScriptConfig
+     * 替换模板中的配置内容
      *
-     * @param $content $init
+     * @param $content $scriptConfig
      * @return string
      */
-    private function __getScriptInitData($content, $init)
+    private function __replaceScriptContentByScriptConfig($content, $scriptConfig)
     {
         //转化参数值,将数据中的1对应true,2对应false
-        if ($init['load_images'] == 1){
+        if ($scriptConfig['load_images'] == 1){
             $loadImages = 'true';
         } else {
             $loadImages = 'false';
         }
 
-        if ($init['load_plugins'] == 1){
+        if ($scriptConfig['load_plugins'] == 1){
             $loadPlugins = 'true';
         } else {
             $loadPlugins = 'false';
         }
 
-        if ($init['verbose'] == 1){
+        if ($scriptConfig['verbose'] == 1){
             $verbose = 'true';
         } else {
             $verbose = 'false';
@@ -622,19 +599,19 @@ class ScriptController extends Controller
         //替换模板中的配置参数
         $content = str_replace("{{load_images}}", $loadImages, $content);
         $content = str_replace("{{load_plugins}}", $loadPlugins, $content);
-        $content = str_replace("{{log_level}}", $init['log_level'], $content);
+        $content = str_replace("{{log_level}}", $scriptConfig['log_level'], $content);
         $content = str_replace("{{verbose}}",$verbose, $content);
 
-        if (empty($init['height'])) {
+        if (empty($scriptConfig['height'])) {
             $content = str_replace("{{height}}", '', $content);
         } else {
-            $content = str_replace("{{height}}","height: " . $init['height'] . ",", $content);
+            $content = str_replace("{{height}}","height: " . $scriptConfig['height'] . ",", $content);
         }
 
-        if (empty($init['width'])) {
+        if (empty($scriptConfig['width'])) {
             $content = str_replace("{{width}}", '', $content);
         } else {
-            $content = str_replace("{{width}}","width: " . $init['width'] . ",", $content);
+            $content = str_replace("{{width}}","width: " . $scriptConfig['width'] . ",", $content);
         }
 
         return $content;
@@ -649,9 +626,9 @@ class ScriptController extends Controller
      */
     private function __afterScriptGenerated($script)
     {
-        DB::beginTransaction();
 
         try {
+            DB::beginTransaction();
 
             //更新script状态和最后生成时间
             $script->status = Script::STATUS_GENERATE;
@@ -676,6 +653,8 @@ class ScriptController extends Controller
             Log::error('__afterScriptGenerated    Exception:'."\t".$e->getCode()."\t".$e->getMessage());
             throw new \Dingo\Api\Exception\ResourceException("status update is failed");
         }
+
+        return true;
     }
 
     /**

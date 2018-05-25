@@ -60,7 +60,7 @@
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
 			$this->form[] = ['label'=>'模块名称','name'=>'name','type'=>'text','validation'=>'required|string|max:50','width'=>'col-sm-10'];
-            $this->form[] = ['label'=>'模块描述','name'=>'description','type'=>'text','validation'=>'nullable|max:255','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'模块描述','name'=>'description','type'=>'textarea','validation'=>'nullable|string','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'脚本语言','name'=>'languages_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|casperjs;2|html;3|api','value'=>'1'];
 
 			$this->form[] = ['label'=>'代码结构','name'=>'structure','type'=>'textarea','validation'=>'required|string','width'=>'col-sm-10'];
