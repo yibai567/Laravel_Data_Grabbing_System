@@ -47,5 +47,10 @@ $api->version(
 
         $api->post('/block_news/results', 'BlockNewsController@batchCreate');
         $api->get('/script/queue', 'ScriptController@allByQueue');
+        //收集资源
+        $api->post('/quirement', 'QuirementPoolController@create');
+        $api->post('/quirement/update', 'QuirementPoolController@update');
+        $api->get('/quirement', 'QuirementPoolController@retrieve');
+        $api->get('/quirements', 'QuirementPoolController@all');
     }
 );

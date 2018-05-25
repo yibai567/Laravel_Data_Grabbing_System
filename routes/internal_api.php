@@ -110,5 +110,12 @@ $api->version(
         $api->post('/task_run_log/status/success','TaskRunLogController@updateStatusSuccess');
         $api->post('/task_run_log/status/fail','TaskRunLogController@updateStatusFail');
 
+        //收集资源
+        $api->post('/quirement', 'QuirementPoolController@create');
+        $api->post('/quirement/update', 'QuirementPoolController@update');
+        $api->get('/quirement', 'QuirementPoolController@retrieve');
+        $api->get('/quirements', 'QuirementPoolController@all');
+        $api->get('/quirement/update_status', 'QuirementPoolController@updateStatus');
+
     }
 );
