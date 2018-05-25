@@ -164,7 +164,7 @@ class DataController extends Controller
     }
 
     /**
-     * batchCreate
+     * batchSave
      * 批量插入
      *
      * @param

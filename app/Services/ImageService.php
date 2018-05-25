@@ -158,7 +158,6 @@ class ImageService extends Service
             if ($file->getError() != 0) {
                 return ["msg" => '上传图片失败，请检查图片并重试', 'error' => -1];
             }
-            dd(1);
             $path = $file->path();
             $ext = $file->extension();
             $minType = $file->getMimeType();

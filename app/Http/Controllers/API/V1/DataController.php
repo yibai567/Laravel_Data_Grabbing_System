@@ -45,7 +45,7 @@ class DataController extends Controller
         try {
             //调取根据task_run_log_id查询task_run_log信息
             $selectTaskRunLogData['id'] = $params['task_run_log_id'];
-            $taskRunLog = InternalAPIService::post('/task_run_log', $selectTaskRunLogData);
+            $taskRunLog = InternalAPIService::get('/task_run_log', $selectTaskRunLogData);
             if (empty($taskRunLog)) {
                 Log::debug('[v1 DataController batchHandle]  $taskRunLog is not found,task_run_log_id : ' . $params['task_run_log_id']);
                 return $this->resObjectGet(false, 'data', $request->path());

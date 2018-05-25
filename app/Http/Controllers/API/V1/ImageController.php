@@ -32,29 +32,36 @@ class ImageController extends Controller
             'image'         => 'required|image',
             'task_run_log_id' => 'required|integer'
         ]);
+        try {
+            //调取根据task_run_log_id查询data信息
+            $uploadSelectData['task_run_log_id'] = intval($params['task_run_log_id']);
+            $datas = InternalAPIService::get('/datas/task_run_log_id', $uploadSelectData);
 
-        //调取根据task_run_log_id查询data信息
-        $uploadSelectData['task_run_log_id'] = intval($params['task_run_log_id']);
-        $datas = InternalAPIService::get('/datas/task_run_log_id', $uploadSelectData);
+            if (empty($datas)) {
+                return $this->resObjectGet(false, 'image', $request->path());
+            }
 
-        if (empty($datas)) {
-            return $this->resObjectGet(false, 'image', $request->path());
+            $image = $request->file('image');
+
+            // 图片上传
+            $imageService = new ImageService();
+            $imageInfo = $imageService->uploadByFile($image);
+
+            if (!$imageInfo) {
+                return $this->resObjectGet(false, 'image', $request->path());
+            }
+
+            //调取更新data信息接口
+            $uploadUpdateData['task_run_log_id'] = intval($params['task_run_log_id']);
+            $uploadUpdateData['screenshot'] = $imageInfo;
+
+            InternalAPIService::post('/datas/update/task_run_log_id', $uploadUpdateData);
+        } catch (\Exception $e) {
+            Log::debug('[v1 ImageController upload] error message = ' . $e->getMessage());
+
+            return $this->resObjectGet(false, 'data', $request->path());
         }
 
-        $image = $request->file('image');
-
-        // 图片上传
-        $imageService = new ImageService();
-        $imageInfo = $imageService->uploadByFile($image);
-
-        if (!$imageInfo) {
-            return $this->resObjectGet(false, 'image', $request->path());
-        }
-
-        //调取更新data信息接口
-        $uploadUpdateData['task_run_log_id'] = intval($params['task_run_log_id']);
-        $uploadUpdateData['screenshot'] = $imageInfo;
-        $result = InternalAPIService::post('/datas/update/task_run_log_id', $uploadUpdateData);
 
         return $this->resObjectGet(true, 'image', $request->path());
     }
