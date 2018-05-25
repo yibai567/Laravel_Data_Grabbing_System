@@ -260,7 +260,71 @@
                     </div>
                     <div style="clear: both;"></div>
                 </div>
+                <div class='form-group header-group-0 ' id='form-group-cron_type'>
+                    <label class='control-label col-sm-2'>是否下载
+                    </label>
+                    <div>
+                        <div class="col-sm-10">
+                            <div class="checkbox">
+                                @if ($row[is_download] == 1)
+                                    <label>
+                                        <input type="checkbox" checked name="is_download" value="1">
+                                    </label>
+                                @else
+                                    <label>
+                                        <input type="checkbox" name="is_download" value="1">
+                                    </label>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
+                <div class='form-group header-group-0 ' id='form-group-cron_type'>
+                    <label class='control-label col-sm-2'>是否上报
+                    </label>
+                    <div>
+                        <div class="col-sm-10">
+                            <div class="checkbox">
+                                @if ($row[is_report] == 1)
+                                    <label>
+                                        <input type="checkbox" checked name="is_report" value="1">
+                                    </label>
+                                @else
+                                    <label>
+                                        <input type="checkbox" name="is_report" value="1">
+                                    </label>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class='form-group header-group-0 ' id='form-group-cron_type'>
+                    <label class='control-label col-sm-2'>requirement_pool_id
+                    </label>
+                    <div>
+                        <div class="col-sm-10">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="text" name="requirement_pool_id" value='{{$row[requirement_pool_id]}}'>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class='form-group header-group-0 ' id='form-group-cron_type'>
+                    <label class='control-label col-sm-2'>next_script_id
+                    </label>
+                    <div>
+                        <div class="col-sm-10">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="text" name="next_script_id" value='{{$row[next_script_id]}}'>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class='form-group header-group-0 ' id='form-group-cron_type'>
                     <label class='control-label col-sm-2'>cron_type
                         <span class='text-danger' title='This field is required'>*</span>

@@ -54,6 +54,8 @@ class Data extends Model
         'show_time',
         'author',
         'read_count',
+        'thumbnail',
+        'img_remaining_step',
         'screenshot',
         'status',
         'start_time',

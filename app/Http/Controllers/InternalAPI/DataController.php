@@ -193,7 +193,8 @@ class DataController extends Controller
                 'detail_url' => 'nullable|string',
                 'show_time'  => 'nullable|string|max:100',
                 'author'     => 'nullable|string|max:50',
-                'read_count' => 'nullable|integer|max:100'
+                'read_count' => 'nullable|string|max:100',
+                'images'  => 'nullable|string',
             ]);
 
             //监测content内容和title,有则进行加密,便于后面查重
@@ -224,22 +225,23 @@ class DataController extends Controller
 
             //整理保存数据
             $data = [
-                'content_type'    => $params['content_type'],
-                'company'         => $params['company'],
-                'title'           => $value['title'],
-                'md5_title'       => $value['md5_title'],
-                'md5_content'     => $value['md5_content'],
-                'content'         => $value['content'],
-                'task_id'         => $params['task_id'],
-                'task_run_log_id' => $params['task_run_log_id'],
-                'detail_url'      => $value['detail_url'],
-                'show_time'       => $value['show_time'],
-                'author'          => $value['author'],
-                'read_count'      => $value['read_count'],
-                'status'          => Data::STATUS_NORMAL,
-                'start_time'      => $params['start_time'],
-                'end_time'        => $params['end_time'],
-                'created_time'    => time()
+                'content_type'       => $params['content_type'],
+                'company'            => $params['company'],
+                'title'              => $value['title'],
+                'md5_title'          => $value['md5_title'],
+                'md5_content'        => $value['md5_content'],
+                'content'            => $value['content'],
+                'task_id'            => $params['task_id'],
+                'task_run_log_id'    => $params['task_run_log_id'],
+                'detail_url'         => $value['detail_url'],
+                'show_time'          => $value['show_time'],
+                'author'             => $value['author'],
+                'read_count'         => $value['read_count'],
+                'thumbnail'          => $value['images'],
+                'status'             => Data::STATUS_NORMAL,
+                'start_time'         => $params['start_time'],
+                'end_time'           => $params['end_time'],
+                'created_time'       => time()
             ];
 
             $result[] = Data::create($data);
@@ -248,6 +250,31 @@ class DataController extends Controller
         return $this->resObjectGet($result, 'data', $request->path());
     }
 
+    /**
+     * retrieve
+     * 详情
+     *
+     * @param
+     * @return array
+     */
+    public function retrieve(Request $request)
+    {
+        $params = $request->all();
+
+        //检测参数
+        ValidatorService::check($params, [
+            'id' => 'required|integer',
+        ]);
+        $data = Data::find($params['id']);
+
+        $result = [];
+
+        if (!empty($data)) {
+            $result = $data->toArray();
+        }
+
+        return $this->resObjectGet($result, 'task', $request->path());
+    }
     /**
      * listByIds
      * 根据多个id查数据信息

@@ -48,8 +48,8 @@ $api->version(
         $api->post('/block_news/results', 'BlockNewsController@batchCreate');
         $api->get('/script/queue', 'ScriptController@allByQueue');
 
-        $api->post('/datas/report', 'DataController@dataResultReport');
-        $api->post('/datas/results', 'DataController@batchHandle');
+        $api->post('/data/batch/report', 'DataController@dataResultReport');
+        $api->post('/data/results', 'DataController@batchHandle');
 
         $api->post('/image/upload', 'ImageController@upload');
     }

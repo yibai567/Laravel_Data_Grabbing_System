@@ -68,6 +68,10 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $this->form[] = ['label'=>'步骤','name'=>'step','type'=>'textarea','validation'=>'required','width'=>'col-sm-10'];
         $this->form[] = ['name'=>'script_model_params','type'=>'text'];
 		$this->form[] = ['label'=>'执行规则','name'=>'cron_type','type'=>'radio','validation'=>'nullable|integer','width'=>'col-sm-10','dataenum'=>'1|每分钟执行一次;2|每五分钟执行一次;3|每十五分钟执行一次;','value'=>'1'];
+        $this->form[] = ['label'=>'是否上报','name'=>'is_report','type'=>'checkout','validation'=>'nullable|integer','width'=>'col-sm-10','value'=>'1'];
+        $this->form[] = ['label'=>'是否下载','name'=>'is_download','type'=>'checkout','validation'=>'nullable|integer','width'=>'col-sm-10','value'=>'1'];
+        $this->form[] = ['name'=>'next_script_id','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
+        $this->form[] = ['name'=>'requirement_pool_id','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
 		# END FORM DO NOT REMOVE THIS LINE
 
 		/*
@@ -464,9 +468,21 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
                          ];
         $data['cron_type'] = $formParams['cron_type'];
         $data['languages_type'] = $formParams['languages_type'];
+        $data['requirement_pool_id'] = $formParams['requirement_pool_id'];
+        $data['next_script_id'] = $formParams['next_script_id'];
+        if (empty($formParams['is_report'])) {
+            $data['is_report'] = Script::REPORT_DATA_FALSE;
+        } else {
+            $data['is_report'] = $formParams['is_report'];
+        }
+
+        if (empty($formParams['is_download'])) {
+            $data['is_download'] = Script::DOWNLOAD_IMAGE_FALSE;
+        } else {
+            $data['is_download'] = $formParams['is_download'];
+        }
         $data['operate_user'] = CRUDBooster::myName();
         $data['id'] = $id;
-
         try {
             $res = InternalAPIService::post('/script/update', $data);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
@@ -490,7 +506,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data = [];
         $formParams = $this->arr;
         $newData = [];
-
         if (empty($formParams['script_model_params'])) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "步骤必填", "error");
         }
@@ -514,6 +529,20 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
                          ];
         $data['cron_type'] = $formParams['cron_type'];
         $data['languages_type'] = $formParams['languages_type'];
+        $data['requirement_pool_id'] = $formParams['requirement_pool_id'];
+        $data['next_script_id'] = $formParams['next_script_id'];
+        if (empty($formParams['is_report'])) {
+            $data['is_report'] = Script::REPORT_DATA_FALSE;
+        } else {
+            $data['is_report'] = $formParams['is_report'];
+        }
+
+        if (empty($formParams['is_download'])) {
+            $data['is_download'] = Script::DOWNLOAD_IMAGE_FALSE;
+        } else {
+            $data['is_download'] = $formParams['is_download'];
+        }
+
         $data['operate_user'] = CRUDBooster::myName();
         try {
             $res = InternalAPIService::post('/script', $data);

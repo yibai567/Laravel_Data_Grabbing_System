@@ -109,6 +109,7 @@ $api->version(
 
         $api->post('/data/results','DataController@batchCreate');
         $api->post('/datas','DataController@batchSave');
+        $api->get('/data','DataController@retrieve');
         $api->get('/datas/ids','DataController@listByIds');
         $api->get('/datas/task_run_log_id','DataController@listByTaskRunLogId');
         $api->post('/datas/update/task_run_log_id','DataController@updateByTaskRunLogId');
@@ -119,6 +120,8 @@ $api->version(
         $api->post('/task_run_log/status/success','TaskRunLogController@updateStatusSuccess');
         $api->post('/task_run_log/status/fail','TaskRunLogController@updateStatusFail');
         $api->get('/task_run_log','TaskRunLogController@retrieve');
+
+        $api->get('/task','TaskController@retrieve');
 
     }
 );

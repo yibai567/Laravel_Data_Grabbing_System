@@ -13,6 +13,7 @@ use Log;
 use App\Models\TaskRunLog;
 use App\Services\InternalAPIService;
 use App\Services\ValidatorService;
+use App\Services\RabbitMQService;
 use Illuminate\Http\Request;
 
 class DataController extends Controller
@@ -46,6 +47,7 @@ class DataController extends Controller
             //调取根据task_run_log_id查询task_run_log信息
             $selectTaskRunLogData['id'] = $params['task_run_log_id'];
             $taskRunLog = InternalAPIService::get('/task_run_log', $selectTaskRunLogData);
+
             if (empty($taskRunLog)) {
                 Log::debug('[v1 DataController batchHandle]  $taskRunLog is not found,task_run_log_id : ' . $params['task_run_log_id']);
                 return $this->resObjectGet(false, 'data', $request->path());
@@ -68,16 +70,23 @@ class DataController extends Controller
             }
 
             $params['task_id'] = $taskId;
-            $data = InternalAPIService::post('/datas',$params);
+            $datas = InternalAPIService::post('/datas',$params);
 
-            $dataNum = count($data);
+            $dataNum = count($datas);
             $updateTaskRunLogData['result_count'] = $dataNum;
             $updateTaskRunLogData['id'] = $params['task_run_log_id'];
             //更改task_runRunLog状态
             InternalAPIService::post('/task_run_log/status/success', $updateTaskRunLogData);
 
             if ($dataNum > 0) {
-                //TODO 加入队列处理
+
+                foreach ($datas as $data) {
+
+                    $rabbitMQ = new RabbitMQService();
+                    //调用队列
+                    $rabbitMQ->create('save_result', '', $data);
+
+                }
             }
         } catch (\Exception $e) {
             Log::debug('[v1 DataController batchHandle] error message = ' . $e->getMessage());
@@ -111,54 +120,45 @@ class DataController extends Controller
         //调取上报数据信息
         $datas = InternalAPIService::get('/datas/ids', $params);
 
-        $newData = [];
-        $postNum = 0;
+        $newDatas = [];
         //遍历上报数据
         foreach ($datas as $data) {
 
-            if (empty($data['title'])) {
+            $newData = [];
+            if (empty($data['title']) || empty($data['task_id']) || empty($data['detail_url'])) {
                 continue;
             }
 
-            $newData[$postNum]['title'] = $data['title'];
+            $newData['title'] = $data['title'];
 
-            if (empty($data['task_id'])) {
-                $newData[$postNum]['task_id'] = "";
-            } else {
-                $newData[$postNum]['task_id'] = $data['task_id'];
-            }
+            $newData['task_id'] = $data['task_id'];
 
-            if (empty($data['detail_url'])) {
-                $newData[$postNum]['url'] = "";
-            } else {
-                $newData[$postNum]['url'] = $data['detail_url'];
-            }
+            $newData['url'] = $data['detail_url'];
 
             if (empty($data['show_time'])) {
-                $newData[$postNum]['date'] = "";
+                $newData['date'] = "";
             } else {
-                $newData[$postNum]['date'] = $data['show_time'];
+                $newData['date'] = $data['show_time'];
             }
 
             if (empty($data['images'])) {
-                $newData[$postNum]['images'] = [];
+                $newData['images'] = [];
             } else {
-                $newData[$postNum]['images'] = $data['images'];
+                $newData['images'] = $data['images'];
             }
 
             if (empty($data['screenshot'])) {
-                $newData[$postNum]['screenshot'] = [];
+                $newData['screenshot'] = [];
             } else {
-                $newData[$postNum]['screenshot'] = $data['screenshot'];
+                $newData['screenshot'] = $data['screenshot'];
             }
 
-            $postNum += 1;
+            $newDatas[] = $newData;
         }
-
 
         //整理数据
         $params['is_test'] = TaskRunLog::TYPE_TEST;
-        $params['result'] = json_encode($newData, JSON_UNESCAPED_UNICODE);
+        $params['result'] = json_encode($newDatas, JSON_UNESCAPED_UNICODE);
 
         //调用上传数据接口
         $result = InternalAPIService::post('/item/result/report', $params);

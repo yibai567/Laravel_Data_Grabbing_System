@@ -35,13 +35,17 @@ class ScriptController extends Controller
 
         //验证参数
         ValidatorService::check($params, [
-            'name'           => 'required|string|max:100',
-            'description'    => 'nullable|string|max:255',
-            'languages_type' => 'required|integer|between:1,3',
-            'step'           => 'required|array',
-            'cron_type'      => 'nullable|integer',
-            'operate_user'   => 'required|string|max:50',
-            'init'           => 'nullable|array'
+            'name'                => 'required|string|max:100',
+            'description'         => 'nullable|string|max:255',
+            'languages_type'      => 'required|integer|between:1,3',
+            'step'                => 'required|array',
+            'cron_type'           => 'nullable|integer',
+            'operate_user'        => 'required|string|max:50',
+            'next_script_id'      => 'nullable|integer',
+            'requirement_pool_id' => 'nullable|integer',
+            'is_report'           => 'nullable|integer|between:1,2',
+            'is_download'         => 'nullable|integer|between:1,2',
+            'init'                => 'nullable|array'
         ]);
 
         //默认值
@@ -70,10 +74,14 @@ class ScriptController extends Controller
             }
             //整理script入库数据
             $scriptData = [
-                'languages_type' => $params['languages_type'],
-                'step' => $params['step'],
-                'status' => Script::STATUS_INIT,
-                'operate_user' => $params['operate_user'],
+                'languages_type'      => $params['languages_type'],
+                'step'                => $params['step'],
+                'status'              => Script::STATUS_INIT,
+                'operate_user'        => $params['operate_user'],
+                'next_script_id'      => $params['next_script_id'],
+                'requirement_pool_id' => $params['requirement_pool_id'],
+                'is_report'           => $params['is_report'],
+                'is_download'         => $params['is_download'],
             ];
 
             if (!empty($scriptConfig)) {
@@ -138,6 +146,11 @@ class ScriptController extends Controller
             'step'           => 'nullable|array',
             'cron_type'      => 'nullable|integer',
             'operate_user'   => 'nullable|string|max:50',
+            'operate_user'        => 'required|string|max:50',
+            'next_script_id'      => 'nullable|integer',
+            'requirement_pool_id' => 'nullable|integer',
+            'is_report'           => 'nullable|integer|between:1,2',
+            'is_download'         => 'nullable|integer|between:1,2',
             'init'           => 'nullable|array'
         ]);
 
@@ -165,6 +178,10 @@ class ScriptController extends Controller
                 'step'           => $params['step'],
                 'status'         => Script::STATUS_INIT,
                 'operate_user'   => $params['operate_user'],
+                'next_script_id'      => $params['next_script_id'],
+                'requirement_pool_id' => $params['requirement_pool_id'],
+                'is_report'           => $params['is_report'],
+                'is_download'         => $params['is_download'],
             ];
 
             $script->update($scriptData);

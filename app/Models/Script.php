@@ -24,6 +24,14 @@ class Script extends Model
     const CRON_TYPE_EVERY_FIVE_MINUTES = 2;
     const CRON_TYPE_EVERY_TEN_MINUTES = 3;
 
+    //下载图片 1、是 2、否
+    const DOWNLOAD_IMAGE_TRUE = 1;
+    const DOWNLOAD_IMAGE_FALSE = 2;
+
+    //上报数据 1、是 2、否
+    const REPORT_DATA_TRUE = 1;
+    const REPORT_DATA_FALSE = 2;
+
     /**
      * 表名
      */
@@ -53,6 +61,10 @@ class Script extends Model
         'languages_type',
         'status',
         'operate_user',
+        'next_script_id',
+        'requirement_pool_id',
+        'is_report',
+        'is_download',
     ];
 
     public function config()

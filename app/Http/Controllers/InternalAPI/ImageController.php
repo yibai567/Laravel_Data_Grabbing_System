@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\InternalAPI;
 
 use App\Services\ImageService;
+use App\Services\RabbitMQService;
 use Illuminate\Http\Request;
 use Log;
 use DB;
+use QL\QueryList;
 use App\Services\ValidatorService;
 use App\Models\Data;
 use App\Models\Task;
@@ -74,6 +76,7 @@ class ImageController extends Controller
         $params = $request->all();
 
         ValidatorService::check($params, [
+            "header" => "nullable|array",
             "data_id" => "required|integer",
             "thumbnail" => "nullable|string",
             "content" => "nullable|string",
@@ -99,7 +102,7 @@ class ImageController extends Controller
         $taskInfo = $taskInfo->toArray();
 
         //获取资源url 需要拆分成接口）
-        $scriptInfo = Script::find($dataInfo['task_id']);
+        $scriptInfo = Script::find($taskInfo['script_id']);
 
         if (empty($scriptInfo)) {
             Log::debug('[getByResult] script empty scriptId = ' . $scriptInfo['script_id']);
@@ -115,12 +118,16 @@ class ImageController extends Controller
 
         //提取$params['content'] 中url,并且补全
         if (!empty($params['content'])) {
-            preg_match_all('/src="(.*?(jpg|jpeg|gif|png))/', $params['content'], $imageUrl);
+
+            $ql = QueryList::html($params['content']);
+            //获取所有的图片地址
+            $imageUrl = $ql->find('img')->attrs('src')->all();
+
             if (!empty($urlFormat)) {
-                $formatImage = $this->__foramtUrl($imageUrl[1], $urlFormat, $params['content']);
+                $formatImage = $this->__foramtUrl($imageUrl, $urlFormat, $params['content']);
                 $content = $formatImage['content'];
             } else {
-                $content = $imageUrl[1];
+                $content = $params['content'];
             }
             $dataRes->content = $content;
         }
@@ -135,52 +142,26 @@ class ImageController extends Controller
             $dataRes->thumbnail = $thumbnail;
         }
 
-        if (!empty($content['format_url']) && !empty($thumbnail['format_url'])){
-            $imgUrl = array_unique(array_merge($content['format_url'],$thumbnail['format_url']));
-        } else if (!empty($content['format_url'])) {
-            $imgUrl = array_unique($content['format_url']);
+        if (!empty($formatImage['format_url']) && !empty($thumbnail['format_url'])){
+            $imgUrl = array_unique(array_merge($formatImage['format_url'],$thumbnail['format_url']));
+        } else if (!empty($formatImage['format_url'])) {
+            $imgUrl = array_unique($formatImage['format_url']);
         } else if (!empty($thumbnail['format_url'])) {
-            $imgUrl = array_unique($content['format_url']);
+            $imgUrl = array_unique($thumbnail['format_url']);
         }
 
-        //调用方法todo
-
-        $dataRes->img_remaining_step = count($imgUrl);
+        //保存数据
+        $imgNum = count($imgUrl);
+        $dataRes->img_remaining_step = $imgNum;
         $dataRes->save();
-        return $this->resObjectGet(true, 'image', $request->path());
+
+        //调用队列
+        $result = $this->__callRabbitMQ($imgUrl, $imgNum, $params['header']);
+
+        return $this->resObjectGet($result, 'image', $request->path());
     }
 
-    private function __foramtUrl($urlArr, $urlFormat, $content = '')
-    {
-        $extractUrl = [];
-        foreach ($urlArr as $key => $value) {
-            $http = substr($value, 0, 4);
-            if ($http != 'http') {
-                if (substr($value, 0, 2) == '//') {
-                        $newUrl = $urlFormat['scheme'] . ':' . $value;
-                } else {
-                    if (substr($value, 0, 1) == '/') {
-                        $newUrl = $urlFormat['scheme'] . '://' . $urlFormat['host'] . $value;
-                    } else {
-                        $newUrl = $urlFormat['scheme'] . '://' . $urlFormat['host'] . '/' . $value;
-                    }
-                }
-                if (!empty($content)) {
-                    $content = str_replace($value, $newUrl, $content);
-                }
-                $extractUrl[] = $newUrl;
-            } else {
-                $extractUrl[] = $value;
-            }
-        }
-        $data['format_url'] = $extractUrl;
 
-        if (!empty($content)) {
-            $data['content'] = $content;
-        }
-
-        return $data;
-    }
 
     /**
      * replacement
@@ -266,5 +247,74 @@ class ImageController extends Controller
         $data['image_url'] = $params['image_url'];
         $data['oss_url'] = $imageInfo['oss_url'];
         return $this->resObjectGet($data, 'image', $request->path());
+    }
+
+    /**
+     * __callRabbitMQ
+     * 调用image download RabbitMQ
+     *
+     * @param array $imgUrls int $imgNum array $headers
+     * @return boolean
+     */
+    private function __callRabbitMQ($imgUrls, $imgNum, $headers)
+    {
+        dd(isset($headers['vhost']));
+        if ($imgNum > 0 && isset($headers['vhost']) &&  isset($headers['exchange']) &&  isset($headers['routing_key'])) {
+          dd('3333333');
+           try{
+               //调用方法todo
+               foreach($imgUrls as $imgUrl){
+
+                   $rabbitMQ = new RabbitMQService();
+                   //调用队列
+                   $rabbitMQ->create('image', 'download', $imgUrl, $headers);
+               }
+           } catch (\Exception $e) {
+               Log::error('__callRabbitMQ    Exception:'."\t".$e->getCode()."\t".$e->getMessage());
+               return false;
+           }
+        }
+        dd('2222');
+        return true;
+
+    }
+
+    /**
+     * __foramtUrl
+     * 格式化Url
+     *
+     * @param array $urlArr array $urlFormat string $content
+     * @return array
+     */
+    private function __foramtUrl($urlArr, $urlFormat, $content = '')
+    {
+        $extractUrl = [];
+        foreach ($urlArr as $key => $value) {
+            $http = substr($value, 0, 4);
+            if ($http != 'http') {
+                if (substr($value, 0, 2) == '//') {
+                    $newUrl = $urlFormat['scheme'] . ':' . $value;
+                } else {
+                    if (substr($value, 0, 1) == '/') {
+                        $newUrl = $urlFormat['scheme'] . '://' . $urlFormat['host'] . $value;
+                    } else {
+                        $newUrl = $urlFormat['scheme'] . '://' . $urlFormat['host'] . '/' . $value;
+                    }
+                }
+                if (!empty($content)) {
+                    $content = str_replace($value, $newUrl, $content);
+                }
+                $extractUrl[] = $newUrl;
+            } else {
+                $extractUrl[] = $value;
+            }
+        }
+        $data['format_url'] = $extractUrl;
+
+        if (!empty($content)) {
+            $data['content'] = $content;
+        }
+
+        return $data;
     }
 }
