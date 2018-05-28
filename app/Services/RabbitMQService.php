@@ -30,6 +30,7 @@ class RabbitMQService extends Service
         $this->channel->exchange_declare('save_result', 'fanout', false, true, false);
         $this->channel->exchange_declare('image', 'direct', false, true, false);
         $this->channel->exchange_declare('instant_task', 'direct', false, true, false);
+        $this->channel->exchange_declare('error', 'fanout', false, true, false);
 
         // 声明队列
         $this->channel->queue_declare('result_img_processing', false, true, false, false);
@@ -44,6 +45,8 @@ class RabbitMQService extends Service
         $this->channel->queue_declare('engine_node', false, true, false, false);
         $this->channel->queue_declare('engine_chromeless', false, true, false, false);
 
+        $this->channel->queue_declare('error_msg', false, true, false, false);
+
         // 队列和交换器绑定
         $this->channel->queue_bind('result_img_processing', 'save_result');
         $this->channel->queue_bind('result_report', 'save_result');
@@ -56,6 +59,8 @@ class RabbitMQService extends Service
         $this->channel->queue_bind('engine_casperjs', 'instant_task', 'casperjs');
         $this->channel->queue_bind('engine_node', 'instant_task', 'node');
         $this->channel->queue_bind('engine_chromeless', 'instant_task', 'chromeless');
+
+        $this->channel->queue_bind('error_msg', 'error');
     }
 
     /**
@@ -94,12 +99,15 @@ class RabbitMQService extends Service
 
         // 发送消息
         $this->channel->basic_publish($AMPQMessage, $exchange, $routingKey);
+
+        $this->channel->close();
+        $this->connection->close();
     }
 
 
     /**
      * 取出队列
-     * @param $headers array()
+     * @param $queue 队列名
      * @return array
      */
     public function get($queue)
@@ -132,4 +140,32 @@ class RabbitMQService extends Service
         $this->connection->close();
     }
 
+    /**
+     * 创建消费者
+     * @param $queue 队列名
+     * @return 回调函数
+     */
+    public function consume($queue, $callback)
+    {
+        $this->channel->basic_consume($queue, '', false, false, false, false, $callback);
+        while(count($this->channel->callbacks)) {
+            $this->channel->wait();
+        }
+        $this->channel->close();
+        $this->connection->close();
+    }
+
+
+    /**
+     * errorMsg
+     * 创建错误信息
+     * @param $message 消息内容
+     */
+    public function errorMsg($body, $msg = '')
+    {
+        $message['raw'] = $body;
+        $message['msg'] = $msg;
+        \Log::debug($msg);
+        $this->create('error', '', $message);
+    }
 }

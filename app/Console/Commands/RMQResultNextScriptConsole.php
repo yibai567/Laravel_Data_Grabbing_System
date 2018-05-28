@@ -40,80 +40,92 @@ class RMQResultNextScriptConsole extends Command
      */
     public function handle()
     {
-        $rabbitMQ = new RabbitMQService();
-        $result = $rabbitMQ->get('result_next_script');
-        if (empty($result)) {
-            $this->info('result_next_script 队列暂无数据，请稍后重试');
-            return false;
+        try {
+            $rabbitMQ = new RabbitMQService();
+            $rabbitMQ->consume('result_next_script', $this->callback());
+        } catch (Exception $e) {
+            \Log::debug('11');
+            throw $e;
         }
+    }
 
-        if (!isset($result['body']['task_id']) || !isset($result['body']['id']) || !isset($result['body']['detail_url'])) {
-            $this->info('body 结构体格式错误 '. json_encode($result['body']));
-            return false;
-        }
+    public function callback()
+    {
+        return function($msg) {
+            $this->info($msg->body);
+            $rabbitMQ = new RabbitMQService();
+            $result = json_decode($msg->body, true);
+            if (!isset($result['body']['task_id']) || !isset($result['body']['id']) || !isset($result['body']['detail_url'])) {
+                $rabbitMQ->errorMsg($msg->body, 'body 结构体格式错误');
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return false;
+            }
 
-        // 根据 task_id 获取 task 信息
-        $task = InternalAPIService::get('/task', ['id' => $result['body']['task_id']]);
-        if (empty($task)) {
-            $this->info('task empty ,task_id = ' . $task['script_id']);
-            return false;
-        }
+            // 根据 task_id 获取 task 信息
+            $task = InternalAPIService::get('/task', ['id' => $result['body']['task_id']]);
+            if (empty($task)) {
+                $rabbitMQ->errorMsg($msg->body, 'task empty ,task_id = ' . $task['script_id']);
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return false;
+            }
 
-        // 根据 script_id 获取 script 信息
-        $script = InternalAPIService::get('/script', ['id' => $task['script_id']]);
-        if (empty($script)) {
-            $this->info('script empty ,script_id = ' . $task['script_id']);
-            return false;
-        }
+            // 根据 script_id 获取 script 信息
+            $script = InternalAPIService::get('/script', ['id' => $task['script_id']]);
+            if (empty($script)) {
+                $rabbitMQ->errorMsg($msg->body, 'script empty ,script_id = ' . $task['script_id']);
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return false;
+            }
 
-        // 没有下一步脚本
-        if (empty($script['next_script_id'])) {
-            $rabbitMQ->ack();
-            return true;
-        }
+            // 没有下一步脚本
+            if (empty($script['next_script_id'])) {
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return true;
+            }
 
-        $newScript = InternalAPIService::get('/script', ['id' => $script['next_script_id']]);
-        if (empty($newScript)) {
-            $this->info('next_script empty ,script_id = ' . $script['next_script_id']);
-            return false;
-        }
+            $newScript = InternalAPIService::get('/script', ['id' => $script['next_script_id']]);
+            if (empty($newScript)) {
+                $rabbitMQ->errorMsg($msg->body, 'next_script empty ,script_id = ' . $script['next_script_id']);
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return false;
+            }
 
-        $result['header'] = [
-            'data_id' => $result['body']['id'],
-            'task_id' => $result['body']['task_id'],
-            'script_id' => $script['next_script_id']
-        ];
+            $result['header'] = [
+                'data_id' => $result['body']['id'],
+                'task_id' => $result['body']['task_id'],
+                'script_id' => $script['next_script_id']
+            ];
 
-        switch ($newScript['languages_type']) {
-            case Script::LANGUAGES_TYPE_CASPERJS:
-                $routingKey = 'casperjs';
-                break;
+            switch ($newScript['languages_type']) {
+                case Script::LANGUAGES_TYPE_CASPERJS:
+                    $routingKey = 'casperjs';
+                    break;
 
-            case Script::LANGUAGES_TYPE_HTML:
-                $routingKey = 'node';
-                break;
+                case Script::LANGUAGES_TYPE_HTML:
+                    $routingKey = 'node';
+                    break;
 
-            case Script::LANGUAGES_TYPE_API:
-                $routingKey = 'node';
-                break;
+                case Script::LANGUAGES_TYPE_API:
+                    $routingKey = 'node';
+                    break;
 
-            default:
-                $routingKey = '';
-                break;
-        }
+                default:
+                    $routingKey = '';
+                    break;
+            }
 
-        $taskRunLog = InternalAPIService::post('/task_run_log', ['task_id' => $result['body']['task_id'], 'start_job_at' => date('Y-m-d H:i:s')]);
-        if (empty($taskRunLog)) {
-            $this->info("task_run_log添加失败，请后重试");
-            $rabbitMQ->nack();
-        }
-        $message = [
-            'path' => 'script_' . $script['next_script_id'],
-            'task_run_log_id' => $taskRunLog['id'],
-            'url' => $result['body']['detail_url']
-        ];
-
-        $rabbitMQ->create('instant_task', $routingKey, $message, $result['header']);
-        $rabbitMQ->ack();
+            $taskRunLog = InternalAPIService::post('/task_run_log', ['task_id' => $result['body']['task_id'], 'start_job_at' => date('Y-m-d H:i:s')]);
+            if (empty($taskRunLog)) {
+                $rabbitMQ->errorMsg($msg->body, 'task_run_log添加失败，请后重试');
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+            }
+            $message = [
+                'path' => 'script_' . $script['next_script_id'],
+                'task_run_log_id' => $taskRunLog['id'],
+                'url' => $result['body']['detail_url']
+            ];
+            $rabbitMQ->create('instant_task', $routingKey, $message, $result['header']);
+            $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+        };
     }
 }
