@@ -258,7 +258,7 @@ class ImageController extends Controller
      */
     private function __callImageDownloadRabbitMQ($imgUrls, $imgNum, $headers)
     {
-        if ($imgNum > 0 && isset($headers['vhost']) &&  isset($headers['exchange']) &&  isset($headers['routing_key'])) {
+        if ($imgNum > 0 && array_key_exists('vhost',$headers) &&  array_key_exists('exchange',$headers) &&  array_key_exists('routing_key',$headers)) {
            try{
                //调用方法todo
                foreach($imgUrls as $imgUrl){
