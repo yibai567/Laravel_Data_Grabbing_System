@@ -23,7 +23,7 @@ class QuirementPoolController extends Controller
      * create
      * 资源创建
      *
-     * @param name (任务名称)
+     * @param name (资源名称)
      * @param list_url (列表url)
      * @param description (描述)
      * @param img_description (图片描述)
@@ -56,7 +56,7 @@ class QuirementPoolController extends Controller
      * 修改资源
      *
      * @param id (资源id)
-     * @param name (任务名称)
+     * @param name (资源名称)
      * @param list_url (列表url)
      * @param description (描述)
      * @param img_description (图片描述)

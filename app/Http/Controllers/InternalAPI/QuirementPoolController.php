@@ -8,7 +8,8 @@ use App\Services\ValidatorService;
 use App\Services\InternalAPIService;
 use App\Models\Requirement;
 use CRUDBooster;
-
+use GuzzleHttp\Client;
+use App\Models\Image;
 /**
  * QuirementPoolController
  * 资源管理接口
@@ -24,7 +25,7 @@ class QuirementPoolController extends Controller
      * create
      * 资源创建
      *
-     * @param name (任务名称)
+     * @param name (资源名称)
      * @param list_url (列表url)
      * @param description (描述)
      * @param img_description (图片描述)
@@ -53,6 +54,9 @@ class QuirementPoolController extends Controller
         $resData = $params;
 
         $resData['status'] = Requirement::STATUS_TRUE;
+        //获取图片
+        $getImg=$this->download_img($params['img_description']);
+        //上传图片
 
         $res = Requirement::create($resData);
 
@@ -70,7 +74,7 @@ class QuirementPoolController extends Controller
      * 修改资源
      *
      * @param id (资源id)
-     * @param name (任务名称)
+     * @param name (资源名称)
      * @param list_url (列表url)
      * @param description (描述)
      * @param img_description (图片描述)
@@ -119,7 +123,7 @@ class QuirementPoolController extends Controller
      * retrieve
      * 获取资源详情
      *
-     * @param
+     * @param id (资源id)
      * @return array
      */
     public function retrieve(Request $request)
@@ -168,6 +172,7 @@ class QuirementPoolController extends Controller
 
         //获取数据
         $items = Requirement::take($params['limit'])
+                            ->select('name','list_url','subscription_type','is_capture','is_download_img','status','create_by','operate_by','created_at','updated_at')
                             ->skip($params['offset'])
                             ->orderBy('id', 'desc')
                             ->get();
@@ -205,7 +210,8 @@ class QuirementPoolController extends Controller
             throw new \Dingo\Api\Exception\ResourceException("Requirement is not found");
         }
 
-        $req->status = Requirement::STATUS_FALSE;
+        $req->status = $params['status'];
+
         $req->operate_by = $params['user_id'];
 
 
@@ -220,5 +226,6 @@ class QuirementPoolController extends Controller
         return $this->resObjectGet($result, 'requirement', $request->path());
 
      }
+
 
 }

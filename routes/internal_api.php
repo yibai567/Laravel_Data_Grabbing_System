@@ -116,6 +116,7 @@ $api->version(
         $api->get('/quirement', 'QuirementPoolController@retrieve');
         $api->get('/quirements', 'QuirementPoolController@all');
         $api->get('/quirement/update_status', 'QuirementPoolController@updateStatus');
+        $api->get('/quirement/download_img', 'QuirementPoolController@download_img');
 
     }
 );

@@ -93,7 +93,28 @@
 			$this->form[] = ['label'=>'任务名称','name'=>'name','type'=>'text','validation'=>'nullable|string|max:100','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'抓取url','name'=>'list_url','type'=>'text','validation'=>'required|string|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'描述','name'=>'description','type'=>'textarea','validation'=>'nullable|min:10|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'图片描述','name'=>'img_description','type'=>'upload','validation'=>'required|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'图片描述','name'=>'img_description','type'=>'upload','validation'=>'required|max:255','width'=>'col-sm-10',"callback"=>function ($row) {
+
+
+
+                 $newIp=$_SERVER['HTTP_HOST']."/".$row->img_description;
+                 $domain = strstr($newIp, '/uploads');
+                 $local='/'.$row->img_description;
+                 if($domain){
+                   $string='<div>';
+                   $string='<div><img src="'.$local.'" width="150" height="150" style="margin-left:278px;margin-bottom:15px"><div/>';
+                   $string.='<div/>';
+                   echo $string;
+                 }else{
+                   $string='<div>';
+                   $string='<div><img src="'.$row->img_description.'" width="150" height="150" style="margin-left:278px;margin-bottom:15px"><div/>';
+                   $string.='<div/>';
+                   echo $string;
+                 }
+
+
+
+            }];
 			$this->form[] = ['label'=>'订阅类型','name'=>'subscription_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|列表;2|详情'];
 			$this->form[] = ['label'=>'是否截图','name'=>'is_capture','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|是;2|否'];
 			$this->form[] = ['label'=>'是否下载图片','name'=>'is_download_img','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|是;2|否'];
@@ -138,7 +159,11 @@
 	        |
 	        */
 	        $this->addaction = array();
-            $this->addaction[] = ['label'=>'执行', 'url'=>CRUDBooster::mainpath('modify-state/[id]'),'color'=>'info', 'icon'=>'ion-arrow-right-c', 'showIf'=>'[status] == ' . Requirement::STATUS_TRUE];
+            $this->addaction[] = ['label'=>'执行', 'url'=>CRUDBooster::mainpath('modify-state/[id]/' . Requirement::STATUS_FALSE),'color'=>'warning', 'icon'=>'ion-arrow-right-c', 'showIf'=>'[status] == ' . Requirement::STATUS_TRUE];
+            $this->addaction[] = ['label'=>'已执行', 'url'=>CRUDBooster::mainpath('modify-state/[id]/' . Requirement::STATUS_TRUE),'color'=>'info', 'icon'=>'ion-arrow-right-c', 'showIf'=>'[status] == ' . Requirement::STATUS_FALSE];
+            // $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]'),'color'=>'success', 'icon'=>'fa fa-play', 'showIf'=>'[status] == ' . Item::STATUS_TEST_SUCCESS . '|| [status] == ' . Item::STATUS_STOP];
+
+            // $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-down/[id]'),'color'=>'warning', 'icon'=>'fa fa-stop', 'showIf'=>'[status] == ' . Item::STATUS_START];
 
 	        /*
 	        | ----------------------------------------------------------------------
@@ -384,9 +409,10 @@
 	    }
 
 
-        public function getModifyState($id) {
+        public function getModifyState($id,$status) {
 
             $params['id'] = $id;
+            $params['status'] = $status;
             $params['user_id'] = CRUDBooster::myId();
 
             try {
