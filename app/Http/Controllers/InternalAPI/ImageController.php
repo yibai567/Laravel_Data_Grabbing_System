@@ -156,7 +156,7 @@ class ImageController extends Controller
         $dataRes->save();
 
         //调用队列
-        $result = $this->__callRabbitMQ($imgUrl, $imgNum, $params['header']);
+        $result = $this->__callImageDownloadRabbitMQ($imgUrl, $imgNum, $params['header']);
 
         return $this->resObjectGet($result, 'image', $request->path());
     }
@@ -250,17 +250,15 @@ class ImageController extends Controller
     }
 
     /**
-     * __callRabbitMQ
+     * __callImageDownloadRabbitMQ
      * 调用image download RabbitMQ
      *
      * @param array $imgUrls int $imgNum array $headers
      * @return boolean
      */
-    private function __callRabbitMQ($imgUrls, $imgNum, $headers)
+    private function __callImageDownloadRabbitMQ($imgUrls, $imgNum, $headers)
     {
-        dd(isset($headers['vhost']));
         if ($imgNum > 0 && isset($headers['vhost']) &&  isset($headers['exchange']) &&  isset($headers['routing_key'])) {
-          dd('3333333');
            try{
                //调用方法todo
                foreach($imgUrls as $imgUrl){
@@ -274,7 +272,7 @@ class ImageController extends Controller
                return false;
            }
         }
-        dd('2222');
+
         return true;
 
     }
