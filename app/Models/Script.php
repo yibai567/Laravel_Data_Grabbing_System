@@ -23,6 +23,7 @@ class Script extends Model
     const CRON_TYPE_KEEP = 1;
     const CRON_TYPE_EVERY_FIVE_MINUTES = 2;
     const CRON_TYPE_EVERY_TEN_MINUTES = 3;
+    const CRON_TYPE_ONCE = 4;
 
     //下载图片 1、是 2、否
     const DOWNLOAD_IMAGE_TRUE = 1;
@@ -31,6 +32,10 @@ class Script extends Model
     //上报数据 1、是 2、否
     const REPORT_DATA_TRUE = 1;
     const REPORT_DATA_FALSE = 2;
+
+    //是否翻墙 1、是 2、否
+    const WALL_OVER_TRUE = 1;
+    const WALL_OVER_FALSE = 2;
 
     /**
      * 表名
@@ -55,6 +60,7 @@ class Script extends Model
      * 可更新的字段
      */
     protected $fillable = [
+        'list_url',
         'script_init_id',
         'step',
         'last_generate_at',
@@ -65,6 +71,7 @@ class Script extends Model
         'requirement_pool_id',
         'is_report',
         'is_download',
+        'is_proxy',
     ];
 
     public function config()

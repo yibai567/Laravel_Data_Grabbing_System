@@ -35,7 +35,7 @@ class TaskStatisticsController extends Controller
 
         try {
             //查看task信息
-            $task = Task::where('id',$params['task_id'])->where('status',Task::STATUS_START)->first();
+            $task = Task::where('id',$params['task_id'])->first();
 
             //检测task是否存在
             if (empty($task)) {

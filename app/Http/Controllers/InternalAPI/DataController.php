@@ -188,7 +188,7 @@ class DataController extends Controller
         foreach ($params['result'] as $value) {
 
             ValidatorService::check($value, [
-                'title'      => 'nullable|string|max:255',
+                'title'      => 'nullable|string',
                 'content'    => 'nullable|string',
                 'detail_url' => 'nullable|string',
                 'show_time'  => 'nullable|string|max:100',
@@ -209,9 +209,9 @@ class DataController extends Controller
 
             //检测数据库是否已存在数据
             if (empty($value['title'])) {
-                $row = Data::where('md5_content', $value['md5_content'])->first();
+                $row = Data::where('md5_content', $value['md5_content'])->where('task_id',$params['task_id'])->first();
             } else {
-                $row = Data::where('md5_title', $value['md5_title'])->first();
+                $row = Data::where('md5_title', $value['md5_title'])->where('task_id',$params['task_id'])->first();
             }
 
             //内容已存在,更新信息

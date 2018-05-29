@@ -32,12 +32,15 @@ class ImageController extends Controller
             'image'         => 'required|image',
             'task_run_log_id' => 'required|integer'
         ]);
+
         try {
             //调取根据task_run_log_id查询data信息
             $uploadSelectData['task_run_log_id'] = intval($params['task_run_log_id']);
             $datas = InternalAPIService::get('/datas/task_run_log_id', $uploadSelectData);
 
             if (empty($datas)) {
+                Log::debug('[v1 ImageController upload] $datas is not found,task_run_log_id : '.$uploadSelectData['task_run_log_id']);
+
                 return $this->resObjectGet(false, 'image', $request->path());
             }
 
@@ -48,6 +51,8 @@ class ImageController extends Controller
             $imageInfo = $imageService->uploadByFile($image);
 
             if (!$imageInfo) {
+                Log::debug('[v1 ImageController upload] image upload  is fail');
+
                 return $this->resObjectGet(false, 'image', $request->path());
             }
 

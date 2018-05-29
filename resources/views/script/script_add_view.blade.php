@@ -35,48 +35,88 @@
             @if($hide_form)
                 <input type="hidden" name="hide_form" value='{!! serialize($hide_form) !!}'>
             @endif
-            <div class="box-body" id="parent-form-area">
-                <div class='form-group header-group-0 ' id='form-group-name'>
-                    <label class='control-label col-sm-2'>脚本名称
-                        <span class='text-danger' title='This field is required'>*</span>
-                    </label>
-                    <div class="col-xs-5">
-                        <input type='text' title="脚本名称" required maxlength='70' class='form-control' name="name" id="name" value='{{$row[name]}}'/>
-                        <input type='hidden' maxlength="70" class='form-control' name="languages_type" value='{{$languages_type}}'/>
-                        <div class="text-danger"></div>
-                        <p class='help-block'></p>
+                <div class="box-body" id="parent-form-area">
+                    <div class='form-group header-group-0 ' id='form-group-name'>
+                        <label class='control-label col-sm-2'>脚本名称
+                            <span class='text-danger' title='This field is required'>*</span>
+                        </label>
+                        <div class="col-xs-5">
+                            <input type='text' title="脚本名称" required maxlength='70' class='form-control' name="name" id="name" value='{{$row[name]}}'/>
+                            <input type='hidden' maxlength="70" class='form-control' name="languages_type" value='{{$languages_type}}'/>
+                            <div class="text-danger"></div>
+                            <p class='help-block'></p>
+                        </div>
                     </div>
-                </div>
-                <div class='form-group header-group-0  id='form-group-description'>
-                    <label class='control-label col-sm-2'>脚本描述 </label>
-                    <div class="col-sm-10">
-                        <textarea name="description" id="description" maxlength=5000 class='form-control' rows='2'>{{$row[description]}}</textarea>
-                        <div class="text-danger"></div>
-                        <p class='help-block'></p>
+                    <div class='form-group header-group-0  id='form-group-description'>
+                        <label class='control-label col-sm-2'>脚本描述 </label>
+                        <div class="col-sm-10">
+                            <textarea name="description" id="description" maxlength=5000 class='form-control' rows='2'>{{$row[description]}}</textarea>
+                            <div class="text-danger"></div>
+                            <p class='help-block'></p>
+                        </div>
                     </div>
-                </div>
-                @if ($languages_type == 1)
-                    <table class="table">
-                        <tr>
-                            <td>是否加载图片<span class='text-danger' title='This field is required'>*</span></td>
-                            <td><input type="radio" name="load_images" value="1">&nbsp true</td>
-                            <td><input type="radio" checked name="load_images" value="2">&nbsp false</td>
-
-                            <td>是否加载插件<span class='text-danger' title='This field is required'>*</span></td>
-                            <td><input type="radio" name="load_plugins" value="1">&nbsp true</td>
-                            <td><input type="radio" checked name="load_plugins" value="2">&nbsp false</td>
-                        </tr>
-                        <tr>
-                            <td>verbose<span class='text-danger' title='This field is required'>*</span></td>
-                            <td><input type="radio" name="verbose" value="1">&nbsp true</td>
-                            <td><input type="radio" checked name="verbose" value="2">&nbsp false</td>
-                            <td>log_level<span class='text-danger' title='This field is required'>*</span></td>
-                            <td><input type="radio" name="log_level" value="debug" checked>&nbsp debug</td>
-                            <td><input type="radio" name="log_level" value="info">&nbsp info</td>
-                            <td><input type="radio" name="log_level" value="error">&nbsp error</td>
-
-                        </tr>
-                    </table>
+                    <div class='form-group header-group-0 ' id='form-group-cron_type'>
+                        <label class='control-label col-sm-2'>list_url
+                            <span class='text-danger' title='This field is required'>*</span>
+                        </label>
+                        <div class="col-xs-5">
+                            <input type='text' title="list_url" required maxlength='70' class='form-control' name="list_url" value=''/>
+                            <div class="text-danger"></div>
+                            <p class='help-block'></p>
+                        </div>
+                    </div>
+                    @if ($languages_type == 1)
+                    <div class='form-group header-group-0 ' id='form-group-load_images'>
+                        <label class='control-label col-sm-2'>是否加载图片
+                        </label>
+                        <div>
+                            <div class="col-sm-10">
+                                <label>
+                                    <input type="checkbox" name="load_images" value="1">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='form-group header-group-0 ' id='form-group-load_plugins'>
+                        <label class='control-label col-sm-2'>是否加载插件
+                        </label>
+                        <div>
+                            <div class="col-sm-10">
+                                <label>
+                                    <input type="checkbox" name="load_plugins" value="1">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='form-group header-group-0 ' id='form-group-log_level'>
+                        <label class='control-label col-sm-2'>log_level
+                            <span class='text-danger' title='This field is required'>*</span>
+                        </label>
+                        <div>
+                            <div class="col-sm-10">
+                                <label class='radio-inline'>
+                                    <input type="radio" name="log_level" value="debug" checked> debug
+                                </label>
+                                <label class='radio-inline'>
+                                    <input type="radio" name="log_level" value="info"> info
+                                </label>
+                                <label class='radio-inline'>
+                                    <input type="radio" name="log_level" value="error"> error
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='form-group header-group-0 ' id='form-group-verbose'>
+                        <label class='control-label col-sm-2'>verbose
+                        </label>
+                        <div>
+                            <div class="col-sm-10">
+                                <label>
+                                    <input type="checkbox" name="verbose" value="1">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                     <!-- <div class="row">
                         <div class="col-xs-5">
                             <label>是否加载图片
@@ -298,29 +338,34 @@
                     </div>
                 </div>
                 <div class='form-group header-group-0 ' id='form-group-cron_type'>
-                    <label class='control-label col-sm-2'>requirement_pool_id
+                    <label class='control-label col-sm-2'>是否翻墙
                     </label>
                     <div>
                         <div class="col-sm-10">
                             <div class="checkbox">
                                 <label>
-                                    <input type="text" name="requirement_pool_id" value=''>
+                                    <input type="checkbox" name="is_proxy" value="1">
                                 </label>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class='form-group header-group-0 ' id='form-group-cron_type'>
-                    <label class='control-label col-sm-2'>next_script_id
+                <div class='form-group header-group-0 ' id='form-group-name'>
+                    <label class='control-label col-sm-2'>需求池ID
                     </label>
-                    <div>
-                        <div class="col-sm-10">
-                            <div class="checkbox">
-                                <label>
-                                    <input type="text" name="next_script_id" value=''>
-                                </label>
-                            </div>
-                        </div>
+                    <div class="col-xs-5">
+                        <input type='text' title="需求池ID" maxlength='70' class='form-control' name="requirement_pool_id" id="requirement_pool_id" value=''/>
+                        <div class="text-danger"></div>
+                        <p class='help-block'></p>
+                    </div>
+                </div>
+                <div class='form-group header-group-0 ' id='form-group-name'>
+                    <label class='control-label col-sm-2'>下一步脚本ID
+                    </label>
+                    <div class="col-xs-5">
+                        <input type='text' title="下一步脚本ID" maxlength='70' class='form-control' name="next_script_id" id="next_script_id" value=''/>
+                        <div class="text-danger"></div>
+                        <p class='help-block'></p>
                     </div>
                 </div>
                 <div class='form-group header-group-0 ' id='form-group-cron_type'>
@@ -337,6 +382,9 @@
                             </label>
                             <label class='radio'>
                                 <input type="radio" name="cron_type" value="3"> 每十分钟执行一次
+                            </label>
+                            <label class='radio'>
+                                <input type="radio" name="cron_type" value="4"> 只执行一次
                             </label>
                         </div>
                     </div>

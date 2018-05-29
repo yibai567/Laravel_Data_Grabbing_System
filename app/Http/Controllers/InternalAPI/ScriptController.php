@@ -12,6 +12,7 @@ namespace App\Http\Controllers\InternalAPI;
 use App\Models\ScriptModel;
 use App\Models\Task;
 use App\Models\TaskStatistics;
+use App\Services\FileService;
 use Illuminate\Support\Facades\DB;
 use Log;
 use App\Models\Script;
@@ -37,14 +38,16 @@ class ScriptController extends Controller
         ValidatorService::check($params, [
             'name'                => 'required|string|max:100',
             'description'         => 'nullable|string|max:255',
+            'list_url'            => 'nullable|url',
             'languages_type'      => 'required|integer|between:1,3',
             'step'                => 'required|array',
             'cron_type'           => 'nullable|integer',
             'operate_user'        => 'required|string|max:50',
             'next_script_id'      => 'nullable|integer',
             'requirement_pool_id' => 'nullable|integer',
-            'is_report'           => 'nullable|integer|between:1,2',
-            'is_download'         => 'nullable|integer|between:1,2',
+            'is_report'           => 'required|integer|between:1,2',
+            'is_download'         => 'required|integer|between:1,2',
+            'is_proxy'            => 'required|integer|between:1,2',
             'init'                => 'nullable|array'
         ]);
 
@@ -74,6 +77,7 @@ class ScriptController extends Controller
             }
             //整理script入库数据
             $scriptData = [
+                'list_url'            => $params['list_url'],
                 'languages_type'      => $params['languages_type'],
                 'step'                => $params['step'],
                 'status'              => Script::STATUS_INIT,
@@ -82,6 +86,7 @@ class ScriptController extends Controller
                 'requirement_pool_id' => $params['requirement_pool_id'],
                 'is_report'           => $params['is_report'],
                 'is_download'         => $params['is_download'],
+                'is_proxy'            => $params['is_proxy'],
             ];
 
             if (!empty($scriptConfig)) {
@@ -136,22 +141,23 @@ class ScriptController extends Controller
     public function update(Request $request)
     {
         $params = $request->all();
-
+//        dd($params);
         //验证参数
         ValidatorService::check($params, [
-            'id'             => 'required|integer',
-            'name'           => 'nullable|string|max:100',
-            'description'    => 'nullable|string|max:255',
-            'languages_type' => 'nullable|integer|between:1,3',
-            'step'           => 'nullable|array',
-            'cron_type'      => 'nullable|integer',
-            'operate_user'   => 'nullable|string|max:50',
-            'operate_user'        => 'required|string|max:50',
+            'id'                  => 'required|integer',
+            'name'                => 'nullable|string|max:100',
+            'description'         => 'nullable|string|max:255',
+            'list_url'            => 'nullable|url',
+            'languages_type'      => 'nullable|integer|between:1,3',
+            'step'                => 'nullable|array',
+            'cron_type'           => 'nullable|integer',
+            'operate_user'        => 'nullable|string|max:50',
             'next_script_id'      => 'nullable|integer',
             'requirement_pool_id' => 'nullable|integer',
             'is_report'           => 'nullable|integer|between:1,2',
             'is_download'         => 'nullable|integer|between:1,2',
-            'init'           => 'nullable|array'
+            'is_proxy'            => 'nullable|integer|between:1,2',
+            'init'                => 'nullable|array'
         ]);
 
         //去name和description空白字符
@@ -174,14 +180,16 @@ class ScriptController extends Controller
             DB::beginTransaction();
 
             $scriptData = [
-                'languages_type' => $params['languages_type'],
-                'step'           => $params['step'],
-                'status'         => Script::STATUS_INIT,
-                'operate_user'   => $params['operate_user'],
+                'list_url'            => $params['list_url'],
+                'languages_type'      => $params['languages_type'],
+                'step'                => $params['step'],
+                'status'              => Script::STATUS_INIT,
+                'operate_user'        => $params['operate_user'],
                 'next_script_id'      => $params['next_script_id'],
                 'requirement_pool_id' => $params['requirement_pool_id'],
                 'is_report'           => $params['is_report'],
                 'is_download'         => $params['is_download'],
+                'is_proxy'            => $params['is_proxy'],
             ];
 
             $script->update($scriptData);
@@ -354,15 +362,11 @@ class ScriptController extends Controller
         //命名js名称
         $filename = 'script_' . $script->id . '.js';
 
-        //拼接路径和名称
-        $filePath = config('script.casperjs_generate_path');
-        $file = $filePath . $filename;
-
-        //写入文件
-        file_put_contents($file, $content);
+        $fileService = new FileService();
+        $result = $fileService->create($filename, $content);
 
         //检查文件是否生成成功
-        if (!file_exists($file)) {
+        if (!$result) {
             throw new \Dingo\Api\Exception\ResourceException("file generation is failed");
         }
 
@@ -652,10 +656,13 @@ class ScriptController extends Controller
             $script->last_generate_at = time();
             $script->save();
 
-            //查找script对应的初始化的task,修改状态
-            $task = Task::where('script_id',$script->id)->where('status',Task::STATUS_INIT)->first();
-            $task->status = Task::STATUS_START;
-            $task->save();
+            //查找script对应的初始化的task(详情script不启动任务),修改状态
+            $task = Task::where('script_id',$script->id)->where('status',Task::STATUS_INIT)->where('cron_type','<>',Script::CRON_TYPE_ONCE)->first();
+
+            if (!empty($task)) {
+                $task->status = Task::STATUS_START;
+                $task->save();
+            }
 
             //生成task_statistics
             $taskStatistics = new TaskStatistics;

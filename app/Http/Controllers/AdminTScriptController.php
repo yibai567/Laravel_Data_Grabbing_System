@@ -1,5 +1,6 @@
 <?php namespace App\Http\Controllers;
 
+use App\Models\ScriptConfig;
 use Session;
 use Request;
 use DB;
@@ -57,7 +58,8 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 		$this->form = [];
 		$this->form[] = ['label'=>'名称','name'=>'name','type'=>'text','validation'=>'required|string|max:100','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'语言类型','name'=>'languages_type','type'=>'text','validation'=>'required','width'=>'col-sm-10'];
-		$this->form[] = ['label'=>'描述','name'=>'description','type'=>'textarea','validation'=>'required|max:255','width'=>'col-sm-10'];
+        $this->form[] = ['label'=>'list_url','name'=>'list_url','type'=>'text','validation'=>'required|string','width'=>'col-sm-10'];
+        $this->form[] = ['label'=>'描述','name'=>'description','type'=>'textarea','validation'=>'required|max:255','width'=>'col-sm-10'];
 		$this->form[] = ['label'=>'load_images','name'=>'load_images','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|true;2|false;'];
         $this->form[] = ['label'=>'load_plugins','name'=>'load_plugins','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|true;2|false;'];
         $this->form[] = ['label'=>'log_level','name'=>'log_level','type'=>'radio','validation'=>'required|string','width'=>'col-sm-10','dataenum'=>'debug;error;'];
@@ -70,8 +72,9 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 		$this->form[] = ['label'=>'执行规则','name'=>'cron_type','type'=>'radio','validation'=>'nullable|integer','width'=>'col-sm-10','dataenum'=>'1|每分钟执行一次;2|每五分钟执行一次;3|每十五分钟执行一次;','value'=>'1'];
         $this->form[] = ['label'=>'是否上报','name'=>'is_report','type'=>'checkout','validation'=>'nullable|integer','width'=>'col-sm-10','value'=>'1'];
         $this->form[] = ['label'=>'是否下载','name'=>'is_download','type'=>'checkout','validation'=>'nullable|integer','width'=>'col-sm-10','value'=>'1'];
-        $this->form[] = ['name'=>'next_script_id','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
-        $this->form[] = ['name'=>'requirement_pool_id','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
+        $this->form[] = ['label'=>'是否翻墙','name'=>'is_proxy','type'=>'checkout','validation'=>'nullable|integer','width'=>'col-sm-10','value'=>'1'];
+        $this->form[] = ['label'=>'需求池ID','name'=>'next_script_id','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
+        $this->form[] = ['label'=>'下一步脚本ID','name'=>'requirement_pool_id','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
 		# END FORM DO NOT REMOVE THIS LINE
 
 		/*
@@ -444,6 +447,11 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $formParams = $this->arr;
         $newData = [];
 
+        $result = preg_match("/^(http|https):\/\//i", $formParams['list_url']);
+
+        if (!$result) {
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "list_url格式错误", "error");
+        }
         if (empty($formParams['script_model_params'])) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "步骤必填", "error");
         }
@@ -457,7 +465,16 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data['status'] = Script::STATUS_INIT;
         $data['name'] = $formParams['name'];
         $data['description'] = $formParams['description'];
-
+        $data['list_url'] = $formParams['list_url'];
+        if (empty($formParams['load_images'])) {
+            $formParams['load_images'] = ScriptConfig::DEFAULT_LOAD_IMAGES;
+        }
+        if (empty($formParams['load_plugins'])) {
+            $formParams['load_plugins'] = ScriptConfig::DEFAULT_LOAD_PLUGINS;
+        }
+        if (empty($formParams['verbose'])) {
+            $formParams['verbose'] = ScriptConfig::DEFAULT_VERBOSE;
+        }
         $data['init'] = [
                         'load_images' => $formParams['load_images'],
                         'load_plugins' => $formParams['load_plugins'],
@@ -481,6 +498,13 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         } else {
             $data['is_download'] = $formParams['is_download'];
         }
+
+        if (empty($formParams['is_proxy'])) {
+            $data['is_proxy'] = Script::WALL_OVER_FALSE;
+        } else {
+            $data['is_proxy'] = $formParams['is_proxy'];
+        }
+
         $data['operate_user'] = CRUDBooster::myName();
         $data['id'] = $id;
         try {
@@ -506,6 +530,9 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data = [];
         $formParams = $this->arr;
         $newData = [];
+        if (!$result) {
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "list_url格式错误", "error");
+        }
         if (empty($formParams['script_model_params'])) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "步骤必填", "error");
         }
@@ -518,6 +545,15 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
         $data['name'] = $formParams['name'];
         $data['description'] = $formParams['description'];
+        if (empty($formParams['load_images'])) {
+            $formParams['load_images'] = ScriptConfig::DEFAULT_LOAD_IMAGES;
+        }
+        if (empty($formParams['load_plugins'])) {
+            $formParams['load_plugins'] = ScriptConfig::DEFAULT_LOAD_PLUGINS;
+        }
+        if (empty($formParams['verbose'])) {
+            $formParams['verbose'] = ScriptConfig::DEFAULT_VERBOSE;
+        }
 
         $data['init'] = [
                         'load_images' => $formParams['load_images'],
@@ -541,6 +577,11 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             $data['is_download'] = Script::DOWNLOAD_IMAGE_FALSE;
         } else {
             $data['is_download'] = $formParams['is_download'];
+        }
+        if (empty($formParams['is_proxy'])) {
+            $data['is_proxy'] = Script::WALL_OVER_FALSE;
+        } else {
+            $data['is_proxy'] = $formParams['is_proxy'];
         }
 
         $data['operate_user'] = CRUDBooster::myName();

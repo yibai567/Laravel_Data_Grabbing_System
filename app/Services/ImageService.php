@@ -153,7 +153,7 @@ class ImageService extends Service
      */
     public function uploadByFile($file, $isPrivate = false)
     {
-        Log::debug('[uploadByFile] start');
+//        Log::debug('[uploadByFile] start');
         try {
             if ($file->getError() != 0) {
                 return ["msg" => '上传图片失败，请检查图片并重试', 'error' => -1];

@@ -55,59 +55,46 @@
                         <p class='help-block'></p>
                     </div>
                 </div>
+                <div class='form-group header-group-0 ' id='form-group-cron_type'>
+                    <label class='control-label col-sm-2'>list_url
+                        <span class='text-danger' title='This field is required'>*</span>
+                    </label>
+                    <div class="col-xs-5">
+                        <input type='text' title="list_url" required maxlength='70' class='form-control' name="list_url" value='{{$row[list_url]}}'/>
+                        <div class="text-danger"></div>
+                        <p class='help-block'></p>
+                    </div>
+                </div>
                 @if ($row[languages_type] == 1)
                     <div class='form-group header-group-0 ' id='form-group-load_images'>
                         <label class='control-label col-sm-2'>是否加载图片
-                            <span class='text-danger' title='This field is required'>*</span>
                         </label>
                         <div>
                             <div class="col-sm-10">
-                                @if (empty($row[init][load_images]))
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="load_images" value="1"> true
-                                    </label>
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="load_images" value="2" checked> false
+                                @if ($row[init][load_images] == 1)
+                                    <label>
+                                        <input type="checkbox" checked name="load_images" value="1">
                                     </label>
                                 @else
-                                    @if ($row[init][load_images] == 1)
-                                        <label class='radio-inline'>
-                                            <input type="radio" name="load_images" value="1" checked> true
-                                        </label>
-                                        <label class='radio-inline'>
-                                            <input type="radio" name="load_images" value="2"> false
-                                        </label>
-                                    @else
-                                        <label class='radio-inline'>
-                                            <input type="radio" name="load_images" value="1"> true
-                                        </label>
-                                        <label class='radio-inline'>
-                                            <input type="radio" name="load_images" value="2" checked> false
-                                        </label>
-                                    @endif
+                                    <label>
+                                        <input type="checkbox" name="load_images" value="1">
+                                    </label>
                                 @endif
                             </div>
                         </div>
                     </div>
                     <div class='form-group header-group-0 ' id='form-group-load_plugins'>
                         <label class='control-label col-sm-2'>是否加载插件
-                            <span class='text-danger' title='This field is required'>*</span>
                         </label>
                         <div>
                             <div class="col-sm-10">
                                 @if ($row[init][load_plugins] == 1)
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="load_plugins" value="1" checked> true
-                                    </label>
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="load_plugins" value="2"> false
+                                    <label>
+                                        <input type="checkbox" checked name="load_plugins" value="1">
                                     </label>
                                 @else
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="load_plugins" value="1"> true
-                                    </label>
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="load_plugins" value="2" checked> false
+                                    <label>
+                                        <input type="checkbox" name="load_plugins" value="1">
                                     </label>
                                 @endif
                             </div>
@@ -156,23 +143,16 @@
                     </div>
                     <div class='form-group header-group-0 ' id='form-group-verbose'>
                         <label class='control-label col-sm-2'>verbose
-                            <span class='text-danger' title='This field is required'>*</span>
                         </label>
                         <div>
                             <div class="col-sm-10">
                                 @if ($row[init][verbose] == 1)
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="verbose" value="1" checked> true
-                                    </label>
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="verbose" value="2"> false
+                                    <label>
+                                        <input type="checkbox" checked name="verbose" value="1">
                                     </label>
                                 @else
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="verbose" value="1"> true
-                                    </label>
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="verbose" value="2" checked> false
+                                    <label>
+                                        <input type="checkbox" name="verbose" value="1">
                                     </label>
                                 @endif
                             </div>
@@ -300,29 +280,40 @@
                     </div>
                 </div>
                 <div class='form-group header-group-0 ' id='form-group-cron_type'>
-                    <label class='control-label col-sm-2'>requirement_pool_id
+                    <label class='control-label col-sm-2'>是否翻墙
                     </label>
                     <div>
                         <div class="col-sm-10">
                             <div class="checkbox">
-                                <label>
-                                    <input type="text" name="requirement_pool_id" value='{{$row[requirement_pool_id]}}'>
-                                </label>
+                                @if ($row[is_proxy] == 1)
+                                    <label>
+                                        <input type="checkbox" checked name="is_proxy" value="1">
+                                    </label>
+                                @else
+                                    <label>
+                                        <input type="checkbox" name="is_proxy" value="1">
+                                    </label>
+                                @endif
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class='form-group header-group-0 ' id='form-group-cron_type'>
-                    <label class='control-label col-sm-2'>next_script_id
+                <div class='form-group header-group-0 ' id='form-group-name'>
+                    <label class='control-label col-sm-2'>需求池ID
                     </label>
-                    <div>
-                        <div class="col-sm-10">
-                            <div class="checkbox">
-                                <label>
-                                    <input type="text" name="next_script_id" value='{{$row[next_script_id]}}'>
-                                </label>
-                            </div>
-                        </div>
+                    <div class="col-xs-5">
+                        <input type='text' title="需求池ID" maxlength='70' class='form-control' name="requirement_pool_id" id="requirement_pool_id" value='{{$row[requirement_pool_id]}}'/>
+                        <div class="text-danger"></div>
+                        <p class='help-block'></p>
+                    </div>
+                </div>
+                <div class='form-group header-group-0 ' id='form-group-name'>
+                    <label class='control-label col-sm-2'>下一步脚本ID
+                    </label>
+                    <div class="col-xs-5">
+                        <input type='text' title="下一步脚本ID" maxlength='70' class='form-control' name="next_script_id" id="next_script_id" value='{{$row[next_script_id]}}'/>
+                        <div class="text-danger"></div>
+                        <p class='help-block'></p>
                     </div>
                 </div>
                 <div class='form-group header-group-0 ' id='form-group-cron_type'>
@@ -356,6 +347,16 @@
                         @else
                             <label class='radio'>
                                 <input type="radio" name="cron_type" value="3"> 每十分钟执行一次
+                            </label>
+                        @endif
+
+                        @if ($row[cron_type] == 4)
+                            <label class='radio'>
+                                <input type="radio" checked name="cron_type" value="4"> 只执行一次
+                            </label>
+                        @else
+                            <label class='radio'>
+                                <input type="radio" name="cron_type" value="4"> 只执行一次
                             </label>
                         @endif
                     </div>
