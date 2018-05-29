@@ -110,7 +110,6 @@ class ImageController extends Controller
 
         $scriptInfo = $scriptInfo->toArray();
         $urlFormat = [];
-        $scriptInfo['list_url'] = 'http://www.baidu.com/';
         if (!empty($scriptInfo['list_url'])) {
             $urlFormat = parse_url($scriptInfo['list_url']);
         }
@@ -247,6 +246,7 @@ class ImageController extends Controller
 
         $imageService = new ImageService();
         $imageInfo = $imageService->uploadByImageUrl($params['image_url'], [], $isProxy);
+
         if (empty($imageInfo['id'])) {
             throw new \Dingo\Api\Exception\ResourceException(" upload image fail");
         }
@@ -281,7 +281,7 @@ class ImageController extends Controller
                     }
                 }
                 if (!empty($content)) {
-                    $content = str_replace($value, $newUrl, $content);
+                    $content = str_replace("src=\"$value\"", "src=\"$newUrl\"", $content);
                 }
                 $extractUrl[] = $newUrl;
             } else {

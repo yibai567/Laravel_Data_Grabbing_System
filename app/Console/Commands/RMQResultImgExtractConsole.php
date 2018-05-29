@@ -41,7 +41,7 @@ class RMQResultImgExtractConsole extends Command
     {
         try {
             $rabbitMQ = new RabbitMQService();
-            $rabbitMQ->consume('result_next_script', $this->callback());
+            $rabbitMQ->consume('img_get_url', $this->callback());
         } catch (Exception $e) {
             \Log::debug('11');
             throw $e;
@@ -69,8 +69,6 @@ class RMQResultImgExtractConsole extends Command
                 return false;
             }
 
-            $rabbitMQ = new RabbitMQService();
-
             $headers = [
                 "vhost" => "crawl",
                 "exchange" => "image",
@@ -78,9 +76,9 @@ class RMQResultImgExtractConsole extends Command
                 "data_id" => $result['body']['data_id'],
                 "is_proxy" => $res['is_proxy']
             ];
-
-            foreach ($res['img_url'] as $key => $value) {
+            foreach ($res['img_urls'] as $key => $value) {
                 //调用队列
+                $rabbitMQ = new RabbitMQService();
                 $rabbitMQ->create('image', 'download', ['image_url' => $value], $headers);
             }
             $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);

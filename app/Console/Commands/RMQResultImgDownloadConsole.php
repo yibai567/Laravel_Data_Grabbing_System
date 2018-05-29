@@ -55,16 +55,22 @@ class RMQResultImgDownloadConsole extends Command
             $this->info($msg->body);
             $rabbitMQ = new RabbitMQService();
             $result = json_decode($msg->body, true);
-
             $params = [
                 "image_url" => $result['body']['image_url'],
                 "is_proxy" => $result['header']['is_proxy']
             ];
             //请求图片下载接口，返回原是图片url和阿里云图片url
-            $res = InternalAPIService::post('/image/download', $params);
+            try {
+                $res = InternalAPIService::post('/image/download', $params);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
+                $rabbitMQ->errorMsg($msg->body, 'img uploade fail' . $params['image_url']);
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return false;
+            }
 
-            if (empty($res)) {
-                $rabbitMQ->errorMsg($msg->body, 'image download return empty params = ' . $params);
+            if (empty($res['img_id'])) {
+                $rabbitMQ->errorMsg($msg->body, 'img_id empty image_url = ' . $params['image_url']);
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
                 return false;
             }
 
@@ -80,7 +86,7 @@ class RMQResultImgDownloadConsole extends Command
                 "data_id" => $result['header']['data_id']
             ];
             //调用队列
-            $rabbitMQ->create('image', 'replace', $params, $headers);
+            $rabbitMQ->create('image', 'replace', $message, $headers);
             $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
         };
     }

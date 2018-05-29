@@ -61,7 +61,6 @@ class RMQResultImgProcessionConsole extends Command
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
                 return false;
             }
-
             // 根据 task_id 获取 task 信息
             $task = InternalAPIService::get('/task', ['id' => $result['body']['task_id']]);
             if (empty($task)) {
