@@ -54,7 +54,12 @@ class RMQResultImgExtractConsole extends Command
             if (!empty($msg->body)) {
                 $result = json_decode($msg->body, true);
             }
-            $rabbitMQ = new RabbitMQService();
+
+            if (!isset($result['body']['data_id']) || !isset($result['body']['thumbnail']) || !isset($result['body']['content'])) {
+                $rabbitMQ->errorMsg($msg->body, 'body 结构体格式错误');
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return false;
+            }
 
             //验证缩略图和富文本都为空 返回并删除队列
             if (empty($result['body']['thumbnail']) && empty($result['body']['content'])) {

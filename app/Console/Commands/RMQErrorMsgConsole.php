@@ -5,22 +5,23 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Services\RabbitMQService;
 use App\Services\InternalAPIService;
+use App\Models\ErrorMessage;
 
-class RMQResultImgReplaceConsole extends Command
+class RMQErrorMsgConsole extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'rabbitmq:resultImgReplace';
+    protected $signature = 'rabbitmq:error_msg';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = '图片替换';
+    protected $description = '错误收集';
 
     /**
      * Create a new command instance.
@@ -41,40 +42,33 @@ class RMQResultImgReplaceConsole extends Command
     {
         try {
             $rabbitMQ = new RabbitMQService();
-            $rabbitMQ->consume('img_replace', $this->callback());
+            $rabbitMQ->consume('error_msg', $this->callback());
         } catch (Exception $e) {
             \Log::debug('11');
             throw $e;
         }
     }
+
     public function callback()
     {
         return function($msg) {
             $this->info($msg->body);
             $rabbitMQ = new RabbitMQService();
             $result = json_decode($msg->body, true);
-            if (!isset($result['header']['data_id']) || !isset($result['body']['original_img_url']) || !isset($result['body']['img_id'])) {
+
+            if (empty($result)) {
+                $rabbitMQ->errorMsg($msg->body, 'error_msg 队列暂无数据，请稍后重试');
+                return false;
+            }
+
+            if (!isset($result['body']['raw']) || !isset($result['body']['msg'])) {
                 $rabbitMQ->errorMsg($msg->body, 'body 结构体格式错误');
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
                 return false;
             }
 
-            $params = [
-                "data_id" => $result['header']['data_id'],
-                "original_img_url" => $result['body']['original_img_url'],
-                "img_id" => $result['body']['img_id']
-            ];
-
-            //请求图片替换接口，返回true
-            $res = InternalAPIService::post('/image/replace', $params);
-
-            if (empty($res)) {
-                $rabbitMQ->errorMsg($msg->body, 'image replace return empty params = ' . $params);
-                return false;
-            }
-
+            ErrorMessage::create($result['body']);
             $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
         };
     }
-
 }

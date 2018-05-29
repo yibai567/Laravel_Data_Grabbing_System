@@ -55,6 +55,13 @@ class RMQResultImgDownloadConsole extends Command
             $this->info($msg->body);
             $rabbitMQ = new RabbitMQService();
             $result = json_decode($msg->body, true);
+
+            if (!isset($result['body']['image_url'])) {
+                $rabbitMQ->errorMsg($msg->body, 'body 结构体格式错误');
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return false;
+            }
+
             $params = [
                 "image_url" => $result['body']['image_url'],
                 "is_proxy" => $result['header']['is_proxy']
