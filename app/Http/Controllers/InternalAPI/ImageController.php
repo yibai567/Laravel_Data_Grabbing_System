@@ -76,7 +76,6 @@ class ImageController extends Controller
         $params = $request->all();
 
         ValidatorService::check($params, [
-            "header" => "nullable|array",
             "data_id" => "required|integer",
             "thumbnail" => "nullable|string",
             "content" => "nullable|string",
@@ -110,8 +109,8 @@ class ImageController extends Controller
         }
 
         $scriptInfo = $scriptInfo->toArray();
-
         $urlFormat = [];
+        $scriptInfo['list_url'] = 'http://www.baidu.com/';
         if (!empty($scriptInfo['list_url'])) {
             $urlFormat = parse_url($scriptInfo['list_url']);
         }
@@ -121,15 +120,21 @@ class ImageController extends Controller
 
             $ql = QueryList::html($params['content']);
             //获取所有的图片地址
-            $imageUrl = $ql->find('img')->attrs('src')->all();
-
+            $imgArr = $ql->find('img')->attrs('src')->all();
+            $imageUrl = [];
             if (!empty($urlFormat)) {
-                $formatImage = $this->__foramtUrl($imageUrl, $urlFormat, $params['content']);
-                $content = $formatImage['content'];
+                $formatImage = $this->__foramtUrl($imgArr, $urlFormat, $params['content']);
+                $params['content'] = $formatImage['content'];
+                $imageUrl = $formatImage['format_url'];
             } else {
-                $content = $params['content'];
+                foreach ($imgArr as $key => $value) {
+                    if (empty($value)) {
+                        continue;
+                    }
+                    $imageUrl[] = $value;
+                }
             }
-            $dataRes->content = $content;
+            $dataRes->content = $params['content'];
         }
 
         //提取$params['thumbnail'] 中url,并且补全
@@ -137,17 +142,16 @@ class ImageController extends Controller
             $thumbnail = explode(',', $params['thumbnail']);
             if (!empty($urlFormat)) {
                 $formatThumbnail = $this->__foramtUrl($thumbnail, $urlFormat);
-                $thumbnail = json_encode($formatThumbnail['format_url']);
+                $thumbnail = $formatThumbnail['format_url'];
             }
-            $dataRes->thumbnail = $thumbnail;
+            $dataRes->thumbnail = json_encode($thumbnail);
         }
-
-        if (!empty($formatImage['format_url']) && !empty($thumbnail['format_url'])){
-            $imgUrl = array_unique(array_merge($formatImage['format_url'],$thumbnail['format_url']));
-        } else if (!empty($formatImage['format_url'])) {
-            $imgUrl = array_unique($formatImage['format_url']);
-        } else if (!empty($thumbnail['format_url'])) {
-            $imgUrl = array_unique($thumbnail['format_url']);
+        if (!empty($imageUrl) && !empty($thumbnail)){
+            $imgUrl = array_unique(array_merge($imageUrl,$thumbnail));
+        } else if (!empty($imageUrl)) {
+            $imgUrl = array_unique($imageUrl);
+        } else if (!empty($thumbnail)) {
+            $imgUrl = array_unique($thumbnail);
         }
 
         //保存数据
@@ -155,9 +159,11 @@ class ImageController extends Controller
         $dataRes->img_remaining_step = $imgNum;
         $dataRes->save();
 
-        //调用队列
-        $result = $this->__callImageDownloadRabbitMQ($imgUrl, $imgNum, $params['header']);
-
+        $result = [];
+        if (!empty($imgUrl)) {
+            $result['img_urls'] = $imgUrl;
+            $result['is_proxy'] = $scriptInfo['is_proxy'];
+        }
         return $this->resObjectGet($result, 'image', $request->path());
     }
 
@@ -235,7 +241,7 @@ class ImageController extends Controller
 
         $isProxy = false;
 
-        if (!empty($params['is_proxy'])) {
+        if ($params['is_proxy'] == 1) {
             $isProxy = true;
         }
 
@@ -245,36 +251,8 @@ class ImageController extends Controller
             throw new \Dingo\Api\Exception\ResourceException(" upload image fail");
         }
         $data['image_url'] = $params['image_url'];
-        $data['oss_url'] = $imageInfo['oss_url'];
+        $data['img_id'] = $imageInfo['id'];
         return $this->resObjectGet($data, 'image', $request->path());
-    }
-
-    /**
-     * __callImageDownloadRabbitMQ
-     * 调用image download RabbitMQ
-     *
-     * @param array $imgUrls int $imgNum array $headers
-     * @return boolean
-     */
-    private function __callImageDownloadRabbitMQ($imgUrls, $imgNum, $headers)
-    {
-        if ($imgNum > 0 && array_key_exists('vhost',$headers) &&  array_key_exists('exchange',$headers) &&  array_key_exists('routing_key',$headers)) {
-           try{
-               //调用方法todo
-               foreach($imgUrls as $imgUrl){
-
-                   $rabbitMQ = new RabbitMQService();
-                   //调用队列
-                   $rabbitMQ->create('image', 'download', $imgUrl, $headers);
-               }
-           } catch (\Exception $e) {
-               Log::error('__callRabbitMQ    Exception:'."\t".$e->getCode()."\t".$e->getMessage());
-               return false;
-           }
-        }
-
-        return true;
-
     }
 
     /**
@@ -288,6 +266,9 @@ class ImageController extends Controller
     {
         $extractUrl = [];
         foreach ($urlArr as $key => $value) {
+            if (empty($value)) {
+                continue;
+            }
             $http = substr($value, 0, 4);
             if ($http != 'http') {
                 if (substr($value, 0, 2) == '//') {
@@ -312,7 +293,6 @@ class ImageController extends Controller
         if (!empty($content)) {
             $data['content'] = $content;
         }
-
         return $data;
     }
 }

@@ -40,54 +40,69 @@ class RMQResultImgProcessionConsole extends Command
      */
     public function handle()
     {
-        $rabbitMQ = new RabbitMQService();
-        $result = $rabbitMQ->get('result_img_processing');
-        if (empty($result)) {
-            $this->info('result_img_processing 队列暂无数据，请稍后重试');
-            return false;
+        try {
+            $rabbitMQ = new RabbitMQService();
+            $rabbitMQ->consume('result_img_processing', $this->callback());
+        } catch (Exception $e) {
+            \Log::debug('11');
+            throw $e;
         }
+    }
+    public function callback()
+    {
+        return function($msg) {
+            $this->info($msg->body);
+            $rabbitMQ = new RabbitMQService();
+            $result = json_decode($msg->body, true);
 
-        if (!isset($result['body']['task_id']) || !isset($result['body']['id']) || !array_key_exists('thumbnail', $result['body']) || !array_key_exists('content', $result['body'])) {
-            $this->info('body 结构体格式错误 '. json_encode($result['body']));
-            return false;
-        }
+            if (!isset($result['body']['task_id']) || !isset($result['body']['id']) || !array_key_exists('thumbnail', $result['body']) || !array_key_exists('content', $result['body'])) {
 
-        // 根据 task_id 获取 task 信息
-        $task = InternalAPIService::get('/task', ['id' => $result['body']['task_id']]);
-        if (empty($task)) {
-            $this->info('task empty ,task_id = ' . $task['script_id']);
-            return false;
-        }
+                $rabbitMQ->errorMsg($msg->body, 'body 结构体格式错误');
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return false;
+            }
 
-        // 根据 script_id 获取 script 信息
-        $script = InternalAPIService::get('/script', ['id' => $task['script_id']]);
-        if (empty($script)) {
-            $this->info('script empty ,script_id = ' . $task['script_id']);
-            return false;
-        }
+            // 根据 task_id 获取 task 信息
+            $task = InternalAPIService::get('/task', ['id' => $result['body']['task_id']]);
+            if (empty($task)) {
 
-        // 不需要下载图片直接从队列移除并退出
-        if ($script['is_download'] != Script::DOWNLOAD_IMAGE_TRUE) {
-            $rabbitMQ->ack();
-            return true;
-        }
+                $rabbitMQ->errorMsg($msg->body, 'task empty ,task_id = ' . $task['script_id']);
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return false;
 
-        $result['header'] = [
-            'exchange' => 'image',
-            'routing_key' => 'download',
-            'data_id' => $result['body']['id'],
-            'task_id' => $result['body']['task_id'],
-            'script_id' => $task['script_id'],
-            'task_run_log_id' => $result['body']['task_run_log_id']
-        ];
+            }
 
-        $message = [
-            'data_id' => $result['body']['id'],
-            'thumbnail' => $result['body']['thumbnail'],
-            'content' => $result['body']['content']
-        ];
+            // 根据 script_id 获取 script 信息
+            $script = InternalAPIService::get('/script', ['id' => $task['script_id']]);
+            if (empty($script)) {
 
-        $rabbitMQ->create('image', 'get_url', $message, $result['header']);
-        $rabbitMQ->ack();
+                $rabbitMQ->errorMsg($msg->body, 'script empty ,script_id = ' . $task['script_id']);
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return false;
+            }
+            // 不需要下载图片直接从队列移除并退出
+            if ($script['is_download'] != Script::DOWNLOAD_IMAGE_TRUE) {
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return true;
+            }
+
+            $result['header'] = [
+                'exchange' => 'image',
+                'routing_key' => 'download',
+                'data_id' => $result['body']['id'],
+                'task_id' => $result['body']['task_id'],
+                'script_id' => $task['script_id'],
+                'task_run_log_id' => $result['body']['task_run_log_id']
+            ];
+
+            $message = [
+                'data_id' => $result['body']['id'],
+                'thumbnail' => $result['body']['thumbnail'],
+                'content' => $result['body']['content']
+            ];
+
+            $rabbitMQ->create('image', 'get_url', $message, $result['header']);
+            $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+        };
     }
 }
