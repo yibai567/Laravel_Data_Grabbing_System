@@ -14,7 +14,7 @@ class RMQResultNextScriptConsole extends Command
      *
      * @var string
      */
-    protected $signature = 'rabbitmq:resultNextScript';
+    protected $signature = 'rabbitmq:result_next_script';
 
     /**
      * The console command description.
@@ -120,7 +120,7 @@ class RMQResultNextScriptConsole extends Command
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
             }
             $message = [
-                'path' => 'script_' . $script['next_script_id'],
+                'path' => 'script_' . $script['next_script_id'] . '.js',
                 'task_run_log_id' => $taskRunLog['id'],
                 'url' => $result['body']['detail_url']
             ];

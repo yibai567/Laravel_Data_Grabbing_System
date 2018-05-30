@@ -77,6 +77,7 @@ class RMQResultImgExtractConsole extends Command
                 "data_id" => $result['body']['data_id'],
                 "is_proxy" => $res['is_proxy']
             ];
+
             foreach ($res['img_urls'] as $key => $value) {
                 //调用队列
                 $message['image_url'] = $value;

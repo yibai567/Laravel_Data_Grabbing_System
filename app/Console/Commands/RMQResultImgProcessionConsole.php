@@ -14,7 +14,7 @@ class RMQResultImgProcessionConsole extends Command
      *
      * @var string
      */
-    protected $signature = 'rabbitmq:resultImgProcessing';
+    protected $signature = 'rabbitmq:result_img_processing';
 
     /**
      * The console command description.

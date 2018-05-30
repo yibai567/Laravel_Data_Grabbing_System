@@ -147,10 +147,15 @@ class RabbitMQService extends Service
      */
     public function consume($queue, $callback)
     {
+        $i = 1;
         $this->channel->basic_qos(null, 1, null);
         $this->channel->basic_consume($queue, '', false, false, false, false, $callback);
         while(count($this->channel->callbacks)) {
+            if ($i > 100) {
+                exit();
+            }
             $this->channel->wait();
+            $i++;
         }
         $this->channel->close();
         $this->connection->close();
