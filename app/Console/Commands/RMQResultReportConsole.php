@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Services\RabbitMQService;
 use App\Services\InternalAPIService;
 use App\Models\Script;
+use App\Services\HttpService;
 
 class RMQResultReportConsole extends Command
 {
@@ -105,7 +106,9 @@ class RMQResultReportConsole extends Command
             }
 
             // 上报接口
-            $data = InternalAPIService::post('/v1/data/batch/report', ['ids' => $result['body']['id']]);
+            $httpService = new HttpService();
+            $data = $httpService->post(config('url.jinse_open_url') . '/v1/data/batch/report', ['ids' => (string)$result['body']['id']]);
+
             if ($data) {
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
             } else {
