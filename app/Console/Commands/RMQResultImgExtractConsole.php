@@ -13,7 +13,7 @@ class RMQResultImgExtractConsole extends Command
      *
      * @var string
      */
-    protected $signature = 'rabbitmq:resultImgExtract';
+    protected $signature = 'rabbitmq:result_img_extract';
 
     /**
      * The console command description.
@@ -55,18 +55,11 @@ class RMQResultImgExtractConsole extends Command
                 $result = json_decode($msg->body, true);
             }
 
-            if (!isset($result['body']['data_id']) || !isset($result['body']['thumbnail']) || !isset($result['body']['content'])) {
-                $rabbitMQ->errorMsg($msg->body, 'body 结构体格式错误');
-                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-                return false;
-            }
-
             //验证缩略图和富文本都为空 返回并删除队列
             if (empty($result['body']['thumbnail']) && empty($result['body']['content'])) {
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
                 return false;
             }
-
             //请求图片提取接口 返回 urls
             $res = InternalAPIService::post('/image/get_by_result', $result['body']);
             if (empty($res) || empty($res['img_urls'])) {
@@ -77,14 +70,19 @@ class RMQResultImgExtractConsole extends Command
             $headers = [
                 "vhost" => "crawl",
                 "exchange" => "image",
-                "routing_key" => "download",
+                "routing_key" => "download"
+            ];
+
+            $message = [
                 "data_id" => $result['body']['data_id'],
                 "is_proxy" => $res['is_proxy']
             ];
+
             foreach ($res['img_urls'] as $key => $value) {
                 //调用队列
+                $message['image_url'] = $value;
                 $rabbitMQ = new RabbitMQService();
-                $rabbitMQ->create('image', 'download', ['image_url' => $value], $headers);
+                $rabbitMQ->create('image', 'download', $message, $headers);
             }
             $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
         };

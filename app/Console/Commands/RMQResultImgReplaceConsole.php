@@ -13,7 +13,7 @@ class RMQResultImgReplaceConsole extends Command
      *
      * @var string
      */
-    protected $signature = 'rabbitmq:resultImgReplace';
+    protected $signature = 'rabbitmq:result_img_replace';
 
     /**
      * The console command description.
@@ -53,14 +53,27 @@ class RMQResultImgReplaceConsole extends Command
             $this->info($msg->body);
             $rabbitMQ = new RabbitMQService();
             $result = json_decode($msg->body, true);
-            if (!isset($result['header']['data_id']) || !isset($result['body']['original_img_url']) || !isset($result['body']['img_id'])) {
-                $rabbitMQ->errorMsg($msg->body, 'body 结构体格式错误');
+
+            if (empty($result['body']['data_id'])) {
+                $rabbitMQ->errorMsg($msg->body, 'data_id 不能为空');
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return false;
+            }
+            if (empty($result['body']['original_img_url'])) {
+                $rabbitMQ->errorMsg($msg->body, 'original_img_url 不能为空');
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
                 return false;
             }
 
+            if (empty($result['body']['img_id'])) {
+                $rabbitMQ->errorMsg($msg->body, 'img_id 不能为空');
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return false;
+            }
+
+
             $params = [
-                "data_id" => $result['header']['data_id'],
+                "data_id" => $result['body']['data_id'],
                 "original_img_url" => $result['body']['original_img_url'],
                 "img_id" => $result['body']['img_id']
             ];
