@@ -34,7 +34,9 @@
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
 			$this->col[] = ["label"=>"任务名称","name"=>"name"];
-			$this->col[] = ["label"=>"抓取url","name"=>"list_url"];
+            $this->col[] = ["label"=>"列表URL","name"=>"list_url",'width'=>'200',"callback"=>function ($row) {
+                return '<a href="' . $row->list_url . '" target="_brank" style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->list_url .'</a>';
+            }];
 			$this->col[] = ["label"=>"订阅类型","name"=>"subscription_type","callback"=>function ($row){
                 if ( $row->subscription_type == Requirement::SUBSCRIPTION_TYPE_LIST) {
                     return '列表';
