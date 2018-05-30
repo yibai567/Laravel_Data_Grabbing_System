@@ -52,13 +52,14 @@
                 }
             }];
 
-			$this->col[] = ["label"=>"是否下载图片","name"=>"is_download_img","callback"=>function ($row) {
-                if ( $row->is_download_img == Requirement::IS_DOWNLOAD_TRUE) {
-                    return '是';
-                } else {
-                    return '否';
-                }
-            }];
+			// $this->col[] = ["label"=>"是否下载图片","name"=>"is_download_img","callback"=>function ($row) {
+   //              if ( $row->is_download_img == Requirement::IS_DOWNLOAD_TRUE) {
+   //                  return '是';
+   //              } else {
+   //                  return '否';
+   //              }
+   //          }];
+            $this->col[] = array("label"=>"图片","name"=>"img_description","image"=>1);
              $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
 
                 if ($row->status == Requirement::STATUS_TRUE) {
@@ -95,24 +96,34 @@
 			$this->form[] = ['label'=>'任务名称','name'=>'name','type'=>'text','validation'=>'nullable|string|max:100','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'抓取url','name'=>'list_url','type'=>'text','validation'=>'required|string|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'描述','name'=>'description','type'=>'textarea','validation'=>'nullable|min:10|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'图片描述','name'=>'img_description','type'=>'upload','validation'=>'required|max:255','width'=>'col-sm-10',"callback"=>function ($row) {
 
 
+			$this->form[] = ['label'=>'图片描述','name'=>'img_description','type'=>'upload','required'=>true,'validation'=>'required|image|max:1000','width'=>'col-sm-10',"callback"=>function ($row) {
 
-                 $newIp=$_SERVER['HTTP_HOST']."/".$row->img_description;
-                 $domain = strstr($newIp, '/uploads');
-                 $local='/'.$row->img_description;
-                 if($domain){
+                $newIp=$_SERVER['HTTP_HOST']."/".$row->img_description;
+                $domain = strstr($newIp, '/uploads');
+                $local='/'.$row->img_description;
+                if($domain){
+                    return $row->img_description;
+
                    $string='<div>';
                    $string='<div><img src="'.$local.'" width="150" height="150" style="margin-left:278px;margin-bottom:15px"><div/>';
                    $string.='<div/>';
                    echo $string;
-                 }else{
-                   $string='<div>';
-                   $string='<div><img src="'.$row->img_description.'" width="150" height="150" style="margin-left:278px;margin-bottom:15px"><div/>';
-                   $string.='<div/>';
-                   echo $string;
-                 }
+                }else{
+                    //return $row->img_description;
+
+                    //print_r($row);
+                     //$string='<img src='.$row->img_description.' width="150" height="150" style="margin-left:278px;margin-bottom:15px">';
+                    //$que="确认删除吗";
+                    $string="<div class='col-sm-10' style='margin-left:208px;margin-bottom:15px'><a data-lightbox='roadtrip' href=' ".$row->img_description."'><img style='max-width:160px' title='Image For 图片描述' src=".$row->img_description."></a><p class='text-muted'><em>* 如果你想上传新的文件，请先删除已上传文件！</em></p><div class='text-danger'></div></div>";
+
+                    //href="http://webmagic1.jinse.cn/admin/t_requirement_pool/delete-image?image='.$row->img_description.'&amp;id='.$row->id.'&amp;column=img_description"
+
+                    echo $string;
+
+
+                }
 
 
 
@@ -162,7 +173,7 @@
 	        */
 	        $this->addaction = array();
             $this->addaction[] = ['label'=>'执行', 'url'=>CRUDBooster::mainpath('modify-state/[id]/' . Requirement::STATUS_FALSE),'color'=>'warning', 'icon'=>'ion-arrow-right-c', 'showIf'=>'[status] == ' . Requirement::STATUS_TRUE];
-            $this->addaction[] = ['label'=>'已执行', 'url'=>CRUDBooster::mainpath('modify-state/[id]/' . Requirement::STATUS_TRUE),'color'=>'info', 'icon'=>'ion-arrow-right-c', 'showIf'=>'[status] == ' . Requirement::STATUS_FALSE];
+            $this->addaction[] = ['label'=>'取消执行', 'url'=>CRUDBooster::mainpath('modify-state/[id]/' . Requirement::STATUS_TRUE),'color'=>'info', 'icon'=>'ion-arrow-right-c', 'showIf'=>'[status] == ' . Requirement::STATUS_FALSE];
             // $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]'),'color'=>'success', 'icon'=>'fa fa-play', 'showIf'=>'[status] == ' . Item::STATUS_TEST_SUCCESS . '|| [status] == ' . Item::STATUS_STOP];
 
             // $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-down/[id]'),'color'=>'warning', 'icon'=>'fa fa-stop', 'showIf'=>'[status] == ' . Item::STATUS_START];
