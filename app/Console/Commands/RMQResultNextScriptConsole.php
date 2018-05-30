@@ -44,7 +44,7 @@ class RMQResultNextScriptConsole extends Command
             $rabbitMQ = new RabbitMQService();
             $rabbitMQ->consume('result_next_script', $this->callback());
         } catch (Exception $e) {
-            \Log::debug('11');
+            \Log::debug('[rabbitmq:result_next_script] error Exception');
             throw $e;
         }
     }
@@ -76,7 +76,6 @@ class RMQResultNextScriptConsole extends Command
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
                 return false;
             }
-
             // 没有下一步脚本
             if (empty($script['next_script_id'])) {
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
@@ -92,7 +91,7 @@ class RMQResultNextScriptConsole extends Command
 
             $result['header'] = [
                 'data_id' => $result['body']['id'],
-                'task_id' => $result['body']['task_id'],
+                'task_id' => $newScript['task_id'],
                 'script_id' => $script['next_script_id']
             ];
 
@@ -114,7 +113,7 @@ class RMQResultNextScriptConsole extends Command
                     break;
             }
 
-            $taskRunLog = InternalAPIService::post('/task_run_log', ['task_id' => $result['body']['task_id'], 'start_job_at' => date('Y-m-d H:i:s')]);
+            $taskRunLog = InternalAPIService::post('/task_run_log', ['task_id' => $newScript['task_id']]);
             if (empty($taskRunLog)) {
                 $rabbitMQ->errorMsg($msg->body, 'task_run_log添加失败，请后重试');
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
@@ -124,6 +123,7 @@ class RMQResultNextScriptConsole extends Command
                 'task_run_log_id' => $taskRunLog['id'],
                 'url' => $result['body']['detail_url']
             ];
+
             $rabbitMQ->create('instant_task', $routingKey, $message, $result['header']);
             $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
         };

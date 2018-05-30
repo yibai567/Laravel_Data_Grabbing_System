@@ -65,6 +65,11 @@ class ScriptController extends Controller
             $params['description'] = trim($params['description']);
         }
 
+        if (!empty($params['next_script_id']) && $params['is_download'] == Script::DOWNLOAD_IMAGE_FALSE) {
+
+            $params['is_download'] = Script::DOWNLOAD_IMAGE_TRUE;
+        }
+
         $config = $params['init'];
 
         try {
@@ -141,7 +146,7 @@ class ScriptController extends Controller
     public function update(Request $request)
     {
         $params = $request->all();
-//        dd($params);
+
         //验证参数
         ValidatorService::check($params, [
             'id'                  => 'required|integer',
@@ -167,6 +172,11 @@ class ScriptController extends Controller
 
         if (!empty($params['description'])) {
             $params['description'] = trim($params['description']);
+        }
+
+        if (!empty($params['next_script_id']) && $params['is_download'] == Script::DOWNLOAD_IMAGE_FALSE) {
+
+            $params['is_download'] = Script::DOWNLOAD_IMAGE_TRUE;
         }
 
         $script = Script::find($params['id']);
@@ -260,6 +270,7 @@ class ScriptController extends Controller
             throw new \Dingo\Api\Exception\ResourceException('$task is not found');
         }
         //整理task数据岛返回结果
+        $result['task_id'] = $task->id;
         $result['name'] = $task->name;
         $result['description'] = $task->description;
         $result['cron_type'] = $task->cron_type;
@@ -657,9 +668,9 @@ class ScriptController extends Controller
             $script->save();
 
             //查找script对应的初始化的task(详情script不启动任务),修改状态
-            $task = Task::where('script_id',$script->id)->where('status',Task::STATUS_INIT)->where('cron_type','<>',Script::CRON_TYPE_ONCE)->first();
+            $task = Task::where('script_id',$script->id)->where('status',Task::STATUS_INIT)->first();
 
-            if (!empty($task)) {
+            if ($task->cron_type !== Script::CRON_TYPE_ONCE) {
                 $task->status = Task::STATUS_START;
                 $task->save();
             }

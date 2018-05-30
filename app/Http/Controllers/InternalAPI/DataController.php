@@ -11,8 +11,11 @@ namespace App\Http\Controllers\InternalAPI;
 
 use App\Events\DataResultReportEvent;
 use App\Models\Data;
+use App\Models\Script;
+use App\Models\Task;
 use App\Models\TaskRunLog;
 use App\Services\InternalAPIService;
+use Illuminate\Support\Facades\DB;
 use Log;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
@@ -243,8 +246,27 @@ class DataController extends Controller
                 'end_time'           => $params['end_time'],
                 'created_time'       => time()
             ];
+            try {
+                DB::beginTransaction();
 
-            $result[] = Data::create($data);
+                $result[] = Data::create($data);
+                //检测缩略图是否为空,不为空则更改script下载图片状态
+                if (!empty($data['thumbnail'])) {
+                    $task = Task::find($data['task_id']);
+
+                    $script = $task->script;
+                    if ($script->is_download == Script::DOWNLOAD_IMAGE_FALSE) {
+                        $script->is_download = Script::DOWNLOAD_IMAGE_TRUE;
+                        $script->save();
+                    }
+                }
+                DB::commit();
+            } catch (\Exception $e) {
+
+                DB::rollBack();
+
+                Log::debug('[DataController batchSave] error message = ' . $e->getMessage());
+            }
         }
 
         return $this->resObjectGet($result, 'data', $request->path());

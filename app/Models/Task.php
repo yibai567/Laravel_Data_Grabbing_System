@@ -57,4 +57,9 @@ class Task extends Model
         return $this->hasOne('App\Models\TaskStatistics', 'task_id', 'id');
     }
 
+    public function script()
+    {
+        return $this->belongsTo('App\Models\Script', 'script_id', 'id');
+    }
+
 }

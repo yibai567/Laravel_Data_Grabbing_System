@@ -111,21 +111,21 @@ class DataController extends Controller
      */
     public function dataResultReport(Request $request)
     {
+        Log::debug('[v1 DataController dataResultReport] start');
         $params = $request->all();
 
         ValidatorService::check($params, [
             'ids' => 'required|string',
         ]);
-
+        Log::debug('[v1 DataController dataResultReport] ids = ' . $params['ids']);
         //调取上报数据信息
         $datas = InternalAPIService::get('/datas/ids', $params);
 
         $newDatas = [];
         //遍历上报数据
         foreach ($datas as $data) {
-
             $newData = [];
-            if (empty($data['title']) || empty($data['task_id']) || empty($data['detail_url'])) {
+            if (empty($data['title']) || empty($data['task_id'])) {
                 continue;
             }
 
@@ -133,11 +133,14 @@ class DataController extends Controller
 
             $newData['task_id'] = $data['task_id'];
 
-            $newData['url'] = $data['detail_url'];
+            if (!empty($data['detail_url'])) {
+                $newData['url'] = $data['detail_url'];
+            }
 
             if (!empty($data['show_time'])) {
                 $newData['date'] = $data['show_time'];
             }
+
             $newData['images'] = [];
             if (!empty($data['thumbnail'])) {
                 $thumbnail = json_decode($data['thumbnail'],true);
@@ -156,19 +159,23 @@ class DataController extends Controller
             $newDatas[] = $newData;
         }
 
-        //整理数据
-        $reportData['is_test'] = TaskRunLog::TYPE_TEST;
-        $reportData['result'] = json_encode($newDatas, JSON_UNESCAPED_UNICODE);
+        if (!empty($newDatas)) {
+            //整理数据
+            $reportData['is_test'] = TaskRunLog::TYPE_TEST;
 
-        try {
-            //调用上传数据接口
-            $result = InternalAPIService::post('/item/result/report', $reportData);
-        } catch (\Exception $e) {
-            Log::debug('[v1 DataController dataResultReport] error message = ' . $e->getMessage());
+            $reportData['result'] = json_encode($newDatas, JSON_UNESCAPED_UNICODE);
 
-            Log::debug('[v1 DataController dataResultReport] data report failed');
+            Log::debug('[v1 DataController dataResultReport] reportData = ' , $reportData );
+
+            try {
+                //调用上传数据接口
+                $result = InternalAPIService::post('/item/result/report', $reportData);
+            } catch (\Exception $e) {
+                Log::debug('[v1 DataController dataResultReport] error message = ' . $e->getMessage());
+
+                Log::debug('[v1 DataController dataResultReport] data report failed');
+            }
         }
-
 
         return $this->resObjectGet($result, 'data', $request->path());
     }
