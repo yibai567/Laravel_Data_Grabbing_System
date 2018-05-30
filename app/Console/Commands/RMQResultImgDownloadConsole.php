@@ -44,7 +44,7 @@ class RMQResultImgDownloadConsole extends Command
             $rabbitMQ = new RabbitMQService();
             $rabbitMQ->consume('img_download', $this->callback());
         } catch (Exception $e) {
-            \Log::debug('11');
+            \Log::debug('[rabbitmq:result_img_download] error Exception');
             throw $e;
         }
     }
@@ -56,6 +56,7 @@ class RMQResultImgDownloadConsole extends Command
             $rabbitMQ = new RabbitMQService();
             $result = json_decode($msg->body, true);
 
+            \Log::debug('[rabbitmq:result_img_download] $result', $result);
             if (empty($result['body']['image_url'])) {
                 $rabbitMQ->errorMsg($msg->body, 'image_url 不能为空');
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
@@ -92,7 +93,8 @@ class RMQResultImgDownloadConsole extends Command
                 "exchange" => "image",
                 "routing_key" => "replace"
             ];
-            \Log::debug('$message', $message);
+
+            \Log::debug('[rabbitmq:result_img_download] $message', $message);
             //调用队列
             $rabbitMQ->create('image', 'replace', $message, $headers);
             $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);

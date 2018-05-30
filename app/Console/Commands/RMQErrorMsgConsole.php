@@ -44,7 +44,7 @@ class RMQErrorMsgConsole extends Command
             $rabbitMQ = new RabbitMQService();
             $rabbitMQ->consume('error_msg', $this->callback());
         } catch (Exception $e) {
-            \Log::debug('11');
+            \Log::debug('[rabbitmq:error_msg] error Exception');
             throw $e;
         }
     }

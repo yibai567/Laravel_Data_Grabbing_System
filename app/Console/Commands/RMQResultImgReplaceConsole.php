@@ -43,7 +43,7 @@ class RMQResultImgReplaceConsole extends Command
             $rabbitMQ = new RabbitMQService();
             $rabbitMQ->consume('img_replace', $this->callback());
         } catch (Exception $e) {
-            \Log::debug('11');
+            \Log::debug('[rabbitmq:result_img_replace] error Exception');
             throw $e;
         }
     }
@@ -53,6 +53,8 @@ class RMQResultImgReplaceConsole extends Command
             $this->info($msg->body);
             $rabbitMQ = new RabbitMQService();
             $result = json_decode($msg->body, true);
+
+            \Log::debug('[rabbitmq:result_img_replace] $result', $result);
 
             if (empty($result['body']['data_id'])) {
                 $rabbitMQ->errorMsg($msg->body, 'data_id 不能为空');
@@ -77,10 +79,10 @@ class RMQResultImgReplaceConsole extends Command
                 "original_img_url" => $result['body']['original_img_url'],
                 "img_id" => $result['body']['img_id']
             ];
+            \Log::debug('[rabbitmq:result_img_replace] $params', $params);
 
             //请求图片替换接口，返回true
             $res = InternalAPIService::post('/image/replace', $params);
-
             if (empty($res)) {
                 $rabbitMQ->errorMsg($msg->body, 'image replace return empty params = ' . $params);
                 return false;

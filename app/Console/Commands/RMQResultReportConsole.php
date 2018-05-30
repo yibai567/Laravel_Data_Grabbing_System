@@ -44,7 +44,7 @@ class RMQResultReportConsole extends Command
             $rabbitMQ = new RabbitMQService();
             $rabbitMQ->consume('result_report', $this->callback());
         } catch (Exception $e) {
-            \Log::debug('11');
+            \Log::debug('[rabbitmq:result_report] error Exception');
             throw $e;
         }
     }

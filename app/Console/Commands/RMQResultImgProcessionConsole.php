@@ -44,7 +44,7 @@ class RMQResultImgProcessionConsole extends Command
             $rabbitMQ = new RabbitMQService();
             $rabbitMQ->consume('result_img_processing', $this->callback());
         } catch (Exception $e) {
-            \Log::debug('11');
+            \Log::debug('[rabbitmq:result_img_processing] error Exception');
             throw $e;
         }
     }

@@ -44,7 +44,7 @@ class RMQResultNextScriptConsole extends Command
             $rabbitMQ = new RabbitMQService();
             $rabbitMQ->consume('result_next_script', $this->callback());
         } catch (Exception $e) {
-            \Log::debug('11');
+            \Log::debug('[rabbitmq:result_next_script] error Exception');
             throw $e;
         }
     }

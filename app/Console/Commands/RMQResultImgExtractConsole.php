@@ -43,7 +43,7 @@ class RMQResultImgExtractConsole extends Command
             $rabbitMQ = new RabbitMQService();
             $rabbitMQ->consume('img_get_url', $this->callback());
         } catch (Exception $e) {
-            \Log::debug('11');
+            \Log::debug('[rabbitmq:result_img_extract] error Exception');
             throw $e;
         }
     }
@@ -54,7 +54,7 @@ class RMQResultImgExtractConsole extends Command
             if (!empty($msg->body)) {
                 $result = json_decode($msg->body, true);
             }
-
+            \Log::debug('[rabbitmq:result_img_extract] $result', $result);
             //验证缩略图和富文本都为空 返回并删除队列
             if (empty($result['body']['thumbnail']) && empty($result['body']['content'])) {
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
@@ -77,7 +77,7 @@ class RMQResultImgExtractConsole extends Command
                 "data_id" => $result['body']['data_id'],
                 "is_proxy" => $res['is_proxy']
             ];
-
+            \Log::debug('[rabbitmq:result_img_extract] $message', $message);
             foreach ($res['img_urls'] as $key => $value) {
                 //调用队列
                 $message['image_url'] = $value;
