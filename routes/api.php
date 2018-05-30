@@ -52,5 +52,11 @@ $api->version(
         $api->post('/data/results', 'DataController@batchHandle');
 
         $api->post('/image/upload', 'ImageController@upload');
+        //收集资源
+        $api->post('/quirement', 'QuirementPoolController@create');
+        $api->post('/quirement/update', 'QuirementPoolController@update');
+        $api->get('/quirements', 'QuirementPoolController@all');
+        $api->get('/quirement', 'QuirementPoolController@retrieve');
+
     }
 );
