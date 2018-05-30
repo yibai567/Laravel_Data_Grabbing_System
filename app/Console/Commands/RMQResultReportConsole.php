@@ -99,7 +99,7 @@ class RMQResultReportConsole extends Command
                     $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
                     return false;
                 }
-                if ($data['img_remaining_step'] !== 0) {
+                if ($data['img_task_undone'] !== 0) {
                     $msg->delivery_info['channel']->basic_nack($msg->delivery_info['delivery_tag']);
                     return true;
                 }
