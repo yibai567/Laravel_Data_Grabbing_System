@@ -123,5 +123,13 @@ $api->version(
 
         $api->get('/task','TaskController@retrieve');
 
+        //收集资源
+        $api->post('/quirement', 'QuirementPoolController@create');
+        $api->post('/quirement/update', 'QuirementPoolController@update');
+        $api->get('/quirement', 'QuirementPoolController@retrieve');
+        $api->get('/quirements', 'QuirementPoolController@all');
+        $api->get('/quirement/update_status', 'QuirementPoolController@updateStatus');
+        $api->get('/quirement/download_img', 'QuirementPoolController@download_img');
+
     }
 );
