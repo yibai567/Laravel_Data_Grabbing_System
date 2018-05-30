@@ -226,6 +226,16 @@ class DataController extends Controller
                 continue;
             }
 
+            if (!empty($value['images'])) {
+                $task = Task::find($params['task_id']);
+
+                $script = $task->script;
+
+                if ($script->is_download == Script::DOWNLOAD_IMAGE_FALSE) {
+                    $value['images'] = '';
+                }
+            }
+
             //整理保存数据
             $data = [
                 'content_type'       => $params['content_type'],
@@ -246,27 +256,8 @@ class DataController extends Controller
                 'end_time'           => $params['end_time'],
                 'created_time'       => time()
             ];
-            try {
-                DB::beginTransaction();
 
-                $result[] = Data::create($data);
-                //检测缩略图是否为空,不为空则更改script下载图片状态
-                if (!empty($data['thumbnail'])) {
-                    $task = Task::find($data['task_id']);
-
-                    $script = $task->script;
-                    if ($script->is_download == Script::DOWNLOAD_IMAGE_FALSE) {
-                        $script->is_download = Script::DOWNLOAD_IMAGE_TRUE;
-                        $script->save();
-                    }
-                }
-                DB::commit();
-            } catch (\Exception $e) {
-
-                DB::rollBack();
-
-                Log::debug('[DataController batchSave] error message = ' . $e->getMessage());
-            }
+            $result[] = Data::create($data);
         }
 
         return $this->resObjectGet($result, 'data', $request->path());

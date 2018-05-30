@@ -547,7 +547,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
         $data['name'] = $formParams['name'];
         $data['description'] = $formParams['description'];
-        $data['list_ur'] = $formParams['list_url'];
+        $data['list_url'] = $formParams['list_url'];
 
         if (empty($formParams['load_images'])) {
             $formParams['load_images'] = ScriptConfig::DEFAULT_LOAD_IMAGES;

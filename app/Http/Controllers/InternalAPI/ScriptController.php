@@ -65,11 +65,6 @@ class ScriptController extends Controller
             $params['description'] = trim($params['description']);
         }
 
-        if (!empty($params['next_script_id']) && $params['is_download'] == Script::DOWNLOAD_IMAGE_FALSE) {
-
-            $params['is_download'] = Script::DOWNLOAD_IMAGE_TRUE;
-        }
-
         $config = $params['init'];
 
         try {
@@ -172,11 +167,6 @@ class ScriptController extends Controller
 
         if (!empty($params['description'])) {
             $params['description'] = trim($params['description']);
-        }
-
-        if (!empty($params['next_script_id']) && $params['is_download'] == Script::DOWNLOAD_IMAGE_FALSE) {
-
-            $params['is_download'] = Script::DOWNLOAD_IMAGE_TRUE;
         }
 
         $script = Script::find($params['id']);
