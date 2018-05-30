@@ -52,5 +52,7 @@ $api->version(
         $api->post('/quirement/update', 'QuirementPoolController@update');
         $api->get('/quirement', 'QuirementPoolController@retrieve');
         $api->get('/quirements', 'QuirementPoolController@all');
+
+        $api->get('/demand', 'DemandController@get_json');
     }
 );
