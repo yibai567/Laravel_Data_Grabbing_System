@@ -14,7 +14,7 @@ class RMQResultReportConsole extends Command
      *
      * @var string
      */
-    protected $signature = 'rabbitmq:resultReport';
+    protected $signature = 'rabbitmq:result_report';
 
     /**
      * The console command description.

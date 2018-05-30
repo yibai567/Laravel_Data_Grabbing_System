@@ -135,21 +135,21 @@ class DataController extends Controller
 
             $newData['url'] = $data['detail_url'];
 
-            if (empty($data['show_time'])) {
-                $newData['date'] = "";
-            } else {
+            if (!empty($data['show_time'])) {
                 $newData['date'] = $data['show_time'];
             }
-
-            if (empty($data['images'])) {
-                $newData['images'] = [];
-            } else {
-                $newData['images'] = $data['images'];
+            $newData['images'] = [];
+            if (!empty($data['thumbnail'])) {
+                $thumbnail = json_decode($data['thumbnail'],true);
+                foreach ($thumbnail as $key=>$url) {
+                    $getSize = getimagesize($url);
+                    $newData['images'][$key]['width'] = $getSize[0];
+                    $newData['images'][$key]['height'] = $getSize[1];
+                    $newData['images'][$key]['url'] = $url;
+                }
             }
 
-            if (empty($data['screenshot'])) {
-                $newData['screenshot'] = [];
-            } else {
+            if (!empty($data['screenshot'])) {
                 $newData['screenshot'] = $data['screenshot'];
             }
 
@@ -157,11 +157,18 @@ class DataController extends Controller
         }
 
         //整理数据
-        $params['is_test'] = TaskRunLog::TYPE_TEST;
-        $params['result'] = json_encode($newDatas, JSON_UNESCAPED_UNICODE);
+        $reportData['is_test'] = TaskRunLog::TYPE_TEST;
+        $reportData['result'] = json_encode($newDatas, JSON_UNESCAPED_UNICODE);
 
-        //调用上传数据接口
-        $result = InternalAPIService::post('/item/result/report', $params);
+        try {
+            //调用上传数据接口
+            $result = InternalAPIService::post('/item/result/report', $reportData);
+        } catch (\Exception $e) {
+            Log::debug('[v1 DataController dataResultReport] error message = ' . $e->getMessage());
+
+            Log::debug('[v1 DataController dataResultReport] data report failed');
+        }
+
 
         return $this->resObjectGet($result, 'data', $request->path());
     }

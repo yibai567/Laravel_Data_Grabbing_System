@@ -530,6 +530,8 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data = [];
         $formParams = $this->arr;
         $newData = [];
+
+        $result = preg_match("/^(http|https):\/\//i", $formParams['list_url']);
         if (!$result) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "list_url格式错误", "error");
         }

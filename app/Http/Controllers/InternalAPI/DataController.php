@@ -194,7 +194,7 @@ class DataController extends Controller
                 'show_time'  => 'nullable|string|max:100',
                 'author'     => 'nullable|string|max:50',
                 'read_count' => 'nullable|string|max:100',
-                'images'  => 'nullable|string',
+                'images'     => 'nullable|string',
             ]);
 
             //监测content内容和title,有则进行加密,便于后面查重

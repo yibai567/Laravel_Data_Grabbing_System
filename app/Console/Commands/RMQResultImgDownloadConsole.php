@@ -13,7 +13,7 @@ class RMQResultImgDownloadConsole extends Command
      *
      * @var string
      */
-    protected $signature = 'rabbitmq:resultImgDownload';
+    protected $signature = 'rabbitmq:result_img_download';
 
     /**
      * The console command description.
@@ -55,6 +55,13 @@ class RMQResultImgDownloadConsole extends Command
             $this->info($msg->body);
             $rabbitMQ = new RabbitMQService();
             $result = json_decode($msg->body, true);
+
+            if (empty($result['body']['image_url'])) {
+                $rabbitMQ->errorMsg($msg->body, 'image_url 不能为空');
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return false;
+            }
+
             $params = [
                 "image_url" => $result['body']['image_url'],
                 "is_proxy" => $result['header']['is_proxy']
@@ -76,15 +83,16 @@ class RMQResultImgDownloadConsole extends Command
 
             $message = [
                 "original_img_url" => $res['image_url'],
-                "img_id" => $res['img_id']
+                "img_id" => $res['img_id'],
+                "data_id" =>  $result['body']['data_id']
             ];
 
             $headers = [
                 "vhost" => "crawl",
                 "exchange" => "image",
-                "routing_key" => "replace",
-                "data_id" => $result['header']['data_id']
+                "routing_key" => "replace"
             ];
+            \Log::debug('$message', $message);
             //调用队列
             $rabbitMQ->create('image', 'replace', $message, $headers);
             $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
