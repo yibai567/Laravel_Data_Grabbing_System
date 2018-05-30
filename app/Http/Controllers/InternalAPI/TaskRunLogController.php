@@ -35,11 +35,10 @@ class TaskRunLogController extends Controller
 
         ValidatorService::check($params, [
             'task_id' => 'required|integer',
-            'start_job_at' => 'nullable|date',
             'end_job_at' => 'nullable|date',
             'result_count' => 'nullable|integer',
         ]);
-
+        $params['start_job_at'] = date('Y-m-d');
         $res = TaskRunLog::create($params);
 
         $result = [];
