@@ -55,7 +55,7 @@ class RMQResultNextScriptConsole extends Command
             $this->info($msg->body);
             $rabbitMQ = new RabbitMQService();
             $result = json_decode($msg->body, true);
-            if (!isset($result['body']['task_id']) || !isset($result['body']['id']) || !isset($result['body']['detail_url'])) {
+            if (!isset($result['body']['task_id']) || !isset($result['body']['id'])) {
                 $rabbitMQ->errorMsg($msg->body, 'body 结构体格式错误');
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
                 return false;
@@ -77,7 +77,7 @@ class RMQResultNextScriptConsole extends Command
                 return false;
             }
             // 没有下一步脚本
-            if (empty($script['next_script_id'])) {
+            if (empty($script['next_script_id']) && empty($result['body']['detail_url'])) {
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
                 return true;
             }
