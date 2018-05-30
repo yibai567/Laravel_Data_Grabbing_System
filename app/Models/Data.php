@@ -55,7 +55,8 @@ class Data extends Model
         'author',
         'read_count',
         'thumbnail',
-        'img_remaining_step',
+        'img_task_undone',
+        'img_task_total'
         'screenshot',
         'status',
         'start_time',

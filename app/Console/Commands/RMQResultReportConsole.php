@@ -99,7 +99,7 @@ class RMQResultReportConsole extends Command
                     $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
                     return false;
                 }
-                if ($data['img_remaining_step'] !== 0) {
+                if ($data['img_task_undone'] !== 0) {
                     $msg->delivery_info['channel']->basic_nack($msg->delivery_info['delivery_tag']);
                     return true;
                 }
@@ -108,7 +108,6 @@ class RMQResultReportConsole extends Command
             // 上报接口
             $httpService = new HttpService();
             $data = $httpService->post(config('url.jinse_open_url') . '/v1/data/batch/report', ['ids' => (string)$result['body']['id']]);
-
             if ($data) {
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
             } else {

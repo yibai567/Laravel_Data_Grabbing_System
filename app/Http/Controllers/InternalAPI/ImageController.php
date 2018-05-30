@@ -155,7 +155,8 @@ class ImageController extends Controller
 
         //保存数据
         $imgNum = count($imgUrl);
-        $dataRes->img_remaining_step = $imgNum;
+        $dataRes->img_task_undone = $imgNum;
+        $dataRes->img_task_total = $imgNum;
         $dataRes->save();
 
         $result = [];
@@ -216,7 +217,7 @@ class ImageController extends Controller
             $dataRes->thumbnail = json_encode(explode(",", $thumbnail));
 
         }
-        $dataRes->decrement('img_remaining_step', 1);
+        $dataRes->decrement('img_task_undone', 1);
         $dataRes->save();
 
         return $this->resObjectGet(true, 'image', $request->path());
