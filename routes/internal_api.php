@@ -122,6 +122,13 @@ $api->version(
         $api->get('/task_run_log','TaskRunLogController@retrieve');
 
         $api->get('/task','TaskController@retrieve');
+          //收集资源
+        $api->post('/quirement', 'QuirementPoolController@create');
+        $api->post('/quirement/update', 'QuirementPoolController@update');
+        $api->get('/quirements', 'QuirementPoolController@all');
+        $api->get('/quirement', 'QuirementPoolController@retrieve');
+        $api->get('/quirement/update_status','QuirementPoolController@updateStatus');
+
 
     }
 );
