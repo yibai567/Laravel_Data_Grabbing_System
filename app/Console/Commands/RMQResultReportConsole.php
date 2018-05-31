@@ -100,7 +100,8 @@ class RMQResultReportConsole extends Command
                     return false;
                 }
                 if ($data['img_task_undone'] !== 0) {
-                    $msg->delivery_info['channel']->basic_nack($msg->delivery_info['delivery_tag']);
+                    // 不处理重新放回队列
+                    $msg->delivery_info['channel']->basic_nack($msg->delivery_info['delivery_tag'], false, true);
                     return true;
                 }
             }
@@ -112,8 +113,10 @@ class RMQResultReportConsole extends Command
             if ($data) {
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
             } else {
-                $msg->delivery_info['channel']->basic_nack($msg->delivery_info['delivery_tag']);
+                $rabbitMQ->errorMsg($msg->body, 'post /v1/data/batch/report error ');
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
             }
+            return true;
         };
     }
 }
