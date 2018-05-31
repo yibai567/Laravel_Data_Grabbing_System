@@ -33,7 +33,8 @@
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
-			$this->col[] = ["label"=>"任务名称","name"=>"name"];
+            $this->col[] = ["label"=>"资源ID","name"=>"id"];
+			$this->col[] = ["label"=>"资源名称","name"=>"name"];
             $this->col[] = ["label"=>"列表URL","name"=>"list_url",'width'=>'200',"callback"=>function ($row) {
                 return '<a href="' . $row->list_url . '" target="_brank" style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->list_url .'</a>';
             }];
