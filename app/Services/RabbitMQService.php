@@ -26,13 +26,33 @@ class RabbitMQService extends Service
         $this->connection = new AMQPStreamConnection(config('rabbitmq.host'), config('rabbitmq.port'), config('rabbitmq.login'), config('rabbitmq.password'), config('rabbitmq.vhost'));
         $this->channel = $this->connection->channel();
 
-        // 声明交换机
+        /**
+         * 声明交换机
+         * exchange_declare(
+         *   $exchange,   交换机名称
+         *   $type,   交换机类型
+         *   $passive,   被动
+         *   $durable,   持久化
+         *   $auto_delete,   自动删除，如果该队列没有任何订阅的消费者的话，该队列会被自动删除。这种队列适用于临时队列。
+         * )
+         */
+
         $this->channel->exchange_declare('save_result', 'fanout', false, true, false);
         $this->channel->exchange_declare('image', 'direct', false, true, false);
         $this->channel->exchange_declare('instant_task', 'direct', false, true, false);
         $this->channel->exchange_declare('error', 'fanout', false, true, false);
 
-        // 声明队列
+        /**
+         * 声明队列
+         * queue_declare(
+         *   $queue,   队列名称
+         *   $passive,   被动
+         *   $durable,   持久化
+         *   $exclusive,   排他队列，如果一个队列被声明为排他队列，该队列仅对首次声明它的连接可见，并在连接断开时自动删除。这里需要注意三点：其一，排他队列是基于连接可见的，同一连接的不同信道是可以同时访问同一个连接创建的排他队列的。其二，“首次”，如果一个连接已经声明了一个排他队列，其他连接是不允许建立同名的排他队列的，这个与普通队列不同。其三，即使该队列是持久化的，一旦连接关闭或者客户端退出，该排他队列都会被自动删除的。这种队列适用于只限于一个客户端发送读取消息的应用场景。
+         *   $auto_delete,   自动删除，如果该队列没有任何订阅的消费者的话，该队列会被自动删除。这种队列适用于临时队列。
+         * )
+         */
+
         $this->channel->queue_declare('result_img_processing', false, true, false, false);
         $this->channel->queue_declare('result_report', false, true, false, false);
         $this->channel->queue_declare('result_next_script', false, true, false, false);
@@ -43,7 +63,8 @@ class RabbitMQService extends Service
 
         $this->channel->queue_declare('engine_casperjs', false, true, false, false);
         $this->channel->queue_declare('engine_node', false, true, false, false);
-        $this->channel->queue_declare('engine_chromeless', false, true, false, false);
+        $this->channel->queue_declare('engine_php', false, true, false, false);
+        // $this->channel->queue_declare('engine_chromeless', false, true, false, false);
 
         $this->channel->queue_declare('error_msg', false, true, false, false);
 
@@ -58,7 +79,8 @@ class RabbitMQService extends Service
 
         $this->channel->queue_bind('engine_casperjs', 'instant_task', 'casperjs');
         $this->channel->queue_bind('engine_node', 'instant_task', 'node');
-        $this->channel->queue_bind('engine_chromeless', 'instant_task', 'chromeless');
+        $this->channel->queue_bind('engine_php', 'instant_task', 'node');
+        // $this->channel->queue_bind('engine_chromeless', 'instant_task', 'chromeless');
 
         $this->channel->queue_bind('error_msg', 'error');
     }
