@@ -77,7 +77,16 @@ class ScriptModelController extends Controller
             throw new \Dingo\Api\Exception\ResourceException('$scriptModel is not found');
         }
 
-        $scriptModel->update($params);
+        $scriptModel->name = $params['name'];
+        $scriptModel->description = $params['description'];
+        $scriptModel->structure = $params['structure'];
+        $scriptModel->languages_type = $params['languages_type'];
+        $scriptModel->system_type = $params['system_type'];
+        $scriptModel->parameters = $params['parameters'];
+        $scriptModel->operate_user = $params['operate_user'];
+        $scriptModel->sort = $params['sort'];
+
+        $scriptModel->save();
         $result = $scriptModel->toArray();
 
         return $this->resObjectGet($result, 'script_model', $request->path());

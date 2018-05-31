@@ -179,20 +179,18 @@ class ScriptController extends Controller
         try {
             DB::beginTransaction();
 
-            $scriptData = [
-                'list_url'            => $params['list_url'],
-                'languages_type'      => $params['languages_type'],
-                'step'                => $params['step'],
-                'status'              => Script::STATUS_INIT,
-                'operate_user'        => $params['operate_user'],
-                'next_script_id'      => $params['next_script_id'],
-                'requirement_pool_id' => $params['requirement_pool_id'],
-                'is_report'           => $params['is_report'],
-                'is_download'         => $params['is_download'],
-                'is_proxy'            => $params['is_proxy'],
-            ];
+            $script->list_url = $params['list_url'];
+            $script->languages_type = $params['languages_type'];
+            $script->step = $params['step'];
+            $script->status = $params['status'];
+            $script->operate_user = $params['operate_user'];
+            $script->next_script_id = $params['next_script_id'];
+            $script->requirement_pool_id = $params['requirement_pool_id'];
+            $script->is_report = $params['is_report'];
+            $script->is_download = $params['is_download'];
+            $script->is_proxy = $params['is_proxy'];
 
-            $script->update($scriptData);
+            $script->save();
 
             $result = $script->toArray();
 
@@ -462,15 +460,12 @@ class ScriptController extends Controller
             $taskInfo = Task::create($taskData);
         } else {
             //整理task数据
-            $taskData = [
-                'languages_type' => $uploadData['languages_type'],
-                'name'           => $uploadData['name'],
-                'description'    => $uploadData['description'],
-                'cron_type'      => $uploadData['cron_type'],
-                'status'         => Task::STATUS_INIT,
-            ];
-
-            $task->update($taskData);
+            $task->languages_type = $uploadData['languages_type'];
+            $task->name = $uploadData['name'];
+            $task->description = $uploadData['description'];
+            $task->cron_type = $uploadData['cron_type'];
+            $task->status = $uploadData['status'];
+            $task->save();
 
             $taskInfo =$task;
         }
@@ -510,7 +505,14 @@ class ScriptController extends Controller
             throw new \Dingo\Api\Exception\ResourceException('$scriptConfig is not found');
         }
 
-        $scriptConfig->update($postScriptConfig);
+        $scriptConfig->load_images = $postScriptConfig['load_images'];
+        $scriptConfig->load_plugins = $postScriptConfig['load_plugins'];
+        $scriptConfig->log_level = $postScriptConfig['log_level'];
+        $scriptConfig->verbose = $postScriptConfig['verbose'];
+        $scriptConfig->width = $postScriptConfig['width'];
+        $scriptConfig->height = $postScriptConfig['height'];
+
+        $scriptConfig->save();
 
         return $scriptConfig->toArray();
     }
