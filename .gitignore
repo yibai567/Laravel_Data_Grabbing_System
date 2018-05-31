@@ -1,9 +1,8 @@
 build
-/node_modules
+node_modules
 bower_components
 /public/hot
 /public/storage
-/storage/*
 composer.phar
 /.idea
 /.vagrant
