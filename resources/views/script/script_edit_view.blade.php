@@ -33,6 +33,7 @@
             <input type='hidden' name='ref_mainpath' value='{{ CRUDBooster::mainpath() }}'/>
             <input type='hidden' name='ref_parameter' value='{{urldecode(http_build_query(@$_GET))}}'/>
             <input type='hidden' name='languages_type' value='{{$row[languages_type]}}'/>
+            <input type='hidden' name='generate_type' value='{{$row[generate_type]}}'/>
             @if($hide_form)
                 <input type="hidden" name="hide_form" value='{!! serialize($hide_form) !!}'>
             @endif
@@ -72,8 +73,8 @@
                     <div class='form-group  header-group-0'>
                         <div class="col-sm-2"></div>
                         <div class='form-group  header-group-0 table-bordered col-sm-10'>
-                            <label class='control-label col-sm-2'>是否加载图片</label>
-                            <div class="col-sm-4">
+                            <label class='control-label col-sm-3'>是否加载图片</label>
+                            <div class="col-sm-3">
                                 @if ($row[init][load_images] == 1)
                                     <label>
                                         <input type="checkbox" checked name="load_images" value="1">
@@ -84,8 +85,8 @@
                                     </label>
                                 @endif
                             </div>
-                            <label class='control-label col-sm-2'>是否加载插件</label>
-                            <div class="col-sm-4">
+                            <label class='control-label col-sm-3'>是否加载插件</label>
+                            <div class="col-sm-3">
                                 @if ($row[init][load_plugins] == 1)
                                     <label>
                                         <input type="checkbox" checked name="load_plugins" value="1">
@@ -96,8 +97,20 @@
                                     </label>
                                 @endif
                             </div>
-                            <label class='control-label col-sm-2'>log_level</label>
-                            <div class="col-sm-4">
+                            <label class='control-label col-sm-3'>verbose</label>
+                            <div class="col-sm-9">
+                                @if ($row[init][verbose] == 1)
+                                    <label>
+                                        <input type="checkbox" checked name="verbose" value="1">
+                                    </label>
+                                @else
+                                    <label>
+                                        <input type="checkbox" name="verbose" value="1">
+                                    </label>
+                                @endif
+                            </div>
+                            <label class='control-label col-sm-3'>log_level</label>
+                            <div class="col-sm-9">
                                 @if ($row[init][log_level] == 'debug')
                                     <label class='radio-inline'>
                                         <input type="radio" name="log_level" value="debug" checked> debug
@@ -131,143 +144,23 @@
 
                                 @endif
                             </div>
-                            <label class='control-label col-sm-2'>verbose</label>
-                            <div class="col-sm-4">
-                                @if ($row[init][verbose] == 1)
-                                    <label>
-                                        <input type="checkbox" checked name="verbose" value="1">
-                                    </label>
-                                @else
-                                    <label>
-                                        <input type="checkbox" name="verbose" value="1">
-                                    </label>
-                                @endif
-                            </div>
-                            <label class='control-label col-sm-2'>width</label>
-                            <div class="col-sm-4">
+                            <label class='control-label col-sm-3'>width</label>
+                            <div class="col-sm-3">
                                 <input type='text' class='form-control' name="width" id="width" value='{{$row[init][width]}}'/>
                                 <div class="text-danger"></div>
                                 <p class='help-block'></p>
                             </div>
-                            <label class='control-label col-sm-2'>height</label>
-                            <div class="col-sm-4">
+                            <label class='control-label col-sm-3'>height</label>
+                            <div class="col-sm-3">
                                 <input type='text' class='form-control' name="height" id="width" value='{{$row[init][height]}}'/>
                                 <div class="text-danger"></div>
                                 <p class='help-block'></p>
                             </div>
                         </div>
                     </div>
-                    <div class='form-group header-group-0 ' id='form-group-load_images'>
-                        <label class='control-label col-sm-2'>是否加载图片
-                        </label>
-                        <div>
-                            <div class="col-sm-10">
-                                @if ($row[init][load_images] == 1)
-                                    <label>
-                                        <input type="checkbox" checked name="load_images" value="1">
-                                    </label>
-                                @else
-                                    <label>
-                                        <input type="checkbox" name="load_images" value="1">
-                                    </label>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    <div class='form-group header-group-0 ' id='form-group-load_plugins'>
-                        <label class='control-label col-sm-2'>是否加载插件
-                        </label>
-                        <div>
-                            <div class="col-sm-10">
-                                @if ($row[init][load_plugins] == 1)
-                                    <label>
-                                        <input type="checkbox" checked name="load_plugins" value="1">
-                                    </label>
-                                @else
-                                    <label>
-                                        <input type="checkbox" name="load_plugins" value="1">
-                                    </label>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    <div class='form-group header-group-0 ' id='form-group-log_level'>
-                        <label class='control-label col-sm-2'>log_level
-                            <span class='text-danger' title='This field is required'>*</span>
-                        </label>
-                        <div>
-                            <div class="col-sm-10">
-                                @if ($row[init][log_level] == 'debug')
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="debug" checked> debug
-                                    </label>
-                                   <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="info"> info
-                                    </label>
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="error"> error
-                                    </label>
-                                @elseif ($row[init][log_level] == 'info')
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="debug"> debug
-                                    </label>
-                                   <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="info" checked> info
-                                    </label>
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="error"> error
-                                    </label>
-                                @else
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="debug"> debug
-                                    </label>
-                                   <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="info"> info
-                                    </label>
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="error" checked> error
-                                    </label>
-
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    <div class='form-group header-group-0 ' id='form-group-verbose'>
-                        <label class='control-label col-sm-2'>verbose
-                        </label>
-                        <div>
-                            <div class="col-sm-10">
-                                @if ($row[init][verbose] == 1)
-                                    <label>
-                                        <input type="checkbox" checked name="verbose" value="1">
-                                    </label>
-                                @else
-                                    <label>
-                                        <input type="checkbox" name="verbose" value="1">
-                                    </label>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class='form-group header-group-0' id='form-group-width'>
-                        <label class='control-label col-sm-2'>width</label>
-                        <div class="col-sm-2">
-                            <input type='text' maxlength='70' class='form-control' name="width" id="width" value='{{$row[init][width]}}'/>
-                            <div class="text-danger"></div>
-                            <p class='help-block'></p>
-                        </div>
-                    </div>
-                    <div class='form-group header-group-0 ' id='form-group-height'>
-                        <label class='control-label col-sm-2'>height</label>
-                        <div class="col-sm-2">
-                            <input type='text' maxlength='70' class='form-control' name="height" value='{{$row[init][height]}}'/>
-                            <div class="text-danger"></div>
-                            <p class='help-block'></p>
-                        </div>
-                    </div>
                 @endif
-                <div class='form-group header-group-0 ' id='form-group-step'>
+                @if ($row['generate_type'] == 1)
+                    <div class='form-group header-group-0 ' id='form-group-step'>
                     <label class='control-label col-sm-2'>步骤
                         <span class='text-danger' title='This field is required'>*</span>
                     </label>
@@ -331,6 +224,17 @@
                     </div>
                     <div style="clear: both;"></div>
                 </div>
+                @else
+                    <div class='form-group header-group-0 ' id='form-group-name'>
+                        <label class='control-label col-sm-2'>脚本地址链接
+                        </label>
+                        <div class="col-xs-5">
+                            <a href="{{$row['file_url']}}"  target="_blank">查看脚本</a>
+                            <div class="text-danger"></div>
+                            <p class='help-block'></p>
+                        </div>
+                    </div>
+                @endif
                 <div class='form-group header-group-0 ' id='form-group-cron_type'>
                     <label class='control-label col-sm-2'>是否下载
                     </label>

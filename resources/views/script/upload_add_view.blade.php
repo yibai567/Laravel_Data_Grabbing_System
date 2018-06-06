@@ -15,47 +15,160 @@
     ?>
     <form class='form-horizontal' method='post' id="form" enctype="multipart/form-data" action='{{$action}}'>
         <div class="panel-body" style="padding:79px 0px 75px 0px;; width: 80%;">
-
-
                 <div class="box-body" id="parent-form-area">
                      <input type="hidden" name="_token" value="{{ csrf_token() }}">
                      <input type='hidden' name='return_url' value='{{ @$return_url }}'/>
-                    <div class='form-group header-group-0  id='form-group-description'>
-                        <label class='control-label col-sm-2'>url
+                    <div class='form-group header-group-0 ' id='form-group-name'>
+                        <label class='control-label col-sm-2'>脚本名称
                             <span class='text-danger' title='This field is required'>*</span>
                         </label>
-                        <div class="col-sm-10" id="test">
-                           <input type='text' title="url" required maxlength='255' class='form-control' name="url"/>
-
+                        <div class="col-xs-5">
+                            <input type='text' title="脚本名称" required maxlength='70' class='form-control' name="name" id="name" value='{{$row[name]}}'/>
+                            <input type='hidden' maxlength="70" class='form-control' name="languages_type" value='{{$languages_type}}'/>
                             <div class="text-danger"></div>
                             <p class='help-block'></p>
                         </div>
                     </div>
                     <div class='form-group header-group-0  id='form-group-description'>
-                        <label class='control-label col-sm-2'>脚本内容
+                        <label class='control-label col-sm-2'>脚本描述 </label>
+                        <div class="col-sm-10">
+                            <textarea name="description" id="description" maxlength=5000 class='form-control' rows='2'>{{$row[description]}}</textarea>
+                            <div class="text-danger"></div>
+                            <p class='help-block'></p>
+                        </div>
+                    </div>
+                    <div class='form-group header-group-0 ' id='form-group-cron_type'>
+                        <label class='control-label col-sm-2'>list_url
                             <span class='text-danger' title='This field is required'>*</span>
                         </label>
-                        <div class="col-sm-10">
-
-                            <textarea name="description" id="description" maxlength=5000 required minlength='10' class='form-control' style="height:400px;display: block;color: #428bca;"></textarea>
+                        <div class="col-xs-5">
+                            <input type='text' title="list_url" required maxlength='70' class='form-control' name="list_url" value=''/>
                             <div class="text-danger"></div>
                             <p class='help-block'></p>
                         </div>
                     </div>
                     <div class='form-group header-group-0 ' id='form-group-load_images'>
-                        <label class='control-label col-sm-2'>脚本类型
+                        <label class='control-label col-sm-2'>语言类型
+                            <span class='text-danger' title='This field is required'>*</span>
                         </label>
                         <div>
                             <div class="col-sm-10">
-                                <label>
-                                    <input type="radio" name="type" value="1" checked>&nbsp;&nbsp;php&nbsp;&nbsp;
-                                    <input type="radio" name="type" value="2">&nbsp;&nbsp;js
+                                <label class='radio-inline'>
+                                    <input type="radio" name="languages_type" value="1" checked> CasperJs
+                                </label>
+                                <label class='radio-inline'>
+                                    <input type="radio" name="languages_type" value="2"> Html
+                                </label>
+                                <label class='radio-inline'>
+                                    <input type="radio" name="languages_type" value="3"> Api
                                 </label>
                             </div>
                         </div>
                     </div>
+                    <div class='form-group header-group-0 ' id='form-group-load_images'>
+                        <label class='control-label col-sm-2'>脚本类型
+                            <span class='text-danger' title='This field is required'>*</span>
+                        </label>
+                        <div>
+                            <div class="col-sm-10">
+                                <label class='radio-inline'>
+                                    <input type="radio" name="script_type" value="1" checked> JS
+                                </label>
+                                <label class='radio-inline'>
+                                    <input type="radio" name="script_type" value="2"> PHP
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='form-group header-group-0  id='form-group-content'>
+                        <label class='control-label col-sm-2'>脚本内容
+                            <span class='text-danger' title='This field is required'>*</span>
+                        </label>
+                        <div class="col-sm-10">
 
-
+                            <textarea name="content" id="content" maxlength=5000 required class='form-control' style="height:400px;display: block;color: #428bca;"></textarea>
+                            <div class="text-danger"></div>
+                            <p class='help-block'></p>
+                        </div>
+                    </div>
+                    <div class='form-group header-group-0 ' id='form-group-is_download'>
+                        <label class='control-label col-sm-2'>是否下载图片
+                        </label>
+                        <div>
+                            <div class="col-sm-10">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" name="is_download" value="1">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='form-group header-group-0 ' id='form-group-is_report'>
+                        <label class='control-label col-sm-2'>是否上报
+                        </label>
+                        <div>
+                            <div class="col-sm-10">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" name="is_report" value="1">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='form-group header-group-0 ' id='form-group-is_proxy'>
+                        <label class='control-label col-sm-2'>是否翻墙
+                        </label>
+                        <div>
+                            <div class="col-sm-10">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" name="is_proxy" value="1">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='form-group header-group-0 ' id='form-group-requirement_pool_id'>
+                        <label class='control-label col-sm-2'>需求池ID
+                        </label>
+                        <div class="col-xs-5">
+                            <input type='text' title="需求池ID" maxlength='70' class='form-control' name="requirement_pool_id" id="requirement_pool_id" value=''/>
+                            <div class="text-danger"></div>
+                            <p class='help-block'></p>
+                        </div>
+                    </div>
+                    <div class='form-group header-group-0 ' id='form-group-next_script_id'>
+                        <label class='control-label col-sm-2'>下一步脚本ID
+                        </label>
+                        <div class="col-xs-5">
+                            <input type='text' title="下一步脚本ID" maxlength='70' class='form-control' name="next_script_id" id="next_script_id" value=''/>
+                            <div class="text-danger"></div>
+                            <p class='help-block'></p>
+                        </div>
+                    </div>
+                    <div class='form-group header-group-0 ' id='form-group-cron_type'>
+                        <label class='control-label col-sm-2'>cron_type
+                            <span class='text-danger' title='This field is required'>*</span>
+                        </label>
+                        <div>
+                            <div class="col-sm-10">
+                                <label class='radio'>
+                                    <input type="radio" checked name="cron_type" value="1"> 每分钟执行一次
+                                </label>
+                                <label class='radio'>
+                                    <input type="radio" name="cron_type" value="2"> 每五分钟执行一次
+                                </label>
+                                <label class='radio'>
+                                    <input type="radio" name="cron_type" value="3"> 每十分钟执行一次
+                                </label>
+                                <label class='radio'>
+                                    <input type="radio" name="cron_type" value="4"> 只执行一次
+                                </label>
+                            </div>
+                        </div>
+                    </div>
             </div>
         </div><!-- /.boxbody- -->
 

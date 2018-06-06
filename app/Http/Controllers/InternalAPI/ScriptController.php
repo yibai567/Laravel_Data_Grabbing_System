@@ -40,7 +40,7 @@ class ScriptController extends Controller
             'description'         => 'nullable|string|max:255',
             'list_url'            => 'required|url',
             'languages_type'      => 'required|integer|between:1,3',
-            'step'                => 'required|array',
+            'step'                => 'nullable|array',
             'cron_type'           => 'nullable|integer',
             'operate_user'        => 'required|string|max:50',
             'next_script_id'      => 'nullable|integer',
@@ -48,12 +48,29 @@ class ScriptController extends Controller
             'is_report'           => 'required|integer|between:1,2',
             'is_download'         => 'required|integer|between:1,2',
             'is_proxy'            => 'required|integer|between:1,2',
+            'script_type'         => 'nullable|integer|between:1,2',
+            'generate_type'       => 'nullable|integer|between:1,2',
             'init'                => 'nullable|array'
         ]);
+
+        if ($params['generate_type'] == Script::GENERATE_TYPE_MODULE) {
+            //验证参数
+            ValidatorService::check($params, [
+                'step' => 'required|array',
+            ]);
+        }
 
         //默认值
         if (empty($params['cron_type'])) {
             $params['cron_type'] = Script::CRON_TYPE_KEEP;
+        }
+
+        if (empty($params['script_type'])) {
+            $params['script_type'] = Script::SCRIPT_TYPE_JS;
+        }
+
+        if (empty($params['generate_type'])) {
+            $params['generate_type'] = Script::GENERATE_TYPE_MODULE;
         }
 
         //去name和description空白字符
@@ -71,7 +88,7 @@ class ScriptController extends Controller
             DB::beginTransaction();
 
             //判断当模板类型等于script的时候需要添加配置
-            if ($params['languages_type'] == Script::LANGUAGES_TYPE_CASPERJS) {
+            if ($params['languages_type'] == Script::LANGUAGES_TYPE_CASPERJS && $params['generate_type'] == Script::GENERATE_TYPE_MODULE) {
                 //调用添加配置的方法
                 $scriptConfig = $this->__createScriptConfig($config);
             }
@@ -87,6 +104,8 @@ class ScriptController extends Controller
                 'is_report'           => $params['is_report'],
                 'is_download'         => $params['is_download'],
                 'is_proxy'            => $params['is_proxy'],
+                'generate_type'       => $params['generate_type'],
+                'script_type'         => $params['script_type'],
             ];
 
             if (!empty($scriptConfig)) {
@@ -95,13 +114,15 @@ class ScriptController extends Controller
 
             $script = Script::create($scriptData);
 
-            //生成脚本
-            $executeResult = $this->__generateScript($script);
+            if ($script->generate_type == Script::GENERATE_TYPE_MODULE) {
+                //生成脚本
+                $executeResult = $this->__generateScript($script);
 
-            //生成脚本后,更改script的last_generate_at字段
-            if ($executeResult) {
-                $script->last_generate_at = time();
-                $script->save();
+                //生成脚本后,更改script的last_generate_at字段
+                if ($executeResult) {
+                    $script->last_generate_at = time();
+                    $script->save();
+                }
             }
 
             //整理task数据
@@ -197,24 +218,25 @@ class ScriptController extends Controller
 
             $script->save();
 
-            //生成脚本
-            $executeResult = $this->__generateScript($script);
+            if ($script->generate_type == Script::GENERATE_TYPE_MODULE) {
+                //生成脚本
+                $executeResult = $this->__generateScript($script);
 
-            //生成脚本后,更改script的last_generate_at字段
-            if ($executeResult) {
-                $script->last_generate_at = time();
-                $script->save();
+                //生成脚本后,更改script的last_generate_at字段
+                if ($executeResult) {
+                    $script->last_generate_at = time();
+                    $script->save();
+                }
             }
 
             $result = $script->toArray();
-
             //更改或创建task信息
             $task = $this->__updateTask($params);
 
             $result['task'] = $task;
 
             //判断是否修改配置,有数据就修改,无跳过
-            if (!empty($params['init']) && $params['languages_type'] == Script::LANGUAGES_TYPE_CASPERJS) {
+            if (!empty($params['init']) && $params['languages_type'] == Script::LANGUAGES_TYPE_CASPERJS && $params['generate_type'] == Script::GENERATE_TYPE_MODULE) {
                 $result['init'] = $this->__updateScriptConfig($params['init'], $script);
             }
 
@@ -253,8 +275,15 @@ class ScriptController extends Controller
         }
 
         $result = $script->toArray();
+        if ($result['generate_type'] == Script::GENERATE_TYPE_CONTENT) {
+            if ($result['script_type'] == Script::SCRIPT_TYPE_JS) {
+                $result['file_url'] = '/vendor/script/' . 'script_' . $result['id'] . '.js';
+            }elseif ($result['script_type'] == Script::SCRIPT_TYPE_PHP) {
+                $result['file_url'] = '/vendor/script/' . 'script_' . $result['id'] . '.php';
+            }
+        }
 
-        if ($result['languages_type'] == Script::LANGUAGES_TYPE_CASPERJS) {
+        if ($result['languages_type'] == Script::LANGUAGES_TYPE_CASPERJS && $result['generate_type'] == Script::GENERATE_TYPE_MODULE) {
             //根据一对一关系,查询该script的配置数据
             $scriptConfig = $script->config;
             $result['init'] = [];
@@ -272,12 +301,12 @@ class ScriptController extends Controller
         if (empty($task)) {
             throw new \Dingo\Api\Exception\ResourceException('$task is not found');
         }
+
         //整理task数据岛返回结果
         $result['task_id'] = $task->id;
         $result['name'] = $task->name;
         $result['description'] = $task->description;
         $result['cron_type'] = $task->cron_type;
-
         return $this->resObjectGet($result, 'script', $request->path());
     }
 

@@ -39,7 +39,11 @@ class Script extends Model
 
     //生成模式 1、模块模式 2、文件模式
     const GENERATE_TYPE_MODULE = 1;
-    const GENERATE_TYPE_FILE = 2;
+    const GENERATE_TYPE_CONTENT = 2;
+
+    //脚本类型 1、JS类型 2、PHP类型
+    const SCRIPT_TYPE_JS = 1;
+    const SCRIPT_TYPE_PHP = 2;
 
     /**
      * 表名
@@ -76,6 +80,8 @@ class Script extends Model
         'is_report',
         'is_download',
         'is_proxy',
+        'generate_type',
+        'script_type',
     ];
 
     public function config()

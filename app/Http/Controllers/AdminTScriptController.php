@@ -1,6 +1,7 @@
 <?php namespace App\Http\Controllers;
 
 use App\Models\ScriptConfig;
+use App\Services\FileService;
 use Session;
 use Request;
 use Illuminate\Http\Request as HttpRequest;
@@ -63,9 +64,12 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 		# START FORM DO NOT REMOVE THIS LINE
 		$this->form = [];
 		$this->form[] = ['label'=>'名称','name'=>'name','type'=>'text','validation'=>'required|string|max:100','width'=>'col-sm-10'];
-        $this->form[] = ['label'=>'语言类型','name'=>'languages_type','type'=>'text','validation'=>'required','width'=>'col-sm-10'];
+        $this->form[] = ['label'=>'语言类型','name'=>'languages_type','type'=>'text','validation'=>'required|integer','width'=>'col-sm-10'];
+        $this->form[] = ['label'=>'script脚本生成模式','name'=>'generate_type','type'=>'text','validation'=>'required|integer','width'=>'col-sm-10'];
+        $this->form[] = ['label'=>'脚本类型','name'=>'script_type','type'=>'text','validation'=>'required|integer','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'list_url','name'=>'list_url','type'=>'text','validation'=>'required|string','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'描述','name'=>'description','type'=>'textarea','validation'=>'required|max:255','width'=>'col-sm-10'];
+        $this->form[] = ['label'=>'发布内容','name'=>'content','type'=>'textarea','validation'=>'required|string','width'=>'col-sm-10'];
 		$this->form[] = ['label'=>'load_images','name'=>'load_images','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|true;2|false;'];
         $this->form[] = ['label'=>'load_plugins','name'=>'load_plugins','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|true;2|false;'];
         $this->form[] = ['label'=>'log_level','name'=>'log_level','type'=>'radio','validation'=>'required|string','width'=>'col-sm-10','dataenum'=>'debug;error;'];
@@ -73,7 +77,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $this->form[] = ['label'=>'width','name'=>'width','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'height','name'=>'height','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
 
-        $this->form[] = ['label'=>'步骤','name'=>'step','type'=>'textarea','validation'=>'required','width'=>'col-sm-10'];
+        $this->form[] = ['label'=>'步骤','name'=>'step','type'=>'textarea','validation'=>'nullable','width'=>'col-sm-10'];
         $this->form[] = ['name'=>'script_model_params','type'=>'text'];
 		$this->form[] = ['label'=>'执行规则','name'=>'cron_type','type'=>'radio','validation'=>'nullable|integer','width'=>'col-sm-10','dataenum'=>'1|每分钟执行一次;2|每五分钟执行一次;3|每十五分钟执行一次;','value'=>'1'];
         $this->form[] = ['label'=>'是否上报','name'=>'is_report','type'=>'checkout','validation'=>'nullable|integer','width'=>'col-sm-10','value'=>'1'];
@@ -460,13 +464,16 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         if (!$result) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "list_url格式错误", "error");
         }
-        if (empty($formParams['script_model_params'])) {
+
+        if (empty($formParams['script_model_params']) && $formParams['generate_type'] == Script::GENERATE_TYPE_MODULE) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "步骤必填", "error");
         }
 
-        foreach ($formParams['script_model_params'] as $key => $value) {
-            array_unshift($value, $key);
-            $newData[] = $value;
+        if ($formParams['generate_type'] == Script::GENERATE_TYPE_MODULE) {
+            foreach ($formParams['script_model_params'] as $key => $value) {
+                array_unshift($value, $key);
+                $newData[] = $value;
+            }
         }
 
         $data['step'] = $newData;
@@ -597,6 +604,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         }
 
         $data['operate_user'] = CRUDBooster::myName();
+        $data['generate_type'] = Script::GENERATE_TYPE_MODULE;
         try {
             $res = InternalAPIService::post('/script', $data);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
@@ -1031,7 +1039,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
     public function getPublish($id)
     {
         try {
-            $res = InternalAPIService::get('/script/generate', ['id' => $id]);
+            $res = InternalAPIService::get('/script/publish', ['id' => $id]);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
         }
@@ -1113,32 +1121,82 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
     }
     //脚本发布
-    public function postScriptSave(HttpRequest $request)
+    public function postScriptSave()
     {
 
-        $params = $request->all();
+        $this->cbLoader();
+        if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE) {
+            CRUDBooster::insertLog(trans('crudbooster.log_try_add_save',['name'=>Request::input($this->title_field),'module'=>CRUDBooster::getCurrentModule()->name ]));
+            CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
+        }
 
+        $this->validation();
+        $this->input_assignment();
+
+        $data = [];
+        $formParams = $this->arr;
+
+        $result = preg_match("/^(http|https):\/\//i", $formParams['list_url']);
+
+        if (!$result) {
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "list_url格式错误", "error");
+        }
+
+        $data['name'] = $formParams['name'];
+        $data['description'] = $formParams['description'];
+        $data['list_url'] = $formParams['list_url'];
+
+        $data['cron_type'] = $formParams['cron_type'];
+        $data['languages_type'] = $formParams['languages_type'];
+        $data['requirement_pool_id'] = $formParams['requirement_pool_id'];
+        $data['next_script_id'] = $formParams['next_script_id'];
+        if (empty($formParams['is_report'])) {
+            $data['is_report'] = Script::REPORT_DATA_FALSE;
+        } else {
+            $data['is_report'] = $formParams['is_report'];
+        }
+
+        if (empty($formParams['is_download'])) {
+            $data['is_download'] = Script::DOWNLOAD_IMAGE_FALSE;
+        } else {
+            $data['is_download'] = $formParams['is_download'];
+        }
+        if (empty($formParams['is_proxy'])) {
+            $data['is_proxy'] = Script::WALL_OVER_FALSE;
+        } else {
+            $data['is_proxy'] = $formParams['is_proxy'];
+        }
+        $data['script_type'] = $formParams['script_type'];
+        $data['operate_user'] = CRUDBooster::myName();
+        $data['generate_type'] = Script::GENERATE_TYPE_CONTENT;
+        $res = [];
         try {
-
-            $url = $params['url'];
-            $content=$params['description'];
-            $type = $params['type'];
-            if ($type == 1) {
-                file_put_contents(base_path().'/uploadtest/'.date('Y-m-d-H-i-s').'.php',$content);
-            } else {
-                file_put_contents(base_path().'/uploadtest/'.date('Y-m-d-H-i-s').'.js',$content);
-            }
-            //$string = '时间:'.date('Y-m-d H:i:s')." ".'url:'.$url." ".'des:'.$description." ".'type:'.$type."\r\n";
-
+            $res = InternalAPIService::post('/script', $data);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
-
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
         }
 
+        if (empty($res)) {
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "创建script信息失败", "error");
+        }
+
+        //命名文件名称
+        $filename = '';
+        if ($formParams['script_type'] == Script::SCRIPT_TYPE_JS) {
+            $filename = 'script_' . $res['id'] . '.js';
+        } elseif ($formParams['script_type'] == Script::SCRIPT_TYPE_PHP) {
+            $filename = 'script_' . $res['id'] . '.php';
+        }
+
+        $fileService = new FileService();
+        $result = $fileService->create($filename, $formParams['content']);
+
+        //检查文件是否生成成功
+        if (!$result) {
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "生成脚本文件失败", "error");
+        }
+
         CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script", "创建成功", "success");
-
-
-
 
     }
 

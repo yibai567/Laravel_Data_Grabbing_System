@@ -73,20 +73,26 @@
                     <div class='form-group  header-group-0'>
                         <div class="col-sm-2"></div>
                         <div class='form-group  header-group-0 table-bordered col-sm-10'>
-                            <label class='control-label col-sm-2'>是否加载图片</label>
-                            <div class="col-sm-4">
+                            <label class='control-label col-sm-3'>是否加载图片</label>
+                            <div class="col-sm-3">
                                 <input type="checkbox" name="load_images" value="1">
                                 <div class="text-danger"></div>
                                 <p class='help-block'></p>
                             </div>
-                            <label class='control-label col-sm-2'>是否加载插件</label>
-                            <div class="col-sm-4">
+                            <label class='control-label col-sm-3'>是否加载插件</label>
+                            <div class="col-sm-3">
                                 <input type="checkbox" name="load_plugins" value="1">
                                 <div class="text-danger"></div>
                                 <p class='help-block'></p>
                             </div>
-                            <label class='control-label col-sm-2'>log_level</label>
-                            <div class="col-sm-4">
+                            <label class='control-label col-sm-3'>verbose</label>
+                            <div class="col-sm-9">
+                                <input type="checkbox" name="verbose" value="1">
+                                <div class="text-danger"></div>
+                                <p class='help-block'></p>
+                            </div>
+                            <label class='control-label col-sm-3'>log_level</label>
+                            <div class="col-sm-9">
                                 <label class='radio-inline'>
                                     <input type="radio" name="log_level" value="debug" checked> debug
                                 </label>
@@ -97,20 +103,14 @@
                                     <input type="radio" name="log_level" value="error"> error
                                 </label>
                             </div>
-                            <label class='control-label col-sm-2'>verbose</label>
-                            <div class="col-sm-4">
-                                <input type="checkbox" name="verbose" value="1">
-                                <div class="text-danger"></div>
-                                <p class='help-block'></p>
-                            </div>
-                            <label class='control-label col-sm-2'>width</label>
-                            <div class="col-sm-4">
+                            <label class='control-label col-sm-3'>width</label>
+                            <div class="col-sm-3">
                                 <input type='text' class='form-control' name="width" id="width" value=''/>
                                 <div class="text-danger"></div>
                                 <p class='help-block'></p>
                             </div>
-                            <label class='control-label col-sm-2'>height</label>
-                            <div class="col-sm-4">
+                            <label class='control-label col-sm-3'>height</label>
+                            <div class="col-sm-3">
                                 <input type='text' class='form-control' name="height" id="width" value=''/>
                                 <div class="text-danger"></div>
                                 <p class='help-block'></p>
@@ -182,7 +182,7 @@
                         <div style="clear: both;"></div>
                     </div>
                 </div>
-                <div class='form-group header-group-0 ' id='form-group-cron_type'>
+                <div class='form-group header-group-0 ' id='form-group-is_download'>
                     <label class='control-label col-sm-2'>是否下载图片
                     </label>
                     <div>
@@ -196,7 +196,7 @@
                     </div>
                 </div>
 
-                <div class='form-group header-group-0 ' id='form-group-cron_type'>
+                <div class='form-group header-group-0 ' id='form-group-is_report'>
                     <label class='control-label col-sm-2'>是否上报
                     </label>
                     <div>
@@ -209,7 +209,7 @@
                         </div>
                     </div>
                 </div>
-                <div class='form-group header-group-0 ' id='form-group-cron_type'>
+                <div class='form-group header-group-0 ' id='form-group-is_proxy'>
                     <label class='control-label col-sm-2'>是否翻墙
                     </label>
                     <div>
@@ -222,7 +222,7 @@
                         </div>
                     </div>
                 </div>
-                <div class='form-group header-group-0 ' id='form-group-name'>
+                <div class='form-group header-group-0 ' id='form-group-requirement_pool_id'>
                     <label class='control-label col-sm-2'>需求池ID
                     </label>
                     <div class="col-xs-5">
@@ -231,7 +231,7 @@
                         <p class='help-block'></p>
                     </div>
                 </div>
-                <div class='form-group header-group-0 ' id='form-group-name'>
+                <div class='form-group header-group-0 ' id='form-group-next_script_id'>
                     <label class='control-label col-sm-2'>下一步脚本ID
                     </label>
                     <div class="col-xs-5">

@@ -97,7 +97,7 @@ $api->version(
         $api->post('/script/update','ScriptController@update');
         $api->get('/script','ScriptController@retrieve');
         $api->get('/scripts','ScriptController@all');
-        $api->get('/script/generate','ScriptController@generateScript');
+        $api->get('/script/publish','ScriptController@publishScript');
         $api->get('/script/queue','ScriptController@getByQueueName');
 
         $api->post('/script_model','ScriptModelController@create');
