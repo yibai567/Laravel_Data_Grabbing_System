@@ -58,5 +58,6 @@ $api->version(
         $api->get('/quirements', 'QuirementPoolController@all');
         $api->get('/quirement', 'QuirementPoolController@retrieve');
 
+
     }
 );

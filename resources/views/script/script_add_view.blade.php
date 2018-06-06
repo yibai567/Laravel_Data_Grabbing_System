@@ -24,6 +24,7 @@
     </div>
     <?php
         $action = (@$row)?CRUDBooster::mainpath("edit-save/$row[id]"):CRUDBooster::mainpath("add-save");
+
         $return_url = ($return_url)?:g('return_url');
     ?>
     <form class='form-horizontal' method='post' id="form" enctype="multipart/form-data" action='{{$action}}'>

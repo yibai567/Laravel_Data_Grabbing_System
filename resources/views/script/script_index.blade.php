@@ -53,6 +53,32 @@
       </div>
     </div>
     @endif
+     <div class="container kv-main"   id="showupload" style="display: none">
+
+             <?php
+            $action = CRUDBooster::mainpath("upload-save");
+
+            ?>
+            <form enctype="multipart/form-data" action='{{$action}}' method='post' id='form'>
+
+                <div class="form-group">
+                    <input id="file-5" class="file" name="files" required type="file"  data-preview-file-type="any" data-upload-url="#">
+                </div>
+                {{ csrf_field() }}
+
+                    <div class="input-group">
+                        <span class="input-group-addon">URL</span>
+                        <input type="text" class="form-control" name='url' required maxlength='255' placeholder="请填写url" >
+                    </div>
+                  <br/>
+                  <div align="center">
+                    <!-- <button type="button" class="btn btn-primary" onclick="submit()">保存</button> -->
+                     <input type="submit" name="submit" value='保存' class='btn btn-primary'>
+                </div>
+            </form>
+
+        </div>
+
 
     <div class="box">
       <div class="box-header">
@@ -65,6 +91,12 @@
             </a>
             <a href='{{CRUDBooster::mainpath("add?languagesType=3")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
               <i class="fa fa-plus-circle"></i> Api
+            </a>
+            <a id="uploadfile" class="btn btn-sm btn-success" title="上传脚本">
+              <i class="fa fa-plus-circle"></i> 上传脚本
+            </a>
+             <a href='{{CRUDBooster::mainpath("upload")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="发布脚本">
+              <i class="fa fa-plus-circle"></i> 发布脚本
             </a>
         <div class="box-tools pull-{{ trans('crudbooster.right') }}" style="position: relative;margin-top: -5px;margin-right: -10px">
 
@@ -399,6 +431,39 @@
                 <!-- /.modal-content -->
               </div>
             </div>
+
+            <link href="{{URL::asset('/css/fileinput.css')}}" media="all" rel="stylesheet" type="text/css" />
+
+            <script src="{{URL::asset('/js/jquery-1.9.1.min.js')}}"></script>
+
+            <script src="{{URL::asset('/js/fileinput.js')}}" type="text/javascript"></script>
+
+            <script src="{{URL::asset('/js/bootstrap.min.js')}}" type="text/javascript"></script>
+
+            <script src="{{URL::asset('/js/layer-v3.1.1/layer/layer.js')}}"></script>
+              <script type="text/javascript">
+
+                //弹出一个页面层
+                  $('#uploadfile').on('click', function(){
+                    layer.open({
+                      type: 1,
+                      title:['上传脚本', 'font-size:14px;'],
+                      area: ['600px', '440px'],
+                      shadeClose: true, //点击遮罩关闭
+                      content: $("#showupload"),
+                      cancel: function(index, layero){
+
+                            $("#showupload").hide()
+                      }
+                    });
+                  });
+            </script>
+
+
+
+
+
+
    @if(!is_null($post_index_html) && !empty($post_index_html))
        {!! $post_index_html !!}
    @endif
