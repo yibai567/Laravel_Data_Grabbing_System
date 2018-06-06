@@ -38,7 +38,7 @@ class ScriptController extends Controller
         ValidatorService::check($params, [
             'name'                => 'required|string|max:100',
             'description'         => 'nullable|string|max:255',
-            'list_url'            => 'nullable|url',
+            'list_url'            => 'required|url',
             'languages_type'      => 'required|integer|between:1,3',
             'step'                => 'required|array',
             'cron_type'           => 'nullable|integer',
@@ -95,6 +95,15 @@ class ScriptController extends Controller
 
             $script = Script::create($scriptData);
 
+            //生成脚本
+            $executeResult = $this->__generateScript($script);
+
+            //生成脚本后,更改script的last_generate_at字段
+            if ($executeResult) {
+                $script->last_generate_at = time();
+                $script->save();
+            }
+
             //整理task数据
             $taskData = [
                 'languages_type' => $params['languages_type'],
@@ -115,18 +124,14 @@ class ScriptController extends Controller
             throw new \Dingo\Api\Exception\ResourceException("create script or create script config is failed");
         }
 
-        $result = [];
-        if (!empty($script)) {
-            $result = $script->toArray();
-        }
+
+        $result = $script->toArray();
 
         if (!empty($scriptConfig)) {
             $result['init'] = $scriptConfig;
         }
 
-        if (!empty($task)) {
-            $result['task'] = $task->toArray();
-        }
+        $result['task'] = $task->toArray();
 
         return $this->resObjectGet($result, 'script', $request->path());
     }
@@ -192,6 +197,15 @@ class ScriptController extends Controller
 
             $script->save();
 
+            //生成脚本
+            $executeResult = $this->__generateScript($script);
+
+            //生成脚本后,更改script的last_generate_at字段
+            if ($executeResult) {
+                $script->last_generate_at = time();
+                $script->save();
+            }
+
             $result = $script->toArray();
 
             //更改或创建task信息
@@ -211,6 +225,7 @@ class ScriptController extends Controller
             Log::error('Script update or __updateScriptConfig    Exception:'."\t".$e->getCode()."\t".$e->getMessage());
             throw new \Dingo\Api\Exception\ResourceException("update script or update script config is failed");
         }
+
 
         return $this->resObjectGet($result, 'script', $request->path());
     }
@@ -304,14 +319,15 @@ class ScriptController extends Controller
         return $this->resObjectGet($result, 'script', $request->path());
     }
 
+
     /**
-     * generateScript
-     * 生成脚本
+     * publishScript
+     * 发布脚本
      *
      * @param $id
      * @return array
      */
-    public function generateScript(Request $request)
+    public function publishScript(Request $request)
     {
         $params = $request->all();
 
@@ -327,6 +343,22 @@ class ScriptController extends Controller
         if (empty($script)) {
             throw new \Dingo\Api\Exception\ResourceException('$script is not found');
         }
+
+        //生成脚本之后,做的一系列状态操作
+        $result =$this->__afterPublishScript($script);
+
+        return $this->resObjectGet($result, 'script', $request->path());
+    }
+
+    /**
+     * __generateScript
+     * 生成脚本
+     *
+     * @param script $script
+     * @return boolean
+     */
+    public function __generateScript($script)
+    {
 
         $scriptLanguagesType = $script->languages_type;
 
@@ -369,10 +401,7 @@ class ScriptController extends Controller
             throw new \Dingo\Api\Exception\ResourceException("file generation is failed");
         }
 
-        //生成脚本之后,做的一系列状态操作
-        $result =$this->__afterScriptGenerated($script);
-
-        return $this->resObjectGet($result, 'script', $request->path());
+        return $result;
     }
 
     /**
@@ -642,13 +671,13 @@ class ScriptController extends Controller
     }
 
     /**
-     * __afterScriptGenerated
-     * 生成脚本后,更改script和task状态,生成task_statistics
+     * __afterPublishScript
+     * 发布脚本后,更改script和task状态,生成task_statistics
      *
      * @param Script $script
      * @return boolean
      */
-    private function __afterScriptGenerated($script)
+    private function __afterPublishScript($script)
     {
 
         try {
@@ -656,7 +685,6 @@ class ScriptController extends Controller
 
             //更新script状态和最后生成时间
             $script->status = Script::STATUS_GENERATE;
-            $script->last_generate_at = time();
             $script->save();
 
             //查找script对应的初始化的task(详情script不启动任务),修改状态

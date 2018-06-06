@@ -37,6 +37,10 @@ class Script extends Model
     const WALL_OVER_TRUE = 1;
     const WALL_OVER_FALSE = 2;
 
+    //生成模式 1、模块模式 2、文件模式
+    const GENERATE_TYPE_MODULE = 1;
+    const GENERATE_TYPE_FILE = 2;
+
     /**
      * 表名
      */

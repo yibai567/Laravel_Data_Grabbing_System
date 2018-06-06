@@ -66,6 +66,97 @@
                     </div>
                 </div>
                 @if ($row[languages_type] == 1)
+                    <div class='form-group header-group-0' id='form-group-width'>
+                        <label class='control-label col-sm-2'>CasperJS配置:</label>
+                    </div>
+                    <div class='form-group  header-group-0'>
+                        <div class="col-sm-2"></div>
+                        <div class='form-group  header-group-0 table-bordered col-sm-10'>
+                            <label class='control-label col-sm-2'>是否加载图片</label>
+                            <div class="col-sm-4">
+                                @if ($row[init][load_images] == 1)
+                                    <label>
+                                        <input type="checkbox" checked name="load_images" value="1">
+                                    </label>
+                                @else
+                                    <label>
+                                        <input type="checkbox" name="load_images" value="1">
+                                    </label>
+                                @endif
+                            </div>
+                            <label class='control-label col-sm-2'>是否加载插件</label>
+                            <div class="col-sm-4">
+                                @if ($row[init][load_plugins] == 1)
+                                    <label>
+                                        <input type="checkbox" checked name="load_plugins" value="1">
+                                    </label>
+                                @else
+                                    <label>
+                                        <input type="checkbox" name="load_plugins" value="1">
+                                    </label>
+                                @endif
+                            </div>
+                            <label class='control-label col-sm-2'>log_level</label>
+                            <div class="col-sm-4">
+                                @if ($row[init][log_level] == 'debug')
+                                    <label class='radio-inline'>
+                                        <input type="radio" name="log_level" value="debug" checked> debug
+                                    </label>
+                                    <label class='radio-inline'>
+                                        <input type="radio" name="log_level" value="info"> info
+                                    </label>
+                                    <label class='radio-inline'>
+                                        <input type="radio" name="log_level" value="error"> error
+                                    </label>
+                                @elseif ($row[init][log_level] == 'info')
+                                    <label class='radio-inline'>
+                                        <input type="radio" name="log_level" value="debug"> debug
+                                    </label>
+                                    <label class='radio-inline'>
+                                        <input type="radio" name="log_level" value="info" checked> info
+                                    </label>
+                                    <label class='radio-inline'>
+                                        <input type="radio" name="log_level" value="error"> error
+                                    </label>
+                                @else
+                                    <label class='radio-inline'>
+                                        <input type="radio" name="log_level" value="debug"> debug
+                                    </label>
+                                    <label class='radio-inline'>
+                                        <input type="radio" name="log_level" value="info"> info
+                                    </label>
+                                    <label class='radio-inline'>
+                                        <input type="radio" name="log_level" value="error" checked> error
+                                    </label>
+
+                                @endif
+                            </div>
+                            <label class='control-label col-sm-2'>verbose</label>
+                            <div class="col-sm-4">
+                                @if ($row[init][verbose] == 1)
+                                    <label>
+                                        <input type="checkbox" checked name="verbose" value="1">
+                                    </label>
+                                @else
+                                    <label>
+                                        <input type="checkbox" name="verbose" value="1">
+                                    </label>
+                                @endif
+                            </div>
+                            <label class='control-label col-sm-2'>width</label>
+                            <div class="col-sm-4">
+                                <input type='text' class='form-control' name="width" id="width" value='{{$row[init][width]}}'/>
+                                <div class="text-danger"></div>
+                                <p class='help-block'></p>
+                            </div>
+                            <label class='control-label col-sm-2'>height</label>
+                            <div class="col-sm-4">
+                                <input type='text' class='form-control' name="height" id="width" value='{{$row[init][height]}}'/>
+                                <div class="text-danger"></div>
+                                <p class='help-block'></p>
+                            </div>
+                        </div>
+                    </div>
                     <div class='form-group header-group-0 ' id='form-group-load_images'>
                         <label class='control-label col-sm-2'>是否加载图片
                         </label>
