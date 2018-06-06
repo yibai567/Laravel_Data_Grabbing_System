@@ -3,11 +3,17 @@
 use App\Models\ScriptConfig;
 use Session;
 use Request;
+use Illuminate\Http\Request as HttpRequest;
 use DB;
 use CB;
 use CRUDBooster;
 use App\Models\Script;
 use App\Services\InternalAPIService;
+
+use Storage;
+
+use Symfony\Component\HttpFoundation\File;
+use Symfony\Component\HttpFoundation\File\UploadeFile;
 
 class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBController {
 
@@ -351,6 +357,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
     //增加界面
     public function getAdd() {
+
         $languagesType = Request::get('languagesType');
         if (!$languagesType) {
             $languagesType = Script::LANGUAGES_TYPE_CASPERJS;
@@ -427,6 +434,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         } catch (\Dingo\Api\Exception\ResourceException $e) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "该数据信息有误", "error");
         }
+
         $this->cbView('script/script_edit_view',$data);
     }
 
@@ -647,7 +655,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $this->cbLoader();
 
         $module = CRUDBooster::getCurrentModule();
-
         if(!CRUDBooster::isView() && $this->global_privilege==FALSE) {
             CRUDBooster::insertLog(trans('crudbooster.log_try_view',['module'=>$module->name]));
             CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
@@ -1021,7 +1028,8 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
     }
 
     //发布
-    public function getPublish($id) {
+    public function getPublish($id)
+    {
         try {
             $res = InternalAPIService::get('/script/generate', ['id' => $id]);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
@@ -1029,6 +1037,111 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         }
         CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "创建成功", "success");
     }
+    //发布脚本
+    public function getUpload()
+    {
+
+        $data['page_title'] = '发布脚本';
+        $data['languages_type'] = $languagesType;
+        $this->cbView('script/upload_add_view', $data);
+
+    }
+    //上传脚本
+    public function postUploadSave(HttpRequest $request)
+    {
+
+        $params = $request->all();
+
+        if ($request->isMethod('post')) {
+
+            $file = $request->file('files');
+
+
+            if ($file->isValid()) {
+                // 获取文件相关信息
+                $originalName = $file->getClientOriginalName(); // 文件原名
+
+                $ext = $file->getClientOriginalExtension();     // 扩展名
+
+                $realPath = $file->getRealPath();   //临时文件的绝对路径
+
+                $type = $file->getClientMimeType();     // image/jpeg
+
+                $size = $file->getClientSize();    //文件大小
+
+                $maxSize = 5*1024*1024;
+                //大小判断
+                if ($size > $maxSize) {
+
+                    CRUDBooster::redirect($_SERVER['HTTP_REFERER'], '文件大小超出5M', "error");
+                }
+                //类型判断
+                if ($ext == 'php' || $ext == 'js') {
+
+                    // 生成上传的文件名
+                    $fileName = date('Y-m-d-H-i-s') . '-' . uniqid() . '.' . $ext;
+                    // 上传文件到指定目录
+                    $path = $file->move(base_path() . '/uploadtest', $fileName);
+
+                    //生成的文件路径
+                    //$uploadName='/uploadtest/'.$fileName;
+
+                    //上传判断
+                    if (empty($path)) {
+
+                        CRUDBooster::redirect($_SERVER['HTTP_REFERER'], '文件上传失败', "error");
+                    } else {
+
+                        CRUDBooster::redirect($_SERVER['HTTP_REFERER'], '文件上传成功', "success");
+                    }
+
+
+                } else {
+
+                    CRUDBooster::redirect($_SERVER['HTTP_REFERER'], '文件类型不允许', "error");
+                }
+
+            }
+
+
+        } else {
+
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "请求失败", "error");
+        }
+
+
+
+    }
+    //脚本发布
+    public function postScriptSave(HttpRequest $request)
+    {
+
+        $params = $request->all();
+
+        try {
+
+            $url = $params['url'];
+            $content=$params['description'];
+            $type = $params['type'];
+            if ($type == 1) {
+                file_put_contents(base_path().'/uploadtest/'.date('Y-m-d-H-i-s').'.php',$content);
+            } else {
+                file_put_contents(base_path().'/uploadtest/'.date('Y-m-d-H-i-s').'.js',$content);
+            }
+            //$string = '时间:'.date('Y-m-d H:i:s')." ".'url:'.$url." ".'des:'.$description." ".'type:'.$type."\r\n";
+
+        } catch (\Dingo\Api\Exception\ResourceException $e) {
+
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+        }
+
+        CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script", "创建成功", "success");
+
+
+
+
+    }
+
 
     //By the way, you can still create your own method in here... :)
 
