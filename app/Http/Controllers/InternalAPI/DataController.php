@@ -219,10 +219,6 @@ class DataController extends Controller
 
             //内容已存在,更新信息
             if (!empty($row)) {
-                if (!empty($value['read_count']) && $row->read_count != $value['read_count']) {
-                    $row->read_count = $value['read_count'];
-                    $row->save();
-                }
                 continue;
             }
 
