@@ -41,6 +41,7 @@ class RabbitMQService extends Service
         $this->channel->exchange_declare('image', 'direct', false, true, false);
         $this->channel->exchange_declare('instant_task', 'direct', false, true, false);
         $this->channel->exchange_declare('error', 'fanout', false, true, false);
+        $this->channel->exchange_declare('dispatch', 'fanout', false, true, false);
 
         /**
          * 声明队列
@@ -68,6 +69,8 @@ class RabbitMQService extends Service
 
         $this->channel->queue_declare('error_msg', false, true, false, false);
 
+        $this->channel->queue_declare('dispatch_news', false, true, false, false);
+
         // 队列和交换器绑定
         $this->channel->queue_bind('result_img_processing', 'save_result');
         $this->channel->queue_bind('result_report', 'save_result');
@@ -83,6 +86,8 @@ class RabbitMQService extends Service
         // $this->channel->queue_bind('engine_chromeless', 'instant_task', 'chromeless');
 
         $this->channel->queue_bind('error_msg', 'error');
+
+        $this->channel->queue_bind('dispatch_news', 'dispatch');
     }
 
     /**
