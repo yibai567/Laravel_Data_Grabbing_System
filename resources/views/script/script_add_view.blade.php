@@ -71,7 +71,7 @@
                         <label class='control-label col-sm-2'>CasperJS配置:</label>
                     </div>
                     <div class='form-group  header-group-0'>
-                        <div class="col-sm-2"></div>
+                        <label class="col-sm-2"></label>
                         <div class='form-group  header-group-0 table-bordered col-sm-10'>
                             <label class='control-label col-sm-3'>是否加载图片</label>
                             <div class="col-sm-3">

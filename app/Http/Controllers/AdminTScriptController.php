@@ -481,23 +481,27 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data['name'] = $formParams['name'];
         $data['description'] = $formParams['description'];
         $data['list_url'] = $formParams['list_url'];
-        if (empty($formParams['load_images'])) {
-            $formParams['load_images'] = ScriptConfig::DEFAULT_LOAD_IMAGES;
+
+        if ($formParams['generate_type'] == Script::GENERATE_TYPE_MODULE) {
+            if (empty($formParams['load_images'])) {
+                $formParams['load_images'] = ScriptConfig::DEFAULT_LOAD_IMAGES;
+            }
+            if (empty($formParams['load_plugins'])) {
+                $formParams['load_plugins'] = ScriptConfig::DEFAULT_LOAD_PLUGINS;
+            }
+            if (empty($formParams['verbose'])) {
+                $formParams['verbose'] = ScriptConfig::DEFAULT_VERBOSE;
+            }
+            $data['init'] = [
+                'load_images' => $formParams['load_images'],
+                'load_plugins' => $formParams['load_plugins'],
+                'log_level' => $formParams['log_level'],
+                'verbose' => $formParams['verbose'],
+                'width' => $formParams['width'],
+                'height' => $formParams['height'],
+            ];
         }
-        if (empty($formParams['load_plugins'])) {
-            $formParams['load_plugins'] = ScriptConfig::DEFAULT_LOAD_PLUGINS;
-        }
-        if (empty($formParams['verbose'])) {
-            $formParams['verbose'] = ScriptConfig::DEFAULT_VERBOSE;
-        }
-        $data['init'] = [
-                        'load_images' => $formParams['load_images'],
-                        'load_plugins' => $formParams['load_plugins'],
-                        'log_level' => $formParams['log_level'],
-                        'verbose' => $formParams['verbose'],
-                        'width' => $formParams['width'],
-                        'height' => $formParams['height'],
-                         ];
+
         $data['cron_type'] = $formParams['cron_type'];
         $data['languages_type'] = $formParams['languages_type'];
         $data['requirement_pool_id'] = $formParams['requirement_pool_id'];

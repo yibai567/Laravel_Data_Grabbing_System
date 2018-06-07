@@ -66,12 +66,12 @@
                         <p class='help-block'></p>
                     </div>
                 </div>
-                @if ($row[languages_type] == 1)
+                @if ($row[languages_type] == 1 && $row[generate_type] == 1)
                     <div class='form-group header-group-0' id='form-group-width'>
                         <label class='control-label col-sm-2'>CasperJS配置:</label>
                     </div>
                     <div class='form-group  header-group-0'>
-                        <div class="col-sm-2"></div>
+                        <lable class="col-sm-2"></lable>
                         <div class='form-group  header-group-0 table-bordered col-sm-10'>
                             <label class='control-label col-sm-3'>是否加载图片</label>
                             <div class="col-sm-3">
@@ -226,7 +226,7 @@
                 </div>
                 @else
                     <div class='form-group header-group-0 ' id='form-group-name'>
-                        <label class='control-label col-sm-2'>脚本地址链接
+                        <label class='control-label col-sm-2'>脚本详情
                         </label>
                         <div class="col-xs-5">
                             <a href="{{$row['file_url']}}"  target="_blank">查看脚本</a>
@@ -381,7 +381,8 @@
             </div>
         </div><!-- /.box-footer-->
     </form>
-    <aside class="control-sidebar control-sidebar-dark" style="width: 330px; right:0; height: 100%">
+    @if ($row['generate_type'] == 1)
+        <aside class="control-sidebar control-sidebar-dark" style="width: 330px; right:0; height: 100%">
         <ul id="foo" class="block__list block__list_words">
             @if (!empty($script_model))
                 @foreach($script_model as $key=>$value)
@@ -436,6 +437,7 @@
             @endif
         </ul>
     </aside>
+    @endif
 </div>
 <script src="http://rubaxa.github.io/Sortable/Sortable.js"></script>
 <script>

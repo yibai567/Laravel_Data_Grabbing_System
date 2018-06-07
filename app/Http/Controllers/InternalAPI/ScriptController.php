@@ -118,12 +118,14 @@ class ScriptController extends Controller
                 //生成脚本
                 $executeResult = $this->__generateScript($script);
 
-                //生成脚本后,更改script的last_generate_at字段
-                if ($executeResult) {
-                    $script->last_generate_at = time();
-                    $script->save();
+                if (!$executeResult) {
+                    throw new \Dingo\Api\Exception\ResourceException('generate script is fail');
                 }
             }
+
+            //生成脚本后,更改script的last_generate_at字段
+            $script->last_generate_at = time();
+            $script->save();
 
             //整理task数据
             $taskData = [
@@ -222,8 +224,8 @@ class ScriptController extends Controller
                 //生成脚本
                 $executeResult = $this->__generateScript($script);
 
-                //生成脚本后,更改script的last_generate_at字段
                 if ($executeResult) {
+                    //生成脚本后,更改script的last_generate_at字段
                     $script->last_generate_at = time();
                     $script->save();
                 }
@@ -236,7 +238,7 @@ class ScriptController extends Controller
             $result['task'] = $task;
 
             //判断是否修改配置,有数据就修改,无跳过
-            if (!empty($params['init']) && $params['languages_type'] == Script::LANGUAGES_TYPE_CASPERJS && $params['generate_type'] == Script::GENERATE_TYPE_MODULE) {
+            if (!empty($params['init']) && $params['languages_type'] == Script::LANGUAGES_TYPE_CASPERJS) {
                 $result['init'] = $this->__updateScriptConfig($params['init'], $script);
             }
 
@@ -247,7 +249,6 @@ class ScriptController extends Controller
             Log::error('Script update or __updateScriptConfig    Exception:'."\t".$e->getCode()."\t".$e->getMessage());
             throw new \Dingo\Api\Exception\ResourceException("update script or update script config is failed");
         }
-
 
         return $this->resObjectGet($result, 'script', $request->path());
     }
