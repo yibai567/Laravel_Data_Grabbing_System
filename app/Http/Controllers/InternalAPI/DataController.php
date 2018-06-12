@@ -200,6 +200,9 @@ class DataController extends Controller
                 'images'     => 'nullable|string',
             ]);
 
+            if (empty($value['title']) && empty($value['content'])) {
+                continue;
+            }
             //监测content内容和title,有则进行加密,便于后面查重
             if (!empty($value['content'])) {
                 $value['content'] = trim($value['content']);
