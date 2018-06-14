@@ -40,5 +40,19 @@ class BlockNews extends Model
         "deleted_at",
     ];
 
+    /**
+     *
+     * 可更新的字段
+     */
+    protected $fillable = [
+        'requirement_id',
+        'list_url',
+        'title',
+        'content',
+        'detail_url',
+        'show_time',
+        'read_count',
+    ];
+
 
 }

@@ -122,12 +122,18 @@ $api->version(
         $api->get('/task_run_log','TaskRunLogController@retrieve');
 
         $api->get('/task','TaskController@retrieve');
-          //收集资源
+        //收集资源
         $api->post('/quirement', 'QuirementPoolController@create');
         $api->post('/quirement/update', 'QuirementPoolController@update');
         $api->get('/quirements', 'QuirementPoolController@all');
         $api->get('/quirement', 'QuirementPoolController@retrieve');
         $api->get('/quirement/update_status','QuirementPoolController@updateStatus');
+
+        //区块链新闻
+        $api->get('/block_news','BlockNewsController@all');
+        $api->get('/block_news/companies', 'QuirementPoolController@getCompanies');
+        $api->get('/block_news/total','BlockNewsController@getTotal');
+
 
 
     }

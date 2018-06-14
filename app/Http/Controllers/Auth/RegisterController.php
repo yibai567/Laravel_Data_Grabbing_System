@@ -63,6 +63,11 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        $email = explode('@', $data['email']);
+        if ($email[1] != 'jinse.com') {
+            return $user = new User;
+        }
+
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],

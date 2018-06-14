@@ -58,6 +58,11 @@ $api->version(
         $api->get('/quirements', 'QuirementPoolController@all');
         $api->get('/quirement', 'QuirementPoolController@retrieve');
 
+        //微信公众号消息
+        $api->post('/weixin/message', 'WeiXinMessageController@create');
 
+        //区块链新闻
+        $api->get('/block_news','BlockNewsController@all');
+        $api->get('/block_news/companies', 'QuirementPoolController@getCompanies');
     }
 );

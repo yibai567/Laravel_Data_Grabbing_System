@@ -190,13 +190,10 @@ class QuirementPoolController extends Controller
 
         $params = $request->all();
 
-
-
         ValidatorService::check($params, [
             "id" => "required|integer",
             "user_id"=>"required|integer"
         ]);
-
 
         $req = Requirement::find($params['id']);
         if (empty($req)) {
@@ -220,5 +217,56 @@ class QuirementPoolController extends Controller
 
      }
 
+    /**
+     * getCompanies
+     * 获取公司名称
+     *
+     * @return array
+     */
+
+     public function getCompanies(Request $request)
+     {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            "offset" => "nullable|integer",
+            "limit" => "nullable|integer",
+            "order" => "nullable|string",
+            "sort" => "nullable|string"
+        ]);
+
+        if (empty($params['offset'])) {
+            $params['offset'] = 0;
+        }
+
+        if (empty($params['limit'])) {
+            $params['limit'] = 100;
+        }
+
+        if (empty($params['order'])) {
+            $params['order'] = 'created_at';
+        }
+
+        if (empty($params['sort'])) {
+            $params['sort'] = 'desc';
+        }
+
+        $total = Requirement::count();
+
+        $companies = Requirement::take($params['limit'])
+                ->skip($params['offset'])
+                ->orderBy($params['order'], $params['sort'])
+                ->get();
+
+        $result['total'] = $total;
+
+        $data = [];
+        if (!empty($companies)) {
+            $data = $companies->toArray();
+        }
+
+        $result['data'] = $data;
+        return $this->resObjectGet($result, 'block_news', $request->path());
+     }
 
 }

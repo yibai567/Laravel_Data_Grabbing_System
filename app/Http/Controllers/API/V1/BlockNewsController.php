@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\V1;
 use App\Models\BlockNews;
 use Illuminate\Http\Request;
 use App\Services\ValidatorService;
+use App\Services\InternalAPIService;
 use Log;
 use DB;
 
@@ -143,5 +144,48 @@ class BlockNewsController extends Controller
         }
 
         return response()->json(true);
+    }
+    /**
+     * all
+     * 获取新闻列表
+     *
+     * @param id 需求ID
+     * @param offset
+     * @param limit
+     * @param order
+     * @param sort
+     * @return array
+     */
+    public function all(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'requirement_id' => 'nullable|integer',
+            'offset' => 'nullable|integer',
+            'limit' => 'nullable|integer',
+            'order' => 'nullable|string',
+            'sort' => 'nullable|string',
+        ]);
+
+        $result = InternalAPIService::get('/block_news', $params);
+        if (!empty($result['data'])) {
+            $companies = InternalAPIService::get('/block_news/companies', []);
+            if (!empty($companies['data'])) {
+                foreach ($companies['data'] as $value) {
+                    $formatCompanies[$value['id']][] = $value['name'];
+                }
+                $blockNews = [];
+                foreach ($result['data'] as $value) {
+                    $value['corporate_name'] = $formatCompanies[$value['requirement_id']][0];
+                    $blockNews[] = $value;
+                }
+            }
+
+            if (!empty($blockNews)) {
+                $result['data'] = $blockNews;
+            }
+        }
+        return $this->resObjectList($result, 'block_news', $request->path());
     }
 }

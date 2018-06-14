@@ -122,6 +122,48 @@ class QuirementPoolController extends Controller
         $res = InternalAPIService::get('/quirements', $params);
         return $this->resObjectGet($res, 'quirement', $request->path());
     }
+    /**
+     * getCompanies
+     * 获取公司名称
+     *
+     * @return array
+     */
 
+     public function getCompanies(Request $request)
+     {
+        $params = $request->all();
 
+        ValidatorService::check($params, [
+            "offset" => "nullable|integer",
+            "limit" => "nullable|integer",
+            "order" => "nullable|string",
+            "sort" => "nullable|string"
+        ]);
+
+        $companies = InternalAPIService::get('/block_news/companies', $params);
+        $total = InternalAPIService::get('/block_news/total', []);
+        $blockNewsTotal = [];
+        if (!empty($total)) {
+            foreach ($total as $key => $value) {
+                $blockNewsTotal[$value['requirement_id']]['total'] = $value['total'];
+            }
+        }
+        $newCompanies = [];
+        if (!empty($companies['data'])) {
+            foreach ($companies['data'] as $companiesKey => $companiesValue) {
+                $newTotal = 0;
+                if (!empty($blockNewsTotal[$companiesValue['id']]['total'])) {
+                    $newTotal = $blockNewsTotal[$companiesValue['id']]['total'];
+                }
+                $newCompanies[] = [
+                    "id" => $companiesValue['id'],
+                    "name" => $companiesValue['name'],
+                    "list_url" => $companiesValue['list_url'],
+                    "block_news_total" => $newTotal
+                ];
+            }
+        }
+        $companies['data'] = $newCompanies;
+        return $this->resObjectList($companies, 'block_news', $request->path());
+     }
 }

@@ -83,6 +83,7 @@ class RabbitMQService extends Service
         // $this->channel->queue_bind('engine_chromeless', 'instant_task', 'chromeless');
 
         $this->channel->queue_bind('error_msg', 'error');
+        $this->channel->queue_bind('dispatch_news', 'dispatch');
     }
 
     /**
