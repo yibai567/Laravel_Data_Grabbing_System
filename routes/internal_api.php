@@ -24,7 +24,7 @@ $api->version(
 
 $api->version(
     'v1',
-    ['namespace' => 'App\Http\Controllers\InternalAPI', 'prefix' => 'internal'],
+    ['namespace' => 'App\Http\Controllers\InternalAPIV2', 'prefix' => 'internal'],
     function (Dingo\Api\Routing\Router $api) {
         $api->get('/test', function(){
             echo 'test';
