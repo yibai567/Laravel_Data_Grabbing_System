@@ -97,7 +97,7 @@ $api->version(
         $api->post('/script/update','ScriptController@update');
         $api->get('/script','ScriptController@retrieve');
         $api->get('/scripts','ScriptController@all');
-        $api->get('/script/publish','ScriptController@publishScript');
+        $api->post('/script/publish','ScriptController@publishScript');
         $api->get('/script/queue','ScriptController@getByQueueName');
 
         $api->post('/script_model','ScriptModelController@create');
@@ -105,7 +105,7 @@ $api->version(
         $api->get('/script_model','ScriptModelController@retrieve');
         $api->get('/script_models','ScriptModelController@all');
         $api->get('/script_models/ids','ScriptModelController@listByIds');
-        $api->get('/script_models/languages_type/{languages_type}','ScriptModelController@listByLanguagesType');
+        $api->get('/script_models/data_type/{data_type}','ScriptModelController@listByDataType');
 
         $api->post('/data/results','DataController@batchCreate');
         $api->post('/datas','DataController@batchSave');
@@ -121,7 +121,14 @@ $api->version(
         $api->post('/task_run_log/status/fail','TaskRunLogController@updateStatusFail');
         $api->get('/task_run_log','TaskRunLogController@retrieve');
 
+        $api->post('/task','TaskController@create');
+        $api->post('/task/start','TaskController@taskStart');
+        $api->post('/task/stop','TaskController@taskStop');
+        $api->post('/task/delete','TaskController@delete');
         $api->get('/task','TaskController@retrieve');
+
+        $api->post('/task/project_map','TaskProjectMapController@create');
+
         //收集资源
         $api->post('/quirement', 'QuirementPoolController@create');
         $api->post('/quirement/update', 'QuirementPoolController@update');

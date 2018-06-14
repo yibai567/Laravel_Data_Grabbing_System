@@ -15,9 +15,9 @@ class Script extends Model
     const STATUS_GENERATE = 2; // 已生成
 
     //脚本类型
-    const DATA_TYPE_CASPERJS = 1;
-    const DATA_TYPE_HTML = 2;
-    const DATA_TYPE_API = 3;
+    const LANGUAGES_TYPE_CASPERJS = 1;
+    const LANGUAGES_TYPE_HTML = 2;
+    const LANGUAGES_TYPE_API = 3;
 
     //任务执行类型 1、每分钟 2、每五分钟 3、每十分钟
     const CRON_TYPE_KEEP = 1;
@@ -41,9 +41,9 @@ class Script extends Model
     const GENERATE_TYPE_MODULE = 1;
     const GENERATE_TYPE_CONTENT = 2;
 
-    //后缀类型 1、JS类型 2、PHP类型
-    const EXT_TYPE_JS = 1;
-    const EXT_TYPE_PHP = 2;
+    //脚本类型 1、JS类型 2、PHP类型
+    const SCRIPT_TYPE_JS = 1;
+    const SCRIPT_TYPE_PHP = 2;
 
     /**
      * 表名
@@ -68,48 +68,45 @@ class Script extends Model
      * 可更新的字段
      */
     protected $fillable = [
-        'requirement_pool_id',
-        'name',
-        'description',
         'list_url',
-        'data_type',
-        'casper_config_id',
-        'modules',
-        'content',
+        'script_init_id',
+        'step',
         'last_generate_at',
-        'is_proxy',
-        'projects',
-        'filters',
-        'actions',
-        'cron_type',
-        'ext',
-        'created_by',
+        'languages_type',
         'status',
+        'operate_user',
+        'next_script_id',
+        'requirement_pool_id',
+        'is_report',
+        'is_download',
+        'is_proxy',
+        'generate_at',
+        'script_type',
     ];
 
-    public function casperConfig()
+    public function config()
     {
-        return $this->hasOne('App\Models\ScriptConfig', 'id', 'casper_config_id');
+        return $this->hasOne('App\Models\ScriptConfig', 'id', 'script_init_id');
     }
 
     /**
-     * 设置modules字段入库前转化为json
+     * 设置step字段入库前转化为json
      *
      * @param  array  $value
      * @return string
      */
-    public function setModulesAttribute($value)
+    public function setStepAttribute($value)
     {
-        $this->attributes['modules'] = json_encode($value, JSON_UNESCAPED_UNICODE);
+        $this->attributes['step'] = json_encode($value, JSON_UNESCAPED_UNICODE);
     }
 
     /**
-     * 获取modules字段时转化为array
+     * 获取step字段时转化为array
      *
      * @param  string  $value
      * @return array
      */
-    public function getModulesAttribute($value)
+    public function getStepAttribute($value)
     {
         return json_decode($value, true);
     }
