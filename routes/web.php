@@ -1,5 +1,5 @@
 <?php
-
+use App\AMQP;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,3 +16,20 @@ Route::get('/', function () {
 });
 Route::get('/block_news', 'WWW\BlockNewsController@index');
 Route::get('/ajax_block_news', 'WWW\BlockNewsController@ajaxList');
+Route::get('test', function() {
+    $option = [
+        'server' => [
+            'host' => config('rabbitmq.host'),
+            'port' => config('rabbitmq.port'),
+            'login' => config('rabbitmq.login'),
+            'password' => config('rabbitmq.password'),
+            'vhost' => 'test',
+            // 'vhost' => config('rabbitmq.vhost'),
+        ],
+        'type' => 'workqueue',
+        'exchange' => 'error',
+        'queue' =>'error'
+    ];
+    $a = AMQP::get_instance($option);
+    $a->publish('asdasd','error');
+});
