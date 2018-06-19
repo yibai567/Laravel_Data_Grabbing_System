@@ -10,20 +10,19 @@ class Task extends Model
     use SoftDeletes;
 
     //脚本类型
-    const LANGUAGES_TYPE_CASPERJS = 1;
-    const LANGUAGES_TYPE_HTML = 2;
-    const LANGUAGES_TYPE_API = 3;
+    const DATA_TYPE_CASPERJS = 1;
+    const DATA_TYPE_TYPE_HTML = 2;
+    const DATA_TYPE_TYPE_API = 3;
 
     //任务执行类型 1、每分钟 2、每五分钟 3、每十分钟
     const CRON_TYPE_KEEP = 1;
     const CRON_TYPE_EVERY_FIVE_MINUTES = 2;
     const CRON_TYPE_EVERY_TEN_MINUTES = 3;
 
-    //任务状态 1、初始化，2、启动，3停止
+    //任务状态 1、初始化，2、启动
 
     const STATUS_INIT = 1;
     const STATUS_START = 2;
-    const STATUS_STOP = 3;
 
     protected $dates = ['deleted_at'];
 
@@ -41,7 +40,7 @@ class Task extends Model
         'name',
         'description',
         'cron_type',
-        'languages_type',
+        'data_type',
         'status',
     ];
 

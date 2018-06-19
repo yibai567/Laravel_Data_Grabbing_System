@@ -15,9 +15,9 @@ class Script extends Model
     const STATUS_GENERATE = 2; // 已生成
 
     //脚本类型
-    const LANGUAGES_TYPE_CASPERJS = 1;
-    const LANGUAGES_TYPE_HTML = 2;
-    const LANGUAGES_TYPE_API = 3;
+    const DATA_TYPE_CASPERJS = 1;
+    const DATA_TYPE_HTML = 2;
+    const DATA_TYPE_API = 3;
 
     //任务执行类型 1、每分钟 2、每五分钟 3、每十分钟
     const CRON_TYPE_KEEP = 1;
