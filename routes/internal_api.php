@@ -129,6 +129,9 @@ $api->version(
 
         $api->post('/task/project_map','TaskProjectMapController@create');
 
+        $api->post('/project_result','ProjectResultController@create');
+        $api->get('/project_result','ProjectResultController@retrieve');
+
         $api->get('/project','ProjectController@retrieve');
 
         //收集资源
@@ -136,7 +139,7 @@ $api->version(
         $api->post('/quirement/update', 'QuirementPoolController@update');
         $api->get('/quirements', 'QuirementPoolController@all');
         $api->get('/quirement', 'QuirementPoolController@retrieve');
-        $api->get('/quirement/update_status','QuirementPoolController@updateStatus');
+        $api->get('/quiremeupdateByTaskRunLogIdnt/update_status','QuirementPoolController@updateStatus');
 
         //区块链新闻
         $api->get('/block_news','BlockNewsController@all');

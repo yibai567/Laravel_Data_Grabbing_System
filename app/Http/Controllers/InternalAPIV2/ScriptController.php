@@ -44,8 +44,8 @@ class ScriptController extends Controller
             'cron_type'           => 'nullable|integer|between:1,4',
             'ext'                 => 'nullable|integer|between:1,2',
             'created_by'          => 'nullable|string|max:100',
-            'next_script_id'      => 'nullable|integer|max:10',
-            'requirement_pool_id' => 'nullable|integer|max:10',
+            'next_script_id'      => 'nullable|integer',
+            'requirement_pool_id' => 'nullable|integer',
             'is_proxy'            => 'required|integer|between:1,2',
             'casper_config'       => 'nullable|array'
         ]);
@@ -145,7 +145,8 @@ class ScriptController extends Controller
             'cron_type'           => 'nullable|integer|between:1,4',
             'ext'                 => 'nullable|integer|between:1,2',
             'created_by'          => 'nullable|string|max:100',
-            'requirement_pool_id' => 'nullable|integer|max:10',
+            'next_script_id'      => 'nullable|integer',
+            'requirement_pool_id' => 'nullable|integer',
             'is_proxy'            => 'nullable|integer|between:1,2',
             'projects'            => 'nullable|array|max:100',
             'filters'             => 'nullable|array|max:200',

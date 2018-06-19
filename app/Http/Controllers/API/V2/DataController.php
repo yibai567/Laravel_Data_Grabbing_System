@@ -49,7 +49,7 @@ class DataController extends Controller
             $taskRunLog = InternalAPIService::get('/task_run_log', $selectTaskRunLogData);
 
             if (empty($taskRunLog)) {
-                Log::debug('[v1 DataController batchHandle]  $taskRunLog is not found,task_run_log_id : ' . $params['task_run_log_id']);
+                Log::debug('[v2 DataController batchHandle]  $taskRunLog is not found,task_run_log_id : ' . $params['task_run_log_id']);
                 return $this->resObjectGet(false, 'data', $request->path());
             }
 
@@ -61,7 +61,7 @@ class DataController extends Controller
 
             if (!$result) {
 
-                Log::debug('[v1 DataController batchHandle] update task statistics is failed,task_id : '.$taskId);
+                Log::debug('[v2 DataController batchHandle] update task statistics is failed,task_id : '.$taskId);
                 $updateTaskRunLogData['id'] = $params['task_run_log_id'];
                 //更改task_runRunLog状态
                 InternalAPIService::post('/task_run_log/status/fail', $updateTaskRunLogData);
@@ -71,7 +71,7 @@ class DataController extends Controller
 
             $params['task_id'] = $taskId;
             $datas = InternalAPIService::post('/datas',$params);
-
+            dd(json_encode($datas[0]));
             $dataNum = count($datas);
             $updateTaskRunLogData['result_count'] = $dataNum;
             $updateTaskRunLogData['id'] = $params['task_run_log_id'];
@@ -82,7 +82,7 @@ class DataController extends Controller
                 event(new SaveDataEvent($datas));
             }
         } catch (\Exception $e) {
-            Log::debug('[v1 DataController batchHandle] error message = ' . $e->getMessage());
+            Log::debug('[v2 DataController batchHandle] error message = ' . $e->getMessage());
 
             $updateTaskRunLogData['id'] = $params['task_run_log_id'];
             //更改task_runRunLog状态
@@ -104,13 +104,13 @@ class DataController extends Controller
      */
     public function dataResultReport(Request $request)
     {
-        Log::debug('[v1 DataController dataResultReport] start');
+        Log::debug('[v2 DataController dataResultReport] start');
         $params = $request->all();
 
         ValidatorService::check($params, [
             'ids' => 'required|string',
         ]);
-        Log::debug('[v1 DataController dataResultReport] ids = ' . $params['ids']);
+        Log::debug('[v2 DataController dataResultReport] ids = ' . $params['ids']);
         //调取上报数据信息
         $datas = InternalAPIService::get('/datas/ids', $params);
 
@@ -158,15 +158,15 @@ class DataController extends Controller
 
             $reportData['result'] = json_encode($newDatas, JSON_UNESCAPED_UNICODE);
 
-            Log::debug('[v1 DataController dataResultReport] reportData = ' , $reportData );
+            Log::debug('[v2 DataController dataResultReport] reportData = ' , $reportData );
 
             try {
                 //调用上传数据接口
                 $result = InternalAPIService::post('/item/result/report', $reportData);
             } catch (\Exception $e) {
-                Log::debug('[v1 DataController dataResultReport] error message = ' . $e->getMessage());
+                Log::debug('[v2 DataController dataResultReport] error message = ' . $e->getMessage());
 
-                Log::debug('[v1 DataController dataResultReport] data report failed');
+                Log::debug('[v2 DataController dataResultReport] data report failed');
             }
         }
 

@@ -340,7 +340,7 @@ class DataController extends Controller
 
     /**
      * updateByTaskRunLogId
-     * 根据task_run_log_id查询data数据
+     * 根据task_run_log_id更新截图
      *
      * @param id
      * @return array

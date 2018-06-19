@@ -42,4 +42,5 @@ class ProjectController extends Controller
 
         return $this->resObjectGet($result, 'project', $request->path());
     }
+
 }
