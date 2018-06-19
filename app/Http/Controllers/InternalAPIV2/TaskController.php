@@ -9,7 +9,7 @@
 
 namespace App\Http\Controllers\InternalAPIV2;
 
-use App\Models\TaskStatistics;
+use App\Models\V2\TaskStatistics;
 use App\Models\V2\Task;
 use App\Models\V2\Script;
 use App\Services\InternalAPIService;

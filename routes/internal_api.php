@@ -129,6 +129,8 @@ $api->version(
 
         $api->post('/task/project_map','TaskProjectMapController@create');
 
+        $api->get('/project','ProjectController@retrieve');
+
         //收集资源
         $api->post('/quirement', 'QuirementPoolController@create');
         $api->post('/quirement/update', 'QuirementPoolController@update');

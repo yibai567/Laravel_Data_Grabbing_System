@@ -24,6 +24,12 @@ class EventServiceProvider extends ServiceProvider
             // 爬取结果上报
             'App\Listeners\DataResultReportListener',
         ],
+
+        'App\Events\SaveDataEvent' => [
+            // 爬取结果上报
+            'App\Listeners\SaveDataListener',
+        ],
+
     ];
 
     /**

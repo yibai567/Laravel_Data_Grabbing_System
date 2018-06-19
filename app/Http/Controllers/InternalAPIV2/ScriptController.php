@@ -9,15 +9,14 @@
 
 namespace App\Http\Controllers\InternalAPIV2;
 
-use App\Models\Project;
-use App\Models\ScriptModel;
+use App\Models\V2\ScriptModel;
 use App\Models\V2\Task;
 use App\Services\FileService;
 use App\Services\InternalAPIService;
 use Illuminate\Support\Facades\DB;
 use Log;
 use App\Models\V2\Script;
-use App\Models\ScriptConfig;
+use App\Models\V2\ScriptConfig;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 
