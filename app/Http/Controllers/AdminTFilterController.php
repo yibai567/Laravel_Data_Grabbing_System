@@ -4,10 +4,8 @@
 	use Request;
 	use DB;
 	use CRUDBooster;
-    use App\Services\InternalAPIService;
-    use App\Models\Task;
 
-	class AdminTTaskController extends \crocodicstudio\crudbooster\controllers\CBController {
+	class AdminTFilterController extends \crocodicstudio\crudbooster\controllers\CBController {
 
 	    public function cbInit() {
 
@@ -19,84 +17,51 @@
 			$this->button_table_action = true;
 			$this->button_bulk_action = true;
 			$this->button_action_style = "button_icon";
-			$this->button_add = false;
-			$this->button_edit = false;
-			$this->button_delete = false;
-			$this->button_detail = false;
+			$this->button_add = true;
+			$this->button_edit = true;
+			$this->button_delete = true;
+			$this->button_detail = true;
 			$this->button_show = true;
 			$this->button_filter = true;
 			$this->button_import = false;
 			$this->button_export = false;
-			$this->table = "t_task";
+			$this->table = "t_filter";
 			# END CONFIGURATION DO NOT REMOVE THIS LINE
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
-            $this->col[] = ["label"=>"任务ID","name"=>"id"];
-			$this->col[] = ["label"=>"脚本ID","name"=>"script_id"];
-			$this->col[] = ["label"=>"任务名称","name"=>"name"];
-            // $this->col[] = ["label"=>"最后执行时间","name"=>"name","callback"=>function ($row) {
-            //     $taskStatistics = DB::table('t_task_statistics')->where('task_id', $row->id)->first();
-            //     return $taskStatistics->last_job_at;
-            // }];
-            // $this->col[] = ["label"=>"执行次数","name"=>"name","callback"=>function ($row) {
-            //     $taskStatistics = DB::table('t_task_statistics')->where('task_id', $row->id)->first();
-            //     return $taskStatistics->run_times;
-            // }];
-            $this->col[] = ["label"=>"是否翻墙","name"=>"is_proxy","callback"=>function ($row) {
-                if( $row->is_proxy == 1) {
-                    return '翻墙';
-                } else{
-                    return '不翻墙';
-                }
-            }];
-            $this->col[] = ["label"=>"执行规则","name"=>"cron_type","callback"=>function ($row) {
-                if( $row->cron_type == Task::CRON_TYPE_KEEP) {
-                    return '每分钟执行';
-                } else if ($row->cron_type == Task::CRON_TYPE_EVERY_FIVE_MINUTES) {
-                    return '每五分钟执行';
-                } else if ($row->cron_type == Task::CRON_TYPE_EVERY_TEN_MINUTES) {
-                    return '每十五分钟执行';
-                }
-            }];
-
-            $this->col[] = ["label"=>"数据类型","name"=>"data_type","callback"=>function ($row) {
-                if( $row->data_type == Task::DATA_TYPE_CASPERJS) {
-                    return 'casperJs';
-                } else if ($row->data_type == Task::DATA_TYPE_HTML) {
-                    return 'html';
-                } else if ($row->data_type == Task::DATA_TYPE_API) {
-                    return 'api';
-                }
-            }];
-
-            $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
-                if( $row->status == Task::STATUS_INIT) {
-                    return "<a class='btn btn-xs btn-warning'><i></i>初始化</a>";
-                } else if ($row->status == Task::STATUS_START) {
-                    return "<a class='btn btn-xs btn-success'><i></i>已启动</a>";
-                }
-            }];
-
+			$this->col[] = ["label"=>"Id","name"=>"id"];
+			$this->col[] = ["label"=>"Name","name"=>"name"];
+			$this->col[] = ["label"=>"Vhost","name"=>"vhost"];
+			$this->col[] = ["label"=>"Exchange","name"=>"exchange"];
+			$this->col[] = ["label"=>"Exchange Type","name"=>"exchange_type"];
+			$this->col[] = ["label"=>"Routing Key","name"=>"routing_key"];
+			$this->col[] = ["label"=>"Queue","name"=>"queue"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
-			$this->form[] = ['label'=>'Script Id','name'=>'script_id','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Name','name'=>'name','type'=>'text','validation'=>'required|string|min:3|max:70','width'=>'col-sm-10','placeholder'=>'请输入字母'];
-			$this->form[] = ['label'=>'Description','name'=>'description','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Cron Type','name'=>'cron_type','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'data Type','name'=>'data_type','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Status','name'=>'status','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Name','name'=>'name','type'=>'text','validation'=>'nullable|string|max:70','width'=>'col-sm-10','placeholder'=>'请输入字母'];
+			$this->form[] = ['label'=>'Discription','name'=>'discription','type'=>'text','validation'=>'nullable|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Vhost','name'=>'vhost','type'=>'text','validation'=>'nullable|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Exchange','name'=>'exchange','type'=>'text','validation'=>'nullable|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Exchange Type','name'=>'exchange_type','type'=>'text','validation'=>'nullable|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Routing Key','name'=>'routing_key','type'=>'text','validation'=>'nullable|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Queue','name'=>'queue','type'=>'text','validation'=>'nullable|min:1|max:255','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'Customer Path','name'=>'customer_path','type'=>'text','validation'=>'nullable|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'params','name'=>'params','type'=>'textarea','validation'=>'nullable|min:1|max:255','width'=>'col-sm-10'];
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
 			//$this->form = [];
-			//$this->form[] = ["label"=>"Script Id","name"=>"script_id","type"=>"select2","required"=>TRUE,"validation"=>"required|integer|min:0","datatable"=>"script,id"];
 			//$this->form[] = ["label"=>"Name","name"=>"name","type"=>"text","required"=>TRUE,"validation"=>"required|string|min:3|max:70","placeholder"=>"请输入字母"];
-			//$this->form[] = ["label"=>"Description","name"=>"description","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Cron Type","name"=>"cron_type","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Languages Type","name"=>"languages_type","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
+			//$this->form[] = ["label"=>"Discription","name"=>"discription","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
+			//$this->form[] = ["label"=>"Vhost","name"=>"vhost","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
+			//$this->form[] = ["label"=>"Exchange","name"=>"exchange","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
+			//$this->form[] = ["label"=>"Exchange Type","name"=>"exchange_type","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
+			//$this->form[] = ["label"=>"Routing Key","name"=>"routing_key","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
+			//$this->form[] = ["label"=>"Queue","name"=>"queue","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
+			//$this->form[] = ["label"=>"Customer Path","name"=>"customer_path","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
 			//$this->form[] = ["label"=>"Status","name"=>"status","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
 			# OLD END FORM
 
@@ -113,7 +78,7 @@
 	        |
 	        */
 	        $this->sub_module = array();
-            $this->sub_module[] = ['label'=>'上报结果','path'=>'t_data','foreign_key'=>'task_id','button_color'=>'success','button_icon'=>'fa fa-bars', 'parent_columns'=>'id'];
+
 
 	        /*
 	        | ----------------------------------------------------------------------
@@ -128,9 +93,7 @@
 	        */
 	        $this->addaction = array();
 
-            $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]'),'color'=>'success', 'icon'=>'fa fa-play', 'showIf'=>'[status] == 1'];
 
-        $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-down/[id]'),'color'=>'warning', 'icon'=>'fa fa-stop', 'showIf'=>'[status] == 2'];
 	        /*
 	        | ----------------------------------------------------------------------
 	        | Add More Button Selected
@@ -373,27 +336,7 @@
 
 	    }
 
-        public function getStartUp($id)
-        {
-            try {
-                $result = InternalAPIService::post('/task/start', ['id' => intval($id)]);
-            } catch (\Dingo\Api\Exception\ResourceException $e) {
-                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
-            }
 
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "启动成功", "success");
-        }
-
-        public function getStopDown($id)
-        {
-            try {
-                $result = InternalAPIService::post('/task/stop', ['id' => intval($id)]);
-            } catch (\Dingo\Api\Exception\ResourceException $e) {
-                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
-            }
-
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "停止成功", "success");
-        }
 
 	    //By the way, you can still create your own method in here... :)
 

@@ -32,8 +32,7 @@
             <input type='hidden' name='return_url' value='{{ @$return_url }}'/>
             <input type='hidden' name='ref_mainpath' value='{{ CRUDBooster::mainpath() }}'/>
             <input type='hidden' name='ref_parameter' value='{{urldecode(http_build_query(@$_GET))}}'/>
-            <input type='hidden' name='languages_type' value='{{$row[languages_type]}}'/>
-            <input type='hidden' name='generate_type' value='{{$row[generate_type]}}'/>
+            <input type='hidden' name='data_type' value='{{$row[data_type]}}'/>
             @if($hide_form)
                 <input type="hidden" name="hide_form" value='{!! serialize($hide_form) !!}'>
             @endif
@@ -66,7 +65,7 @@
                         <p class='help-block'></p>
                     </div>
                 </div>
-                @if ($row[languages_type] == 1 && $row[generate_type] == 1)
+                @if ($row[data_type] == 1 && empty($row[content]))
                     <div class='form-group header-group-0' id='form-group-width'>
                         <label class='control-label col-sm-2'>CasperJS配置:</label>
                     </div>
@@ -159,8 +158,8 @@
                         </div>
                     </div>
                 @endif
-                @if ($row['generate_type'] == 1)
-                    <div class='form-group header-group-0 ' id='form-group-step'>
+                @if (empty($row['content']))
+                    <div class='form-group header-group-0 ' id='form-group-modules'>
                     <label class='control-label col-sm-2'>步骤
                         <span class='text-danger' title='This field is required'>*</span>
                     </label>
@@ -168,13 +167,13 @@
                         <div data-force="18" class="layer-block">
                             <p class='help-block'>请将右侧代码块拖拽至下方虚框内</p>
                             <ul id="bar" class="block__list block__list_tags">
-                                @if (!empty($row['step']))
-                                    @foreach($row['step'] as $key => $value)
+                                @if (!empty($row['modules']))
+                                    @foreach($row['modules'] as $key => $value)
                                     <li>
                                         <div class="text-danger" style="font-size: 20px;font-weight: bold;">{{$row[script_model_list][$key][name]}}</div>
                                         <div class="params">
-                                            @foreach($value as $stepKey => $stepValue)
-                                                <?php $parameters = $row['script_model_params'][$key][$stepKey]?>
+                                            @foreach($value as $modulesKey => $modulesValue)
+                                                <?php $parameters = $row['script_model_params'][$key][$modulesKey]?>
                                                 <div class='form-group' id='form-group-name'>
                                                     @if (!empty($parameters->name))
                                                         <label class='control-label col-sm-2' style="text-align: left;">
@@ -191,11 +190,11 @@
                                                     @endif
                                                     @if ($parameters->type == 'string')
                                                         <div class="col-xs-10">
-                                                            <input type="type" {{$requires}} class="form-control" name="script_model_params[{{$key}}][]" value="{{$stepValue}}">
+                                                            <input type="type" {{$requires}} class="form-control" name="script_model_params[{{$key}}][]" value="{{$modulesValue}}">
                                                         </div>
                                                     @elseif ($parameters->type == 'json')
                                                         <div class="col-xs-10">
-                                                            <textarea {{$requires}} class="form-control" name="script_model_params[{{$key}}][]" maxlength=5000 rows="3">{{$stepValue}}</textarea>
+                                                            <textarea {{$requires}} class="form-control" name="script_model_params[{{$key}}][]" maxlength=5000 rows="3">{{$modulesValue}}</textarea>
                                                         </div>
                                                     @elseif ($parameters->type == 'boole')
                                                         <div class="col-sm-10">
@@ -208,7 +207,7 @@
                                                         </div>
                                                     @elseif ($parameters->type == 'text')
                                                         <div class="col-sm-10">
-                                                            <textarea {{$requires}} name="script_model_params[{{$key}}][]" maxlength='5000' rows="3" class="form-control">{{$stepValue}}</textarea>
+                                                            <textarea {{$requires}} name="script_model_params[{{$key}}][]" maxlength='5000' rows="3" class="form-control">{{$modulesValue}}</textarea>
                                                         </div>
                                                     @endif
                                                 </div>
@@ -225,55 +224,20 @@
                     <div style="clear: both;"></div>
                 </div>
                 @else
-                    <div class='form-group header-group-0 ' id='form-group-name'>
-                        <label class='control-label col-sm-2'>脚本详情
+                    <div class='form-group header-group-0  id='form-group-content'>
+                        <label class='control-label col-sm-2'>脚本内容
+                            <span class='text-danger' title='This field is required'>*</span>
                         </label>
-                        <div class="col-xs-5">
-                            <a href="{{$row['file_url']}}"  target="_blank">查看脚本</a>
+                        <div class="col-sm-10">
+
+                            <textarea name="content" id="content" maxlength=5000 required class='form-control' style="height:400px;display: block;color: #428bca;"></textarea>
                             <div class="text-danger"></div>
                             <p class='help-block'></p>
                         </div>
                     </div>
-                @endif
-                <div class='form-group header-group-0 ' id='form-group-cron_type'>
-                    <label class='control-label col-sm-2'>是否下载
-                    </label>
-                    <div>
-                        <div class="col-sm-10">
-                            <div class="checkbox">
-                                @if ($row[is_download] == 1)
-                                    <label>
-                                        <input type="checkbox" checked name="is_download" value="1">
-                                    </label>
-                                @else
-                                    <label>
-                                        <input type="checkbox" name="is_download" value="1">
-                                    </label>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <div class='form-group header-group-0 ' id='form-group-cron_type'>
-                    <label class='control-label col-sm-2'>是否上报
-                    </label>
-                    <div>
-                        <div class="col-sm-10">
-                            <div class="checkbox">
-                                @if ($row[is_report] == 1)
-                                    <label>
-                                        <input type="checkbox" checked name="is_report" value="1">
-                                    </label>
-                                @else
-                                    <label>
-                                        <input type="checkbox" name="is_report" value="1">
-                                    </label>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                @endif
+
                 <div class='form-group header-group-0 ' id='form-group-cron_type'>
                     <label class='control-label col-sm-2'>是否翻墙
                     </label>
@@ -302,15 +266,7 @@
                         <p class='help-block'></p>
                     </div>
                 </div>
-                <div class='form-group header-group-0 ' id='form-group-name'>
-                    <label class='control-label col-sm-2'>下一步脚本ID
-                    </label>
-                    <div class="col-xs-5">
-                        <input type='text' title="下一步脚本ID" maxlength='70' class='form-control' name="next_script_id" id="next_script_id" value='{{$row[next_script_id]}}'/>
-                        <div class="text-danger"></div>
-                        <p class='help-block'></p>
-                    </div>
-                </div>
+
                 <div class='form-group header-group-0 ' id='form-group-cron_type'>
                     <label class='control-label col-sm-2'>cron_type
                         <span class='text-danger' title='This field is required'>*</span>

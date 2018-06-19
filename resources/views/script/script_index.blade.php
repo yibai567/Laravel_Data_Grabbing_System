@@ -83,13 +83,13 @@
     <div class="box">
       <div class="box-header">
 
-            <a href='{{CRUDBooster::mainpath("add?languagesType=1")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
+            <a href='{{CRUDBooster::mainpath("add?dataType=1")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
               <i class="fa fa-plus-circle"></i> casperJs
             </a>
-            <a href='{{CRUDBooster::mainpath("add?languagesType=2")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
+            <a href='{{CRUDBooster::mainpath("add?dataType=2")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
               <i class="fa fa-plus-circle"></i> Html
             </a>
-            <a href='{{CRUDBooster::mainpath("add?languagesType=3")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
+            <a href='{{CRUDBooster::mainpath("add?dataType=3")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
               <i class="fa fa-plus-circle"></i> Api
             </a>
             <a id="uploadfile" class="btn btn-sm btn-success" title="上传脚本">
@@ -152,7 +152,7 @@
       <tr>
         <th>ID</th>
         <th>任务名称</th>
-        <th>语言类型</th>
+        <th>data类型</th>
         <th>最后生成时间</th>
         <th>状态</th>
         <th style="float: right;">操作</th>
@@ -163,9 +163,9 @@
       <tr>
         <td>{{$row->id}}</td>
         <td>{{$row->name}}</td>
-        @if ($row->languages_type == 1)
+        @if ($row->data_type == 1)
             <td>casperJs</td>
-        @elseif ($row->languages_type == 2)
+        @elseif ($row->data_type == 2)
             <td>html</td>
         @else
             <td>api</td>
@@ -176,7 +176,7 @@
             <td>{{$row->last_generate_at}}</td>
         @endif
         @if ($row->status == 1)
-        <td><a class='btn btn-xs btn-warning'><i></i>待发布</a></td>
+        <td><a class='btn btn-xs btn-warning'><i></i>创建</a></td>
         @else
         <td><a class='btn btn-xs btn-success'><i></i>已发布</a></td>
         @endif
@@ -201,6 +201,10 @@
         <a class='btn btn-xs btn-success' onclick='location.href="/admin/t_task?parent_table=t_script&parent_columns=id&parent_columns_alias=&parent_id={{$row->id}}&return_url=http://{{$_SERVER['HTTP_HOST']}}/admin/t_script&foreign_key=script_id&label=任务列表"'>
                 <i class="fa fa-bars">任务列表</i>
         </a>
+        <a class='btn btn-xs btn-primary btn-detail' title='详情' href='{{CRUDBooster::mainpath("detail/$row->id")}}'>
+            <i class='fa fa-eye'></i>
+        </a>
+
         @if(CRUDBooster::isDelete() && $button_edit && $row->status != $item_status['start'])
         <a class='btn btn-xs btn-warning btn-delete' href='javascript:void(0)' onclick="swal({
                 title: '确认删除吗 ?',

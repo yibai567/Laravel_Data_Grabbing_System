@@ -10,9 +10,11 @@ use CB;
 use CRUDBooster;
 use App\Models\Script;
 use App\Services\InternalAPIService;
+use App\Models\Project;
+use App\Models\Filter;
+use App\Models\Action;
 
 use Storage;
-
 use Symfony\Component\HttpFoundation\File;
 use Symfony\Component\HttpFoundation\File\UploadeFile;
 
@@ -40,13 +42,14 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
 		# START COLUMNS DO NOT REMOVE THIS LINE
 		$this->col = [];
-		$this->col[] = ["label"=>"Id","name"=>"id"];
-        $this->col[] = ["label"=>"语言类型","name"=>"languages_type","callback"=>function ($row) {
-            if( $row->languages_type == Script::LANGUAGES_TYPE_CASPERJS) {
+        $this->col[] = ["label"=>"Id","name"=>"id"];
+		$this->col[] = ["label"=>"name","name"=>"name"];
+        $this->col[] = ["label"=>"数据类型","name"=>"data_type","callback"=>function ($row) {
+            if( $row->data_type == Script::DATA_TYPE_CASPERJS) {
                 return 'casperJs';
-            } else if ($row->languages_type == Script::LANGUAGES_TYPE_HTML) {
+            } else if ($row->data_type == Script::DATA_TYPE_HTML) {
                 return 'html';
-            } else if ($row->languages_type == Script::LANGUAGES_TYPE_API) {
+            } else if ($row->data_type == Script::DATA_TYPE_API) {
                 return 'api';
             }
         }];
@@ -63,10 +66,9 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
 		# START FORM DO NOT REMOVE THIS LINE
 		$this->form = [];
+        $this->form[] = ['label'=>'id','name'=>'id','type'=>'text'];
 		$this->form[] = ['label'=>'名称','name'=>'name','type'=>'text','validation'=>'required|string|max:100','width'=>'col-sm-10'];
-        $this->form[] = ['label'=>'语言类型','name'=>'languages_type','type'=>'text','validation'=>'required|integer','width'=>'col-sm-10'];
-        $this->form[] = ['label'=>'script脚本生成模式','name'=>'generate_type','type'=>'text','validation'=>'required|integer','width'=>'col-sm-10'];
-        $this->form[] = ['label'=>'脚本类型','name'=>'script_type','type'=>'text','validation'=>'required|integer','width'=>'col-sm-10'];
+        $this->form[] = ['label'=>'语言类型','name'=>'data_type','type'=>'text','validation'=>'required|integer','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'list_url','name'=>'list_url','type'=>'text','validation'=>'required|string','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'描述','name'=>'description','type'=>'textarea','validation'=>'required|max:255','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'发布内容','name'=>'content','type'=>'textarea','validation'=>'required|string','width'=>'col-sm-10'];
@@ -77,7 +79,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $this->form[] = ['label'=>'width','name'=>'width','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'height','name'=>'height','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
 
-        $this->form[] = ['label'=>'步骤','name'=>'step','type'=>'textarea','validation'=>'nullable','width'=>'col-sm-10'];
+        $this->form[] = ['label'=>'步骤','name'=>'modules','type'=>'textarea','validation'=>'nullable','width'=>'col-sm-10'];
         $this->form[] = ['name'=>'script_model_params','type'=>'text'];
 		$this->form[] = ['label'=>'执行规则','name'=>'cron_type','type'=>'radio','validation'=>'nullable|integer','width'=>'col-sm-10','dataenum'=>'1|每分钟执行一次;2|每五分钟执行一次;3|每十五分钟执行一次;','value'=>'1'];
         $this->form[] = ['label'=>'是否上报','name'=>'is_report','type'=>'checkout','validation'=>'nullable|integer','width'=>'col-sm-10','value'=>'1'];
@@ -85,6 +87,8 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $this->form[] = ['label'=>'是否翻墙','name'=>'is_proxy','type'=>'checkout','validation'=>'nullable|integer','width'=>'col-sm-10','value'=>'1'];
         $this->form[] = ['label'=>'需求池ID','name'=>'next_script_id','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'下一步脚本ID','name'=>'requirement_pool_id','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
+        $this->form[] = ['name'=>'projects','type'=>'text'];
+        $this->form[] = ['label'=>'project_config','name'=>'project_config','type'=>'text','validation'=>'nullable','width'=>'col-sm-10'];
 		# END FORM DO NOT REMOVE THIS LINE
 
 		/*
@@ -362,9 +366,9 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
     //增加界面
     public function getAdd() {
 
-        $languagesType = Request::get('languagesType');
-        if (!$languagesType) {
-            $languagesType = Script::LANGUAGES_TYPE_CASPERJS;
+        $dataType = Request::get('dataType');
+        if (!$dataType) {
+            $dataType = Script::DATA_TYPE_CASPERJS;
         }
         if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE || $this->button_add==FALSE) {
             CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
@@ -373,17 +377,16 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data = [];
         $data['script_model'] = [];
         $data['new_step'] = [];
-        $res = InternalAPIService::get('/script_models/languages_type/' . $languagesType);
-
+        $res = InternalAPIService::get('/script_models/data_type/' . $dataType);
         if (!empty($res)) {
             $data['script_model'] = json_decode(json_encode($res));
             $step = [];
             foreach ($data['script_model'] as $key => $value) {
-                if ($languagesType == Script::LANGUAGES_TYPE_HTML) {
+                if ($dataType == Script::DATA_TYPE_HTML) {
                     if ($value->id == 13) {
                         $step[] = $value;
                     }
-                } else if ($languagesType == Script::LANGUAGES_TYPE_API) {
+                } else if ($dataType == Script::DATA_TYPE_API) {
                     if ($value->id == 17 || $value->id == 12) {
                         $step[] = $value;
                     }
@@ -393,13 +396,12 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             array_multisort($data['new_step'], SORT_DESC);
         }
         $data['page_title'] = '增加脚本生成信息';
-        $data['languages_type'] = $languagesType;
+        $data['data_type'] = $dataType;
         $this->cbView('script/script_add_view',$data);
     }
 
     //编辑界面
     public function getEdit($id) {
-
         if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE || $this->button_add==FALSE) {
             CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
         }
@@ -408,18 +410,18 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data['page_title'] = '编辑脚本生成信息';
         try {
             $data['row'] = InternalAPIService::get('/script', ['id' => $id]);
-            if (!empty($data['row']['step'])) {
-                $step = $data['row']['step'];
+            if (!empty($data['row']['modules'])) {
+                $modules = $data['row']['modules'];
                 $newScriptModel = [];
 
-                foreach ($step as $key => $value) {
+                foreach ($modules as $key => $value) {
                     $scriptModelId .= $value[0] . ',';
                     $id = $value[0];
                     array_splice($value, 0, 1);
                     $newScriptModel[$id] = $value;
                 }
 
-                $data['row']['step'] = $newScriptModel;
+                $data['row']['modules'] = $newScriptModel;
                 $script_models = InternalAPIService::get('/script_models/ids', ['ids' => rtrim($scriptModelId, ",")]);
                 foreach ($script_models as $key => $value) {
                     $newScriptModelParams[$value['id']] = json_decode($value['parameters']);
@@ -430,11 +432,22 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
                 $data['row']['script_model_list'] = $newScriptModelList;
 
                 $data['script_model'] = [];
-                $res = InternalAPIService::get('/script_models/languages_type/' . $data['row']['languages_type']);
+                $res = InternalAPIService::get('/script_models/data_type/' . $data['row']['data_type']);
                 if (!empty($res)) {
                     $data['script_model'] = json_decode(json_encode($res));
                 }
             }
+            // //查询项目信息
+            // $projects = Project::get();
+            // $data['projects'] = $projects->toArray();
+
+            // //查询过滤器信息
+            // $filter = Filter::get();
+            // $data['filter'] = $filter->toArray();
+
+            // //查询action信息
+            // $action = Action::get();
+            // $data['action_info'] = $action->toArray();
         } catch (\Dingo\Api\Exception\ResourceException $e) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "该数据信息有误", "error");
         }
@@ -465,24 +478,24 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "list_url格式错误", "error");
         }
 
-        if (empty($formParams['script_model_params']) && $formParams['generate_type'] == Script::GENERATE_TYPE_MODULE) {
+        if (empty($formParams['script_model_params']) && empty($formParams['content'])) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "步骤必填", "error");
         }
 
-        if ($formParams['generate_type'] == Script::GENERATE_TYPE_MODULE) {
+        if (empty($formParams['content'])) {
             foreach ($formParams['script_model_params'] as $key => $value) {
                 array_unshift($value, $key);
                 $newData[] = $value;
             }
         }
 
-        $data['step'] = $newData;
+        $data['modules'] = $newData;
         $data['status'] = Script::STATUS_INIT;
         $data['name'] = $formParams['name'];
         $data['description'] = $formParams['description'];
         $data['list_url'] = $formParams['list_url'];
 
-        if ($formParams['generate_type'] == Script::GENERATE_TYPE_MODULE) {
+        if (empty($formParams['content'])) {
             if (empty($formParams['load_images'])) {
                 $formParams['load_images'] = ScriptConfig::DEFAULT_LOAD_IMAGES;
             }
@@ -492,7 +505,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             if (empty($formParams['verbose'])) {
                 $formParams['verbose'] = ScriptConfig::DEFAULT_VERBOSE;
             }
-            $data['init'] = [
+            $data['casper_config'] = [
                 'load_images' => $formParams['load_images'],
                 'load_plugins' => $formParams['load_plugins'],
                 'log_level' => $formParams['log_level'],
@@ -503,20 +516,8 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         }
 
         $data['cron_type'] = $formParams['cron_type'];
-        $data['languages_type'] = $formParams['languages_type'];
+        $data['data_type'] = $formParams['data_type'];
         $data['requirement_pool_id'] = $formParams['requirement_pool_id'];
-        $data['next_script_id'] = $formParams['next_script_id'];
-        if (empty($formParams['is_report'])) {
-            $data['is_report'] = Script::REPORT_DATA_FALSE;
-        } else {
-            $data['is_report'] = $formParams['is_report'];
-        }
-
-        if (empty($formParams['is_download'])) {
-            $data['is_download'] = Script::DOWNLOAD_IMAGE_FALSE;
-        } else {
-            $data['is_download'] = $formParams['is_download'];
-        }
 
         if (empty($formParams['is_proxy'])) {
             $data['is_proxy'] = Script::WALL_OVER_FALSE;
@@ -524,7 +525,32 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             $data['is_proxy'] = $formParams['is_proxy'];
         }
 
-        $data['operate_user'] = CRUDBooster::myName();
+        //更新projects字段
+        if (!empty($formParams['projects'])) {
+            //TODO调用接口
+            $script = Script::find($formParams['id']);
+            $script->projects = json_encode($formParams['projects']);
+            $script->save();
+            CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script/filter-action/". $script->id, "成功");
+        }
+        if (!empty($formParams['project_config'])) {
+            if (!empty($formParams['project_config']['filters'])) {
+                //TODO调用接口
+                $script = Script::find($formParams['id']);
+                $script->filters = json_encode($formParams['project_config']['filters']);
+                $script->save();
+            }
+
+            if (!empty($formParams['project_config']['actions'])) {
+                //TODO调用接口
+                $script = Script::find($formParams['id']);
+                $script->actions = json_encode($formParams['project_config']['actions']);
+                $script->save();
+            }
+            CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script", "创建成功", "success");
+        }
+
+        $data['created_by'] = CRUDBooster::myName();
         $data['id'] = $id;
         try {
             $res = InternalAPIService::post('/script/update', $data);
@@ -532,7 +558,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
         }
 
-        CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script", "修改成功", "success");
+        CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script/dispatch/" . $id, "修改成功", "success");
     }
 
     //保存增加信息
@@ -548,6 +574,31 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
         $data = [];
         $formParams = $this->arr;
+        //更新projects字段
+        if (!empty($formParams['projects'])) {
+            //TODO调用接口
+            $script = Script::find($formParams['id']);
+            $script->projects = json_encode($formParams['projects']);
+            $script->save();
+            CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script/filter-action/". $script->id, "成功");
+        }
+        if (!empty($formParams['project_config'])) {
+            if (!empty($formParams['project_config']['filters'])) {
+                //TODO调用接口
+                $script = Script::find($formParams['id']);
+                $script->filters = json_encode($formParams['project_config']['filters']);
+                $script->save();
+            }
+
+            if (!empty($formParams['project_config']['actions'])) {
+                //TODO调用接口
+                $script = Script::find($formParams['id']);
+                $script->actions = json_encode($formParams['project_config']['actions']);
+                $script->save();
+            }
+            CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script", "创建成功", "success");
+        }
+
         $newData = [];
 
         $result = preg_match("/^(http|https):\/\//i", $formParams['list_url']);
@@ -562,7 +613,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             array_unshift($value, $key);
             $newData[] = $value;
         }
-        $data['step'] = $newData;
+        $data['modules'] = $newData;
 
         $data['name'] = $formParams['name'];
         $data['description'] = $formParams['description'];
@@ -578,7 +629,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             $formParams['verbose'] = ScriptConfig::DEFAULT_VERBOSE;
         }
 
-        $data['init'] = [
+        $data['casper_config'] = [
                         'load_images' => $formParams['load_images'],
                         'load_plugins' => $formParams['load_plugins'],
                         'log_level' => $formParams['log_level'],
@@ -587,58 +638,68 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
                         'height' => $formParams['height'],
                          ];
         $data['cron_type'] = $formParams['cron_type'];
-        $data['languages_type'] = $formParams['languages_type'];
+        $data['data_type'] = $formParams['data_type'];
         $data['requirement_pool_id'] = $formParams['requirement_pool_id'];
-        $data['next_script_id'] = $formParams['next_script_id'];
-        if (empty($formParams['is_report'])) {
-            $data['is_report'] = Script::REPORT_DATA_FALSE;
-        } else {
-            $data['is_report'] = $formParams['is_report'];
-        }
 
-        if (empty($formParams['is_download'])) {
-            $data['is_download'] = Script::DOWNLOAD_IMAGE_FALSE;
-        } else {
-            $data['is_download'] = $formParams['is_download'];
-        }
         if (empty($formParams['is_proxy'])) {
             $data['is_proxy'] = Script::WALL_OVER_FALSE;
         } else {
             $data['is_proxy'] = $formParams['is_proxy'];
         }
 
-        $data['operate_user'] = CRUDBooster::myName();
-        $data['generate_type'] = Script::GENERATE_TYPE_MODULE;
+        $data['created_by'] = CRUDBooster::myName();
         try {
             $res = InternalAPIService::post('/script', $data);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
         }
-
-        CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script", "创建成功", "success");
+        CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script/dispatch/" . $res['id'], "创建成功", "success");
     }
 
     //详情
     public function getDetail($id) {
-
         if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_edit==FALSE) {
             CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
         }
 
         $data = [];
         $data['page_title'] = '脚本详情';
-
         $data['row'] = InternalAPIService::get('/script', ['id' => $id]);
         if (empty($data['row'])) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "数据信息有误", "error");
         }
 
-        if (!empty($data['row']['init'])) {
-            $data['row']['init'] = json_encode($data['row']['init'], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+        if (!empty($data['row']['casper_config'])) {
+            if ($data['row']['casper_config']['load_images'] == 1) {
+                $data['row']['casper_config']['load_images'] = '是';
+            } else {
+                $data['row']['casper_config']['load_images'] = '否';
+            }
+
+            if ($data['row']['casper_config']['load_plugins'] == 2) {
+                $data['row']['casper_config']['load_plugins'] = '是';
+            } else {
+                $data['row']['casper_config']['load_plugins'] = '否';
+            }
+
+            if ($data['row']['casper_config']['verbose'] == 2) {
+                $data['row']['casper_config']['verbose'] = '是';
+            } else {
+                $data['row']['casper_config']['verbose'] = '否';
+            }
+
+            if ($data['row']['casper_config']['log_level'] == 1) {
+                $data['row']['casper_config']['log_level'] = 'debug';
+            } else if($data['row']['casper_config']['log_level'] == 2){
+                $data['row']['casper_config']['log_level'] = 'info';
+            } else {
+                $data['row']['casper_config']['log_level'] = 'error';
+            }
+            $data['row']['casper_config'] = json_encode($data['row']['casper_config'], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
         }
 
-        if (!empty($data['row']['step'])) {
-            $data['row']['step'] = json_encode($data['row']['step'], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+        if (!empty($data['row']['modules'])) {
+            $data['row']['modules'] =  "http://" . $_SERVER['HTTP_HOST'] . "/vendor/script/script_" . $id . ".js";
         }
 
         if ($data['row']['cron_type'] == Script::CRON_TYPE_KEEP) {
@@ -649,8 +710,16 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             $data['row']['cron_type'] = '每十分钟执行一次';
         }
 
+        if ($data['row']['data_type'] == Script::DATA_TYPE_CASPERJS) {
+            $data['row']['data_type'] = 'casperJS';
+        } else if($data['row']['data_type'] == Script::DATA_TYPE_HTML) {
+            $data['row']['data_type'] = 'html';
+        } else if( $data['row']['data_type'] == Script::DATA_TYPE_API) {
+            $data['row']['data_type'] = 'api';
+        }
+
         if ($data['row']['status'] == Script::STATUS_INIT) {
-            $data['row']['status_name'] = '初始化';
+            $data['row']['status'] = '初始化';
         } else {
             $data['row']['status'] = '已生成';
         }
@@ -659,6 +728,25 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             $data['row']['last_generate_at'] = date('Y-m-d H:i:s', $data['row']['last_generate_at']);
         }
 
+        if (!empty($data['row']['projects'])) {
+            foreach ($data['row']['projects'] as $key => $value) {
+                if ($value == 1) {
+                    $projects[] = '快讯列表';
+                } else if ($value == 2) {
+                    $projects[] = '快讯详情';
+                } else {
+                    $projects[] = '行业新闻';
+                }
+            }
+            $data['row']['projects'] = json_encode($projects, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+        }
+        if (!empty($data['row']['filters'])) {
+            $data['row']['filters'] = json_encode($data['row']['filters'], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+        }
+        if (!empty($data['row']['actions'])) {
+            $data['row']['actions'] = json_encode($data['row']['actions'], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+        }
+        // dd($data);
         $this->cbView('script/script_detail_view',$data);
     }
 
@@ -950,8 +1038,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         } else {
             $row->status_name = '已生成';
         }
-        $task = DB::table('t_task')->select('name')->where('script_id', $row->id)->orderBy('id', 'desc')->first();
-        $row->name = $task->name;
         foreach($columns_table as $col) {
               if($col['visible']===FALSE) continue;
 
@@ -1043,7 +1129,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
     public function getPublish($id)
     {
         try {
-            $res = InternalAPIService::get('/script/publish', ['id' => $id]);
+            $res = InternalAPIService::post('/script/publish', ['id' => $id, 'publisher' => CRUDBooster::myName()]);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
         }
@@ -1204,7 +1290,46 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
     }
 
+    /**
+     * dispatchView
+     * 分发器页面
+     */
+    public function getDispatch($id)
+    {
+        //查询script
+        $script = Script::find($id);
+        $scriptInfo = $script->toArray();
+        $res['projects'] = $scriptInfo['projects'];
+        //TODO 查询分发器数据
+        $data = Project::get();
+        $res['id'] = $id;
+        $res['dispatch'] = $data->toArray();
+        $this->cbView('script/script_dispatch_view', $res);
+    }
 
+    public function getFilterAction($id)
+    {
+        //查询script信息
+        $script = Script::find($id);
+        $scriptInfo = $script->toArray();
+        $res['script'] = $scriptInfo;
+        $projectIds = json_decode($scriptInfo['projects']);
+
+        //查询项目信息
+        $projects = new Project;
+        $projectsInfo = $projects->whereIn('id',$projectIds)->get();
+        $res['projects'] = $projectsInfo->toArray();
+
+        //查询过滤器信息
+        $filter = Filter::get();
+        $res['filter'] = $filter->toArray();
+
+        //查询action信息
+        $action = Action::get();
+        $res['action_info'] = $action->toArray();
+        $res['id'] = $id;
+        $this->cbView('script/script_filter_action_view', $res);
+    }
     //By the way, you can still create your own method in here... :)
 
 
