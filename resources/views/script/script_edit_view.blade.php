@@ -65,98 +65,64 @@
                         <p class='help-block'></p>
                     </div>
                 </div>
-                @if ($row[data_type] == 1 && empty($row[content]))
-                    <div class='form-group header-group-0' id='form-group-width'>
-                        <label class='control-label col-sm-2'>CasperJS配置:</label>
+                @if ($row['data_type'] == 1 && empty($row['content']))
+                <div class="table-bordered">
+                    <div class='form-group'>
+                        <label class='control-label col-md-2'>casper配置</label>
+                        <label class='control-label col-md-3'>是否加载图片&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                            <?php $checked = "" ?>
+                            @if ($row['casper_config']['load_images'] == 1)
+                            <?php $checked = "checked" ?>
+                            @endif
+                            <input type="checkbox" {{$checked}} name="load_images" value="1">
+                        </label>
+                        <label class='control-label col-md-3'>是否加载插件&nbsp&nbsp&nbsp&nbsp
+                            <?php $checked = "" ?>
+                            @if ($row['casper_config']['load_plugins'] == 1)
+                            <?php $checked = "checked" ?>
+                            @endif
+                            <input type="checkbox" {{$checked}} name="load_plugins" value="1">
+                        </label>
+                        <label class='control-label col-md-3'>verbose&nbsp&nbsp&nbsp&nbsp
+                            <?php $checked = "" ?>
+                            @if ($row['casper_config']['verbose'] == 1)
+                            <?php $checked = "checked" ?>
+                            @endif
+                            <input type="checkbox" {{$checked}} name="verbose" value="1">
+                        </label>
                     </div>
-                    <div class='form-group  header-group-0'>
-                        <lable class="col-sm-2"></lable>
-                        <div class='form-group  header-group-0 table-bordered col-sm-10'>
-                            <label class='control-label col-sm-3'>是否加载图片</label>
-                            <div class="col-sm-3">
-                                @if ($row[init][load_images] == 1)
-                                    <label>
-                                        <input type="checkbox" checked name="load_images" value="1">
-                                    </label>
-                                @else
-                                    <label>
-                                        <input type="checkbox" name="load_images" value="1">
-                                    </label>
-                                @endif
-                            </div>
-                            <label class='control-label col-sm-3'>是否加载插件</label>
-                            <div class="col-sm-3">
-                                @if ($row[init][load_plugins] == 1)
-                                    <label>
-                                        <input type="checkbox" checked name="load_plugins" value="1">
-                                    </label>
-                                @else
-                                    <label>
-                                        <input type="checkbox" name="load_plugins" value="1">
-                                    </label>
-                                @endif
-                            </div>
-                            <label class='control-label col-sm-3'>verbose</label>
-                            <div class="col-sm-9">
-                                @if ($row[init][verbose] == 1)
-                                    <label>
-                                        <input type="checkbox" checked name="verbose" value="1">
-                                    </label>
-                                @else
-                                    <label>
-                                        <input type="checkbox" name="verbose" value="1">
-                                    </label>
-                                @endif
-                            </div>
-                            <label class='control-label col-sm-3'>log_level</label>
-                            <div class="col-sm-9">
-                                @if ($row[init][log_level] == 'debug')
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="debug" checked> debug
-                                    </label>
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="info"> info
-                                    </label>
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="error"> error
-                                    </label>
-                                @elseif ($row[init][log_level] == 'info')
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="debug"> debug
-                                    </label>
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="info" checked> info
-                                    </label>
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="error"> error
-                                    </label>
-                                @else
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="debug"> debug
-                                    </label>
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="info"> info
-                                    </label>
-                                    <label class='radio-inline'>
-                                        <input type="radio" name="log_level" value="error" checked> error
-                                    </label>
-
-                                @endif
-                            </div>
-                            <label class='control-label col-sm-3'>width</label>
-                            <div class="col-sm-3">
-                                <input type='text' class='form-control' name="width" id="width" value='{{$row[init][width]}}'/>
-                                <div class="text-danger"></div>
-                                <p class='help-block'></p>
-                            </div>
-                            <label class='control-label col-sm-3'>height</label>
-                            <div class="col-sm-3">
-                                <input type='text' class='form-control' name="height" id="width" value='{{$row[init][height]}}'/>
-                                <div class="text-danger"></div>
-                                <p class='help-block'></p>
-                            </div>
-                        </div>
+                    <div class='form-group'>
+                        <label class='control-label col-md-2'></label>
+                        <?php $checked = "" ?>
+                        @if ($row['casper_config']['log_level'] == 'debug')
+                            <?php $checked = "checked" ?>
+                        @elseif ($row['casper_config']['log_level'] == 'info')
+                            <?php $checked = "checked" ?>
+                        @else
+                            <?php $checked = "checked" ?>
+                        @endif
+                        <label class='control-label col-md-3'>日志级别 debug&nbsp&nbsp&nbsp&nbsp
+                            <input type="radio" name="log_level" {{$checked}} value="debug">
+                        </label>
+                        <label class='control-label col-md-3'>info&nbsp&nbsp&nbsp&nbsp
+                            <input type="radio" name="log_level" {{$checked}} value="info">
+                        </label>
+                        <label class='control-label col-md-3'>error&nbsp&nbsp&nbsp&nbsp
+                            <input type="radio" name="log_level" {{$checked}} value="error">
+                        </label>
                     </div>
+                    <div class='form-group'>
+                        <label class='control-label col-md-2'></label>
+                        <label class='control-label col-md-1'>width:</label>
+                        <label class='control-label col-md-2'>
+                            <input type='text' class='form-control' name="width" value="{{$row['casper_config']['width']}}"/>
+                        </label>
+                        <label class='control-label col-md-2'>height:</label>
+                        <label class='control-label col-md-2'>
+                            <input type='text' class='form-control' name="height" value="{{$row['casper_config']['height']}}"/>
+                        </label>
+                    </div>
+                </div>
                 @endif
                 @if (empty($row['content']))
                     <div class='form-group header-group-0 ' id='form-group-modules'>
@@ -337,7 +303,7 @@
             </div>
         </div><!-- /.box-footer-->
     </form>
-    @if ($row['generate_type'] == 1)
+    @if (empty($row['content']))
         <aside class="control-sidebar control-sidebar-dark" style="width: 330px; right:0; height: 100%">
         <ul id="foo" class="block__list block__list_words">
             @if (!empty($script_model))

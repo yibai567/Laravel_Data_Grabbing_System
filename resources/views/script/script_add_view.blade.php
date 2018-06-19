@@ -67,56 +67,43 @@
                     </div>
                 </div>
                 @if ($data_type == 1)
-                    <div class='form-group header-group-0' id='form-group-width'>
-                        <label class='control-label col-sm-2'>CasperJS配置:</label>
+                    <div class="table-bordered">
+                    <div class='form-group'>
+                        <label class='control-label col-md-2'>casper配置</label>
+                        <label class='control-label col-md-3'>是否加载图片&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                            <input type="checkbox" name="load_images" value="1">
+                        </label>
+                        <label class='control-label col-md-3'>是否加载插件&nbsp&nbsp&nbsp&nbsp
+                            <input type="checkbox" name="load_plugins" value="1">
+                        </label>
+                        <label class='control-label col-md-3'>verbose&nbsp&nbsp&nbsp&nbsp
+                            <input type="checkbox" name="verbose" value="1">
+                        </label>
                     </div>
-                    <div class='form-group  header-group-0'>
-                        <label class="col-sm-2"></label>
-                        <div class='form-group  header-group-0 table-bordered col-sm-10'>
-                            <label class='control-label col-sm-3'>是否加载图片</label>
-                            <div class="col-sm-3">
-                                <input type="checkbox" name="load_images" value="1">
-                                <div class="text-danger"></div>
-                                <p class='help-block'></p>
-                            </div>
-                            <label class='control-label col-sm-3'>是否加载插件</label>
-                            <div class="col-sm-3">
-                                <input type="checkbox" name="load_plugins" value="1">
-                                <div class="text-danger"></div>
-                                <p class='help-block'></p>
-                            </div>
-                            <label class='control-label col-sm-3'>verbose</label>
-                            <div class="col-sm-9">
-                                <input type="checkbox" name="verbose" value="1">
-                                <div class="text-danger"></div>
-                                <p class='help-block'></p>
-                            </div>
-                            <label class='control-label col-sm-3'>log_level</label>
-                            <div class="col-sm-9">
-                                <label class='radio-inline'>
-                                    <input type="radio" name="log_level" value="debug" checked> debug
-                                </label>
-                                <label class='radio-inline'>
-                                    <input type="radio" name="log_level" value="info"> info
-                                </label>
-                                <label class='radio-inline'>
-                                    <input type="radio" name="log_level" value="error"> error
-                                </label>
-                            </div>
-                            <label class='control-label col-sm-3'>width</label>
-                            <div class="col-sm-3">
-                                <input type='text' class='form-control' name="width" id="width" value=''/>
-                                <div class="text-danger"></div>
-                                <p class='help-block'></p>
-                            </div>
-                            <label class='control-label col-sm-3'>height</label>
-                            <div class="col-sm-3">
-                                <input type='text' class='form-control' name="height" id="width" value=''/>
-                                <div class="text-danger"></div>
-                                <p class='help-block'></p>
-                            </div>
-                        </div>
+                    <div class='form-group'>
+                        <label class='control-label col-md-2'></label>
+                        <label class='control-label col-md-3'>日志级别 debug&nbsp&nbsp&nbsp&nbsp
+                            <input type="radio" name="log_level" value="debug">
+                        </label>
+                        <label class='control-label col-md-3'>info&nbsp&nbsp&nbsp&nbsp
+                            <input type="radio" name="log_level" value="info">
+                        </label>
+                        <label class='control-label col-md-3'>error&nbsp&nbsp&nbsp&nbsp
+                            <input type="radio" name="log_level" value="error">
+                        </label>
                     </div>
+                    <div class='form-group'>
+                        <label class='control-label col-md-2'></label>
+                        <label class='control-label col-md-1'>width:</label>
+                        <label class='control-label col-md-2'>
+                            <input type='text' class='form-control' name="width" value=""/>
+                        </label>
+                        <label class='control-label col-md-2'>height:</label>
+                        <label class='control-label col-md-2'>
+                            <input type='text' class='form-control' name="height" value=""/>
+                        </label>
+                    </div>
+                </div>
                 @endif
                 <div class='form-group header-group-0 ' id='form-group-step'>
                     <label class='control-label col-sm-2'>步骤
