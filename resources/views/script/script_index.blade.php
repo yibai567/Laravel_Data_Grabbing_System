@@ -92,9 +92,9 @@
             <a href='{{CRUDBooster::mainpath("add?dataType=3")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
               <i class="fa fa-plus-circle"></i> Api
             </a>
-            <a id="uploadfile" class="btn btn-sm btn-success" title="上传脚本">
+            <!-- <a id="uploadfile" class="btn btn-sm btn-success" title="上传脚本">
               <i class="fa fa-plus-circle"></i> 上传脚本
-            </a>
+            </a> -->
              <a href='{{CRUDBooster::mainpath("upload")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="发布脚本">
               <i class="fa fa-plus-circle"></i> 发布脚本
             </a>

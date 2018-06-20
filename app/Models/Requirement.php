@@ -51,6 +51,8 @@ class Requirement extends Model
         'description',
         'subscription_type',
         'is_capture',
+        'company_id',
+        'status_identity',
         'is_download_img',
         'img_description',
         'status',

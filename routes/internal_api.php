@@ -141,14 +141,12 @@ $api->version(
         $api->post('/quirement/update', 'QuirementPoolController@update');
         $api->get('/quirements', 'QuirementPoolController@all');
         $api->get('/quirement', 'QuirementPoolController@retrieve');
-        $api->get('/quiremeupdateByTaskRunLogIdnt/update_status','QuirementPoolController@updateStatus');
+        $api->post('/quirement/update_status','QuirementPoolController@updateStatus');
 
         //区块链新闻
         $api->get('/block_news','BlockNewsController@all');
         $api->get('/block_news/companies', 'QuirementPoolController@getCompanies');
         $api->get('/block_news/total','BlockNewsController@getTotal');
-
-
 
     }
 );

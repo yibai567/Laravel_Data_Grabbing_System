@@ -33,11 +33,16 @@
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
-            $this->col[] = ["label"=>"资源ID","name"=>"id"];
-			$this->col[] = ["label"=>"资源名称","name"=>"name"];
-            $this->col[] = ["label"=>"列表URL","name"=>"list_url",'width'=>'200',"callback"=>function ($row) {
+            $this->col[] = ["label"=>"任务ID","name"=>"id"];
+			$this->col[] = ["label"=>"任务名称","name"=>"name"];
+            $this->col[] = ["label"=>"任务地址","name"=>"list_url",'width'=>'200',"callback"=>function ($row) {
                 return '<a href="' . $row->list_url . '" target="_brank" style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->list_url .'</a>';
             }];
+            $this->col[] = ["label"=>"公司名称","name"=>"company_id","callback"=>function ($row){
+                $company = DB::table('t_company')->where('id', $row->company_id)->first();
+                return $company->cn_name;
+            }];
+
 			$this->col[] = ["label"=>"订阅类型","name"=>"subscription_type","callback"=>function ($row){
                 if ( $row->subscription_type == Requirement::SUBSCRIPTION_TYPE_LIST) {
                     return '列表';
@@ -45,86 +50,66 @@
                     return '详情';
                 }
             }];
-			$this->col[] = ["label"=>"是否截图","name"=>"is_capture","callback"=>function ($row) {
+			$this->col[] = ["label"=>"截图","name"=>"is_capture","callback"=>function ($row) {
                 if ( $row->is_capture == Requirement::IS_CAPTURE_TRUE) {
-                    return '是';
+                    return '需要';
                 } else {
-                    return '否';
+                    return '不需要';
                 }
             }];
 
-			$this->col[] = ["label"=>"是否下载图片","name"=>"is_download_img","callback"=>function ($row) {
+			$this->col[] = ["label"=>"图片资源","name"=>"is_download_img","callback"=>function ($row) {
                 if ( $row->is_download_img == Requirement::IS_DOWNLOAD_TRUE) {
-                    return '是';
+                    return '需要';
                 } else {
-                    return '否';
+                    return '不需要';
                 }
             }];
-            $this->col[] = array("label"=>"图片","name"=>"img_description","image"=>1);
-             $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
-
+            $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
                 if ($row->status == Requirement::STATUS_TRUE) {
-
                     return "<a class='btn btn-xs btn-warning'><i></i>未处理</a>";
                 } else {
                     return "<a class='btn btn-xs btn-success'><i></i>已处理</a>";
-
-
                 }
-
-
             }];
-            $this->col[] = ["label"=>"创建人","name"=>"create_by","callback"=>function ($row) {
-
-                $createBy = config('user');
-
-                return $createBy[$row->create_by];
-
-
-
+            $this->col[] = ["label"=>"全部数据","name"=>"status_identity","callback"=>function ($row) {
+                if ($row->status_identity == 1) {
+                    return "<a class='btn btn-xs btn-warning'><i></i>未获取</a>";
+                } else {
+                    return "<a class='btn btn-xs btn-success'><i></i>已获取</a>";
+                }
             }];
+
             $this->col[] = ["label"=>"操作人","name"=>"operate_by","callback"=>function ($row) {
-
                  return $this->__getUser($row->operate_by);
-
-
-
             }];
-
 
             $this->col[] = ["label"=>"创建时间","name"=>"created_at"];
-            $this->col[] = ["label"=>"执行时间","name"=>"updated_at"];
 
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
 			$this->form[] = ['label'=>'任务名称','name'=>'name','type'=>'text','validation'=>'nullable|string|max:100','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'抓取url','name'=>'list_url','type'=>'text','validation'=>'required|string|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'任务地址','name'=>'list_url','type'=>'text','validation'=>'required|string|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'描述','name'=>'description','type'=>'textarea','validation'=>'nullable|max:255','width'=>'col-sm-10'];
 
+            $this->form[] = ['label'=>'公司列表','name'=>'company_id','type'=>'select','datatable'=>'t_company,cn_name'];
 
-			$this->form[] = ['label'=>'图片描述','name'=>'img_description','type'=>'upload','required'=>true,'validation'=>'required|image|max:1000','width'=>'col-sm-10',"callback"=>function ($row) {
+
+			$this->form[] = ['label'=>'图片描述','name'=>'img_description','type'=>'upload','width'=>'col-sm-10',"callback"=>function ($row) {
                 $newIp=$_SERVER['HTTP_HOST']."/".$row->img_description;
                 $domain = strstr($newIp, '/uploads');
                 if($domain){
-
                     return $row->img_description;
-
                 }else{
-
                     $string="<div class='col-sm-10' style='margin-left:208px;margin-bottom:15px'><a data-lightbox='roadtrip' href=' ".$row->img_description."'><img style='max-width:160px'  src=".$row->img_description."></a><div class='text-danger'></div></div>";
                     echo $string;
-
-
                 }
-
-
-
             }];
 			$this->form[] = ['label'=>'订阅类型','name'=>'subscription_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|列表;2|详情','value'=>1];
-			$this->form[] = ['label'=>'是否截图','name'=>'is_capture','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|是;2|否','value'=>1];
-			$this->form[] = ['label'=>'是否下载图片','name'=>'is_download_img','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|是;2|否','value'=>1];
+			$this->form[] = ['label'=>'截图','name'=>'is_capture','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|需要;2|不需要','value'=>2];
+			$this->form[] = ['label'=>'图片资源','name'=>'is_download_img','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|需要;2|不需要','value'=>2];
 			$this->form[] = ['label'=>'创建人','name'=>'create_by','type'=>'select','validation'=>'required','width'=>'col-sm-9','dataenum'=>'1|liqi1@jinse.com;2|huangxingxing@jinse.com;3|wangbo@jinse.com',];
 			# END FORM DO NOT REMOVE THIS LINE
 
@@ -168,9 +153,8 @@
 	        $this->addaction = array();
             $this->addaction[] = ['label'=>'done', 'url'=>CRUDBooster::mainpath('modify-state/[id]/' . Requirement::STATUS_FALSE),'color'=>'warning', 'icon'=>'ion-arrow-right-c', 'showIf'=>'[status] == ' . Requirement::STATUS_TRUE];
             $this->addaction[] = ['label'=>'restart', 'url'=>CRUDBooster::mainpath('modify-state/[id]/' . Requirement::STATUS_TRUE),'color'=>'info', 'icon'=>'ion-arrow-right-c', 'showIf'=>'[status] == ' . Requirement::STATUS_FALSE];
-            // $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]'),'color'=>'success', 'icon'=>'fa fa-play', 'showIf'=>'[status] == ' . Item::STATUS_TEST_SUCCESS . '|| [status] == ' . Item::STATUS_STOP];
 
-            // $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-down/[id]'),'color'=>'warning', 'icon'=>'fa fa-stop', 'showIf'=>'[status] == ' . Item::STATUS_START];
+            $this->addaction[] = ['label'=>'获取全部数据', 'url'=>CRUDBooster::mainpath('save-status-identity/[id]/2'),'color'=>'info', 'icon'=>'ion-arrow-right-c', 'showIf'=>'[status_identity] == 1'];
 
 	        /*
 	        | ----------------------------------------------------------------------
@@ -425,11 +409,22 @@
             $params['user_id'] = CRUDBooster::myId();
 
             try {
-                $result = InternalAPIService::get('/quirement/update_status', $params);
+                $result = InternalAPIService::post('/quirement/update_status', $params);
             } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "状态修改成功", "info");
+        }
 
+        public function getSaveStatusIdentity($id,$statusIdentity) {
+            try {
+                $requirement = Requirement::find($id);
+                $requirement->status_identity = $statusIdentity;
+                $requirement->operate_by = CRUDBooster::myId();
+                $requirement->save();
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+            }
            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "状态修改成功", "info");
         }
 
@@ -457,7 +452,6 @@
         {
 
             $params['id'] = (int)$id;
-
             try {
                 InternalAPIService::post('/quirement/update', $params);
 
