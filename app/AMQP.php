@@ -9,7 +9,7 @@ class AMQP {
     /**
      * Work Queue 模型
      */
-    const MODEL_TYPE_WORKQUEUE = 'workqueue';
+    const MODEL_TYPE_WORKQUEUE = 'direct';
 
     /**
      * Publish/Subscribe 模型
@@ -74,13 +74,13 @@ class AMQP {
     );
 
     /**
-     * get_instance
+     * getInstance
      * 获取Client实例
      *
      * @param array $options
      * @return object
      */
-    public static function &get_instance($options) {
+    public static function &getInstance($options) {
 
         $name = $options['name'];
         if (array_key_exists($name, self::$__clients)) {
@@ -99,6 +99,18 @@ class AMQP {
         try {
             $this->is_config_valid($options);
 
+            if (!isset($options['server']['host'])) {
+                $options['server']['host'] = config('rabbitmq.host');
+            }
+            if (!isset($options['server']['port'])) {
+                $options['server']['port'] = config('rabbitmq.port');
+            }
+            if (!isset($options['server']['login'])) {
+                $options['server']['login'] = config('rabbitmq.login');
+            }
+            if (!isset($options['server']['password'])) {
+                $options['server']['password'] = config('rabbitmq.password');
+            }
             $server = $options['server'];
             $this->__connection = new AMQPConnection($server['host'],
                                                      $server['port'],
@@ -107,9 +119,6 @@ class AMQP {
                                                      $server['vhost']);
 
             $this->__channel = $this->__connection->channel();
-            // if (!$this->__channel->is_open) {
-            //     throw new AMQPException('channel is not open');
-            // }
 
             if ($options['qos']['size'] && $options['qos']['count']) {
                 throw new AMQPException('qos size and count both bigger than 0');
@@ -124,12 +133,12 @@ class AMQP {
     }
 
     /**
-     * prepare_exchange
+     * prepareExchange
      * 初始化Exchange
      *
      * @return void
      */
-    public function prepare_exchange() {
+    public function prepareExchange() {
 
         try {
             $conf = $this->__options['exchange_config'];
@@ -189,12 +198,12 @@ class AMQP {
     }
 
     /**
-     * prepare_queue
+     * prepareQueue
      * 初始化队列
      *
      * @return void
      */
-    public function prepare_queue() {
+    public function prepareQueue() {
 
         try {
             $conf = $this->__options['queue_config'];
@@ -251,12 +260,12 @@ class AMQP {
     }
 
     /**
-     * queue_bind
+     * queueBind
      * 绑定队列和Exchange
      *
      * @return void
      */
-    public function queue_bind($routing_key = '') {
+    public function queueBind($routing_key = '') {
 
         try {
             if (!$this->_exchange_name) {
@@ -272,7 +281,7 @@ class AMQP {
             if (!$routing_key) {
                 $routing_key = $this->_queue_name;
             }
-            $this->__channel->queue_bind($this->_queue_name,
+            $this->__channel->queueBind($this->_queue_name,
                                          $this->_exchange_name,
                                          $routing_key);
         } catch (Exception $e) {
@@ -387,12 +396,22 @@ class AMQP {
      * @param callback $callback
      * @return void
      */
-    public function consume($callback) {
+    public function consume($queue, $callback) {
 
-        $this->__channel->basic_consume($callback);
+        // $this->__channel->basic_consume($callback);
+        $i = 1;
+        $this->__channel->basic_qos(null, 1, null);
+        $this->__channel->basic_consume($queue, '', false, false, false, false, $callback);
+        while(count($this->__channel->callbacks)) {
+            if ($i > 100) {
+                exit();
+            }
+            $this->__channel->wait();
+            $i++;
+        }
     }
 
-    public function __destruct() {
+    public function close() {
 
         // destory connection
         try {

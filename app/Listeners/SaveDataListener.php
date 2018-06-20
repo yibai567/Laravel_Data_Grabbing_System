@@ -4,9 +4,9 @@ namespace App\Listeners;
 
 use App\Events\SaveDataEvent;
 use App\Models\V2\Project;
-use App\Models\V2\Task;
 use App\Models\V2\TaskProjectMap;
-use App\Services\RabbitMQService;
+use App\Models\V2\Task;
+use App\AMQP;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Log;
 
@@ -31,52 +31,69 @@ class SaveDataListener implements ShouldQueue
     public function handle(SaveDataEvent $event)
     {
         Log::debug('[SaveDataListener handle] ------- start -------');
-
-        // 获取事件中的信息
-        $datas = $event->datas;
-        Log::debug('[SaveDataListener handle] datas: '.json_encode($datas, JSON_UNESCAPED_UNICODE));
-
-        if (empty($datas)) {
+        $data = $event->datas;
+        if (empty($data)) {
             Log::debug('[SaveDataListener handle] data is not exists');
-
             return true;
         }
 
-        //这批数据的来源同一个script
-        $taskId = $datas[0]['task_id'];
-
-        $taskProjectMap = TaskProjectMap::where('task_id',$taskId)->get(['project_id']);
+        $taskProjectMap = TaskProjectMap::select('project_id')
+                    ->where('task_id', $data['task_id'])
+                    ->get()
+                    ->toArray();
 
         if (empty($taskProjectMap)) {
-            Log::debug('[SaveDataListener handle] task_project_map is empty');
-
             return true;
         }
 
-        try {
-            foreach ($datas as $data) {
 
-                foreach ($taskProjectMap['project_id'] as $projectId) {
-                    //查询分发项目信息
-                    $project = Project::find($projectId);
-                    $exchange = $project->exchange;
-                    $routingKey = $project->routing_key;
+        $projectIds = array_pluck($taskProjectMap, 'project_id');
+        $projects = Project::whereIn('id', $projectIds)->get()->toArray();
 
-                    $rabbitMQ = new RabbitMQService();
-
-                    //调用分发项目队列
-                    $rabbitMQ->create($exchange, $routingKey, $data);
-
-                }
+        foreach ($projects as $project) {
+            $type = '';
+            switch ($project['exchange_type']) {
+                case Project::EXCHANGE_TYPE_DIRECT :
+                    $type = 'direct';
+                    break;
+                case Project::EXCHANGE_TYPE_FANOUT :
+                    $type = 'fanout';
+                    break;
+                case Project::EXCHANGE_TYPE_ROUTE :
+                    $type = 'route';
+                    break;
+                default:
+                    break;
             }
 
-        } catch (\Exception $e) {
-            // DB::rollBack();
-            Log::error('[SaveDataListener handle error]:'."\t".$e->getCode()."\t".$e->getMessage());
+            if (empty($type) || empty($project['vhost']) || empty($project['exchange']) || empty($project['queue'])) {
+                Log::debug('[SaveDataListener Project error] project id ' . $project['id']);
+                continue;
+            }
+
+            $option = [
+                'server' => [
+                    'vhost' => $project['vhost'],
+                ],
+                'type' => $type,
+                'exchange' => $project['exchange'],
+                'queue' => $project['queue']
+            ];
+
+            try {
+                $rmq = AMQP::getInstance($option);
+                $rmq->prepareExchange();
+                $rmq->prepareQueue();
+                $rmq->queueBind();
+                foreach ($data['data'] as $value) {
+                    $rmq->publish(json_encode($value), $project['queue']);
+                }
+                $rmq->close();
+            } catch (\Exception $e) {
+                Log::error('[SaveDataListener handle error]:'."\t".$e->getCode()."\t".$e->getMessage());
+            }
         }
-
         Log::debug('[SaveDataListener handle] ------- end -------');
-
         return true;
     }
 }

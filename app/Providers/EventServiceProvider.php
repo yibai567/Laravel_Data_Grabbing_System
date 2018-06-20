@@ -20,13 +20,12 @@ class EventServiceProvider extends ServiceProvider
             // 任务测试
             'App\Listeners\TaskPreviewListener',
         ],
-        'App\Events\DataResultReportEvent' => [
-            // 爬取结果上报
-            'App\Listeners\DataResultReportListener',
-        ],
+        // 'App\Events\DataResultReportEvent' => [
+        //     // 爬取结果上报
+        //     'App\Listeners\DataResultReportListener',
+        // ],
 
         'App\Events\SaveDataEvent' => [
-            // 爬取结果处理监听
             'App\Listeners\SaveDataListener',
         ],
 
