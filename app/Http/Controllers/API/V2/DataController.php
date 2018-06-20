@@ -71,7 +71,7 @@ class DataController extends Controller
 
             $params['task_id'] = $taskId;
             $datas = InternalAPIService::post('/datas',$params);
-
+            Log::debug('[v2 DataController batchHandle] $datas = ',$datas);
             $dataNum = count($datas);
             $updateTaskRunLogData['result_count'] = $dataNum;
             $updateTaskRunLogData['id'] = $params['task_run_log_id'];
@@ -79,7 +79,7 @@ class DataController extends Controller
             InternalAPIService::post('/task_run_log/status/success', $updateTaskRunLogData);
 
             if ($dataNum > 0) {
-                event(new SaveDataEvent($datas));
+//                event(new SaveDataEvent($datas));
             }
         } catch (\Exception $e) {
             Log::debug('[v2 DataController batchHandle] error message = ' . $e->getMessage());
