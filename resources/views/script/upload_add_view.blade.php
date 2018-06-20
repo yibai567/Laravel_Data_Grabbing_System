@@ -24,7 +24,7 @@
                         </label>
                         <div class="col-xs-5">
                             <input type='text' title="脚本名称" required maxlength='70' class='form-control' name="name" id="name" value='{{$row[name]}}'/>
-                            <input type='hidden' maxlength="70" class='form-control' name="languages_type" value='{{$languages_type}}'/>
+                            <input type='hidden' maxlength="70" class='form-control' name="data_type" value='{{$data_type}}'/>
                             <div class="text-danger"></div>
                             <p class='help-block'></p>
                         </div>
@@ -54,13 +54,13 @@
                         <div>
                             <div class="col-sm-10">
                                 <label class='radio-inline'>
-                                    <input type="radio" name="languages_type" value="1" checked> CasperJs
+                                    <input type="radio" name="data_type" value="1" checked> CasperJs
                                 </label>
                                 <label class='radio-inline'>
-                                    <input type="radio" name="languages_type" value="2"> Html
+                                    <input type="radio" name="data_type" value="2"> Html
                                 </label>
                                 <label class='radio-inline'>
-                                    <input type="radio" name="languages_type" value="3"> Api
+                                    <input type="radio" name="data_type" value="3"> Api
                                 </label>
                             </div>
                         </div>
@@ -72,10 +72,10 @@
                         <div>
                             <div class="col-sm-10">
                                 <label class='radio-inline'>
-                                    <input type="radio" name="script_type" value="1" checked> JS
+                                    <input type="radio" name="ext" value="1" checked> JS
                                 </label>
                                 <label class='radio-inline'>
-                                    <input type="radio" name="script_type" value="2"> PHP
+                                    <input type="radio" name="ext" value="2"> PHP
                                 </label>
                             </div>
                         </div>
@@ -89,32 +89,6 @@
                             <textarea name="content" id="content" maxlength=5000 required class='form-control' style="height:400px;display: block;color: #428bca;"></textarea>
                             <div class="text-danger"></div>
                             <p class='help-block'></p>
-                        </div>
-                    </div>
-                    <div class='form-group header-group-0 ' id='form-group-is_download'>
-                        <label class='control-label col-sm-2'>是否下载图片
-                        </label>
-                        <div>
-                            <div class="col-sm-10">
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" name="is_download" value="1">
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class='form-group header-group-0 ' id='form-group-is_report'>
-                        <label class='control-label col-sm-2'>是否上报
-                        </label>
-                        <div>
-                            <div class="col-sm-10">
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" name="is_report" value="1">
-                                    </label>
-                                </div>
-                            </div>
                         </div>
                     </div>
                     <div class='form-group header-group-0 ' id='form-group-is_proxy'>
@@ -139,15 +113,7 @@
                             <p class='help-block'></p>
                         </div>
                     </div>
-                    <div class='form-group header-group-0 ' id='form-group-next_script_id'>
-                        <label class='control-label col-sm-2'>下一步脚本ID
-                        </label>
-                        <div class="col-xs-5">
-                            <input type='text' title="下一步脚本ID" maxlength='70' class='form-control' name="next_script_id" id="next_script_id" value=''/>
-                            <div class="text-danger"></div>
-                            <p class='help-block'></p>
-                        </div>
-                    </div>
+
                     <div class='form-group header-group-0 ' id='form-group-cron_type'>
                         <label class='control-label col-sm-2'>cron_type
                             <span class='text-danger' title='This field is required'>*</span>
