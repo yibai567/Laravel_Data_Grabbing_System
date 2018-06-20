@@ -26,8 +26,13 @@ class EventServiceProvider extends ServiceProvider
         ],
 
         'App\Events\SaveDataEvent' => [
-            // 爬取结果上报
+            // 爬取结果处理监听
             'App\Listeners\SaveDataListener',
+        ],
+
+        // SqlListener监听QueryExecuted
+        'Illuminate\Database\Events\QueryExecuted' => [
+            'App\Listeners\SqlListener',
         ],
 
     ];

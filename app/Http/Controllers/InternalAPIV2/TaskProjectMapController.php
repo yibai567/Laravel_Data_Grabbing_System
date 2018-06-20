@@ -66,6 +66,7 @@ class TaskProjectMapController extends Controller
                         foreach ($filters as $filterId => $filter) {
                             $taskFilterMap['project_id'] = $projectId;
                             $taskFilterMap['filter_id'] = $filterId;
+                            $taskFilterMap['params'] = $filter;
                             $taskFilterMaps[] = TaskFilterMap::create($taskFilterMap)->toArray();
                         }
                     }
@@ -82,6 +83,7 @@ class TaskProjectMapController extends Controller
                         foreach ($actions as $actionId => $action) {
                             $taskActionMap['project_id'] = $projectId;
                             $taskActionMap['action_id'] = $actionId;
+                            $taskActionMap['params'] = $action;
                             $taskActionMaps[] = TaskActionMap::create($taskActionMap)->toArray();
                         }
                     }

@@ -48,7 +48,9 @@ class Task extends Model
         'cron_type',
         'ext',
         'publisher',
-        'status'
+        'status',
+        'requirement_pool_id',
+        'company_id',
     ];
 
     /**

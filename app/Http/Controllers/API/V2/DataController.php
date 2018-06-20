@@ -71,7 +71,7 @@ class DataController extends Controller
 
             $params['task_id'] = $taskId;
             $datas = InternalAPIService::post('/datas',$params);
-            dd(json_encode($datas[0]));
+
             $dataNum = count($datas);
             $updateTaskRunLogData['result_count'] = $dataNum;
             $updateTaskRunLogData['id'] = $params['task_run_log_id'];

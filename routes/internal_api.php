@@ -129,6 +129,8 @@ $api->version(
 
         $api->post('/task/project_map','TaskProjectMapController@create');
 
+        $api->get('/task/action_map/action_id','TaskActionMapController@getByActionId');
+
         $api->post('/project_result','ProjectResultController@create');
         $api->get('/project_result','ProjectResultController@retrieve');
 

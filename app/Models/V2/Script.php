@@ -69,6 +69,7 @@ class Script extends Model
      */
     protected $fillable = [
         'requirement_pool_id',
+        'company_id',
         'name',
         'description',
         'list_url',

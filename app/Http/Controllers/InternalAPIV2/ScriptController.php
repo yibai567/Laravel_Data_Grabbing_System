@@ -9,6 +9,7 @@
 
 namespace App\Http\Controllers\InternalAPIV2;
 
+use App\Models\V2\Requirement;
 use App\Models\V2\ScriptModel;
 use App\Models\V2\Task;
 use App\Services\FileService;
@@ -76,6 +77,15 @@ class ScriptController extends Controller
             $params['description'] = trim($params['description']);
         }
 
+        if (!empty($params['requirement_pool_id'])) {
+            //查询需求池信息
+            $requirement = Requirement::find($params['requirement_pool_id']);
+            if (empty($requirement)) {
+                throw new \Dingo\Api\Exception\ResourceException('$requirement is not found');
+            }
+            $params['company_id'] = $requirement->company_id;
+        }
+
         try {
             DB::beginTransaction();
 
@@ -88,18 +98,20 @@ class ScriptController extends Controller
 
             //整理script入库数据
             $scriptData = [
-                'name'             => $params['name'],
-                'description'      => $params['description'],
-                'list_url'         => $params['list_url'],
-                'data_type'        => $params['data_type'],
-                'casper_config_id' => $scriptConfig['id'],
-                'modules'          => $params['modules'],
-                'content'          => $params['content'],
-                'is_proxy'         => $params['is_proxy'],
-                'cron_type'        => $params['cron_type'],
-                'ext'              => $params['ext'],
-                'created_by'       => $params['created_by'],
-                'status'           => Script::STATUS_INIT,
+                'name'                => $params['name'],
+                'description'         => $params['description'],
+                'list_url'            => $params['list_url'],
+                'data_type'           => $params['data_type'],
+                'casper_config_id'    => $scriptConfig['id'],
+                'modules'             => $params['modules'],
+                'content'             => $params['content'],
+                'is_proxy'            => $params['is_proxy'],
+                'cron_type'           => $params['cron_type'],
+                'requirement_pool_id' => $params['requirement_pool_id'],
+                'company_id'          => $params['company_id'],
+                'ext'                 => $params['ext'],
+                'created_by'          => $params['created_by'],
+                'status'              => Script::STATUS_INIT,
             ];
 
             $script = Script::create($scriptData);
@@ -161,6 +173,15 @@ class ScriptController extends Controller
 
         if (!empty($params['description'])) {
             $params['description'] = trim($params['description']);
+        }
+
+        if (!empty($params['requirement_pool_id'])) {
+            //查询需求池信息
+            $requirement = Requirement::find($params['requirement_pool_id']);
+            if (empty($requirement)) {
+                throw new \Dingo\Api\Exception\ResourceException('$requirement is not found');
+            }
+            $params['company_id'] = $requirement->company_id;
         }
 
         $script = Script::find($params['id']);
@@ -258,6 +279,7 @@ class ScriptController extends Controller
         $filename = $this->__generateScript($script);
 
         $script->status = Script::STATUS_GENERATE;
+        $script->last_generate_at = time();
         $script->save();
 
         //调用task创建接口
@@ -344,14 +366,7 @@ class ScriptController extends Controller
             throw new \Dingo\Api\Exception\ResourceException('$scriptConfig is not found');
         }
 
-        $scriptConfig->load_images = $postScriptConfig['load_images'];
-        $scriptConfig->load_plugins = $postScriptConfig['load_plugins'];
-        $scriptConfig->log_level = $postScriptConfig['log_level'];
-        $scriptConfig->verbose = $postScriptConfig['verbose'];
-        $scriptConfig->width = $postScriptConfig['width'];
-        $scriptConfig->height = $postScriptConfig['height'];
-
-        $scriptConfig->save();
+        $scriptConfig->update($postScriptConfig);
 
         return $scriptConfig->toArray();
     }
@@ -367,7 +382,7 @@ class ScriptController extends Controller
     {
         $content = $script->content;
 
-        if (empty($script->content)) {
+        if (empty($content)) {
             $dataType = $script->data_type;
 
             //获取script基础模板内容

@@ -21,7 +21,8 @@ class TaskActionMap extends Model
     protected $fillable = [
         'task_id',
         'project_id',
-        'action_id'
+        'action_id',
+        'params',
     ];
 
     /**
@@ -30,4 +31,27 @@ class TaskActionMap extends Model
     protected $hidden = [
         'deleted_at',
     ];
+
+    /**
+     * 设置params字段入库前转化为json
+     *
+     * @param  array  $value
+     * @return string
+     */
+    public function setParamsAttribute($value)
+    {
+        $this->attributes['params'] = json_encode($value, JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * 获取params字段时转化为array
+     *
+     * @param  string  $value
+     * @return array
+     */
+    public function getParamsAttribute($value)
+    {
+        return json_decode($value, true);
+    }
+
 }

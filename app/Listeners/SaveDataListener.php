@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\SaveDataEvent;
 use App\Models\V2\Project;
 use App\Models\V2\Task;
+use App\Models\V2\TaskProjectMap;
 use App\Services\RabbitMQService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Log;
@@ -44,15 +45,18 @@ class SaveDataListener implements ShouldQueue
         //这批数据的来源同一个script
         $taskId = $datas[0]['task_id'];
 
-        //查询task信息
-        $task = Task::find($taskId);
+        $taskProjectMap = TaskProjectMap::where('task_id',$taskId)->get(['project_id']);
 
-        $projectIds = $task->projects;
+        if (empty($taskProjectMap)) {
+            Log::debug('[SaveDataListener handle] task_project_map is empty');
+
+            return true;
+        }
 
         try {
             foreach ($datas as $data) {
 
-                foreach ($projectIds as $projectId) {
+                foreach ($taskProjectMap['project_id'] as $projectId) {
                     //查询分发项目信息
                     $project = Project::find($projectId);
                     $exchange = $project->exchange;

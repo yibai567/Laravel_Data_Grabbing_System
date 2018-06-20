@@ -112,21 +112,25 @@ class ActionController extends Controller
         //调取上报数据信息
         $projectResult = InternalAPIService::get('/project_result', ['id'=>$params['project_result_id']]);
 
-        //调取task信息
-        $task = InternalAPIService::get('/task',['id'=>$projectResult['task_id']]);
+        $postTaskActionMapData = [];
+        $postTaskActionMapData['task_id'] = $projectResult['task_id'];
+        $postTaskActionMapData['project_id'] = $projectResult['project_id'];
+        $postTaskActionMapData['action_id'] = $params['action_id'];
+        //调取task_action_map信息
+        $taskActionMaps = InternalAPIService::get('/task/action_map/action_id', $postTaskActionMapData);
 
-        $action = $task['action'][$params['action_id']];
+        foreach ($taskActionMaps as $taskActionMap) {
+            $scriptId = $taskActionMap['script_id'];
 
-        $scriptId = $action['script_id'];
-        if (empty($scriptId)) {
-            Log::debug('[v2 ActionController nextScript] script id is empty');
-            return $this->resObjectGet(false, 'action', $request->path());
+            if (empty($scriptId)) {
+                Log::debug('[v2 ActionController nextScript] script id is empty');
+                return $this->resObjectGet(false, 'task_action_map', $request->path());
+            }
+
+            $url = $projectResult['detail_url'];
+
+            //TODO 调用队列
         }
-
-        $url = $project['detail_url'];
-
-        //TODO 调用队列
-
 
         //TODO 调用事件
 

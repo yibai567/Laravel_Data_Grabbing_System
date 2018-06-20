@@ -16,6 +16,7 @@ use App\Services\InternalAPIService;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Log;
 
 class TaskController extends Controller
 {
@@ -46,20 +47,22 @@ class TaskController extends Controller
 
         //整理task数据
         $taskData = [
-            'script_id'   => $script->id,
-            'name'        => $script->name,
-            'description' => $script->description,
-            'list_url'    => $script->list_url,
-            'data_type'   => $script->data_type,
-            'script_path' => $params['script_path'],
-            'is_proxy'    => $script->is_proxy,
-            'projects'    => $script->projects,
-            'filters'     => $script->filters,
-            'actions'     => $script->actions,
-            'cron_type'   => $script->cron_type,
-            'ext'         => $script->ext,
-            'publisher'   => $params['publisher'],
-            'status'      => Task::STATUS_INIT,
+            'script_id'           => $script->id,
+            'name'                => $script->name,
+            'description'         => $script->description,
+            'list_url'            => $script->list_url,
+            'data_type'           => $script->data_type,
+            'script_path'         => $params['script_path'],
+            'is_proxy'            => $script->is_proxy,
+            'projects'            => $script->projects,
+            'filters'             => $script->filters,
+            'actions'             => $script->actions,
+            'cron_type'           => $script->cron_type,
+            'ext'                 => $script->ext,
+            'requirement_pool_id' => $script->requirement_pool_id,
+            'company_id'          => $script->company_id,
+            'publisher'           => $params['publisher'],
+            'status'              => Task::STATUS_INIT,
         ];
         try {
             DB::beginTransaction();
