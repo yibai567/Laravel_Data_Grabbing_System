@@ -40,7 +40,7 @@
                      <input type='hidden' name='return_url' value='{{ @$return_url }}'/>
                      <div class="row container" >
                       @foreach($projects as $value)
-                      <div class="col-md-4 table-bordered">
+                      <div class="col-md-4 table-bordered" style="background-color: #eee;">
                         <div class='form-group'>
                             <label class='control-label col-sm-3'>项目名:</label>
                             <div class="col-xs-5">
