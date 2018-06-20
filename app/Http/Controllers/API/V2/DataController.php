@@ -9,10 +9,9 @@
 
 namespace App\Http\Controllers\API\V2;
 
-use App\Events\SaveDataEvent;
 use Log;
 use App\Models\V2\TaskRunLog;
-use App\Services\InternalAPIService;
+use App\Services\InternalAPIV2Service;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 
@@ -46,7 +45,7 @@ class DataController extends Controller
         try {
             //调取根据task_run_log_id查询task_run_log信息
             $selectTaskRunLogData['id'] = $params['task_run_log_id'];
-            $taskRunLog = InternalAPIService::get('/task_run_log', $selectTaskRunLogData);
+            $taskRunLog = InternalAPIV2Service::get('/task_run_log', $selectTaskRunLogData);
 
             if (empty($taskRunLog)) {
                 Log::debug('[v2 DataController batchHandle]  $taskRunLog is not found,task_run_log_id : ' . $params['task_run_log_id']);
@@ -57,26 +56,26 @@ class DataController extends Controller
             $taskId = $taskRunLog['task_id'];
             $updateTaskStatisticsData['task_id'] = $taskId;
             //记录脚本运行记录
-            $result = InternalAPIService::post('/task_statistics/update', $updateTaskStatisticsData);
+            $result = InternalAPIV2Service::post('/task_statistics/update', $updateTaskStatisticsData);
 
             if (!$result) {
 
                 Log::debug('[v2 DataController batchHandle] update task statistics is failed,task_id : '.$taskId);
                 $updateTaskRunLogData['id'] = $params['task_run_log_id'];
                 //更改task_runRunLog状态
-                InternalAPIService::post('/task_run_log/status/fail', $updateTaskRunLogData);
+                InternalAPIV2Service::post('/task_run_log/status/fail', $updateTaskRunLogData);
 
                 return $this->resObjectGet(false, 'data', $request->path());
             }
 
             $params['task_id'] = $taskId;
-            $datas = InternalAPIService::post('/datas',$params);
+            $datas = InternalAPIV2Service::post('/datas',$params);
             Log::debug('[v2 DataController batchHandle] $datas = ',$datas);
             $dataNum = count($datas);
             $updateTaskRunLogData['result_count'] = $dataNum;
             $updateTaskRunLogData['id'] = $params['task_run_log_id'];
             //更改task_runRunLog状态
-            InternalAPIService::post('/task_run_log/status/success', $updateTaskRunLogData);
+            InternalAPIV2Service::post('/task_run_log/status/success', $updateTaskRunLogData);
 
             if ($dataNum > 0) {
 //                event(new SaveDataEvent($datas));
@@ -86,7 +85,7 @@ class DataController extends Controller
 
             $updateTaskRunLogData['id'] = $params['task_run_log_id'];
             //更改task_runRunLog状态
-            InternalAPIService::post('/task_run_log/status/fail', $updateTaskRunLogData);
+            InternalAPIV2Service::post('/task_run_log/status/fail', $updateTaskRunLogData);
 
             return $this->resObjectGet(false, 'data', $request->path());
         }

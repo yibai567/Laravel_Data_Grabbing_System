@@ -14,7 +14,7 @@ $api = app('Dingo\Api\Routing\Router');
 
 $api->version(
     'v1',
-    ['namespace' => 'App\Http\Controllers\API\V2', 'prefix'=>'v1'],
+    ['namespace' => 'App\Http\Controllers\API\V1', 'prefix'=>'v1'],
     function (Dingo\Api\Routing\Router $api) {
         $api->get('/test', function(Illuminate\Http\Request $request){
             return 'test';
@@ -52,13 +52,6 @@ $api->version(
         $api->post('/data/results', 'DataController@batchHandle');
 
         $api->post('/image/upload', 'ImageController@upload');
-
-        $api->post('/project_result/message/list','ProjectResultController@messageListHandle');
-        $api->post('/project_result/message/detail','ProjectResultController@messageDetailHandle');
-
-        $api->post('/action/report','ActionController@projectResultReport');
-        $api->post('/action/next_script','ActionController@nextScript');
-
         //收集资源
         $api->post('/quirement', 'QuirementPoolController@create');
         $api->post('/quirement/update', 'QuirementPoolController@update');
@@ -71,5 +64,29 @@ $api->version(
         //区块链新闻
         $api->get('/block_news','BlockNewsController@all');
         $api->get('/block_news/companies', 'QuirementPoolController@getCompanies');
+
+    }
+);
+
+$api->version(
+    'v1',
+    ['namespace' => 'App\Http\Controllers\API\V2', 'prefix'=>'v2'],
+    function (Dingo\Api\Routing\Router $api) {
+        $api->get('/test', function (Illuminate\Http\Request $request) {
+            return 'test';
+        });
+
+        //新版抓取路由
+
+        $api->post('/data/batch/report', 'DataController@dataResultReport');
+        $api->post('/data/results', 'DataController@batchHandle');
+
+        $api->post('/image/upload', 'ImageController@upload');
+
+        $api->post('/project_result/message/list', 'ProjectResultController@messageListHandle');
+        $api->post('/project_result/message/detail', 'ProjectResultController@messageDetailHandle');
+
+        $api->post('/action/report', 'ActionController@projectResultReport');
+        $api->post('/action/next_script', 'ActionController@nextScript');
     }
 );

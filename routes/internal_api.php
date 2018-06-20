@@ -21,10 +21,9 @@ $api->version(
     }
 );
 
-
 $api->version(
     'v1',
-    ['namespace' => 'App\Http\Controllers\InternalAPIV2', 'prefix' => 'internal'],
+    ['namespace' => 'App\Http\Controllers\InternalAPI', 'prefix' => 'internal'],
     function (Dingo\Api\Routing\Router $api) {
         $api->get('/test', function(){
             echo 'test';
@@ -97,8 +96,60 @@ $api->version(
         $api->post('/script/update','ScriptController@update');
         $api->get('/script','ScriptController@retrieve');
         $api->get('/scripts','ScriptController@all');
-        $api->post('/script/publish','ScriptController@publishScript');
+        $api->get('/script/generate','ScriptController@generateScript');
         $api->get('/script/queue','ScriptController@getByQueueName');
+
+        $api->post('/script_model','ScriptModelController@create');
+        $api->post('/script_model/update','ScriptModelController@update');
+        $api->get('/script_model','ScriptModelController@retrieve');
+        $api->get('/script_models','ScriptModelController@all');
+        $api->get('/script_models/ids','ScriptModelController@listByIds');
+        $api->get('/script_models/languages_type/{languages_type}','ScriptModelController@listByLanguagesType');
+
+        $api->post('/data/results','DataController@batchCreate');
+        $api->post('/datas','DataController@batchSave');
+        $api->get('/data','DataController@retrieve');
+        $api->get('/datas/ids','DataController@listByIds');
+        $api->get('/datas/task_run_log_id','DataController@listByTaskRunLogId');
+        $api->post('/datas/update/task_run_log_id','DataController@updateByTaskRunLogId');
+
+        $api->post('/task_statistics/update','TaskStatisticsController@update');
+
+        $api->post('/task_run_log','TaskRunLogController@create');
+        $api->post('/task_run_log/status/success','TaskRunLogController@updateStatusSuccess');
+        $api->post('/task_run_log/status/fail','TaskRunLogController@updateStatusFail');
+        $api->get('/task_run_log','TaskRunLogController@retrieve');
+
+        $api->get('/task','TaskController@retrieve');
+        //收集资源
+        $api->post('/quirement', 'QuirementPoolController@create');
+        $api->post('/quirement/update', 'QuirementPoolController@update');
+        $api->get('/quirements', 'QuirementPoolController@all');
+        $api->get('/quirement', 'QuirementPoolController@retrieve');
+        $api->get('/quirement/update_status','QuirementPoolController@updateStatus');
+
+        //区块链新闻
+        $api->get('/block_news','BlockNewsController@all');
+        $api->get('/block_news/companies', 'QuirementPoolController@getCompanies');
+        $api->get('/block_news/total','BlockNewsController@getTotal');
+    }
+);
+
+$api->version(
+    'v1',
+    ['namespace' => 'App\Http\Controllers\InternalAPIV2', 'prefix' => 'internalv2'],
+    function (Dingo\Api\Routing\Router $api) {
+        $api->get('/test', function(){
+            echo 'test';
+        });
+
+        // new route
+        $api->post('/item/result/report', 'PlatformReportController@itemResultReport');
+
+        $api->post('/script','ScriptController@create');
+        $api->post('/script/update','ScriptController@update');
+        $api->get('/script','ScriptController@retrieve');
+        $api->post('/script/publish','ScriptController@publishScript');
 
         $api->post('/script_model','ScriptModelController@create');
         $api->post('/script_model/update','ScriptModelController@update');
@@ -107,11 +158,8 @@ $api->version(
         $api->get('/script_models/ids','ScriptModelController@listByIds');
         $api->get('/script_models/data_type/{data_type}','ScriptModelController@listByDataType');
 
-        $api->post('/data/results','DataController@batchCreate');
         $api->post('/datas','DataController@batchSave');
-        $api->get('/data','DataController@retrieve');
         $api->get('/datas/ids','DataController@listByIds');
-        $api->get('/datas/task_run_log_id','DataController@listByTaskRunLogId');
         $api->post('/datas/update/task_run_log_id','DataController@updateByTaskRunLogId');
 
         $api->post('/task_statistics/update','TaskStatisticsController@update');
@@ -142,11 +190,6 @@ $api->version(
         $api->get('/quirements', 'QuirementPoolController@all');
         $api->get('/quirement', 'QuirementPoolController@retrieve');
         $api->post('/quirement/update_status','QuirementPoolController@updateStatus');
-
-        //区块链新闻
-        $api->get('/block_news','BlockNewsController@all');
-        $api->get('/block_news/companies', 'QuirementPoolController@getCompanies');
-        $api->get('/block_news/total','BlockNewsController@getTotal');
 
     }
 );

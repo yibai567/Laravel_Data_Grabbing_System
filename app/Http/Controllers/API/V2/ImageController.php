@@ -10,7 +10,7 @@
 namespace App\Http\Controllers\API\V2;
 
 use App\Services\ImageService;
-use App\Services\InternalAPIService;
+use App\Services\InternalAPIV2Service;
 use Log;
 use Illuminate\Http\Request;
 use App\Services\ValidatorService;
@@ -36,7 +36,7 @@ class ImageController extends Controller
         try {
             //调取根据task_run_log_id查询data信息
             $uploadSelectData['task_run_log_id'] = intval($params['task_run_log_id']);
-            $datas = InternalAPIService::get('/datas/task_run_log_id', $uploadSelectData);
+            $datas = InternalAPIV2Service::get('/datas/task_run_log_id', $uploadSelectData);
 
             if (empty($datas)) {
                 Log::debug('[v2 ImageController upload] $datas is not found,task_run_log_id : '.$uploadSelectData['task_run_log_id']);
@@ -60,7 +60,7 @@ class ImageController extends Controller
             $uploadUpdateData['task_run_log_id'] = intval($params['task_run_log_id']);
             $uploadUpdateData['screenshot'] = $imageInfo;
 
-            InternalAPIService::post('/datas/update/task_run_log_id', $uploadUpdateData);
+            InternalAPIV2Service::post('/datas/update/task_run_log_id', $uploadUpdateData);
         } catch (\Exception $e) {
             Log::debug('[v2 ImageController upload] error message = ' . $e->getMessage());
 

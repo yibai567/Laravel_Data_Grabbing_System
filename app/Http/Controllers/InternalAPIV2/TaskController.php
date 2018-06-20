@@ -9,10 +9,8 @@
 
 namespace App\Http\Controllers\InternalAPIV2;
 
-use App\Models\V2\TaskStatistics;
 use App\Models\V2\Task;
 use App\Models\V2\Script;
-use App\Services\InternalAPIService;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -70,22 +68,6 @@ class TaskController extends Controller
             $taskInfo = Task::create($taskData);
 
             $result = $taskInfo->toArray();
-
-            //调用保存任务与分发器关系接口
-            $postTaskProjectMapData = [];
-            $postTaskProjectMapData['task_id'] = $result['id'];
-
-            InternalAPIService::post('/task/project_map', $postTaskProjectMapData);
-
-            $postTaskData['id'] = $result['id'];
-            InternalAPIService::post('/task/start', $postTaskData);
-
-            //生成task_statistics
-            $taskStatistics = new TaskStatistics;
-
-            $taskStatistics->task_id = $result['id'];
-
-            $taskStatistics->save();
 
             DB::commit();
         } catch (\Exception $e) {

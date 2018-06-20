@@ -53,7 +53,7 @@ class ProjectResultController extends Controller
 
         $result = [];
         if (!empty($project)) {
-            $result = $project->toAarray();
+            $result = $project->toArray();
         }
 
         return $this->resObjectGet($result, 'project_result', $request->path());

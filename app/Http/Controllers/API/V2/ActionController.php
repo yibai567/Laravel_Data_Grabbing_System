@@ -10,7 +10,7 @@
 namespace App\Http\Controllers\API\V2;
 
 use App\Models\V2\TaskRunLog;
-use App\Services\InternalAPIService;
+use App\Services\InternalAPIV2Service;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 use Log;
@@ -35,7 +35,7 @@ class ActionController extends Controller
         Log::debug('[v2 ActionController projectResultReport] id = ' . $params['project_result_id']);
 
         //调取上报数据信息
-        $projectResult = InternalAPIService::get('/project_result', ['id'=>$params['project_result_id']]);
+        $projectResult = InternalAPIV2Service::get('/project_result', ['id'=>$params['project_result_id']]);
 
         $newData = [];
 
@@ -79,7 +79,7 @@ class ActionController extends Controller
 
             try {
                 //调用上传数据接口
-                $result = InternalAPIService::post('/item/result/report', $reportData);
+                $result = InternalAPIV2Service::post('/item/result/report', $reportData);
             } catch (\Exception $e) {
                 Log::debug('[v2 ActionController projectResultReport] error message = ' . $e->getMessage());
 
@@ -110,14 +110,14 @@ class ActionController extends Controller
         Log::debug('[v2 ActionController nextScript] id = ' . $params['project_result_id']);
 
         //调取上报数据信息
-        $projectResult = InternalAPIService::get('/project_result', ['id'=>$params['project_result_id']]);
+        $projectResult = InternalAPIV2Service::get('/project_result', ['id'=>$params['project_result_id']]);
 
         $postTaskActionMapData = [];
         $postTaskActionMapData['task_id'] = $projectResult['task_id'];
         $postTaskActionMapData['project_id'] = $projectResult['project_id'];
         $postTaskActionMapData['action_id'] = $params['action_id'];
         //调取task_action_map信息
-        $taskActionMaps = InternalAPIService::get('/task/action_map/action_id', $postTaskActionMapData);
+        $taskActionMaps = InternalAPIV2Service::get('/task/action_map/action_id', $postTaskActionMapData);
 
         foreach ($taskActionMaps as $taskActionMap) {
             $scriptId = $taskActionMap['script_id'];

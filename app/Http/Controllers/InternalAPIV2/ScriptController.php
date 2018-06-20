@@ -12,8 +12,9 @@ namespace App\Http\Controllers\InternalAPIV2;
 use App\Models\V2\Requirement;
 use App\Models\V2\ScriptModel;
 use App\Models\V2\Task;
+use App\Models\V2\TaskStatistics;
 use App\Services\FileService;
-use App\Services\InternalAPIService;
+use App\Services\InternalAPIV2Service;
 use Illuminate\Support\Facades\DB;
 use Log;
 use App\Models\V2\Script;
@@ -274,20 +275,41 @@ class ScriptController extends Controller
         if (empty($script)) {
             throw new \Dingo\Api\Exception\ResourceException('$script is not found');
         }
+        try {
+            //生成脚本
+            $filename = $this->__generateScript($script);
 
-        //生成脚本
-        $filename = $this->__generateScript($script);
+            $script->status = Script::STATUS_GENERATE;
+            $script->last_generate_at = time();
+            $script->save();
 
-        $script->status = Script::STATUS_GENERATE;
-        $script->last_generate_at = time();
-        $script->save();
+            //调用task创建接口
+            $postTaskData = [];
+            $postTaskData['script_id'] = $script->id;
+            $postTaskData['script_path'] = '/public/vendor/script/' . $filename;
+            $postTaskData['publisher'] = $params['publisher'];
+            $result = InternalAPIV2Service::post('/task', $postTaskData);
 
-        //调用task创建接口
-        $postTaskData = [];
-        $postTaskData['script_id'] = $script->id;
-        $postTaskData['script_path'] = '/public/vendor/script/' . $filename;
-        $postTaskData['publisher'] = $params['publisher'];
-        $result = InternalAPIService::post('/task', $postTaskData);
+            //调用保存任务与分发器关系接口
+            $postTaskProjectMapData = [];
+            $postTaskProjectMapData['task_id'] = $result['id'];
+
+            InternalAPIV2Service::post('/task/project_map', $postTaskProjectMapData);
+
+            $postTaskData['id'] = $result['id'];
+            InternalAPIV2Service::post('/task/start', $postTaskData);
+
+            //生成task_statistics
+            $taskStatistics = new TaskStatistics;
+
+            $taskStatistics->task_id = $result['id'];
+
+            $taskStatistics->save();
+        } catch (\Exception $e) {
+
+            Log::error('publishScript    Exception:' . "\t" . $e->getCode() . "\t" . $e->getMessage());
+            throw new \Dingo\Api\Exception\ResourceException("script publish is failed");
+        }
 
         return $this->resObjectGet($result, 'script', $request->path());
     }

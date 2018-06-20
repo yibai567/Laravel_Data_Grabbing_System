@@ -10,7 +10,7 @@
 namespace App\Http\Controllers\API\V2;
 
 
-use App\Services\InternalAPIService;
+use App\Services\InternalAPIV2Service;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 use Log;
@@ -55,7 +55,7 @@ class ProjectResultController extends Controller
         }
 
         try {
-            $project = InternalAPIService::post('/project_result',$params);
+            $project = InternalAPIV2Service::post('/project_result',$params);
 
             if (!empty($project)) {
                 //TODO 事件
@@ -106,8 +106,7 @@ class ProjectResultController extends Controller
         }
 
         try {
-
-            $project = InternalAPIService::post('/project_result',$params);
+            $project = InternalAPIV2Service::post('/project_result',$params);
 
             if (!empty($project)) {
                 //TODO 事件
