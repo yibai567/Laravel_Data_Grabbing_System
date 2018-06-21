@@ -11,8 +11,8 @@ class Task extends Model
 
     //脚本类型
     const DATA_TYPE_CASPERJS = 1;
-    const DATA_TYPE_TYPE_HTML = 2;
-    const DATA_TYPE_TYPE_API = 3;
+    const DATA_TYPE_HTML = 2;
+    const DATA_TYPE_API = 3;
 
     //任务执行类型 1、每分钟 2、每五分钟 3、每十分钟
     const CRON_TYPE_KEEP = 1;

@@ -60,7 +60,7 @@
                                                 <?php $checked = '' ?>
                                                 @if (!empty($newFilters[$value['id']]))
                                                     <?php $newFiltersKey = array_keys($newFilters[$value['id']])?>
-                                                    @if ($newFiltersKey[$key] == $filterValue['id'])
+                                                    @if (in_array($filterValue['id'],$newFiltersKey))
                                                         <?php $checked = 'checked'?>
                                                     @endif
                                                 @endif
@@ -69,15 +69,16 @@
                                             <?php $checked = '' ?>
                                         @endif
                                     <li>
-                                        <label><input type="checkbox" {{$checked}} name="project_config[filters][{{$value['id']}}][{{$filterValue['id']}}]" value="">{{$filterValue['name']}}</label>
+                                        <label><input type="checkbox" {{$checked}} class="checkbox_{{$value['id']}}_{{$filterValue['id']}}" name="project_config[filters][{{$value['id']}}][{{$filterValue['id']}}]" value="" onclick="filter_checkbox({{$value['id']}},{{$filterValue['id']}},{{$key}})">{{$filterValue['name']}}</label>
+
                                         @if (!empty($newFilters[$value['id']][$filterValue['id']]))
-                                            @foreach($newFilters[$value['id']][$filterValue['id']] as $key=>$paramsValue)
-                                                <label>{{$key}}: <input type="text" name="project_config[filters][{{$value['id']}}][{{$filterValue['id']}}][{{$key}}]" value="{{$paramsValue}}"></label>
+                                            @foreach($newFilters[$value['id']][$filterValue['id']] as $paramsKey=>$paramsValue)
+                                                <label>{{$paramsKey}}: <input type="text" name="project_config[filters][{{$value['id']}}][{{$filterValue['id']}}][{{$paramsKey}}]" value="{{$paramsValue}}" class="filters_params_{{$value['id']}}_{{$key}}"></label>
                                             @endforeach
                                         @else
                                             @if(!empty($filterValue['params']))
                                                 @foreach(json_decode($filterValue['params'], true) as $paramsValue)
-                                                    <label>{{$paramsValue}}: <input type="text" name="project_config[filters][{{$value['id']}}][{{$filterValue['id']}}][{{$paramsValue}}]" value=""></label>
+                                                    <label>{{$paramsValue}}: <input type="text" name="project_config[filters][{{$value['id']}}][{{$filterValue['id']}}][{{$paramsValue}}]" value="" disabled="disabled" class="filters_params_{{$value['id']}}_{{$key}}"></label>
                                                 @endforeach
                                             @endif
                                         @endif
@@ -101,7 +102,7 @@
                                                 <?php $checked = '' ?>
                                                 @if (!empty($newActions[$value['id']]))
                                                     <?php $newActionsKey = array_keys($newActions[$value['id']])?>
-                                                    @if ($newActionsKey[$key] == $actionValue['id'])
+                                                    @if (in_array($actionValue['id'],$newActionsKey))
                                                         <?php $checked = 'checked'?>
                                                     @endif
                                                 @endif
@@ -110,15 +111,15 @@
                                             <?php $checked = '' ?>
                                         @endif
                                     <li>
-                                        <label><input type="checkbox" {{$checked}} name="project_config[actions][{{$value['id']}}][{{$actionValue['id']}}]" value="">{{$actionValue['name']}}</label>
+                                        <label><input type="checkbox" {{$checked}} name="project_config[actions][{{$value['id']}}][{{$actionValue['id']}}]" class="actions_{{$value['id']}}_{{$actionValue['id']}}" value="" onclick="actions_checkbox({{$value['id']}},{{$actionValue['id']}},{{$key}})">{{$actionValue['name']}}</label>
                                         @if (!empty($newActions[$value['id']][$actionValue['id']]))
-                                            @foreach($newActions[$value['id']][$actionValue['id']] as $key=>$paramsValue)
-                                                <label>{{$key}}: <input type="text" name="project_config[actions][{{$value['id']}}][{{$actionValue['id']}}][{{$key}}]" value="{{$paramsValue}}"></label>
+                                            @foreach($newActions[$value['id']][$actionValue['id']] as $paramsKey=>$paramsValue)
+                                                <label>{{$paramsKey}}: <input type="text" name="project_config[actions][{{$value['id']}}][{{$actionValue['id']}}][{{$paramsKey}}]" value="{{$paramsValue}}" class="actions_params_{{$value['id']}}_{{$key}}"></label>
                                             @endforeach
                                         @else
                                             @if(!empty($actionValue['params']))
                                                 @foreach(json_decode($actionValue['params'], true) as $paramsValue)
-                                                    <label>{{$paramsValue}}: <input type="text" name="project_config[actions][{{$value['id']}}][{{$actionValue['id']}}][{{$paramsValue}}]" value=""></label>
+                                                    <label>{{$paramsValue}}: <input type="text" name="project_config[actions][{{$value['id']}}][{{$actionValue['id']}}][{{$paramsValue}}]" value="" disabled="disabled" class="actions_params_{{$value['id']}}_{{$key}}"></label>
                                                 @endforeach
                                             @endif
                                         @endif
@@ -152,23 +153,28 @@
 </div>
 
 <script type="text/javascript">
-    function check(project_id, id, str){
-        if (str === undefined) {
-            return true;
+    function filter_checkbox(project_id, id, key){
+        if ($('.checkbox_' + project_id + '_' + id).is(':checked')) {
+            $('.filters_params_' + project_id + '_' + key).each(function(){
+                $(this).removeAttr('disabled');
+            });
+        } else {
+            alert(1);
+            $('.filters_params_' + project_id + '_' + key).each(function(){
+                    $(this).attr("disabled",'disabled');
+            });
         }
-
-        strs = str.split(",");
-        var input = "";
-        for (i=0;i<strs.length ;i++ )
-        {
-            input += '<div class="form-group"><label class="control-label col-sm-3">'+strs[i]+':</label><div><input type="text" name="project_config[actions]['+project_id+']['+id+']['+strs[i]+']" value=""></div></div>';
+    }
+    function actions_checkbox(project_id, id, key){
+        if ($('.actions_' + project_id + '_' + id).is(':checked')) {
+            $('.actions_params_' + project_id + '_' + key).each(function(){
+                $(this).removeAttr('disabled');
+            });
+        } else {
+            $('.actions_params_' + project_id + '_' + key).each(function(){
+                    $(this).attr("disabled",'disabled');
+            });
         }
-        var checkbox = document.getElementById('checkbox_'+project_id+'_'+id);
-          if(checkbox.checked){
-            document.getElementById('div_'+project_id).innerHTML = input;
-          }else{
-            document.getElementById('div_'+project_id).innerHTML = "";
-          }
     }
 </script>
 

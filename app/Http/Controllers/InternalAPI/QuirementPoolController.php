@@ -41,16 +41,18 @@ class QuirementPoolController extends Controller
         ValidatorService::check($params, [
             'name'              => 'nullable|string|max:100',
             'list_url'          => 'required|string|max:255',
-            'description'       => 'nullable|max:255',
+            'description'       => 'nullable|max:20000',
             'subscription_type' => 'required|integer|between:1,2',
             'is_capture'        => 'required|integer|between:1,2',
+            'company_id'        => 'required|integer',
             'is_download_img'   => 'required|integer|between:1,2',
-            'img_description'   => 'required|max:255',
+            // 'img_description'   => 'required|max:255',
             'operate_by'=>'required|integer'
         ]);
 
 
         $params['status'] = Requirement::STATUS_TRUE;
+        $params['status_identity'] = 1;
         $res = Requirement::create($params);
 
         $result = [];
@@ -87,11 +89,12 @@ class QuirementPoolController extends Controller
             'id'                => 'required|integer',
             'name'              => 'nullable|string|max:100',
             'list_url'          => 'required|string|max:255',
-            'description'       => 'nullable|max:255',
+            'description'       => 'nullable|max:20000',
+            'company_id'        => 'required|integer',
             'subscription_type' => 'required|integer|between:1,2',
             'is_capture'        => 'required|integer|between:1,2',
             'is_download_img'   => 'required|integer|between:1,2',
-            'img_description'   => 'required|max:255'
+            // 'img_description'   => 'required|max:255'
         ]);
         //$item = Requirement::find($formatParams['id']);
         $params['status'] = Requirement::STATUS_TRUE;
@@ -100,7 +103,6 @@ class QuirementPoolController extends Controller
         if (empty($req)) {
             throw new \Dingo\Api\Exception\ResourceException("Requirement is not found");
         }
-
         $req->update($params);
 
         $result = [];
@@ -108,7 +110,6 @@ class QuirementPoolController extends Controller
         if (!empty($req)) {
             $result = $req->toArray();
         }
-
         return $this->resObjectGet($result, 'requirement', $request->path());
     }
 
@@ -212,7 +213,6 @@ class QuirementPoolController extends Controller
         if (!empty($req)) {
             $result = $req->toArray();
         }
-
         return $this->resObjectGet($result, 'requirement', $request->path());
 
      }

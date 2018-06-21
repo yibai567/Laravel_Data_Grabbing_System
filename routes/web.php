@@ -16,6 +16,13 @@ Route::get('/', function () {
 });
 Route::get('/block_news', 'WWW\BlockNewsController@index');
 Route::get('/ajax_block_news', 'WWW\BlockNewsController@ajaxList');
+Auth::routes();
+Route::get('/home', 'HomeController@index');
+Route::get('/logout', function(){
+    Auth::logout();
+    return redirect('/login');
+});
+
 Route::get('test', function() {
     $option = [
         'server' => [
