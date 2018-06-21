@@ -22,7 +22,7 @@ class TaskProjectMapController extends Controller
 {
     /**
      * crete
-     * 创建task信息
+     * 创建task和project的关系
      *
      * @param $request
      * @return array
@@ -33,7 +33,7 @@ class TaskProjectMapController extends Controller
 
         //验证参数
         ValidatorService::check($params, [
-            'task_id' => 'required|integer',
+            'task_id' => 'required|integer|max:999999999',
         ]);
 
         $task = Task::find($params['task_id']);

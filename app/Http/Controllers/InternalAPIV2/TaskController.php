@@ -32,7 +32,7 @@ class TaskController extends Controller
 
         //验证参数
         ValidatorService::check($params, [
-            'script_id'   => 'required|integer',
+            'script_id'   => 'required|integer|max:999999999',
             'publisher'   => 'required|string|max:100',
             'script_path' => 'required|string|max:255'
         ]);
@@ -93,7 +93,7 @@ class TaskController extends Controller
 
         //检测参数
         ValidatorService::check($params, [
-            'id' => 'required|integer',
+            'id' => 'required|integer|max:999999999',
         ]);
         $task = Task::find($params['id']);
 
@@ -124,7 +124,7 @@ class TaskController extends Controller
 
         //检测参数
         ValidatorService::check($params, [
-            'id' => 'required|integer',
+            'id' => 'required|integer|max:999999999',
         ]);
         $task = Task::find($params['id']);
 
@@ -155,7 +155,7 @@ class TaskController extends Controller
 
         //检测参数
         ValidatorService::check($params, [
-            'id' => 'required|integer',
+            'id' => 'required|integer|max:999999999',
         ]);
         $task = Task::find($params['id']);
 
@@ -183,7 +183,7 @@ class TaskController extends Controller
 
         //检测参数
         ValidatorService::check($params, [
-            'id' => 'required|integer',
+            'id' => 'required|integer|max:999999999',
         ]);
         $task = Task::find($params['id']);
 

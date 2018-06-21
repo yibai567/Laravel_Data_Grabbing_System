@@ -29,13 +29,13 @@ class ScriptModelController extends Controller
 
         ValidatorService::check($params, [
             'name'         => 'required|string|max:50',
-            'description'  => 'nullable|string',
-            'structure'    => 'required|string',
+            'description'  => 'nullable|string|max:1000',
+            'structure'    => 'required|string|max:2000',
             'data_type'    => 'required|integer|between:1,3',
-            'parameters'   => 'required|json',
+            'parameters'   => 'required|json|max:1000',
             'system_type'  => 'required|integer|between:1,2',
             'operate_user' => 'required|string|max:50',
-            'sort'         => 'nullable|integer'
+            'sort'         => 'nullable|integer|max:999999999'
         ]);
 
         $scriptModel = ScriptModel::create($params);
@@ -60,15 +60,15 @@ class ScriptModelController extends Controller
         $params = $request->all();
 
         ValidatorService::check($params, [
-            'id'           => 'required|integer',
+            'id'           => 'required|integer|max:999999999',
             'name'         => 'nullable|string|max:50',
-            'description'  => 'nullable|string',
-            'structure'    => 'nullable|string',
+            'description'  => 'nullable|string|max:1000',
+            'structure'    => 'nullable|string|max:2000',
             'data_type'    => 'nullable|integer|between:1,3',
             'system_type'  => 'nullable|integer|between:1,2',
-            'parameters'   => 'nullable|json',
+            'parameters'   => 'nullable|json|max:1000',
             'operate_user' => 'nullable|string|max:50',
-            'sort'         => 'nullable|integer'
+            'sort'         => 'nullable|integer|max:999999999'
         ]);
 
         $scriptModel = ScriptModel::find($params['id']);
@@ -96,7 +96,7 @@ class ScriptModelController extends Controller
         $params = $request->all();
 
         ValidatorService::check($params, [
-            'id' => 'required|integer',
+            'id' => 'required|integer|max:999999999',
         ]);
 
         $scriptModel = ScriptModel::find($params['id']);
@@ -123,7 +123,7 @@ class ScriptModelController extends Controller
 
         //验证参数
         ValidatorService::check($params, [
-            'data_type' => 'nullable|integer',
+            'data_type' => 'nullable|integer|between:1,3',
             'limit'     => 'nullable|integer|min:1|max:500',
             'offset'    => 'nullable|integer|min:0',
         ]);

@@ -29,10 +29,10 @@ class DataController extends Controller
         $params = $request->all();
 
         ValidatorService::check($params, [
-            'company'         => 'required|string|max:500',
+            'company'         => 'required|string|max:50',
             'content_type'    => 'required|integer|between:1,9',
-            'task_run_log_id' => 'required|integer',
-            'task_id'         => 'required|integer',
+            'task_run_log_id' => 'required|integer|max:999999999r',
+            'task_id'         => 'required|integer|max:999999999',
             'start_time'      => 'required|date',
             'end_time'        => 'required|date',
             'result'          => 'required|array'
@@ -44,13 +44,13 @@ class DataController extends Controller
         foreach ($params['result'] as $value) {
 
             ValidatorService::check($value, [
-                'title'      => 'nullable|string|max:65535',
-                'content'    => 'nullable|string|max:65535',
-                'detail_url' => 'nullable|string|max:65535',
+                'title'      => 'nullable|string|max:2000',
+                'content'    => 'nullable|string|max:20000',
+                'detail_url' => 'nullable|string|max:500',
                 'show_time'  => 'nullable|string|max:100',
                 'author'     => 'nullable|string|max:50',
                 'read_count' => 'nullable|string|max:100',
-                'images'     => 'nullable|string|max:65535',
+                'images'     => 'nullable|string|max:500',
             ]);
 
             if (empty($value['title']) && empty($value['content'])) {
@@ -78,8 +78,12 @@ class DataController extends Controller
                 continue;
             }
 
+            if (!empty($value['images'])) {
+                $value['images'] = explode(',', $value['images']);
+            }
+
             //整理保存数据
-            $data = [
+            $createData = [
                 'content_type'       => $params['content_type'],
                 'company'            => $params['company'],
                 'title'              => $value['title'],
@@ -99,7 +103,8 @@ class DataController extends Controller
                 'created_time'       => time()
             ];
 
-            $result['data'][] = Data::create($data)->toArray();
+            $datum = Data::create($createData);
+            $result['data'][]['id'] =  $datum->id;
         }
 
         return $this->resObjectGet($result, 'data', $request->path());
@@ -121,11 +126,11 @@ class DataController extends Controller
         ]);
 
         $ids = explode(',', $params['ids']);
-        $datas = Data::whereIn('id', $ids)->get();
+        $datum = Data::whereIn('id', $ids)->get();
 
         $result = [];
-        if (!empty($datas)) {
-            $result = $datas->toArray();
+        if (!empty($datum)) {
+            $result = $datum->toArray();
         }
 
         return $this->resObjectGet($result, 'data', $request->path());
@@ -143,19 +148,19 @@ class DataController extends Controller
         $params = $request->all();
 
         ValidatorService::check($params, [
-            'task_run_log_id' => 'required|integer',
+            'task_run_log_id' => 'required|integer|max:999999999',
             'screenshot' => 'required|array',
         ]);
 
-        $datas = Data::where('task_run_log_id',$params['task_run_log_id'])->get();
+        $data = Data::where('task_run_log_id',$params['task_run_log_id'])->get();
 
-        foreach ($datas as $data) {
-            $data->update($params);
+        foreach ($data as $datum) {
+            $datum->update($params);
         }
 
         $result = [];
-        if (!empty($datas)) {
-            $result = $datas->toArray();
+        if (!empty($data)) {
+            $result = $data->toArray();
         }
 
         return $this->resObjectGet($result, 'data', $request->path());

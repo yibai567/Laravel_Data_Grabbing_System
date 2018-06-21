@@ -30,16 +30,16 @@ class ImageController extends Controller
 
         ValidatorService::check($params, [
             'image'         => 'required|image',
-            'task_run_log_id' => 'required|integer'
+            'task_run_log_id' => 'required|integer|max:999999999'
         ]);
 
         try {
             //调取根据task_run_log_id查询data信息
             $uploadSelectData['task_run_log_id'] = intval($params['task_run_log_id']);
-            $datas = InternalAPIV2Service::get('/datas/task_run_log_id', $uploadSelectData);
+            $datum = InternalAPIV2Service::get('/data/task_run_log_id', $uploadSelectData);
 
-            if (empty($datas)) {
-                Log::debug('[v2 ImageController upload] $datas is not found,task_run_log_id : '.$uploadSelectData['task_run_log_id']);
+            if (empty($datum)) {
+                Log::debug('[v2 ImageController upload] $datum is not found,task_run_log_id : '.$uploadSelectData['task_run_log_id']);
 
                 return $this->resObjectGet(false, 'image', $request->path());
             }
@@ -60,7 +60,7 @@ class ImageController extends Controller
             $uploadUpdateData['task_run_log_id'] = intval($params['task_run_log_id']);
             $uploadUpdateData['screenshot'] = $imageInfo;
 
-            InternalAPIV2Service::post('/datas/update/task_run_log_id', $uploadUpdateData);
+            InternalAPIV2Service::post('/data/update/task_run_log_id', $uploadUpdateData);
         } catch (\Exception $e) {
             Log::debug('[v2 ImageController upload] error message = ' . $e->getMessage());
 

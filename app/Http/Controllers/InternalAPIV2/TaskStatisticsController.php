@@ -25,12 +25,11 @@ class TaskStatisticsController extends Controller
      */
     public function update(Request $request)
     {
-        Log::debug('[internal TaskStatisticsController update] start!');
         $params = $request->all();
 
         //验证参数
         ValidatorService::check($params, [
-            'task_id' => 'required|integer',
+            'task_id' => 'required|integer|max:999999999',
         ]);
 
         try {

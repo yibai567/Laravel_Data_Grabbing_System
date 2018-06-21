@@ -158,9 +158,9 @@ $api->version(
         $api->get('/script_models/ids','ScriptModelController@listByIds');
         $api->get('/script_models/data_type/{data_type}','ScriptModelController@listByDataType');
 
-        $api->post('/datas','DataController@batchSave');
-        $api->get('/datas/ids','DataController@listByIds');
-        $api->post('/datas/update/task_run_log_id','DataController@updateByTaskRunLogId');
+        $api->post('/data','DataController@batchSave');
+        $api->get('/data/ids','DataController@listByIds');
+        $api->post('/data/update/task_run_log_id','DataController@updateByTaskRunLogId');
 
         $api->post('/task_statistics/update','TaskStatisticsController@update');
 
@@ -177,12 +177,13 @@ $api->version(
 
         $api->post('/task/project_map','TaskProjectMapController@create');
 
-        $api->get('/task/action_map/action_id','TaskActionMapController@getByActionId');
-
-        $api->post('/project_result','ProjectResultController@create');
-        $api->get('/project_result','ProjectResultController@retrieve');
-
         $api->get('/project','ProjectController@retrieve');
+        $api->post('/project/live_list','ProjectController@liveList');
+        $api->post('/project/live_detail','ProjectController@liveDetail');
+        $api->post('/project/block_news','ProjectController@blockNews');
+
+        $api->post('/action/report/result', 'ActionController@reportResult');
+        $api->post('/action/converter/task', 'ActionController@converterTask');
 
         //收集资源
         $api->post('/quirement', 'QuirementPoolController@create');

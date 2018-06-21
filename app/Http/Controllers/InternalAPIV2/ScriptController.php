@@ -38,16 +38,16 @@ class ScriptController extends Controller
         //验证参数
         ValidatorService::check($params, [
             'name'                => 'required|string|max:100',
-            'description'         => 'nullable|string|max:65535',
-            'list_url'            => ['required','url','max:65535','regex:/^(http|https):\/\//i'],
+            'description'         => 'nullable|string|max:1000',
+            'list_url'            => ['required','url','max:200','regex:/^(http|https):\/\//i'],
             'data_type'           => 'required|integer|between:1,3',
-            'modules'             => 'nullable|array|max:65535',
-            'content'             => 'nullable|string|max:65535',
+            'modules'             => 'nullable|array|max:2000',
+            'content'             => 'nullable|string|max:5000',
             'cron_type'           => 'nullable|integer|between:1,4',
             'ext'                 => 'nullable|integer|between:1,2',
             'created_by'          => 'nullable|string|max:100',
-            'next_script_id'      => 'nullable|integer',
-            'requirement_pool_id' => 'nullable|integer',
+            'next_script_id'      => 'nullable|integer|max:999999999',
+            'requirement_pool_id' => 'nullable|integer|max:999999999',
             'is_proxy'            => 'required|integer|between:1,2',
             'casper_config'       => 'nullable|array'
         ]);
@@ -150,16 +150,16 @@ class ScriptController extends Controller
         ValidatorService::check($params, [
             'id'                  => 'required|integer',
             'name'                => 'nullable|string|max:100',
-            'description'         => 'nullable|string|max:65535',
-            'list_url'            => ['nullable', 'url', 'max:65535', 'regex:/^(http|https):\/\//i'],
+            'description'         => 'nullable|string|max:1000',
+            'list_url'            => ['nullable', 'url', 'max:200', 'regex:/^(http|https):\/\//i'],
             'data_type'           => 'nullable|integer|between:1,3',
-            'modules'             => 'nullable|array|max:65535',
-            'content'             => 'nullable|string|max:65535',
+            'modules'             => 'nullable|array|max:2000',
+            'content'             => 'nullable|string|max:5000',
             'cron_type'           => 'nullable|integer|between:1,4',
             'ext'                 => 'nullable|integer|between:1,2',
             'created_by'          => 'nullable|string|max:100',
-            'next_script_id'      => 'nullable|integer',
-            'requirement_pool_id' => 'nullable|integer',
+            'next_script_id'      => 'nullable|integer|max:999999999',
+            'requirement_pool_id' => 'nullable|integer|max:999999999',
             'is_proxy'            => 'nullable|integer|between:1,2',
             'projects'            => 'nullable|array|max:100',
             'filters'             => 'nullable|array|max:200',
@@ -227,7 +227,7 @@ class ScriptController extends Controller
 
         //检测参数
         ValidatorService::check($params, [
-            'id' => 'required|integer',
+            'id' => 'required|integer|max:999999999',
         ]);
 
         $script = Script::find($params['id']);
@@ -264,7 +264,7 @@ class ScriptController extends Controller
 
         //验证参数
         ValidatorService::check($params, [
-            'id'        => 'required|integer',
+            'id'        => 'required|integer|max:999999999',
             'publisher' => 'required|string|max:100'
         ]);
 

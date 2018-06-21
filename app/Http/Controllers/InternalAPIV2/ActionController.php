@@ -7,8 +7,10 @@
  * Date: 2018/06/19
  */
 
-namespace App\Http\Controllers\API\V2;
+namespace App\Http\Controllers\InternalAPIV2;
 
+use App\Models\V2\ProjectResult;
+use App\Models\V2\TaskActionMap;
 use App\Models\V2\TaskRunLog;
 use App\Services\InternalAPIV2Service;
 use App\Services\ValidatorService;
@@ -18,25 +20,29 @@ use Log;
 class ActionController extends Controller
 {
     /**
-     * projectResultReport
-     * 项目数据上报
+     * reportResult
+     * 结果上报
      *
      * @param
      * @return boolean
      */
-    public function projectResultReport(Request $request)
+    public function reportResult(Request $request)
     {
-        Log::debug('[v2 ActionController projectResultReport] start');
         $params = $request->all();
         ValidatorService::check($params, [
-            'project_result_id' => 'required|integer',
+            'project_result_id' => 'required|integer|max:999999999',
         ]);
 
-        Log::debug('[v2 ActionController projectResultReport] id = ' . $params['project_result_id']);
+        //获取上报数据信息
+        $projectResult = ProjectResult::find($params['project_result_id']);
 
-        //调取上报数据信息
-        $projectResult = InternalAPIV2Service::get('/project_result', ['id'=>$params['project_result_id']]);
+        if (empty($projectResult)) {
+            throw new \Dingo\Api\Exception\ResourceException('$projectResult is not found');
+        }
 
+        $projectResult = $projectResult->toArray();
+
+        //整理上报数据
         $newData = [];
 
         $newData['title'] = $projectResult['title'];
@@ -75,15 +81,15 @@ class ActionController extends Controller
 
             $reportData['result'] = json_encode([$newData], JSON_UNESCAPED_UNICODE);
 
-            Log::debug('[v2 ActionController dataResultReport] reportData = ' , $reportData );
+            Log::debug('[InternalAPIV2 ActionController reportResult] reportData = ' , $reportData );
 
             try {
                 //调用上传数据接口
                 $result = InternalAPIV2Service::post('/item/result/report', $reportData);
             } catch (\Exception $e) {
-                Log::debug('[v2 ActionController projectResultReport] error message = ' . $e->getMessage());
+                Log::debug('[InternalAPIV2 ActionController reportResult] error message = ' . $e->getMessage());
 
-                Log::debug('[v2 ActionController projectResultReport] data report failed');
+                Log::debug('[InternalAPIV2 ActionController reportResult] data report failed');
             }
         }
 
@@ -91,48 +97,44 @@ class ActionController extends Controller
     }
 
     /**
-     * nextScript
-     * 执行下一步脚本
+     * converterTask
+     * 转换任务
      *
      * @param
      * @return boolean
      */
-    public function nextScript(Request $request)
+    public function converterTask(Request $request)
     {
-        Log::debug('[v2 ActionController nextScript] start');
         $params = $request->all();
 
         ValidatorService::check($params, [
-            'project_result_id' => 'required|integer',
-            'action_id'         => 'required|integer'
+            'project_result_id' => 'required|integer|max:999999999',
+            'action_id'         => 'required|integer|max:999999999'
         ]);
 
-        Log::debug('[v2 ActionController nextScript] id = ' . $params['project_result_id']);
+        //获取上报数据信息
+        $projectResult = ProjectResult::find($params['project_result_id']);
 
-        //调取上报数据信息
-        $projectResult = InternalAPIV2Service::get('/project_result', ['id'=>$params['project_result_id']]);
-
-        $postTaskActionMapData = [];
-        $postTaskActionMapData['task_id'] = $projectResult['task_id'];
-        $postTaskActionMapData['project_id'] = $projectResult['project_id'];
-        $postTaskActionMapData['action_id'] = $params['action_id'];
-        //调取task_action_map信息
-        $taskActionMaps = InternalAPIV2Service::get('/task/action_map/action_id', $postTaskActionMapData);
-
-        foreach ($taskActionMaps as $taskActionMap) {
-            $scriptId = $taskActionMap['script_id'];
-
-            if (empty($scriptId)) {
-                Log::debug('[v2 ActionController nextScript] script id is empty');
-                return $this->resObjectGet(false, 'task_action_map', $request->path());
-            }
-
-            $url = $projectResult['detail_url'];
-
-            //TODO 调用队列
+        if (empty($projectResult)) {
+            throw new \Dingo\Api\Exception\ResourceException('$projectResult is not found');
         }
 
-        //TODO 调用事件
+        //查询task_action_map信息
+        $taskActionMap = TaskActionMap::where('task_id', $projectResult->task_id)
+                                      ->where('project_id', $projectResult->project_id)
+                                      ->where('action_id', $params['action_id'])
+                                      ->first();
+
+        if (empty($taskActionMap)) {
+            throw new \Dingo\Api\Exception\ResourceException('$taskActionMap is not found');
+        }
+
+        $scriptId = $taskActionMap->script_id;
+
+        $detail_url = $projectResult->detail_url;
+
+        //TODO 调用队列
+
 
         return $this->resObjectGet(true, 'action', $request->path());
     }

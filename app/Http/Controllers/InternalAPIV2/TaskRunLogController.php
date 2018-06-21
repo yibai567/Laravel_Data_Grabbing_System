@@ -33,9 +33,9 @@ class TaskRunLogController extends Controller
         Log::debug('[create] 接收参数:', $params);
 
         ValidatorService::check($params, [
-            'task_id' => 'required|integer',
+            'task_id' => 'required|integer|max:999999999',
             'end_job_at' => 'nullable|date',
-            'result_count' => 'nullable|integer',
+            'result_count' => 'nullable|integer|max:999999999',
         ]);
         $params['start_job_at'] = date('Y-m-d');
         $res = TaskRunLog::create($params);
@@ -66,8 +66,8 @@ class TaskRunLogController extends Controller
         Log::debug('[updateStatusSuccess] 接收参数:', $params);
 
         ValidatorService::check($params, [
-            'id' => 'required|integer',
-            'result_count' => 'required|integer',
+            'id' => 'required|integer|max:999999999',
+            'result_count' => 'required|integer|max:999999999',
         ]);
 
         $taskRunLog = TaskRunLog::find($params['id']);
@@ -103,7 +103,7 @@ class TaskRunLogController extends Controller
         Log::debug('[updateStatusFAIL] 接收参数:', $params);
 
         ValidatorService::check($params, [
-            'id' => 'required|integer',
+            'id' => 'required|integer|max:999999999',
         ]);
 
         $taskRunLog = TaskRunLog::find($params['id']);
@@ -133,7 +133,7 @@ class TaskRunLogController extends Controller
         $params = $request->all();
 
         ValidatorService::check($params, [
-            'id' => 'required|integer',
+            'id' => 'required|integer|max:999999999',
         ]);
 
         $id = intval($params['id']);

@@ -54,4 +54,48 @@ class ProjectResult extends Model
         'end_time',
         'created_time',
     ];
+
+    /**
+     * 设置screenshot字段入库前转化为json
+     *
+     * @param  array  $value
+     * @return string
+     */
+    public function setScreenshotAttribute($value)
+    {
+        $this->attributes['screenshot'] = json_encode($value, JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * 获取screenshot字段时转化为array
+     *
+     * @param  string  $value
+     * @return array
+     */
+    public function getScreenshotAttribute($value)
+    {
+        return json_decode($value, true);
+    }
+
+    /**
+     * 设置thumbnail字段入库前转化为json
+     *
+     * @param  array  $value
+     * @return string
+     */
+    public function setThumbnailAttribute($value)
+    {
+        $this->attributes['thumbnail'] = json_encode($value, JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * 获取thumbnail字段时转化为array
+     *
+     * @param  string  $value
+     * @return array
+     */
+    public function getThumbnailAttribute($value)
+    {
+        return json_decode($value, true);
+    }
 }
