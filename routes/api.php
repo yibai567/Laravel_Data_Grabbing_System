@@ -83,8 +83,8 @@ $api->version(
 
         $api->post('/image/upload', 'ImageController@upload');
 
-        $api->post('/project_result/message/list', 'ProjectResultController@messageListHandle');
-        $api->post('/project_result/message/detail', 'ProjectResultController@messageDetailHandle');
+        $api->post('/project_result/live_list', 'ProjectResultController@liveListHandle');
+        $api->post('/project_result/live_detail', 'ProjectResultController@liveDetailHandle');
 
         $api->post('/action/report', 'ActionController@projectResultReport');
         $api->post('/action/next_script', 'ActionController@nextScript');

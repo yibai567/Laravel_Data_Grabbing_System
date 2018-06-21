@@ -33,6 +33,14 @@
 			$this->col[] = ["label"=>"Id","name"=>"id"];
 			$this->col[] = ["label"=>"中文名","name"=>"cn_name"];
 			$this->col[] = ["label"=>"英文名","name"=>"en_name"];
+            $this->col[] = ["label"=>"类型","name"=>"type","callback"=>function ($row) {
+                if ( $row->type == 1) {
+                    return '个体';
+                } else {
+                    return '微信平台';
+                }
+            }];
+
 			$this->col[] = ["label"=>"公司网址","name"=>"url"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
@@ -40,6 +48,7 @@
 			$this->form = [];
 			$this->form[] = ['label'=>'中文名','name'=>'cn_name','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-2'];
 			$this->form[] = ['label'=>'英文名','name'=>'en_name','type'=>'text','validation'=>'nullable|max:255','width'=>'col-sm-2'];
+            $this->form[] = ['label'=>'类型','name'=>'type','type'=>'radio','validation'=>'required|integer|between:1,2','width'=>'col-sm-10','dataenum'=>'1|个体;2|微信平台','value'=>'1'];
 			$this->form[] = ['label'=>'公司网址','name'=>'url','type'=>'text','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-5'];
 			# END FORM DO NOT REMOVE THIS LINE
 

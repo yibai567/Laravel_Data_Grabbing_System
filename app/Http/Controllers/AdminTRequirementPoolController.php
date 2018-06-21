@@ -92,7 +92,7 @@
 			$this->form = [];
 			$this->form[] = ['label'=>'任务名称','name'=>'name','type'=>'text','validation'=>'nullable|string|max:100','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'任务地址','name'=>'list_url','type'=>'text','validation'=>'required|string|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'描述','name'=>'description','type'=>'textarea','validation'=>'nullable|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'描述','name'=>'description','type'=>'textarea','validation'=>'nullable|max:20000','width'=>'col-sm-10'];
 
             $this->form[] = ['label'=>'公司列表','name'=>'company_id','type'=>'select','datatable'=>'t_company,cn_name'];
 

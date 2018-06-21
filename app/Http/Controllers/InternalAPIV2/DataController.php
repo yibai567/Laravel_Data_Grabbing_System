@@ -40,6 +40,7 @@ class DataController extends Controller
 
         $result = [];
         $result['task_id'] = $params['task_id'];
+        $result['data'] = [];
         foreach ($params['result'] as $value) {
 
             ValidatorService::check($value, [
@@ -98,7 +99,7 @@ class DataController extends Controller
                 'created_time'       => time()
             ];
 
-            $result[] = Data::create($data)->toArray();
+            $result['data'][] = Data::create($data)->toArray();
         }
 
         return $this->resObjectGet($result, 'data', $request->path());

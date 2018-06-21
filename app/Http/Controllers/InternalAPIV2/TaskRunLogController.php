@@ -9,8 +9,7 @@
 
 namespace App\Http\Controllers\InternalAPIV2;
 
-use App\Models\TaskRunLog;
-use Illuminate\Support\Facades\DB;
+use App\Models\V2\TaskRunLog;
 use Log;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
