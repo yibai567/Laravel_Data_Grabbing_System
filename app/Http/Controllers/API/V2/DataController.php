@@ -9,6 +9,7 @@
 
 namespace App\Http\Controllers\API\V2;
 
+use App\Events\SaveDataEvent;
 use Log;
 use App\Models\V2\TaskRunLog;
 use App\Services\InternalAPIV2Service;
@@ -78,7 +79,7 @@ class DataController extends Controller
             InternalAPIV2Service::post('/task_run_log/status/success', $updateTaskRunLogData);
 
             if ($dataNum > 0) {
-//                event(new SaveDataEvent($datas));
+                event(new SaveDataEvent($datas));
             }
         } catch (\Exception $e) {
             Log::debug('[v2 DataController batchHandle] error message = ' . $e->getMessage());
