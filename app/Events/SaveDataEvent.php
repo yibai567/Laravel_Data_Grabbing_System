@@ -9,9 +9,9 @@ class SaveDataEvent extends Event
     use SerializesModels;
 
     /**
-     * 原创对象
+     * SaveData
      */
-    public $datas;
+    public $messages;
 
     /**
      * 创建一个事件实例。
@@ -19,8 +19,8 @@ class SaveDataEvent extends Event
      * @param $data
      * @return void
      */
-    public function __construct($datas)
+    public function __construct($data)
     {
-        $this->datas = $datas;
+        $this->messages = $data;
     }
 }

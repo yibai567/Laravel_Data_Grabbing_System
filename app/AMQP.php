@@ -398,7 +398,6 @@ class AMQP {
      */
     public function consume($queue, $callback) {
 
-        // $this->__channel->basic_consume($callback);
         $i = 1;
         $this->__channel->basic_qos(null, 1, null);
         $this->__channel->basic_consume($queue, '', false, false, false, false, $callback);

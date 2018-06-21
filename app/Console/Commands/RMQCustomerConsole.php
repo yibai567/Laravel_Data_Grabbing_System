@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Services\InternalAPIService;
+use App\Services\InternalAPIV2Service;
 use App\Models\V2\Project;
 use App\AMQP;
 use Log;
@@ -51,21 +51,21 @@ class RMQCustomerConsole extends Command
             $id = $this->argument('id');
             $customer = $this->getCustomer($type, $id);
 
-            $type = '';
+            $exchangeType = '';
             switch ($customer['exchange_type']) {
                 case Project::EXCHANGE_TYPE_DIRECT :
-                    $type = 'direct';
+                    $exchangeType = 'direct';
                     break;
                 case Project::EXCHANGE_TYPE_FANOUT :
-                    $type = 'fanout';
+                    $exchangeType = 'fanout';
                     break;
                 case Project::EXCHANGE_TYPE_ROUTE :
-                    $type = 'route';
+                    $exchangeType = 'route';
                     break;
                 default:
                     break;
             }
-            if (empty($type) || empty($customer['vhost']) || empty($customer['exchange']) || empty($customer['queue'])) {
+            if (empty($exchangeType) || empty($customer['vhost']) || empty($customer['exchange']) || empty($customer['queue'])) {
                 Log::debug('[SaveDataListener error] customer id ' . $customer['id']);
                 return false;
             }
@@ -73,12 +73,15 @@ class RMQCustomerConsole extends Command
                 'server' => [
                     'vhost' => $customer['vhost'],
                 ],
-                'type' => $type,
+                'type' => $exchangeType,
                 'exchange' => $customer['exchange'],
                 'queue' => $customer['queue']
             ];
             $rmq = AMQP::getInstance($option);
-            $rmq->consume($customer['queue'], $this->callback());
+            $rmq->prepareExchange();
+            $rmq->prepareQueue();
+            $rmq->queueBind();
+            $rmq->consume($customer['queue'], $this->callback($customer['customer_path'], $type, $id));
         } catch (Exception $e) {
             Log::debug('11');
             throw $e;
@@ -89,7 +92,10 @@ class RMQCustomerConsole extends Command
     {
         switch ($type) {
                 case 'project' :
-                    $customer = Project::find($id)->toArray();
+                    $customer = Project::find($id);
+                    if (!empty($customer)) {
+                        $customer->toArray();
+                    }
                     break;
                 case 'filter' :
                     // $type = 'fanout';
@@ -103,13 +109,31 @@ class RMQCustomerConsole extends Command
         return $customer;
     }
 
-    private function callback()
+    private function callback($customerPath, $type, $id)
     {
-        $this->info(1);
-        return function($msg) {
-            $this->info($msg->body);
-            // $this->info($customer_path);
-            $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+        return function($msg) use ($customerPath, $type, $id) {
+            $message = json_decode($msg->body, true);
+            switch ($type) {
+                case 'project' :
+                    $params = [
+                        'data_id' => $message['id'],
+                        'project_id' => $id,
+                    ];
+                    $result = InternalAPIV2Service::post($customerPath, $params);
+                    if ($result) {
+                        $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                    }
+                    break;
+                case 'filter' :
+
+                    break;
+                case 'action' :
+
+                    break;
+                default:
+                    break;
+            }
+
         };
     }
 }

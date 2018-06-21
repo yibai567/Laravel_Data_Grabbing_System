@@ -31,7 +31,7 @@ class SaveDataListener implements ShouldQueue
     public function handle(SaveDataEvent $event)
     {
         Log::debug('[SaveDataListener handle] ------- start -------');
-        $data = $event->datas;
+        $data = $event->messages;
         if (empty($data)) {
             Log::debug('[SaveDataListener handle] data is not exists');
             return true;
@@ -88,7 +88,7 @@ class SaveDataListener implements ShouldQueue
                 foreach ($data['data'] as $value) {
                     $rmq->publish(json_encode($value), $project['queue']);
                 }
-                $rmq->close();
+                // $rmq->close();
             } catch (\Exception $e) {
                 Log::error('[SaveDataListener handle error]:'."\t".$e->getCode()."\t".$e->getMessage());
             }

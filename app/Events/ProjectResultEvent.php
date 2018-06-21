@@ -4,23 +4,23 @@ namespace App\Events;
 
 use Illuminate\Queue\SerializesModels;
 
-class DataResultReportEvent extends Event
+class ProjectResultEvent extends Event
 {
     use SerializesModels;
 
-    /*
-     * 原创对象
+    /**
+     * ProjectResult
      */
-    public $data;
+    public $messages;
 
     /**
      * 创建一个事件实例。
      *
-     * @param  $data
+     * @param $data
      * @return void
      */
     public function __construct($data)
     {
-        $this->data = $data;
+        $this->messages = $data;
     }
 }
