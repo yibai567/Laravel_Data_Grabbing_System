@@ -10,6 +10,13 @@ class Project extends Model
     use SoftDeletes;
 
     /**
+     * Exchange 类型
+     **/
+    const EXCHANGE_TYPE_DIRECT = 1;
+    const EXCHANGE_TYPE_FANOUT = 2;
+    const EXCHANGE_TYPE_ROUTE = 3;
+
+    /**
      * 表名
      */
     protected $table = 't_project';

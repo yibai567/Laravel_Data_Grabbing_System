@@ -21,6 +21,6 @@ class SaveDataEvent extends Event
      */
     public function __construct($datas)
     {
-        $this->data = $datas;
+        $this->datas = $datas;
     }
 }
