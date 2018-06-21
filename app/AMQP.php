@@ -281,7 +281,7 @@ class AMQP {
             if (!$routing_key) {
                 $routing_key = $this->_queue_name;
             }
-            $this->__channel->queueBind($this->_queue_name,
+            $this->__channel->queue_bind($this->_queue_name,
                                          $this->_exchange_name,
                                          $routing_key);
         } catch (Exception $e) {
