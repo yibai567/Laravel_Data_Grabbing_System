@@ -51,7 +51,7 @@ class CreateScriptQueueConsole extends Command
         }
         $queueList = [];
         foreach ($scriptList as $key => $value) {
-            $driver = $this->__getDriver($value['languages_type'], $value['script_id']);
+            $driver = $this->__getDriver($value['data_type'], $value['script_id']);
             $cron = $this->__getCron($value['cron_type'], $value['script_id']);
             $queueName = 'script_queue_' . $driver . '_' . $cron;
             $queueList[$queueName][] = [
@@ -89,7 +89,7 @@ class CreateScriptQueueConsole extends Command
     private function __getScriptList()
     {
         $data = [];
-        Task::select(['id', 'languages_type', 'cron_type', 'script_id'])
+        Task::select(['id', 'data_type', 'cron_type', 'script_id'])
                 ->where('status', Task::STATUS_START)
                 ->chunk(500, function ($script) use(&$data) {
                     if ($script) {
@@ -104,23 +104,23 @@ class CreateScriptQueueConsole extends Command
         return $data;
     }
 
-    private function __getDriver($languagesType, $scriptId)
+    private function __getDriver($dataType, $scriptId)
     {
-        switch ($languagesType) {
-            case Script::LANGUAGES_TYPE_CASPERJS:
+        switch ($dataType) {
+            case Script::DATA_TYPE_CASPERJS:
                 $driver = 'casper';
                 break;
 
-            case Script::LANGUAGES_TYPE_HTML:
+            case Script::DATA_TYPE_HTML:
                 $driver = 'node';
                 break;
 
-            case Script::LANGUAGES_TYPE_API:
+            case Script::DATA_TYPE_API:
                 $driver = 'node';
                 break;
 
             default:
-                Log::error('script_id 为 [' . $scriptId . '] 的 languagesType 值不对 = ' . $languagesType);
+                Log::error('script_id 为 [' . $scriptId . '] 的 dataType 值不对 = ' . $dataType);
                 $driver = '';
                 break;
             }

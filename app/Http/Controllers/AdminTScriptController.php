@@ -1141,7 +1141,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
     {
 
         $data['page_title'] = '发布脚本';
-        $data['languages_type'] = $languagesType;
         $this->cbView('script/upload_add_view', $data);
 
     }

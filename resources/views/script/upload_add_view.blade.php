@@ -24,7 +24,6 @@
                         </label>
                         <div class="col-xs-5">
                             <input type='text' title="脚本名称" required maxlength='70' class='form-control' name="name" id="name" value='{{$row[name]}}'/>
-                            <input type='hidden' maxlength="70" class='form-control' name="data_type" value='{{$data_type}}'/>
                             <div class="text-danger"></div>
                             <p class='help-block'></p>
                         </div>

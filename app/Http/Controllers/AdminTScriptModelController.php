@@ -4,7 +4,7 @@
 	use Request;
 	use DB;
 	use CRUDBooster;
-    use App\Models\ScriptModel;
+    use App\Models\V2\ScriptModel;
     use App\Services\InternalAPIService;
     use Illuminate\Support\Facades\Route;
 
@@ -35,12 +35,12 @@
 			$this->col = [];
 			$this->col[] = ["label"=>"ID","name"=>"id"];
             $this->col[] = ["label"=>"模块名称","name"=>"name"];
-			$this->col[] = ["label"=>"脚本语言","name"=>"languages_type","callback"=>function ($row) {
-            if ( $row->languages_type == ScriptModel::LANGUAGES_TYPE_CASPERJS) {
+			$this->col[] = ["label"=>"脚本语言","name"=>"data_type","callback"=>function ($row) {
+            if ( $row->data_type == ScriptModel::DATA_TYPE_CASPERJS) {
                 return 'casperjs';
-            } elseif ($row->languages_type == ScriptModel::LANGUAGES_TYPE_HTML) {
+            } elseif ($row->data_type == ScriptModel::DATA_TYPE_HTML) {
                 return 'html';
-            } elseif ($row->languages_type == ScriptModel::LANGUAGES_TYPE_API) {
+            } elseif ($row->data_type == ScriptModel::DATA_TYPE_API) {
                 return 'api';
             }
             }];
@@ -61,7 +61,7 @@
 			$this->form = [];
 			$this->form[] = ['label'=>'模块名称','name'=>'name','type'=>'text','validation'=>'required|string|max:50','width'=>'col-sm-10'];
             $this->form[] = ['label'=>'模块描述','name'=>'description','type'=>'textarea','validation'=>'nullable|string','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'脚本语言','name'=>'languages_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|casperjs;2|html;3|api','value'=>'1'];
+			$this->form[] = ['label'=>'脚本语言','name'=>'data_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|casperjs;2|html;3|api','value'=>'1'];
 
 			$this->form[] = ['label'=>'代码结构','name'=>'structure','type'=>'textarea','validation'=>'required|string','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'参数规则','name'=>'parameters','type'=>'textarea','validation'=>'required|json','width'=>'col-sm-10'];
@@ -415,12 +415,12 @@
                 $row->system_type = '用户自定义模块';
             }
 
-            if ($row->languages_type == ScriptModel::LANGUAGES_TYPE_CASPERJS) {
-                $row->languages_type = 'casperjs';
-            } elseif ($row->languages_type == ScriptModel::LANGUAGES_TYPE_HTML) {
-                $row->languages_type = 'html';
-            } elseif ($row->languages_type == ScriptModel::LANGUAGES_TYPE_API) {
-                $row->languages_type = 'api';
+            if ($row->data_type == ScriptModel::DATA_TYPE_CASPERJS) {
+                $row->data_type = 'casperjs';
+            } elseif ($row->data_type == ScriptModel::DATA_TYPE_HTML) {
+                $row->data_type = 'html';
+            } elseif ($row->data_type == ScriptModel::DATA_TYPE_API) {
+                $row->data_type = 'api';
             }
 
 
