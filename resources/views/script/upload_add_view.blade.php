@@ -48,7 +48,7 @@
                         </div>
                     </div>
                     <div class='form-group header-group-0 ' id='form-group-load_images'>
-                        <label class='control-label col-sm-2'>语言类型
+                        <label class='control-label col-sm-2'>data类型
                             <span class='text-danger' title='This field is required'>*</span>
                         </label>
                         <div>

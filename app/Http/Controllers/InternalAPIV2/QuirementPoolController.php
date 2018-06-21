@@ -41,7 +41,7 @@ class QuirementPoolController extends Controller
         ValidatorService::check($params, [
             'name'              => 'nullable|string|max:100',
             'list_url'          => 'required|string|max:255',
-            'description'       => 'nullable|max:255',
+            'description'       => 'nullable|max:20000',
             'subscription_type' => 'required|integer|between:1,2',
             'is_capture'        => 'required|integer|between:1,2',
             'company_id'        => 'required|integer',
@@ -89,7 +89,7 @@ class QuirementPoolController extends Controller
             'id'                => 'required|integer',
             'name'              => 'nullable|string|max:100',
             'list_url'          => 'required|string|max:255',
-            'description'       => 'nullable|max:255',
+            'description'       => 'nullable|max:20000',
             'company_id'        => 'required|integer',
             'subscription_type' => 'required|integer|between:1,2',
             'is_capture'        => 'required|integer|between:1,2',

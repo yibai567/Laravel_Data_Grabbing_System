@@ -9,7 +9,7 @@ use DB;
 use CB;
 use CRUDBooster;
 use App\Models\Script;
-use App\Services\InternalAPIService;
+use App\Services\InternalAPIV2Service;
 use App\Models\Project;
 use App\Models\Filter;
 use App\Models\Action;
@@ -88,6 +88,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $this->form[] = ['label'=>'需求池ID','name'=>'next_script_id','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'下一步脚本ID','name'=>'requirement_pool_id','type'=>'text','validation'=>'nullable|integer','width'=>'col-sm-10'];
         $this->form[] = ['name'=>'projects','type'=>'text'];
+        $this->form[] = ['name'=>'ext','type'=>'text'];
         $this->form[] = ['label'=>'project_config','name'=>'project_config','type'=>'text','validation'=>'nullable','width'=>'col-sm-10'];
 		# END FORM DO NOT REMOVE THIS LINE
 
@@ -377,7 +378,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data = [];
         $data['script_model'] = [];
         $data['new_step'] = [];
-        $res = InternalAPIService::get('/script_models/data_type/' . $dataType);
+        $res = InternalAPIV2Service::get('/script_models/data_type/' . $dataType);
         if (!empty($res)) {
             $data['script_model'] = json_decode(json_encode($res));
             $step = [];
@@ -409,7 +410,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data = [];
         $data['page_title'] = '编辑脚本生成信息';
         try {
-            $data['row'] = InternalAPIService::get('/script', ['id' => $id]);
+            $data['row'] = InternalAPIV2Service::get('/script', ['id' => $id]);
             if (!empty($data['row']['modules'])) {
                 $modules = $data['row']['modules'];
                 $newScriptModel = [];
@@ -422,7 +423,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
                 }
 
                 $data['row']['modules'] = $newScriptModel;
-                $script_models = InternalAPIService::get('/script_models/ids', ['ids' => rtrim($scriptModelId, ",")]);
+                $script_models = InternalAPIV2Service::get('/script_models/ids', ['ids' => rtrim($scriptModelId, ",")]);
                 foreach ($script_models as $key => $value) {
                     $newScriptModelParams[$value['id']] = json_decode($value['parameters']);
                     $newScriptModelList[$value['id']] = $value;
@@ -432,7 +433,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
                 $data['row']['script_model_list'] = $newScriptModelList;
 
                 $data['script_model'] = [];
-                $res = InternalAPIService::get('/script_models/data_type/' . $data['row']['data_type']);
+                $res = InternalAPIV2Service::get('/script_models/data_type/' . $data['row']['data_type']);
                 if (!empty($res)) {
                     $data['script_model'] = json_decode(json_encode($res));
                 }
@@ -524,7 +525,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         } else {
             $data['is_proxy'] = $formParams['is_proxy'];
         }
-
         //更新projects字段
         if (!empty($formParams['projects'])) {
             //TODO调用接口
@@ -553,7 +553,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $data['created_by'] = CRUDBooster::myName();
         $data['id'] = $id;
         try {
-            $res = InternalAPIService::post('/script/update', $data);
+            $res = InternalAPIV2Service::post('/script/update', $data);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
         }
@@ -582,20 +582,21 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             $script->save();
             CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script/filter-action/". $script->id, "成功");
         }
-        if (!empty($formParams['project_config'])) {
-            if (!empty($formParams['project_config']['filters'])) {
-                //TODO调用接口
-                $script = Script::find($formParams['id']);
-                $script->filters = json_encode($formParams['project_config']['filters']);
-                $script->save();
+        if (!empty($formParams['id'])) {
+            $script = Script::find($formParams['id']);
+            $script->filters = "";
+            $script->actions = "";
+            if (!empty($formParams['project_config'])) {
+                if (!empty($formParams['project_config']['filters'])) {
+                    //TODO调用接口
+                    $script->filters = json_encode($formParams['project_config']['filters']);
+                }
+                if (!empty($formParams['project_config']['actions'])) {
+                    //TODO调用接口
+                    $script->actions = json_encode($formParams['project_config']['actions']);
+                }
             }
-
-            if (!empty($formParams['project_config']['actions'])) {
-                //TODO调用接口
-                $script = Script::find($formParams['id']);
-                $script->actions = json_encode($formParams['project_config']['actions']);
-                $script->save();
-            }
+            $script->save();
             CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script", "创建成功", "success");
         }
 
@@ -649,7 +650,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
         $data['created_by'] = CRUDBooster::myName();
         try {
-            $res = InternalAPIService::post('/script', $data);
+            $res = InternalAPIV2Service::post('/script', $data);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
         }
@@ -664,7 +665,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
         $data = [];
         $data['page_title'] = '脚本详情';
-        $data['row'] = InternalAPIService::get('/script', ['id' => $id]);
+        $data['row'] = InternalAPIV2Service::get('/script', ['id' => $id]);
         if (empty($data['row'])) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "数据信息有误", "error");
         }
@@ -1129,7 +1130,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
     public function getPublish($id)
     {
         try {
-            $res = InternalAPIService::post('/script/publish', ['id' => $id, 'publisher' => CRUDBooster::myName()]);
+            $res = InternalAPIV2Service::post('/script/publish', ['id' => $id, 'publisher' => CRUDBooster::myName()]);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
         }
@@ -1225,7 +1226,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
         $data = [];
         $formParams = $this->arr;
-
         $result = preg_match("/^(http|https):\/\//i", $formParams['list_url']);
 
         if (!$result) {
@@ -1233,35 +1233,23 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         }
 
         $data['name'] = $formParams['name'];
+        $data['content'] = $formParams['content'];
         $data['description'] = $formParams['description'];
         $data['list_url'] = $formParams['list_url'];
 
         $data['cron_type'] = $formParams['cron_type'];
-        $data['languages_type'] = $formParams['languages_type'];
+        $data['data_type'] = $formParams['data_type'];
         $data['requirement_pool_id'] = $formParams['requirement_pool_id'];
-        $data['next_script_id'] = $formParams['next_script_id'];
-        if (empty($formParams['is_report'])) {
-            $data['is_report'] = Script::REPORT_DATA_FALSE;
-        } else {
-            $data['is_report'] = $formParams['is_report'];
-        }
-
-        if (empty($formParams['is_download'])) {
-            $data['is_download'] = Script::DOWNLOAD_IMAGE_FALSE;
-        } else {
-            $data['is_download'] = $formParams['is_download'];
-        }
         if (empty($formParams['is_proxy'])) {
             $data['is_proxy'] = Script::WALL_OVER_FALSE;
         } else {
             $data['is_proxy'] = $formParams['is_proxy'];
         }
-        $data['script_type'] = $formParams['script_type'];
+        $data['ext'] = $formParams['ext'];
         $data['operate_user'] = CRUDBooster::myName();
-        $data['generate_type'] = Script::GENERATE_TYPE_CONTENT;
         $res = [];
         try {
-            $res = InternalAPIService::post('/script', $data);
+            $res = InternalAPIV2Service::post('/script', $data);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
         }
@@ -1272,9 +1260,9 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
         //命名文件名称
         $filename = '';
-        if ($formParams['script_type'] == Script::SCRIPT_TYPE_JS) {
+        if ($formParams['ext'] == Script::SCRIPT_TYPE_JS) {
             $filename = 'script_' . $res['id'] . '.js';
-        } elseif ($formParams['script_type'] == Script::SCRIPT_TYPE_PHP) {
+        } elseif ($formParams['ext'] == Script::SCRIPT_TYPE_PHP) {
             $filename = 'script_' . $res['id'] . '.php';
         }
 
@@ -1285,9 +1273,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         if (!$result) {
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "生成脚本文件失败", "error");
         }
-
-        CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script", "创建成功", "success");
-
+        CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_script/dispatch/" . $res['id'], "创建成功", "success");
     }
 
     /**

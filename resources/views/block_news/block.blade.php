@@ -54,7 +54,11 @@
                                 <button class="widget-button btn btn-primary btn-small sign-up-button btn-text">
                                     <span class="d-button-label">{{ Auth::user()->name }}</span>
                                 </button>
-
+                                <a href="http://{{$_SERVER['HTTP_HOST']}}/logout">
+                                <button class="widget-button btn btn-primary btn-small sign-up-button btn-text">
+                                    <span class="d-button-label">退出</span>
+                                </button>
+                                </a>
                                 @endguest
                              </span>
 <!--                             <ul role="navigation" class="icons d-header-icons clearfix">
