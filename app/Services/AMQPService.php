@@ -1,10 +1,11 @@
 <?php
-namespace App;
+namespace App\Services;
+
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use App\Exceptions\AMQPException;
 
-class AMQP {
+class AMQPService extends Service{
 
     /**
      * Work Queue 模型
@@ -80,20 +81,20 @@ class AMQP {
      * @param array $options
      * @return object
      */
-    public static function &getInstance($options) {
+    public static function getInstance($options) {
 
         $name = $options['name'];
         if (array_key_exists($name, self::$__clients)) {
             return self::$__clients[$name];
         }
 
-        self::$__clients[$name] = new AMQP($options);
+        self::$__clients[$name] = new AMQPService($options);
         return self::$__clients[$name];
 
     }
 
-    private function __construct($options) {
-
+    public function __construct($options) {
+        \Log::debug('==========='.json_encode($options));
         $this->__options = $options;
         $this->__type = $options['type'];
         try {

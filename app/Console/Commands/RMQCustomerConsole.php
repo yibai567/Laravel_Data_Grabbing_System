@@ -5,7 +5,8 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Services\InternalAPIV2Service;
 use App\Models\V2\Project;
-use App\AMQP;
+use App\Models\V2\Action;
+use App\Services\AMQPService;
 use Log;
 
 
@@ -77,7 +78,7 @@ class RMQCustomerConsole extends Command
                 'exchange' => $customer['exchange'],
                 'queue' => $customer['queue']
             ];
-            $rmq = AMQP::getInstance($option);
+            $rmq = AMQPService::getInstance($option);
             $rmq->prepareExchange();
             $rmq->prepareQueue();
             $rmq->queueBind();
@@ -101,6 +102,10 @@ class RMQCustomerConsole extends Command
                     // $type = 'fanout';
                     break;
                 case 'action' :
+                    $customer = Action::find($id);
+                    if (!empty($customer)) {
+                        $customer->toArray();
+                    }
                     // $type = 'route';
                     break;
                 default:
@@ -128,7 +133,14 @@ class RMQCustomerConsole extends Command
 
                     break;
                 case 'action' :
-
+                    $params = [
+                        'project_result_id' => $message['project_result_id'],
+                        'action_id' => $id,
+                    ];
+                    $result = InternalAPIV2Service::post($customerPath, $params);
+                    if ($result) {
+                        $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                    }
                     break;
                 default:
                     break;

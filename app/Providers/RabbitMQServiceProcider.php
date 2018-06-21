@@ -6,7 +6,7 @@ use Illuminate\Support\ServiceProvider;
 // use PhpAmqpLib\Connection\AMQPStreamConnection;
 // use PhpAmqpLib\Message\AMQPMessage;
 // use PhpAmqpLib\Wire\AMQPTable;
-use App\AMQP;
+use App\Services\AMQPService;
 
 class RabbitMQServiceProcider extends ServiceProvider
 {
@@ -33,7 +33,7 @@ class RabbitMQServiceProcider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind('amqp', AMQP::class);
+        $this->app->bind('amqp', AMQPService::class);
     }
 
     // private function __client()

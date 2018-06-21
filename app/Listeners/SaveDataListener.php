@@ -6,7 +6,7 @@ use App\Events\SaveDataEvent;
 use App\Models\V2\Project;
 use App\Models\V2\TaskProjectMap;
 use App\Models\V2\Task;
-use App\AMQP;
+use App\Services\AMQPService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Log;
 
@@ -81,7 +81,7 @@ class SaveDataListener implements ShouldQueue
             ];
 
             try {
-                $rmq = AMQP::getInstance($option);
+                $rmq = AMQPService::getInstance($option);
                 $rmq->prepareExchange();
                 $rmq->prepareQueue();
                 $rmq->queueBind();

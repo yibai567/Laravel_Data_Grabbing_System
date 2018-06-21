@@ -7,7 +7,7 @@ use App\Models\V2\ProjectResult;
 use App\Models\V2\TaskFilterMap;
 use App\Models\V2\TaskActionMap;
 use App\Models\V2\Action;
-use App\AMQP;
+use App\Services\AMQPService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Log;
 
@@ -89,22 +89,22 @@ class ProjectResultListener implements ShouldQueue
 
             $option = [
                 'server' => [
-                    'vhost' => $project['vhost'],
+                    'vhost' => $action['vhost'],
                 ],
                 'type' => $type,
-                'exchange' => $project['exchange'],
-                'queue' => $project['queue']
+                'exchange' => $action['exchange'],
+                'queue' => $action['queue']
             ];
-
+            Log::debug('rmq ==== ' . json_encode($option));
             try {
-                $rmq = AMQP::getInstance($option);
+                // TODO ???????
+                $rmq = new AMQPService($option);
+            Log::debug('rmq2 ==== ' . json_encode($rmq));
                 $rmq->prepareExchange();
                 $rmq->prepareQueue();
                 $rmq->queueBind();
-                foreach ($data['data'] as $value) {
-                    $rmq->publish(json_encode($value), $project['queue']);
-                }
-                // $rmq->close();
+                $rmq->publish(json_encode($data), $action['queue']);
+            Log::debug('rmq3 ==== ' . json_encode($rmq));
             } catch (\Exception $e) {
                 Log::error('[ProjectResultListener handle error]:'."\t".$e->getCode()."\t".$e->getMessage());
             }
