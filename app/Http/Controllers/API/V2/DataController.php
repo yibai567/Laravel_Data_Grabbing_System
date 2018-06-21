@@ -72,7 +72,7 @@ class DataController extends Controller
             $params['task_id'] = $taskId;
             $datas = InternalAPIV2Service::post('/datas',$params);
             Log::debug('[v2 DataController batchHandle] $datas = ',$datas);
-            $dataNum = count($datas);
+            $dataNum = count($datas['data']);
             $updateTaskRunLogData['result_count'] = $dataNum;
             $updateTaskRunLogData['id'] = $params['task_run_log_id'];
             //更改task_runRunLog状态

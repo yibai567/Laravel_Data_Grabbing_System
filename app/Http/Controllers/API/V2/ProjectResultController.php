@@ -18,13 +18,13 @@ use Log;
 class ProjectResultController extends Controller
 {
     /**
-     * messageListCreate
+     * liveListHandle
      * 快讯列表项目结果处理
      *
      * @param
      * @return boolean
      */
-    public function messageListHandle(Request $request)
+    public function liveListHandle(Request $request)
     {
         $params = $request->all();
 
@@ -69,13 +69,13 @@ class ProjectResultController extends Controller
     }
 
     /**
-     * messageDetailCreate
+     * liveDetailHandle
      * 快讯详情项目结果处理
      *
      * @param
      * @return boolean
      */
-    public function messageDetailHandle(Request $request)
+    public function liveDetailHandle(Request $request)
     {
         $params = $request->all();
 
