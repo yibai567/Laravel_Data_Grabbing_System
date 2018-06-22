@@ -1245,7 +1245,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             $data['is_proxy'] = $formParams['is_proxy'];
         }
         $data['ext'] = $formParams['ext'];
-        $data['operate_user'] = CRUDBooster::myName();
+        $data['created_by'] = CRUDBooster::myName();
         $res = [];
         try {
             $res = InternalAPIV2Service::post('/script', $data);
