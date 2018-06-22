@@ -4,7 +4,7 @@
 	use Request;
 	use DB;
 	use CRUDBooster;
-    use App\Services\InternalAPIService;
+    use App\Services\InternalAPIV2Service;
     use App\Models\Task;
 
 	class AdminTTaskController extends \crocodicstudio\crudbooster\controllers\CBController {
@@ -113,7 +113,7 @@
 	        |
 	        */
 	        $this->sub_module = array();
-            $this->sub_module[] = ['label'=>'上报结果','path'=>'t_data','foreign_key'=>'task_id','button_color'=>'success','button_icon'=>'fa fa-bars', 'parent_columns'=>'id'];
+            $this->sub_module[] = ['label'=>'结果列表','path'=>'t_data','foreign_key'=>'task_id','button_color'=>'success','button_icon'=>'fa fa-bars', 'parent_columns'=>'id'];
 
 	        /*
 	        | ----------------------------------------------------------------------
@@ -376,7 +376,7 @@
         public function getStartUp($id)
         {
             try {
-                $result = InternalAPIService::post('/task/start', ['id' => intval($id)]);
+                $result = InternalAPIV2Service::post('/task/start', ['id' => intval($id)]);
             } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
@@ -387,7 +387,7 @@
         public function getStopDown($id)
         {
             try {
-                $result = InternalAPIService::post('/task/stop', ['id' => intval($id)]);
+                $result = InternalAPIV2Service::post('/task/stop', ['id' => intval($id)]);
             } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }

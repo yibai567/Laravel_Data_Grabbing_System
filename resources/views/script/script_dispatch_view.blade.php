@@ -6,7 +6,7 @@
 <div class="panel panel-default" >
     <div class="panel-heading">
         <strong>
-            <i class='{{CRUDBooster::getCurrentModule()->icon}}'></i>项目分发
+            <i class='{{CRUDBooster::getCurrentModule()->icon}}'></i>第二步、分发项目配置
         </strong>
     </div>
     <?php

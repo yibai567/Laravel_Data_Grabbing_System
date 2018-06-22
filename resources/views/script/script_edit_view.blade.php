@@ -19,7 +19,7 @@
 <div class="panel panel-default">
     <div class="panel-heading">
         <strong>
-            <i class='{{CRUDBooster::getCurrentModule()->icon}}'></i> {!! $page_title or "Page Title" !!}
+            <i class='{{CRUDBooster::getCurrentModule()->icon}}'></i> 第一步、配置脚本信息
         </strong>
     </div>
     <?php
