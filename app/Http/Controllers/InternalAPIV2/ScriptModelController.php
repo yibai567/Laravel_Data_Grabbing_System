@@ -60,7 +60,7 @@ class ScriptModelController extends Controller
         $params = $request->all();
 
         ValidatorService::check($params, [
-            'id'           => 'required|integer|max:999999999',
+            'id'           => 'required|integer|max:1000',
             'name'         => 'nullable|string|max:50',
             'description'  => 'nullable|string|max:1000',
             'structure'    => 'nullable|string|max:2000',
@@ -96,7 +96,7 @@ class ScriptModelController extends Controller
         $params = $request->all();
 
         ValidatorService::check($params, [
-            'id' => 'required|integer|max:999999999',
+            'id' => 'required|integer|max:1000',
         ]);
 
         $scriptModel = ScriptModel::find($params['id']);

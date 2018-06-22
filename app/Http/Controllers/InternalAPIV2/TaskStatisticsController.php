@@ -29,7 +29,7 @@ class TaskStatisticsController extends Controller
 
         //验证参数
         ValidatorService::check($params, [
-            'task_id' => 'required|integer|max:999999999',
+            'task_id' => 'required|integer|max:3000',
         ]);
 
         try {

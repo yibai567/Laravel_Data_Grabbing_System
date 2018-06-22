@@ -33,7 +33,7 @@ class TaskRunLogController extends Controller
         Log::debug('[create] 接收参数:', $params);
 
         ValidatorService::check($params, [
-            'task_id' => 'required|integer|max:999999999',
+            'task_id' => 'required|integer|max:3000',
             'end_job_at' => 'nullable|date',
             'result_count' => 'nullable|integer|max:999999999',
         ]);

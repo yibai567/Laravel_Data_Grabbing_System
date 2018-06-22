@@ -33,7 +33,7 @@ class ProjectController extends Controller
 
         //检测参数
         ValidatorService::check($params, [
-            'id' => 'required|integer|max:999999999',
+            'id' => 'required|integer|max:100',
         ]);
 
         $project = Project::find($params['id']);
@@ -61,7 +61,7 @@ class ProjectController extends Controller
 
         ValidatorService::check($params, [
             'data_id'    => 'required|integer|max:999999999',
-            'project_id' => 'required|integer|max:999999999',
+            'project_id' => 'required|integer|max:100',
         ]);
 
         //查询data数据
@@ -81,8 +81,6 @@ class ProjectController extends Controller
                 'project_id'      => $params['project_id'],
                 'task_run_log_id' => $data->task_run_log_id,
                 'title'           => $data->title,
-                'md5_title'       => $data->md5_title,
-                'md5_content'     => $data->md5_content,
                 'content'         => $data->content,
                 'detail_url'      => $data->detail_url,
                 'show_time'       => $data->show_time,
@@ -125,7 +123,7 @@ class ProjectController extends Controller
 
         ValidatorService::check($params, [
             'data_id'    => 'required|integer|max:999999999',
-            'project_id' => 'required|integer|max:999999999',
+            'project_id' => 'required|integer|max:100',
         ]);
 
         //查询data数据
@@ -145,8 +143,6 @@ class ProjectController extends Controller
                 'project_id'      => $params['project_id'],
                 'task_run_log_id' => $data->task_run_log_id,
                 'title'           => $data->title,
-                'md5_title'       => $data->md5_title,
-                'md5_content'     => $data->md5_content,
                 'content'         => $data->content,
                 'detail_url'      => $data->detail_url,
                 'show_time'       => $data->show_time,
@@ -190,7 +186,7 @@ class ProjectController extends Controller
 
         ValidatorService::check($params, [
             'data_id'    => 'required|integer|max:999999999',
-            'project_id' => 'required|integer|max:999999999',
+            'project_id' => 'required|integer|max:100',
         ]);
 
         //查询data数据
@@ -210,8 +206,6 @@ class ProjectController extends Controller
                 'project_id'      => $params['project_id'],
                 'task_run_log_id' => $data->task_run_log_id,
                 'title'           => $data->title,
-                'md5_title'       => $data->md5_title,
-                'md5_content'     => $data->md5_content,
                 'content'         => $data->content,
                 'detail_url'      => $data->detail_url,
                 'show_time'       => $data->show_time,
@@ -230,7 +224,7 @@ class ProjectController extends Controller
             $result['project_result_id'] = $projectResult->id;
             Log::debug('[v2 ProjectController liveDetail] $result = ', $result);
             if (!empty($projectResult)) {
-                //分发projectResult事件
+                //触发projectResult事件
                 event(new ProjectResultEvent($result));
             }
 

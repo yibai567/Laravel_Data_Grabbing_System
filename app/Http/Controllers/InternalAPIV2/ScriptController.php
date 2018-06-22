@@ -46,8 +46,8 @@ class ScriptController extends Controller
             'cron_type'           => 'nullable|integer|between:1,4',
             'ext'                 => 'nullable|integer|between:1,2',
             'created_by'          => 'nullable|string|max:100',
-            'next_script_id'      => 'nullable|integer|max:999999999',
-            'requirement_pool_id' => 'nullable|integer|max:999999999',
+            'next_script_id'      => 'nullable|integer|max:1000',
+            'requirement_pool_id' => 'nullable|integer|max:5000',
             'is_proxy'            => 'required|integer|between:1,2',
             'casper_config'       => 'nullable|array'
         ]);
@@ -158,8 +158,8 @@ class ScriptController extends Controller
             'cron_type'           => 'nullable|integer|between:1,4',
             'ext'                 => 'nullable|integer|between:1,2',
             'created_by'          => 'nullable|string|max:100',
-            'next_script_id'      => 'nullable|integer|max:999999999',
-            'requirement_pool_id' => 'nullable|integer|max:999999999',
+            'next_script_id'      => 'nullable|integer|max:1000',
+            'requirement_pool_id' => 'nullable|integer|max:5000',
             'is_proxy'            => 'nullable|integer|between:1,2',
             'projects'            => 'nullable|array|max:100',
             'filters'             => 'nullable|array|max:200',
@@ -227,7 +227,7 @@ class ScriptController extends Controller
 
         //检测参数
         ValidatorService::check($params, [
-            'id' => 'required|integer|max:999999999',
+            'id' => 'required|integer|max:1000',
         ]);
 
         $script = Script::find($params['id']);
@@ -264,7 +264,7 @@ class ScriptController extends Controller
 
         //验证参数
         ValidatorService::check($params, [
-            'id'        => 'required|integer|max:999999999',
+            'id'        => 'required|integer|max:1000',
             'publisher' => 'required|string|max:100'
         ]);
 
@@ -440,7 +440,11 @@ class ScriptController extends Controller
         $content = str_replace(array("\r\n", "\r", "\n"), PHP_EOL,  $content);
 
         //命名js名称
-        $filename = 'script_' . $script->id . '_' . time() . '.js';
+        if ($script->ext == Script::EXT_TYPE_JS) {
+            $filename = 'script_' . $script->id . '_' . time() . '.js';
+        } elseif ($script->ext == Script::EXT_TYPE_PHP) {
+            $filename = 'script_' . $script->id . '_' . time() . '.php';
+        }
 
         $fileService = new FileService();
         $result = $fileService->create($filename, $content);

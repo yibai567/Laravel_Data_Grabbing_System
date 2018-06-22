@@ -33,7 +33,7 @@ class TaskProjectMapController extends Controller
 
         //验证参数
         ValidatorService::check($params, [
-            'task_id' => 'required|integer|max:999999999',
+            'task_id' => 'required|integer|max:3000',
         ]);
 
         $task = Task::find($params['task_id']);
