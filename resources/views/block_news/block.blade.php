@@ -31,7 +31,7 @@
                     <div class="contents clearfix">
                         <div class="title">
                             <a href="/" data-auto-route="true">
-                            <img src="https://forum.bitcore.io/uploads/bitcore/original/1X/12024701fe4838135378269790d8492fb6849978.png" alt="Bitcore Forum" id="site-logo" class="logo-big">
+                            <img src="https://resource.jinse.com/www/v3/img/logo.svg?v=765" alt="Bitcore Forum" id="site-logo" class="logo-big">
                             </a>
                         </div>
                         <div class="panel clearfix">
@@ -189,7 +189,7 @@
                                         </td>
 
                                         <td class="category">
-                                            <a class="badge-wrapper bullet" href="/c/bitcore-wallet">
+                                            <a class="badge-wrapper bullet">
                                                 <span class="badge-category-bg" style="background-color: #0E76BD;"></span>
                                                 <span data-drop-close="true" class="badge-category clear-badge" >
                                                     <span class="category-name">{{$value['corporate_name']}}</span>
@@ -202,7 +202,7 @@
                                         </td>
 
                                         <td class="num age activity" >
-                                            <a class="post-activity" href="/t/signing-a-bws-request-from-python/1974/1">
+                                            <a class="post-activity">
                                                 <span class="relative-date" data-time="1528462617404" data-format="tiny">{{$value['show_time']}}</span>
                                             </a>
                                         </td>

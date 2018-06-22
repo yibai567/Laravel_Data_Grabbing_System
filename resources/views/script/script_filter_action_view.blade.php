@@ -25,7 +25,7 @@
 <div class="panel panel-default" >
     <div class="panel-heading">
         <strong>
-            <i class='{{CRUDBooster::getCurrentModule()->icon}}'></i>第三步过滤器、Action配置
+            <i class='{{CRUDBooster::getCurrentModule()->icon}}'></i>第三步、过滤器、Action配置
         </strong>
     </div>
     <?php
@@ -159,7 +159,6 @@
                 $(this).removeAttr('disabled');
             });
         } else {
-            alert(1);
             $('.filters_params_' + project_id + '_' + key).each(function(){
                     $(this).attr("disabled",'disabled');
             });
