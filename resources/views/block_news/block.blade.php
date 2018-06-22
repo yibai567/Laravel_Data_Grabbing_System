@@ -116,7 +116,18 @@
                                             <div class="collection-header"></div>
                                             @foreach($data['companies'] as $value)
                                             <li data-guid="ember1163" class="select-kit-row category-row">
-                                                <div class="category-status">
+                                                <tr>
+                                                    <td>
+                                                        <a href="http://{{$_SERVER['HTTP_HOST']}}/block_news?requirement_id={{$value['id']}}"><h2>{{$value['name']}}</h2></a>
+                                                    </td>
+                                                    <td>
+                                                        <span>最近24小时文章数量：{{$value['block_news_total']}}</span>
+                                                    </td>
+                                                    <td>
+                                                    <a href="{{$value['list_url']}}" target="_blank"><span>原始文章列表</span></a>
+                                                    </td>
+                                                </tr>
+                                                <!-- <div class="category-status">
                                                     <span class="badge-wrapper bullet">
                                                         <span class="badge-category-bg" style="background-color: #BD1900;"></span>
                                                         <span>
@@ -127,8 +138,9 @@
 
                                                     <span class="topic-count">{{$value['block_news_total']}}</span>
                                                     <a href="{{$value['list_url']}}" target="_blank"><span>原始文章列表</span></a>
-                                                </div>
+                                                </div> -->
                                             </li>
+                                                <hr />
                                             @endforeach
                                         </ul>
                                     </div>
@@ -277,8 +289,15 @@
         <input type="submit" id="signin-button" value="Log In">
     </form>
     <script type="text/javascript">
+        var flag=false;
         function displayDate() {
-            document.getElementById("abc").style.display="block";
+            if(flag==false){
+                document.getElementById("abc").style.display="block";
+                flag=true;
+            }else{
+                document.getElementById("abc").style.display="none";
+                flag=false;
+            }
         }
     </script>
     <script type="text/javascript">
