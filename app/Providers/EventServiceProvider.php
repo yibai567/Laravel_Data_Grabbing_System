@@ -29,6 +29,10 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\ProjectResultListener',
         ],
 
+        'App\Events\ConverterTaskEvent' => [
+            'App\Listeners\ConverterTaskListener',
+        ],
+
         // SqlListener监听QueryExecuted
         'Illuminate\Database\Events\QueryExecuted' => [
             'App\Listeners\SqlListener',

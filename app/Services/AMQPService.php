@@ -82,19 +82,19 @@ class AMQPService extends Service{
      * @return object
      */
     public static function getInstance($options) {
+        // $name = $options['name'];
+        // \Log::debug('AMQP ===== ' . $name);
+        // if (array_key_exists($name, self::$__clients)) {
+        //     return self::$__clients[$name];
+        // }
 
-        $name = $options['name'];
-        if (array_key_exists($name, self::$__clients)) {
-            return self::$__clients[$name];
-        }
+        // self::$__clients[$name] = new AMQPService($options);
+        // return self::$__clients[$name];
 
-        self::$__clients[$name] = new AMQPService($options);
-        return self::$__clients[$name];
-
+        return new AMQPService($options);
     }
 
-    public function __construct($options) {
-        \Log::debug('==========='.json_encode($options));
+    private function __construct($options) {
         $this->__options = $options;
         $this->__type = $options['type'];
         try {
@@ -420,6 +420,34 @@ class AMQPService extends Service{
         } catch (Exception $e) {
             // todo 防止php错误 暂时未知产生异常的原因
         }
+    }
+
+    /**
+     * publishFormart
+     * 创建队列
+     * @param $exchange 当前交换机
+     * @param $routingKey 当前关键词
+     * @param $message 消息内容
+     * @param $headers array 透传信息
+     */
+    public function publishFormart($message, $routingKey = '', $headers = [])
+    {
+        if (!is_array($headers)) {
+            throw new \Exception('headers is not array');
+        }
+
+        $properties = [
+            'content_type' => 'application/json',
+            'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,
+        ];
+
+        $initHeader = [];
+
+        $messageBody['header'] = array_merge($initHeader, $headers);
+        $messageBody['body'] = $message;
+
+        $this->publish(json_encode($messageBody), $routingKey);
+
     }
 
     /**

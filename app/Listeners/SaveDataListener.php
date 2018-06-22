@@ -77,7 +77,8 @@ class SaveDataListener implements ShouldQueue
                 ],
                 'type' => $type,
                 'exchange' => $project['exchange'],
-                'queue' => $project['queue']
+                'queue' => $project['queue'],
+                'name' => 'SaveDataListener'
             ];
 
             try {
@@ -86,9 +87,13 @@ class SaveDataListener implements ShouldQueue
                 $rmq->prepareQueue();
                 $rmq->queueBind();
                 foreach ($data['data'] as $value) {
-                    $rmq->publish(json_encode($value), $project['queue']);
+                    $params = [
+                        'data_id' => $value['id'],
+                        'project_id' => $project['id'],
+                    ];
+                    $rmq->publishFormart($params, $project['queue']);
                 }
-                // $rmq->close();
+                $rmq->close();
             } catch (\Exception $e) {
                 Log::error('[SaveDataListener handle error]:'."\t".$e->getCode()."\t".$e->getMessage());
             }

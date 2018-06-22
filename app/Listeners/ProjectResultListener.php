@@ -54,7 +54,7 @@ class ProjectResultListener implements ShouldQueue
             // TODO 过滤器队列
         }
 
-        $taskActionMap = TaskActionMap::select('action_id', 'params')
+        $taskActionMap = TaskActionMap::select('id', 'action_id')
                     ->where('task_id', $projectResult['task_id'])
                     ->where('project_id', $projectResult['project_id'])
                     ->get()
@@ -65,7 +65,9 @@ class ProjectResultListener implements ShouldQueue
         }
 
         $actionIds = array_pluck($taskActionMap, 'action_id');
+        $taskActionMapIds = array_pluck($taskActionMap, 'id', 'action_id');
         $actions = Action::whereIn('id', $actionIds)->get()->toArray();
+
         foreach ($actions as $action) {
             $type = '';
             switch ($action['exchange_type']) {
@@ -93,18 +95,24 @@ class ProjectResultListener implements ShouldQueue
                 ],
                 'type' => $type,
                 'exchange' => $action['exchange'],
-                'queue' => $action['queue']
+                'queue' => $action['queue'],
+                'name' => 'ProjectResultListener_' . rand(100000, 999999)
             ];
-            Log::debug('rmq ==== ' . json_encode($option));
             try {
-                // TODO ???????
-                $rmq = new AMQPService($option);
-            Log::debug('rmq2 ==== ' . json_encode($rmq));
+                $task_action_map_id = '';
+                if (isset($taskActionMapIds[$action['id']])) {
+                    $task_action_map_id = $taskActionMapIds[$action['id']];
+                }
+                $rmq = AMQPService::getInstance($option);
                 $rmq->prepareExchange();
                 $rmq->prepareQueue();
                 $rmq->queueBind();
-                $rmq->publish(json_encode($data), $action['queue']);
-            Log::debug('rmq3 ==== ' . json_encode($rmq));
+                $params = [
+                    'project_result_id' => $data['project_result_id'],
+                    'task_action_map_id' => $task_action_map_id,
+                ];
+                $rmq->publishFormart($params, $project['queue']);
+                $rmq->close();
             } catch (\Exception $e) {
                 Log::error('[ProjectResultListener handle error]:'."\t".$e->getCode()."\t".$e->getMessage());
             }

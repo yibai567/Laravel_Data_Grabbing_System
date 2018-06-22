@@ -76,15 +76,15 @@ class RMQCustomerConsole extends Command
                 ],
                 'type' => $exchangeType,
                 'exchange' => $customer['exchange'],
-                'queue' => $customer['queue']
+                'queue' => $customer['queue'],
+                'name' => 'RMQCustomerConsole_' . $type . '_' . $id
             ];
             $rmq = AMQPService::getInstance($option);
             $rmq->prepareExchange();
             $rmq->prepareQueue();
             $rmq->queueBind();
-            $rmq->consume($customer['queue'], $this->callback($customer['customer_path'], $type, $id));
+            $rmq->consume($customer['queue'], $this->callback($customer['customer_path']));
         } catch (Exception $e) {
-            Log::debug('11');
             throw $e;
         }
     }
@@ -99,14 +99,12 @@ class RMQCustomerConsole extends Command
                     }
                     break;
                 case 'filter' :
-                    // $type = 'fanout';
                     break;
                 case 'action' :
                     $customer = Action::find($id);
                     if (!empty($customer)) {
                         $customer->toArray();
                     }
-                    // $type = 'route';
                     break;
                 default:
                     break;
@@ -114,38 +112,14 @@ class RMQCustomerConsole extends Command
         return $customer;
     }
 
-    private function callback($customerPath, $type, $id)
+    private function callback($customerPath)
     {
-        return function($msg) use ($customerPath, $type, $id) {
+        return function($msg) use ($customerPath) {
             $message = json_decode($msg->body, true);
-            switch ($type) {
-                case 'project' :
-                    $params = [
-                        'data_id' => $message['id'],
-                        'project_id' => $id,
-                    ];
-                    $result = InternalAPIV2Service::post($customerPath, $params);
-                    if ($result) {
-                        $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-                    }
-                    break;
-                case 'filter' :
-
-                    break;
-                case 'action' :
-                    $params = [
-                        'project_result_id' => $message['project_result_id'],
-                        'action_id' => $id,
-                    ];
-                    $result = InternalAPIV2Service::post($customerPath, $params);
-                    if ($result) {
-                        $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-                    }
-                    break;
-                default:
-                    break;
+            $result = InternalAPIV2Service::post($customerPath, $message['body']);
+            if ($result) {
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
             }
-
         };
     }
 }
