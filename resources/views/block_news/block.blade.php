@@ -18,6 +18,10 @@
         src: url('https://discourse-cdn-sjc2.com/standard16/assets/fontawesome-webfont-2adefcbc041e7d18fcf2d417879dc5a09997aa64d675b7a3c4b6ce33da13f3fe.woff2') format('woff2'),
              url('https://discourse-cdn-sjc2.com/standard16/assets/fontawesome-webfont-ba0c59deb5450f5cb41b3f93609ee2d0d995415877ddfa223e8a8a7533474f07.woff') format('woff');
       }
+      .select-kit-body {
+        position:absolute;
+        z-index:1000;
+      }
     </style>
 </head>
 
@@ -26,7 +30,7 @@
         <div id="ember693" class="ember-view">
             <span id="ember727" class="ember-view"></span>
             <div id="ember740" class="ember-view">
-            <header class="d-header clearfix">
+            <header class="d-header clearfix" style="background-color:#fff">
                 <div class="wrap">
                     <div class="contents clearfix">
                         <div class="title">
@@ -95,7 +99,7 @@
                         <section id="ember774" class="navigation-container ember-view">
                             <ol id="ember788" class="category-breadcrumb ember-view">
                                 <li id="ember813" class="select-kit single-select combobox combo-box category-drop is-below is-left-aligned has-reached-minimum bullet ember-view">
-                                    <div title="null" aria-haspopup="" aria-label="null" tabindex="0" id="ember826" class="select-kit-header combo-box-header category-drop-header is-none ember-view">
+                                    <div aria-haspopup="" tabindex="0" class="select-kit-header combo-box-header category-drop-header is-none ember-view">
                                         <span class="selected-name">
                                         <span class="category-name" onclick="displayDate()">all companies</span>
                                         </span>
@@ -111,14 +115,16 @@
                                         <ul id="ul" class="select-kit-collection ember-view">
                                             <div class="collection-header"></div>
                                             @foreach($data['companies'] as $value)
-                                            <li data-guid="ember1163" class="select-kit-row category-row is-highlighted ember-view">
+                                            <li data-guid="ember1163" class="select-kit-row category-row">
                                                 <div class="category-status">
                                                     <span class="badge-wrapper bullet">
                                                         <span class="badge-category-bg" style="background-color: #BD1900;"></span>
-                                                        <span data-drop-close="true" class="badge-category clear-badge" title="Ask questions, give feedback, and discuss all things Bitcore.">
-                                                            <span class="category-name"><a href="http://{{$_SERVER['HTTP_HOST']}}/block_news?requirement_id={{$value['id']}}">{{$value['name']}}</a></span>
+                                                        <span>
+                                                            <a href="http://{{$_SERVER['HTTP_HOST']}}/block_news?requirement_id={{$value['id']}}">{{$value['name']}}</a>
                                                         </span>
+
                                                     </span>
+
                                                     <span class="topic-count">{{$value['block_news_total']}}</span>
                                                     <a href="{{$value['list_url']}}" target="_blank"><span>原始文章列表</span></a>
                                                 </div>
@@ -135,16 +141,16 @@
                             <ul id="navigation-bar" class="nav nav-pills ember-view">
                                 <li class="active ember-view">
                                     @if(!empty($data['requirement_id']))
-                                    <a href="http://{{$_SERVER['HTTP_HOST']}}/block_news?requirement_id={{$data['requirement_id']}}&offset={{$data['offset']}}&limit={{$data['limit']}}&order=show_time&sort=asc">Asc</a>
+                                    <a href="http://{{$_SERVER['HTTP_HOST']}}/block_news?requirement_id={{$data['requirement_id']}}&offset={{$data['offset']}}&limit={{$data['limit']}}&order=show_time&sort=asc">按发布时间升序</a>
                                     @else
-                                    <a href="http://{{$_SERVER['HTTP_HOST']}}/block_news?offset={{$data['offset']}}&limit={{$data['limit']}}&order=show_time&sort=asc">Asc</a>
+                                    <a href="http://{{$_SERVER['HTTP_HOST']}}/block_news?offset={{$data['offset']}}&limit={{$data['limit']}}&order=show_time&sort=asc">按发布时间升序</a>
                                     @endif
                                 </li>
                                 <li class="active ember-view">
                                     @if(!empty($data['requirement_id']))
-                                    <a href="http://{{$_SERVER['HTTP_HOST']}}/block_news?requirement_id={{$data['requirement_id']}}&offset={{$data['offset']}}&limit={{$data['limit']}}&order=show_time&sort=desc">Desc</a>
+                                    <a href="http://{{$_SERVER['HTTP_HOST']}}/block_news?requirement_id={{$data['requirement_id']}}&offset={{$data['offset']}}&limit={{$data['limit']}}&order=show_time&sort=desc">按发布时间降序</a>
                                     @else
-                                    <a href="http://{{$_SERVER['HTTP_HOST']}}/block_news?offset={{$data['offset']}}&limit={{$data['limit']}}&order=show_time&sort=desc">Desc</a>
+                                    <a href="http://{{$_SERVER['HTTP_HOST']}}/block_news?offset={{$data['offset']}}&limit={{$data['limit']}}&order=show_time&sort=desc">按发布时间降序</a>
                                     @endif
                                 </li>
                                 <li id="ember861" class="ember-view"></li>
