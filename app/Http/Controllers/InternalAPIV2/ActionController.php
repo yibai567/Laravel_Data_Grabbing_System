@@ -10,8 +10,10 @@
 namespace App\Http\Controllers\InternalAPIV2;
 
 use App\Models\V2\ProjectResult;
+use App\Models\V2\Task;
 use App\Models\V2\TaskActionMap;
 use App\Models\V2\TaskRunLog;
+use App\Services\AMQPService;
 use App\Services\InternalAPIV2Service;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
@@ -37,7 +39,8 @@ class ActionController extends Controller
         $projectResult = ProjectResult::find($params['project_result_id']);
 
         if (empty($projectResult)) {
-            throw new \Dingo\Api\Exception\ResourceException('$projectResult is not found');
+            Log::debug('[InternalAPIv2 ActionController reportResult] $projectResult is not found,project_result_id = ' . $params['project_result_id'] );
+            return $this->resObjectGet(false, 'report_result', $request->path());
         }
 
         $projectResult = $projectResult->toArray();
@@ -88,12 +91,10 @@ class ActionController extends Controller
                 $result = InternalAPIV2Service::post('/item/result/report', $reportData);
             } catch (\Exception $e) {
                 Log::debug('[InternalAPIV2 ActionController reportResult] error message = ' . $e->getMessage());
-
-                Log::debug('[InternalAPIV2 ActionController reportResult] data report failed');
             }
         }
 
-        return $this->resObjectGet($result, 'action', $request->path());
+        return $this->resObjectGet($result, 'report_result', $request->path());
     }
 
     /**
@@ -116,7 +117,8 @@ class ActionController extends Controller
         $projectResult = ProjectResult::find($params['project_result_id']);
 
         if (empty($projectResult)) {
-            throw new \Dingo\Api\Exception\ResourceException('$projectResult is not found');
+            Log::debug('[InternalAPIv2 ActionController converterTask] $projectResult is not found,project_result_id = ' . $params['project_result_id'] );
+            return $this->resObjectGet(false, 'converter_task', $request->path());
         }
 
         //查询task_action_map信息
@@ -126,16 +128,84 @@ class ActionController extends Controller
                                       ->first();
 
         if (empty($taskActionMap)) {
-            throw new \Dingo\Api\Exception\ResourceException('$taskActionMap is not found');
+            Log::debug('[InternalAPIv2 ActionController converterTask] $taskActionMap is not found,task_id = ' . $projectResult->task_id . ',project_id = ' . $projectResult->project_id . ',action_id = ' . $params['action_id']);
+            return $this->resObjectGet(false, 'converter_task', $request->path());
         }
 
-        $scriptId = $taskActionMap->script_id;
+        $actionParams = $taskActionMap->params;
 
+        $task_id = $actionParams['task_id'];
+
+        if (empty($task_id)) {
+            Log::debug('[InternalAPIv2 ActionController converterTask] the task_id in task_action_map params is not found');
+            return $this->resObjectGet(false, 'converter_task', $request->path());
+        }
+
+        //查询task信息
+        $task = Task::find($task_id);
+
+        if (empty($task)) {
+            Log::debug('[InternalAPIv2 ActionController converterTask] $task is not found,task_id = ' . $task_id );
+            return $this->resObjectGet(false, 'converter_task', $request->path());
+        }
+
+        $script_path = $task->script_path;
+
+        //建立task_run_log数据
+        $taskRunLog = InternalAPIV2Service::post('/task_run_log', ['task_id' => $task_id]);
+
+        if (empty($taskRunLog)) {
+            Log::debug('[InternalAPIv2 ActionController converterTask] $taskRunLog create is failed,task_id = ' . $task_id );
+            return $this->resObjectGet(false, 'converter_task', $request->path());
+        }
         $detail_url = $projectResult->detail_url;
 
+        if (empty($detail_url)) {
+            Log::debug('[InternalAPIv2 ActionController converterTask] the detail_url in project_result is empty,project_result_id = ' . $params['project_result_id']);
+            return $this->resObjectGet(false, 'converter_task', $request->path());
+        }
+
+        switch ($task->data_type) {
+            case Task::DATA_TYPE_CASPERJS:
+                $routingKey = 'casperjs';
+                break;
+
+            case Task::DATA_TYPE_HTML:
+                $routingKey = 'node';
+                break;
+
+            case Task::DATA_TYPE_API:
+                $routingKey = 'node';
+                break;
+
+            default:
+                $routingKey = '';
+                break;
+        }
+
+        $message = [
+            'path'            => $script_path,
+            'task_run_log_id' => $taskRunLog['id'],
+            'url'             => $detail_url
+        ];
+
         //TODO 调用队列
+        $option = [
+            'server'   => [
+                'vhost' => 'test',
+            ],
+            'type'     => 1,
+            'exchange' => 'instant_task',
+            'queue'    => $routingKey
+        ];
 
+        $rmq = new AMQPService($option);
+        $rmq->prepareExchange();
+        $rmq->prepareQueue();
+        $rmq->queueBind();
+        $rmq->publish(json_encode($message), $routingKey);
+        $rmq->close();
 
-        return $this->resObjectGet(true, 'action', $request->path());
+        return $this->resObjectGet(true, 'converter_task', $request->path());
     }
 }

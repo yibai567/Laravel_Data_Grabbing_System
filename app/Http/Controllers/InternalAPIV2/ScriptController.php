@@ -286,7 +286,7 @@ class ScriptController extends Controller
             //调用task创建接口
             $postTaskData = [];
             $postTaskData['script_id'] = $script->id;
-            $postTaskData['script_path'] = '/public/vendor/script/' . $filename;
+            $postTaskData['script_path'] = $filename;
             $postTaskData['publisher'] = $params['publisher'];
             $result = InternalAPIV2Service::post('/task', $postTaskData);
 
@@ -297,7 +297,10 @@ class ScriptController extends Controller
             InternalAPIV2Service::post('/task/project_map', $postTaskProjectMapData);
 
             $postTaskData['id'] = $result['id'];
-            InternalAPIV2Service::post('/task/start', $postTaskData);
+
+            if ($script->cron_type !== Script::CRON_TYPE_ONCE) {
+                InternalAPIV2Service::post('/task/start', $postTaskData);
+            }
 
             //生成task_statistics
             $taskStatistics = new TaskStatistics;

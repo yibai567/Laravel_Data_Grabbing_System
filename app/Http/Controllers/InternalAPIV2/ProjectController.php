@@ -68,7 +68,8 @@ class ProjectController extends Controller
         $data = Data::find($params['data_id']);
 
         if (empty($data)) {
-            throw new \Dingo\Api\Exception\ResourceException('$data is not found');
+            Log::debug('[InternalAPIv2 ProjectController liveList] $data is not found,data_id = ' . $params['data_id']);
+            return $this->resObjectGet(false, 'live_list', $request->path());
         }
 
         try {
@@ -98,7 +99,7 @@ class ProjectController extends Controller
             $projectResult = ProjectResult::create($newData);
 
             $result['project_result_id'] = $projectResult->id;
-            Log::debug('[InternalAPIv2 ProjectController liveDetail] $result = ', $result);
+            Log::debug('[InternalAPIv2 ProjectController liveList] $result = ', $result);
             if (!empty($projectResult)) {
                 //分发projectResult事件
                 event(new ProjectResultEvent($result));
@@ -131,7 +132,8 @@ class ProjectController extends Controller
         $data = Data::find($params['data_id']);
 
         if (empty($data)) {
-            throw new \Dingo\Api\Exception\ResourceException('$data is not found');
+            Log::debug('[InternalAPIv2 ProjectController liveList] $data is not found,data_id = ' . $params['data_id']);
+            return $this->resObjectGet(false, 'live_detail', $request->path());
         }
 
         try {
@@ -195,7 +197,8 @@ class ProjectController extends Controller
         $data = Data::find($params['data_id']);
 
         if (empty($data)) {
-            throw new \Dingo\Api\Exception\ResourceException('$data is not found');
+            Log::debug('[InternalAPIv2 ProjectController liveList] $data is not found,data_id = ' . $params['data_id']);
+            return $this->resObjectGet(false, 'live_detail', $request->path());
         }
 
         try {
