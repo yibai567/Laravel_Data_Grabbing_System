@@ -55,7 +55,7 @@ class CreateScriptQueueConsole extends Command
             $cron = $this->__getCron($value['cron_type'], $value['script_id']);
             $queueName = 'script_queue_' . $driver . '_' . $cron;
             $queueList[$queueName][] = [
-                'path' => 'script_' . $value['script_id'] . '.js',
+                'path' => $value['script_path'],
                 'task_id' => $value['id'],
             ];
         }
@@ -89,7 +89,7 @@ class CreateScriptQueueConsole extends Command
     private function __getScriptList()
     {
         $data = [];
-        Task::select(['id', 'data_type', 'cron_type', 'script_id'])
+        Task::select(['id', 'data_type', 'cron_type', 'script_id', 'script_path'])
                 ->where('status', Task::STATUS_START)
                 ->chunk(500, function ($script) use(&$data) {
                     if ($script) {
