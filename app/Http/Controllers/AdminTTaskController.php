@@ -57,7 +57,7 @@
                     return '每五分钟执行';
                 } else if ($row->cron_type == Task::CRON_TYPE_EVERY_TEN_MINUTES) {
                     return '每十五分钟执行';
-                } else {
+                } else if ($row->cron_type == Task::CRON_TYPE_KEEP_ONCE){
                     return '只执行一次';
                 }
             }];

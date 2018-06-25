@@ -18,6 +18,7 @@ class Task extends Model
     const CRON_TYPE_KEEP = 1;
     const CRON_TYPE_EVERY_FIVE_MINUTES = 2;
     const CRON_TYPE_EVERY_TEN_MINUTES = 3;
+    const CRON_TYPE_KEEP_ONCE = 4;
 
     //任务状态 1、初始化，2、启动
 
