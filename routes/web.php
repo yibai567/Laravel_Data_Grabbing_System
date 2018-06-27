@@ -16,6 +16,12 @@ Route::get('/', function () {
 });
 Route::get('/block_news', 'WWW\BlockNewsController@index');
 Route::get('/ajax_block_news', 'WWW\BlockNewsController@ajaxList');
+
+Route::get('/wx_message', 'WWW\WxMessageController@index');
+Route::get('/ajax_wx_message', 'WWW\WxMessageController@ajaxWxMessageList');
+Route::get('/ajax_update_group_status', 'WWW\WxMessageController@ajaxUpdateGroupStatus');
+Route::get('/ajax_update_status', 'WWW\WxMessageController@ajaxUpdateStatus');
+
 Auth::routes();
 Route::get('/home', 'HomeController@index');
 Route::get('/logout', function(){

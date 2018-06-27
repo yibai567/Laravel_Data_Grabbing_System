@@ -81,5 +81,11 @@ $api->version(
 
         $api->post('/image/upload', 'ImageController@upload');
 
+        //微信消息
+        $api->post('/wx/message','WxMessageController@create');
+        $api->post('/wx/message/group/status','WxMessageController@updateGroupStatus');
+        $api->get('/wx/message/group','WxMessageController@allGroup');
+        $api->post('/wx/message/status','WxMessageController@updateStatus');
+        $api->get('/wx/message','WxMessageController@all');
     }
 );
