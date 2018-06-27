@@ -123,7 +123,7 @@
             if(room_name == '') {
                 room_name = '暂无数据'
             }
-            desc = '当前组ID：'+id+'&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'+'当前时间段：'+d.data.group_wx_message.times+'&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'+'当前微信群名称：'+room_name+'&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (注：全按钮显示当前已处理未处理数据，隐藏按钮：隐藏当前该数据)';
+            desc = '当前组ID：'+id+'&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'+'当前时间段：'+d.data.group_wx_message.times+'&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp'+'当前微信群名称：'+room_name+'&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <br><br>(<span style="color:red;">注</span>：点击"全部"按钮显示当前组内全部信息; 点击"隐藏"按钮隐藏当前信息)';
             $('#p').html(desc);
             $('#p1').html('<div class="floating ui red label" onclick="getWxMessage('+id+',0)">全部</div>');
         })
@@ -165,8 +165,6 @@
         })
     }
     var last_group_id = {{$data['data'][0]['id']}}
-        // if (last_group_id != 'undefined') {
-            getWxMessage(last_group_id, 1)
-        // }
+        getWxMessage(last_group_id, 1)
 </script>
 </html>
