@@ -81,5 +81,9 @@ $api->version(
 
         $api->post('/image/upload', 'ImageController@upload');
 
+        $api->post('/history_topics','HistoryTopicController@create');
+        $api->post('/history_topic/update','HistoryTopicController@update');
+        $api->get('/history_topics/company_id','HistoryTopicController@listByCompanyId');
+
     }
 );

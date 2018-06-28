@@ -192,5 +192,8 @@ $api->version(
         $api->get('/quirement', 'QuirementPoolController@retrieve');
         $api->post('/quirement/update_status','QuirementPoolController@updateStatus');
 
+        $api->post('/history_topics','HistoryTopicController@create');
+        $api->post('/history_topic/update','HistoryTopicController@update');
+        $api->get('/history_topics/company_id','HistoryTopicController@listByCompanyId');
     }
 );
