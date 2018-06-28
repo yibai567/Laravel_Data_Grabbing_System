@@ -30,6 +30,7 @@ class HistoryTopic extends Model
         'read_count',
         'comment_count',
         'detail_url',
+        'md5_url',
         'create_time',
         'status',
     ];

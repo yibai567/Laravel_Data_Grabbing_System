@@ -195,5 +195,6 @@ $api->version(
         $api->post('/history_topics','HistoryTopicController@create');
         $api->post('/history_topic/update','HistoryTopicController@update');
         $api->get('/history_topics/company_id','HistoryTopicController@listByCompanyId');
+        $api->post('/history_topics/crawl/company_id','HistoryTopicController@crawlDataByCompanyId');
     }
 );

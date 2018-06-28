@@ -43,7 +43,9 @@ class HistoryTopicController extends Controller
                 'detail_url' => 'required|string|max:1000',
             ]);
 
-            $historyTopic = HistoryTopic::where('detail_url', $data['detail_url'])->first();
+            $md5Url = md5($data['detail_url']);
+
+            $historyTopic = HistoryTopic::where('md5_url', $md5Url)->first();
 
             if (!empty($historyTopic)) {
                 continue;
@@ -55,6 +57,7 @@ class HistoryTopicController extends Controller
                 'company_id'  => $params['company_id'],
                 'title'       => $data['title'],
                 'detail_url'  => $data['detail_url'],
+                'md5_url'     => $md5Url,
                 'create_time' => time(),
                 'status'      => HistoryTopic::STATUS_INIT,
             ];
@@ -92,8 +95,9 @@ class HistoryTopicController extends Controller
 
         $params['show_time'] = $this->__formatShowTime($params['show_time']);
 
-        $historyTopic = HistoryTopic::where('detail_url', $params['detail_url'])
-                                    ->first();
+        $params['md5_url'] = md5($params['detail_url']);
+
+        $historyTopic = HistoryTopic::where('md5_url', $params['md5_url'])->first();
 
         if (empty($historyTopic)) {
             $historyTopic = new HistoryTopic();
@@ -172,6 +176,34 @@ class HistoryTopicController extends Controller
         }
 
         return $this->resObjectGet($result, 'history_topic', $request->path());
+    }
+
+    /**
+     * crawlDataByCompanyId
+     * 根据company_id爬取网站详情
+     *
+     * @param
+     * @return boolean
+     */
+    public function crawlDataByCompanyId(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'company_id' => 'required|integer|max:1000',
+            'category'   => 'nullable|string|max:50',
+        ]);
+
+//        $historyTopics = InternalAPIV2Service::get('/history_topics/company_id',$params);
+
+//        foreach ($historyTopics as $historyTopic) {
+//            $ql = QueryList::getInstance();
+//           $ql->use(PhantomJs::class);
+//        $html = $ql->browser('https://m.toutiao.com')->getHtml();
+//            dd($html);
+//        }
+
+//        return $this->resObjectGet($result, 'history_topic', $request->path());
     }
 
     /**
