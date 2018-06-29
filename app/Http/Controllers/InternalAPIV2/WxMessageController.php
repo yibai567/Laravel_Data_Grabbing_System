@@ -382,7 +382,7 @@ class WxMessageController extends Controller
         if (!empty($wxMessage->id)) {
             $res->where('id', '<', $wxMessage->id);
         }
-        $res->orderBy('created_at', 'desc');
+        $res->orderBy('created_at', 'asc');
         $wxMessageInfo = $res->get();
         $result = [];
         if (!empty($wxMessageInfo)) {

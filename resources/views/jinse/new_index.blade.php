@@ -31,7 +31,7 @@
     @endguest
 </div>
 <div class="ui top attached tabular menu">
-    <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/index" class="item active" >全部</a>
+    <a href="#" class="item active" >全部</a>
     <!-- @if(empty($data['status']))
         <a href="http://{{$_SERVER['HTTP_HOST']}}/wx_message" class="item active" >全部</a>
     @else
