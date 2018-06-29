@@ -17,6 +17,7 @@ class HistoryTopic extends Model
     const STATUS_INIT = 1;     //未抓取
     const STATUS_RUN = 2;     //正在抓取
     const STATUS_FINISH = 3; //抓取完成
+    const STATUS_NEW = 4; //抓取完成
 
     protected $fillable = [
         'category',
