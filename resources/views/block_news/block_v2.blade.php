@@ -64,11 +64,11 @@
 
                     <div class="ui grid">
                         <div class="six wide column">{{$newsValue['show_time']}}</div>
-                        <div class="four wide column">{{$value['company_name']}}</div>
+                        <!-- <div class="four wide column">{{$value['company_name']}}</div> -->
                         @if(empty($newsValue['read_count']))
-                        <div class="four wide column">无</div>
+                        <div class="four wide column"><i class="unhide icon"></i> 无</div>
                         @else
-                        <div class="four wide column">{{$newsValue['read_count']}}</div>
+                        <div class="six wide column"><i class="unhide icon"></i> {{$newsValue['read_count']}}</div>
                         @endif
                     </div>
                     </div>
