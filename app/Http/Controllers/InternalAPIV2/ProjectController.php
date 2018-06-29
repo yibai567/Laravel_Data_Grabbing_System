@@ -98,10 +98,9 @@ class ProjectController extends Controller
 
             $result['project_result_id'] = $projectResult->id;
             Log::debug('[InternalAPIv2 ProjectController liveList] $result = ', $result);
-            if (!empty($projectResult)) {
-                //分发projectResult事件
-                event(new ProjectResultEvent($result));
-            }
+
+            //分发projectResult事件
+            event(new ProjectResultEvent($result));
         } catch (\Exception $e) {
             Log::debug('[InternalAPIv2 ProjectController live_list] error message = ' . $e->getMessage());
         }
@@ -160,10 +159,8 @@ class ProjectController extends Controller
 
             $result['project_result_id'] = $projectResult->id;
 
-            if (!empty($projectResult)) {
-                //分发projectResult事件
-                event(new ProjectResultEvent($result));
-            }
+            //分发projectResult事件
+            event(new ProjectResultEvent($result));
 
         } catch (\Exception $e) {
             Log::debug('[InternalAPIv2 ProjectController liveDetail] error message = ' . $e->getMessage());
@@ -180,7 +177,7 @@ class ProjectController extends Controller
      * @param
      * @return boolean
      */
-    public function blockNew(Request $request)
+    public function blockNews(Request $request)
     {
         $params = $request->all();
 
@@ -193,8 +190,8 @@ class ProjectController extends Controller
         $data = Data::find($params['data_id']);
 
         if (empty($data)) {
-            Log::debug('[InternalAPIv2 ProjectController liveList] $data is not found,data_id = ' . $params['data_id']);
-            return $this->resObjectGet(false, 'live_detail', $request->path());
+            Log::debug('[InternalAPIv2 ProjectController blockNews] $data is not found,data_id = ' . $params['data_id']);
+            return $this->resObjectGet(false, 'block_news', $request->path());
         }
 
         try {
@@ -222,14 +219,13 @@ class ProjectController extends Controller
             $projectResult = ProjectResult::create($newData);
 
             $result['project_result_id'] = $projectResult->id;
-            Log::debug('[v2 ProjectController liveDetail] $result = ', $result);
-            if (!empty($projectResult)) {
-                //触发projectResult事件
-                event(new ProjectResultEvent($result));
-            }
+            Log::debug('[v2 ProjectController blockNews] $result = ', $result);
+
+            //触发projectResult事件
+            event(new ProjectResultEvent($result));
 
         } catch (\Exception $e) {
-            Log::debug('[v2 ProjectController liveDetail] error message = ' . $e->getMessage());
+            Log::debug('[v2 ProjectController blockNews] error message = ' . $e->getMessage());
         }
 
 
