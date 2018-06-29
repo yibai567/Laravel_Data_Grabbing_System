@@ -50,7 +50,7 @@
     <div class="card">
         <div class="content">
             @if ($value['status'] == 1)
-                <a class="ui orange right ribbon label">暂不抓取</a>
+                <a class="ui orange right ribbon label">开发中</a>
             @endif
             <div class="header">{{$value['company_name']}}</div>
         </div>
@@ -59,16 +59,19 @@
             @if (!empty($value['news']))
                 @foreach($value['news'] as $newsValue)
                   <div class="item listitem">
-                      <p>{{$newsValue['title']}}</p>
-                      <div class="meta">
-                        <span class="price">{{date('m-d H:i', strtotime($newsValue['show_time']))}}</span>
-                        <span class="price">来源: {{$value['company_name']}}</span>
+                    <p><a href="{{$newsValue['detail_url']}}" target="_bank" style="letter-spacing: 0.08em;color: #000;">{{$newsValue['title']}}</a></p>
+                    <div class="meta" style="color: #1567a5;font-size: 0.8em;">
+
+                    <div class="ui grid">
+                        <div class="six wide column">{{$newsValue['show_time']}}</div>
+                        <div class="four wide column">{{$value['company_name']}}</div>
                         @if(empty($newsValue['read_count']))
-                        <span class="price">view: 无</span>
+                        <div class="four wide column">无</div>
                         @else
-                        <span class="price">view: {{$newsValue['read_count']}}</span>
+                        <div class="four wide column">{{$newsValue['read_count']}}</div>
                         @endif
-                      </div>
+                    </div>
+                    </div>
                   </div>
                 @endforeach
             @else
