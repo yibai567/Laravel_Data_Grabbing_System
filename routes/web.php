@@ -11,38 +11,28 @@ use App\AMQP;
 |
 */
 
-Route::get('/', function () {
-    return response('', 404);
-});
-Route::get('/block_news', 'WWW\BlockNewsController@index');
-Route::get('/ajax_block_news', 'WWW\BlockNewsController@ajaxList');
-
-Route::get('/wx_message', 'WWW\WxMessageController@index');
-Route::get('/ajax_wx_message', 'WWW\WxMessageController@ajaxWxMessageList');
-Route::get('/ajax_update_group_status', 'WWW\WxMessageController@ajaxUpdateGroupStatus');
-Route::get('/ajax_update_status', 'WWW\WxMessageController@ajaxUpdateStatus');
-
 Auth::routes();
-Route::get('/home', 'HomeController@index');
+Route::group(
+    ['middleware' => 'auth'],
+    function () {
+        Route::get('/wx/room/message/old', 'WWW\WxMessageController@index');
+        Route::get('/ajax/wx/message', 'WWW\WxMessageController@ajaxWxMessageList');
+        Route::get('/ajax/update/group/status', 'WWW\WxMessageController@ajaxUpdateGroupStatus');
+        Route::get('/ajax/update/status', 'WWW\WxMessageController@ajaxUpdateStatus');
+
+        Route::get('/', 'WWW\WxMessageController@newIndex');
+        Route::get('/wx/room/message', 'WWW\WxMessageController@newIndex');
+        Route::get('/wx/ajax/room/message/{id}', 'WWW\WxMessageController@ajaxMessageList');
+
+        Route::get('/news', 'WWW\BlockNewsController@all');
+        Route::get('/block_news', 'WWW\BlockNewsController@index');
+        Route::get('/ajax_block_news', 'WWW\BlockNewsController@ajaxList');
+
+        Route::get('/home', 'WWW\HomeController@index');
+    }
+);
 Route::get('/logout', function(){
     Auth::logout();
     return redirect('/login');
 });
 
-Route::get('test', function() {
-    $option = [
-        'server' => [
-            'host' => config('rabbitmq.host'),
-            'port' => config('rabbitmq.port'),
-            'login' => config('rabbitmq.login'),
-            'password' => config('rabbitmq.password'),
-            'vhost' => 'test',
-            // 'vhost' => config('rabbitmq.vhost'),
-        ],
-        'type' => 'workqueue',
-        'exchange' => 'error',
-        'queue' =>'error'
-    ];
-    $a = AMQP::get_instance($option);
-    $a->publish('asdasd','error');
-});

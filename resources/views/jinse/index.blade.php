@@ -2,7 +2,7 @@
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="{{ asset('css/semantic.min.css')}}">
-<script src="http://www.semantic-ui.cn/javascript/library/jquery.min.js"></script>
+<script src="http://{{$_SERVER['HTTP_HOST']}}/vendor/crudbooster/assets/adminlte/plugins/jQuery/jQuery-2.1.4.min.js"></script>
 <script src="{{ asset('js/semantic.min.js')}}"></script>
 </head>
 <body>
@@ -10,14 +10,19 @@
 <div class="ui menu">
   <div class="header item">Jinse Crawl</div>
     @if($data['nav_status'] == 'block_news')
-        <a href="#" class="item active" >行业最新新闻</a>
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/news" class="item active" >行业最新新闻</a>
     @else
-        <a href="#" class="item" >行业最新新闻</a>
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/news" class="item" >行业最新新闻</a>
     @endif
     @if($data['nav_status'] == 'wx_message')
-        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx_message" class="item active" >相对论信息</a>
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/old" class="item active" >相对论信息</a>
     @else
-        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx_message" class="item" >相对论信息</a>
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/old" class="item" >相对论信息</a>
+    @endif
+    @if($data['nav_status'] == 'new_wx_message')
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message" class="item active" >新版相对论信息</a>
+    @else
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message" class="item" >新版相对论信息</a>
     @endif
     @guest
     <a class="ui item right" href="http://{{$_SERVER['HTTP_HOST']}}/login">登陆</a>
@@ -97,7 +102,7 @@
 
         $.ajax({
             type: "get",
-            url: "http://{{$_SERVER['HTTP_HOST']}}/ajax_wx_message?group_wx_message_id="+id+ "&status="+status,
+            url: "http://{{$_SERVER['HTTP_HOST']}}/ajax/wx/message?group_wx_message_id="+id+ "&status="+status,
             data : "",
             crossDomain: true,
             xhrFields: {

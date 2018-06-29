@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>区块链新闻</title>
 
-    <link href="https://discourse-cdn-sjc2.com/standard16/stylesheets/desktop_16_6c8093c5bb903f69ebcf5aed633608cd3f0c96ca.css" media="all" rel="stylesheet" data-target="desktop">
+    <link href="{{ asset('css/block_news.v1.css')}}" media="all" rel="stylesheet" data-target="desktop">
 
-    <link href="https://discourse-cdn-sjc2.com/standard16/stylesheets/desktop_theme_3_604a96563eaf09114496cb2dc5858e4aa9d461f1.css" media="all" rel="stylesheet" data-target="desktop_theme">
+    <link href="{{ asset('css/block_news.v2.css')}}" media="all" rel="stylesheet" data-target="desktop_theme">
 
     <link rel="preload" href="https://discourse-cdn-sjc2.com/standard16/assets/fontawesome-webfont-2adefcbc041e7d18fcf2d417879dc5a09997aa64d675b7a3c4b6ce33da13f3fe.woff2" as="font" type="font/woff2" crossorigin="">
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="http://{{$_SERVER['HTTP_HOST']}}/vendor/crudbooster/assets/adminlte/plugins/jQuery/jQuery-2.1.4.min.js"></script>
 
     <style>
       @font-face {

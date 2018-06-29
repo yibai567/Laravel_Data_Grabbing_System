@@ -86,4 +86,33 @@ class WxMessageController extends Controller
         $wxMessage = json_decode($wxMessage->getContents(), true);
         echo json_encode($wxMessage);
     }
+
+    /**
+     * index
+     * 首页显示
+     *
+     * @return array
+     */
+    public function newIndex(Request $request)
+    {
+        $data = [];
+        $httpService = new HttpService();
+        $wxMessageGroup = $httpService->get(config('url.jinse_open_url') . '/v2/wx/problem/group');
+        $data = json_decode($wxMessageGroup->getContents(), true);
+        $data['nav_status'] = 'new_wx_message';
+        return view('jinse.new_index', ["data" => $data]);
+    }
+
+    /**
+     * index
+     * 首页显示
+     *
+     * @return array
+     */
+    public function ajaxMessageList(Request $request, $id)
+    {
+        $httpService = new HttpService();
+        $wxMessageGroup = $httpService->get(config('url.jinse_open_url') . '/v2/wx/message/' . $id);
+        echo $wxMessageGroup->getContents();
+    }
 }

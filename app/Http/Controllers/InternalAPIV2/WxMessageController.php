@@ -317,4 +317,85 @@ class WxMessageController extends Controller
         $data['group_wx_message'] = $groupWxMessageArr;
         return $this->resObjectGet($data, 'WxMessage', $request->path());
     }
+
+    /**
+     * newCreate
+     * 新版保存微信信息
+     *
+     * @param
+     * @return array
+     */
+    public function newCreate(Request $request)
+    {
+        $params = $request->all();
+        //验证参数
+        ValidatorService::check($params, [
+            'contact_name' => 'required|string|max:100',
+            'room_name' => 'required|string|max:100',
+            'content' => 'required|string|max:1000',
+        ]);
+
+        try {
+            $wxMessage = new WxMessage;
+            $wxMessage->contact_name = $params['contact_name'];
+            $wxMessage->room_name = $params['room_name'];
+            $wxMessage->content = $params['content'];
+            $wxMessage->status = 1;
+            $wxMessage->save();
+        } catch (\Exception $e) {
+            throw new \Dingo\Api\Exception\ResourceException("wxMessage create fail");
+        }
+
+        $result = $wxMessage->toArray();
+
+        return $this->resObjectGet($result, 'WxMessage', $request->path());
+    }
+    /**
+     * getGroupProblem
+     * 获取分组问题
+     *
+     * @param
+     * @return array
+     */
+    public function getGroupProblem(Request $request)
+    {
+        $groupProblem = WxMessage::where('contact_name', '金色管理员')
+                                ->orderBy('created_at', 'desc')
+                                ->get();
+        $result = $groupProblem->toArray();
+        return $this->resObjectGet($result, 'WxMessage', $request->path());
+    }
+
+    /**
+     * getById
+     * 根据id获取用户名
+     *
+     * @param
+     * @return array
+     */
+    public function getMessageById(Request $request, $id)
+    {
+        $wxMessage = WxMessage::where('id', '>', $id)
+                                ->where('contact_name', '金色管理员')
+                                ->first();
+        $res = WxMessage::where('id', '>', $id);
+        if (!empty($wxMessage->id)) {
+            $res->where('id', '<', $wxMessage->id);
+        }
+        $res->orderBy('created_at', 'desc');
+        $wxMessageInfo = $res->get();
+        $result = [];
+        if (!empty($wxMessageInfo)) {
+            $result = $wxMessageInfo->toArray();
+        }
+
+        $contactNames = array_unique(array_pluck($result, 'contact_name'));
+        $data = [];
+        foreach ($result as $key => $value) {
+            if (in_array($value['contact_name'], $contactNames)) {
+                $data[$value['contact_name']][] = $value;
+            }
+        }
+        return $this->resObjectGet($data, 'WxMessage', $request->path());
+    }
 }

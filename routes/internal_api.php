@@ -200,5 +200,14 @@ $api->version(
         $api->post('/wx/message/status','WxMessageController@updateStatus');
         $api->get('/wx/message','WxMessageController@all');
 
+        //新版微信消息管理
+        $api->post('/wx/new_message','WxMessageController@newCreate');
+        $api->get('/wx/problem/group','WxMessageController@getGroupProblem');
+        $api->get('/wx/message/{id}','WxMessageController@getMessageById');
+
+
+        $api->get('/company/{id}', 'CompanyController@getById');
+        $api->get('/news/{requirement_id}', 'BlockNewsController@getByRequirementId');
+
     }
 );

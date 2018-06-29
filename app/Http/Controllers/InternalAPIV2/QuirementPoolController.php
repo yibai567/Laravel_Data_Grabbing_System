@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
 use App\Services\InternalAPIService;
-use App\Models\Requirement;
+use App\Models\V2\Requirement;
 use GuzzleHttp\Client;
 use App\Models\Image;
 /**
@@ -46,6 +46,7 @@ class QuirementPoolController extends Controller
             'is_capture'        => 'required|integer|between:1,2',
             'company_id'        => 'required|integer',
             'is_download_img'   => 'required|integer|between:1,2',
+            'category'          =>  'required|integer|between:1,2',
             // 'img_description'   => 'required|max:255',
             'operate_by'=>'required|integer'
         ]);
@@ -82,9 +83,6 @@ class QuirementPoolController extends Controller
     {
 
         $params = $request->all();
-
-
-
         ValidatorService::check($params, [
             'id'                => 'required|integer',
             'name'              => 'nullable|string|max:100',
@@ -94,12 +92,12 @@ class QuirementPoolController extends Controller
             'subscription_type' => 'required|integer|between:1,2',
             'is_capture'        => 'required|integer|between:1,2',
             'is_download_img'   => 'required|integer|between:1,2',
+            'category'         => 'required|integer|between:1,2',
             // 'img_description'   => 'required|max:255'
         ]);
         //$item = Requirement::find($formatParams['id']);
         $params['status'] = Requirement::STATUS_TRUE;
         $req = Requirement::find($params['id']);
-
         if (empty($req)) {
             throw new \Dingo\Api\Exception\ResourceException("Requirement is not found");
         }
@@ -138,46 +136,46 @@ class QuirementPoolController extends Controller
         return $this->resObjectGet($resData, 'Requirement', $request->path());
     }
 
-    /**
-     * all
-     * 资源列表
-     *
-     * @param
-     * @return array
-     */
-    public function all(Request $request)
-    {
+    // /**
+    //  * all
+    //  * 资源列表
+    //  *
+    //  * @param
+    //  * @return array
+    //  */
+    // public function all(Request $request)
+    // {
 
-        Log::debug('[internal QuirementPoolController all] start!');
-        $params = $request->all();
-        //验证参数
-        ValidatorService::check($params, [
-            'limit' => 'nullable|integer|min:1|max:500',
-            'offset' => 'nullable|integer|min:0',
-        ]);
+    //     Log::debug('[internal QuirementPoolController all] start!');
+    //     $params = $request->all();
+    //     //验证参数
+    //     ValidatorService::check($params, [
+    //         'limit' => 'nullable|integer|min:1|max:500',
+    //         'offset' => 'nullable|integer|min:0',
+    //     ]);
 
-        if (empty($params['limit'])) {
-            $params['limit'] = 20;
-        }
+    //     if (empty($params['limit'])) {
+    //         $params['limit'] = 20;
+    //     }
 
-        if (empty($params['offset'])) {
-            $params['offset'] = 0;
-        }
+    //     if (empty($params['offset'])) {
+    //         $params['offset'] = 0;
+    //     }
 
-        //获取数据
-        $items = Requirement::take($params['limit'])
-                            ->select('name','list_url','subscription_type','is_capture','is_download_img','status','create_by','operate_by','created_at','updated_at')
-                            ->skip($params['offset'])
-                            ->orderBy('id', 'desc')
-                            ->get();
+    //     //获取数据
+    //     $items = Requirement::take($params['limit'])
+    //                         ->select('name','list_url','subscription_type','is_capture','is_download_img','status','create_by','operate_by','created_at','updated_at')
+    //                         ->skip($params['offset'])
+    //                         ->orderBy('id', 'desc')
+    //                         ->get();
 
-        $result = [];
-        if (!empty($items)) {
-            $result = $items->toArray();
-        }
+    //     $result = [];
+    //     if (!empty($items)) {
+    //         $result = $items->toArray();
+    //     }
 
-        return $this->resObjectGet($result, 'script_model', $request->path());
-    }
+    //     return $this->resObjectGet($result, 'script_model', $request->path());
+    // }
 
     /**
      * create
@@ -268,5 +266,24 @@ class QuirementPoolController extends Controller
         $result['data'] = $data;
         return $this->resObjectGet($result, 'block_news', $request->path());
      }
+
+    /**
+     * all
+     * 资源列表
+     *
+     * @param
+     * @return array
+     */
+    public function all(Request $request)
+    {
+        //获取数据
+        $res = Requirement::where('category', 1)->get();
+        $result = [];
+        if (!empty($res)) {
+            $result = $res->toArray();
+        }
+        return $this->resObjectGet($result, 'quirement_pool', $request->path());
+    }
+
 
 }

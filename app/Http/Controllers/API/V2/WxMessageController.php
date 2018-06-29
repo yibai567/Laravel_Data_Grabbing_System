@@ -158,4 +158,55 @@ class WxMessageController extends Controller
 
         return $this->resObjectGet($result, 'wxMessage', $request->path());
     }
+
+    /**
+     * newCreate
+     * 新版保存微信信息
+     *
+     * @param
+     * @return array
+     */
+    public function newCreate(Request $request)
+    {
+        $params = $request->all();
+        //验证参数
+        ValidatorService::check($params, [
+            'contact_name' => 'required|string|max:100',
+            'room_name' => 'required|string|max:100',
+            'content' => 'required|string|max:1000',
+        ]);
+
+        try {
+            $result = InternalAPIV2Service::post('/wx/new_message', $params);
+        } catch (\Exception $e) {
+            throw new \Dingo\Api\Exception\ResourceException("wxMessage create fail");
+        }
+        return $this->resObjectGet($result, 'WxMessage', $request->path());
+    }
+    /**
+     * getGroupProblem
+     * 获取分组问题
+     *
+     * @param
+     * @return array
+     */
+    public function getGroupProblem(Request $request)
+    {
+        $result = InternalAPIV2Service::get('/wx/problem/group', []);
+        return $this->resObjectGet($result, 'WxMessage', $request->path());
+    }
+
+    /**
+     * getGroupProblem
+     * 获取分组问题
+     *
+     * @param
+     * @return array
+     */
+    public function getMessageById(Request $request, $id)
+    {
+        $result = InternalAPIV2Service::get('/wx/message/' . $id);
+        return $this->resObjectGet($result, 'WxMessage', $request->path());
+    }
+
 }
