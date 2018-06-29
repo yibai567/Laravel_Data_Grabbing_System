@@ -55,6 +55,7 @@ class Requirement extends Model
         'img_description',
         'status',
         'updated_at',
+        'category',
         'operate_by',
         'create_by',
     ];

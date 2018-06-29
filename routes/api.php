@@ -81,9 +81,27 @@ $api->version(
 
         $api->post('/image/upload', 'ImageController@upload');
 
+
         $api->post('/history_topics','HistoryTopicController@create');
         $api->post('/history_topic/update','HistoryTopicController@update');
         $api->get('/history_topics/company_id','HistoryTopicController@listByCompanyId');
+
+
+        //微信消息
+        $api->post('/wx/message','WxMessageController@create');
+        $api->post('/wx/message/group/status','WxMessageController@updateGroupStatus');
+        $api->get('/wx/message/group','WxMessageController@allGroup');
+        $api->post('/wx/message/status','WxMessageController@updateStatus');
+        $api->get('/wx/message','WxMessageController@all');
+
+        //微信新消息管理
+        $api->post('/wx/room/message','WxMessageController@newCreate');
+        $api->get('/wx/room/problem/group','WxMessageController@getGroupProblem');
+        $api->get('/wx/room/message/{id}','WxMessageController@getMessageById');
+
+        //行业新闻
+        $api->get('/news','BlockNewsController@all');
+        // $api->get('/news/{requirement_id}','BlockNewsController@getByRequirementId');
 
     }
 );

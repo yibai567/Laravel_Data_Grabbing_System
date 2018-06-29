@@ -5,16 +5,18 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">Dashboard</div>
+                <div class="card-header">网站</div>
 
                 <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success">
-                            {{ session('status') }}
-                        </div>
-                    @endif
+                    <div class="btn-group">
+                        <a href="http://{{$_SERVER['HTTP_HOST']}}/block_news">
+                        <button type="button" class="btn btn-default">行业新闻</button>
+                        </a>
+                        <a href="http://{{$_SERVER['HTTP_HOST']}}/we_message">
+                        <button type="button" class="btn btn-default">微信消息</button>
+                        </a>
+                      </div>
 
-                    You are logged in!
                 </div>
             </div>
         </div>

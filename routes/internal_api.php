@@ -191,6 +191,23 @@ $api->version(
         $api->get('/quirements', 'QuirementPoolController@all');
         $api->get('/quirement', 'QuirementPoolController@retrieve');
         $api->post('/quirement/update_status','QuirementPoolController@updateStatus');
+        //微信消息
+        $api->post('/wx/message/group','WxMessageController@createGroup');
+        $api->post('/wx/message/group/status','WxMessageController@updateGroupStatus');
+        $api->get('/wx/message/group','WxMessageController@allGroup');
+
+        $api->post('/wx/message','WxMessageController@create');
+        $api->post('/wx/message/status','WxMessageController@updateStatus');
+        $api->get('/wx/message','WxMessageController@all');
+
+        //新版微信消息管理
+        $api->post('/wx/room/message','WxMessageController@newCreate');
+        $api->get('/wx/room/problem/group','WxMessageController@getGroupProblem');
+        $api->get('/wx/room/message/{id}','WxMessageController@getMessageById');
+
+
+        $api->get('/company/{id}', 'CompanyController@getById');
+        $api->get('/news/{requirement_id}', 'BlockNewsController@getByRequirementId');
 
         $api->post('/history_topics','HistoryTopicController@create');
         $api->post('/history_topic/update','HistoryTopicController@update');
