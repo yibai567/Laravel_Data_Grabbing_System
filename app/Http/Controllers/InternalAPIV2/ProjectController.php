@@ -206,6 +206,7 @@ class ProjectController extends Controller
                 'requirement_id' => $task->requirement_pool_id,
                 'list_url'       => $task->list_url,
                 'title'          => $data->title,
+                'description'    => $data->description,
                 'content'        => $data->content,
                 'read_count'     => $data->read_count,
                 'detail_url'     => $data->detail_url,

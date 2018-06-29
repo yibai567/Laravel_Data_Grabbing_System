@@ -48,6 +48,7 @@ class BlockNews extends Model
         'requirement_id',
         'list_url',
         'title',
+        'description',
         'content',
         'detail_url',
         'show_time',
