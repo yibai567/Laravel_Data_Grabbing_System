@@ -47,31 +47,36 @@
 </div>
 <div class="ui link cards">
     @foreach($data['data'] as $value)
-    @if (!empty($value['news']))
     <div class="card">
         <div class="content">
             <div class="header">{{$value['company_name']}}</div>
         </div>
         <div class="content div">
             <div class="ui relaxed divided list">
-            @foreach($value['news'] as $newsValue)
-              <div class="item listitem">
-                  <p>{{$newsValue['title']}}</p>
-                  <div class="meta">
-                    <span class="price">{{date('m-d H:i', strtotime($newsValue['show_time']))}}</span>
-                    <span class="price">来源: {{$value['company_name']}}</span>
-                    @if(empty($newsValue['read_count']))
-                    <span class="price">view: 无</span>
-                    @else
-                    <span class="price">view: {{$newsValue['read_count']}}</span>
-                    @endif
+            @if (!empty($value['news']))
+                @foreach($value['news'] as $newsValue)
+                  <div class="item listitem">
+                      <p>{{$newsValue['title']}}</p>
+                      <div class="meta">
+                        <span class="price">{{date('m-d H:i', strtotime($newsValue['show_time']))}}</span>
+                        <span class="price">来源: {{$value['company_name']}}</span>
+                        @if(empty($newsValue['read_count']))
+                        <span class="price">view: 无</span>
+                        @else
+                        <span class="price">view: {{$newsValue['read_count']}}</span>
+                        @endif
+                      </div>
                   </div>
-              </div>
-            @endforeach
+                @endforeach
+            @else
+                <div class="ui" style="text-align: center; margin-top: 200px;">
+                  <h3 class="ui grey header">24小时内</h3>
+                  <h3 class="ui grey header">暂无数据</h3>
+                </div>
+            @endif
             </div>
         </div>
     </div>
-    @endif
     @endforeach
 
   </div>
