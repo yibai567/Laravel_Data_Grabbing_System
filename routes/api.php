@@ -89,9 +89,9 @@ $api->version(
         $api->get('/wx/message','WxMessageController@all');
 
         //微信新消息管理
-        $api->post('/wx/new_message','WxMessageController@newCreate');
-        $api->get('/wx/problem/group','WxMessageController@getGroupProblem');
-        $api->get('/wx/message/{id}','WxMessageController@getMessageById');
+        $api->post('/wx/room/message','WxMessageController@newCreate');
+        $api->get('/wx/room/problem/group','WxMessageController@getGroupProblem');
+        $api->get('/wx/room/message/{id}','WxMessageController@getMessageById');
 
         //行业新闻
         $api->get('/news','BlockNewsController@all');

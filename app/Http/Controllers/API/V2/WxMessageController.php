@@ -177,7 +177,7 @@ class WxMessageController extends Controller
         ]);
 
         try {
-            $result = InternalAPIV2Service::post('/wx/new_message', $params);
+            $result = InternalAPIV2Service::post('/wx/room/message', $params);
         } catch (\Exception $e) {
             throw new \Dingo\Api\Exception\ResourceException("wxMessage create fail");
         }
@@ -192,7 +192,7 @@ class WxMessageController extends Controller
      */
     public function getGroupProblem(Request $request)
     {
-        $result = InternalAPIV2Service::get('/wx/problem/group', []);
+        $result = InternalAPIV2Service::get('/wx/room/problem/group', []);
         return $this->resObjectGet($result, 'WxMessage', $request->path());
     }
 
@@ -205,7 +205,7 @@ class WxMessageController extends Controller
      */
     public function getMessageById(Request $request, $id)
     {
-        $result = InternalAPIV2Service::get('/wx/message/' . $id);
+        $result = InternalAPIV2Service::get('/wx/room/message/' . $id);
         return $this->resObjectGet($result, 'WxMessage', $request->path());
     }
 

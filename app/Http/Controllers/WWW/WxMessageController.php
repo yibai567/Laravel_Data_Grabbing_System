@@ -97,7 +97,7 @@ class WxMessageController extends Controller
     {
         $data = [];
         $httpService = new HttpService();
-        $wxMessageGroup = $httpService->get(config('url.jinse_open_url') . '/v2/wx/problem/group');
+        $wxMessageGroup = $httpService->get(config('url.jinse_open_url') . '/v2/wx/room/problem/group');
         $data = json_decode($wxMessageGroup->getContents(), true);
         $data['nav_status'] = 'new_wx_message';
         return view('jinse.new_index', ["data" => $data]);
@@ -112,7 +112,7 @@ class WxMessageController extends Controller
     public function ajaxMessageList(Request $request, $id)
     {
         $httpService = new HttpService();
-        $wxMessageGroup = $httpService->get(config('url.jinse_open_url') . '/v2/wx/message/' . $id);
+        $wxMessageGroup = $httpService->get(config('url.jinse_open_url') . '/v2/wx/room/message/' . $id);
         echo $wxMessageGroup->getContents();
     }
 }
