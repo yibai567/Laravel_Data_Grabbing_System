@@ -49,6 +49,9 @@
     @foreach($data['data'] as $value)
     <div class="card">
         <div class="content">
+            @if ($value['status'] == 1)
+                <a class="ui orange right ribbon label">暂不抓取</a>
+            @endif
             <div class="header">{{$value['company_name']}}</div>
         </div>
         <div class="content div">

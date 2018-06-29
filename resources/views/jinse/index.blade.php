@@ -32,19 +32,19 @@
 </div>
 <div class="ui top attached tabular menu">
     @if(empty($data['status']))
-        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx_message" class="item active" >全部</a>
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/old" class="item active" >全部</a>
     @else
-        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx_message" class="item" >全部</a>
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/old" class="item" >全部</a>
     @endif
     @if($data['status'] == 1)
-        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx_message?status=1" class="item active" >未处理</a>
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/old?status=1" class="item active" >未处理</a>
     @else
-        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx_message?status=1" class="item" >未处理</a>
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/old?status=1" class="item" >未处理</a>
     @endif
     @if($data['status'] == 2)
-        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx_message?status=2" class="item active" >已处理</a>
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/old?status=2" class="item active" >已处理</a>
     @else
-        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx_message?status=2" class="item" >已处理</a>
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/old?status=2" class="item" >已处理</a>
     @endif
 </div>
 <div class="ui bottom attached tab segment active" data-tab="first" style="display: none;">

@@ -13,6 +13,8 @@ use App\Events\ConverterTaskEvent;
 use App\Models\V2\ProjectResult;
 use App\Models\V2\TaskActionMap;
 use App\Models\V2\TaskRunLog;
+use App\Models\V2\Task;
+use App\Models\BlockNews;
 use App\Services\InternalAPIV2Service;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
@@ -43,7 +45,44 @@ class ActionController extends Controller
         }
 
         $projectResult = $projectResult->toArray();
+        switch ($projectResult['project_id']) {
+            case '1':
+                $result = $this->__formatReportResult($projectResult, $request);
+                return $this->resObjectGet($result, 'report_result', $request->path());
+                break;
+            case '2':
+                $result = $this->__formatReportResult($projectResult, $request);
+                return $this->resObjectGet($result, 'report_result', $request->path());
+                break;
+            case '3':
+                $task = Task::find($projectResult['task_id']);
+                if (empty($task))
+                {
+                    Log::debug('[InternalAPIv2 ActionController reportBlockNews] task is not found' );
+                    return $this->resObjectGet(false, 'report_block_news', $request->path());
+                }
+                try {
+                    $blockNews = new BlockNews();
+                    $blockNews->requirement_id = $task->requirement_pool_id;
+                    $blockNews->list_url = $task->list_url;
+                    $blockNews->title = $projectResult['title'];
+                    $blockNews->content = $projectResult['content'];
+                    $blockNews->read_count = $projectResult['read_count'];
+                    $blockNews->detail_url = $task['detail_url'];
+                    $blockNews->show_time = $projectResult['show_time'];
+                    $result = $blockNews->save();
+                    return $this->resObjectGet($result, 'report_result', $request->path());
+                } catch (\Exception $e) {
+                    Log::debug('[InternalAPIV2 ActionController block_news reportResult] error message = ' . $e->getMessage());
+                    return $this->resObjectGet($result, 'report_result', $request->path());
+                }
+                break;
+            default:
+                break;
+        }
+    }
 
+    private function __formatReportResult($projectResult, $request) {
         //整理上报数据
         $newData = [];
 
@@ -54,10 +93,6 @@ class ActionController extends Controller
         if (!empty($projectResult['detail_url'])) {
             $newData['url'] = $projectResult['detail_url'];
         }
-
-//        if (!empty($projectResult['show_time'])) {
-//            $newData['date'] = $projectResult['show_time'];
-//        }
 
         $newData['images'] = [];
         if (!empty($projectResult['thumbnail'])) {
@@ -73,18 +108,12 @@ class ActionController extends Controller
         if (!empty($projectResult['screenshot'])) {
             $newData['screenshot'] = $projectResult['screenshot'];
         }
-
         $result = false;
-
         if (!empty($newData)) {
-
             //整理数据
             $reportData['is_test'] = TaskRunLog::TYPE_TEST;
-
             $reportData['result'] = json_encode([$newData], JSON_UNESCAPED_UNICODE);
-
             Log::debug('[InternalAPIV2 ActionController reportResult] reportData = ' , $reportData );
-
             try {
                 //调用上传数据接口
                 $result = InternalAPIV2Service::post('/item/result/report', $reportData);
@@ -93,8 +122,7 @@ class ActionController extends Controller
                 return $this->resObjectGet($result, 'report_result', $request->path());
             }
         }
-
-        return $this->resObjectGet($result, 'report_result', $request->path());
+        return $result;
     }
 
     /**
