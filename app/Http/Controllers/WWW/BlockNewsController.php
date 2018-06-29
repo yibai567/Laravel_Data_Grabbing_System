@@ -123,5 +123,29 @@ class BlockNewsController extends Controller
         echo json_encode($blockNews);
     }
 
+    /**
+     * index
+     * 首页显示
+     *
+     * @return array
+     */
+    public function all(Request $request)
+    {
+        $data = [];
+        $httpService = new HttpService();
+        $blockNews = $httpService->get(config('url.jinse_open_url') . '/v2/news', []);
+        $data = json_decode($blockNews->getContents(), true);
+        $data['nav_status'] = 'block_news';
+        return view('block_news.block_v2', ["data" => $data]);
+    }
+
+    public function ajaxNewList(Request $request, $id)
+    {
+        $data = [];
+        $httpService = new HttpService();
+        $blockNews = $httpService->get(config('url.jinse_open_url') . '/v2/block_news/' . $id);
+        echo $blockNews->getContents();
+    }
+
 
 }

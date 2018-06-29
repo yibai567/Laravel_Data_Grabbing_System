@@ -6,7 +6,7 @@
 	use CRUDBooster;
     use Config;
     use App\Models\Requirement;
-    use App\Services\InternalAPIService;
+    use App\Services\InternalAPIV2Service;
     use Illuminate\Support\Facades\Route;
 	class AdminTRequirementPoolController extends \crocodicstudio\crudbooster\controllers\CBController {
 
@@ -42,7 +42,13 @@
                 $company = DB::table('t_company')->where('id', $row->company_id)->first();
                 return $company->cn_name;
             }];
-
+            $this->col[] = ["label"=>"分类","name"=>"category","callback"=>function ($row){
+                if ( $row->category == 1) {
+                    return '订阅';
+                } else {
+                    return '历史数据';
+                }
+            }];
 			$this->col[] = ["label"=>"订阅类型","name"=>"subscription_type","callback"=>function ($row){
                 if ( $row->subscription_type == Requirement::SUBSCRIPTION_TYPE_LIST) {
                     return '列表';
@@ -107,6 +113,7 @@
                     echo $string;
                 }
             }];
+            $this->form[] = ['label'=>'分类','name'=>'category','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|订阅;2|历史数据','value'=>1];
 			$this->form[] = ['label'=>'订阅类型','name'=>'subscription_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|列表;2|详情','value'=>1];
 			$this->form[] = ['label'=>'截图','name'=>'is_capture','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|需要;2|不需要','value'=>2];
 			$this->form[] = ['label'=>'图片资源','name'=>'is_download_img','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|需要;2|不需要','value'=>2];
@@ -409,7 +416,7 @@
             $params['user_id'] = CRUDBooster::myId();
 
             try {
-                $result = InternalAPIService::post('/quirement/update_status', $params);
+                $result = InternalAPIV2Service::post('/quirement/update_status', $params);
             } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
@@ -440,7 +447,7 @@
 
             try {
                 $params['operate_by'] = CRUDBooster::myId();
-                $result = InternalAPIService::post('/quirement', $params);
+                $result = InternalAPIV2Service::post('/quirement', $params);
 
             } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
@@ -453,7 +460,7 @@
 
             $params['id'] = (int)$id;
             try {
-                InternalAPIService::post('/quirement/update', $params);
+                InternalAPIV2Service::post('/quirement/update', $params);
 
             } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");

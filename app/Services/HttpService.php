@@ -44,7 +44,6 @@ class HttpService extends Service
             $response = $client->request('POST', $url, ['json' => $params]);
             $resCode  = (string) $response->getStatusCode();
             $resBody  = $response->getbody()->getContents();
-
             if ($resBody == "ok" && $resCode == 200) {
                 return true;
             }
@@ -53,5 +52,23 @@ class HttpService extends Service
             throw new \Dingo\Api\Exception\ResourceException('post api error');
         }
 
+    }
+    public function postV1($url, $params = [])
+    {
+        $requestParams = [
+            'timeout'  => 2,
+            'debug' => false,
+        ];
+        $client = new Client($requestParams);
+
+        try {
+            $response = $client->request('POST', $url, ['json' => $params]);
+            $resCode  = (string) $response->getStatusCode();
+            $resBody  = $response->getbody();
+        } catch (RequestException $e) {
+            Log::debug('[HttpService->post]' . $e->getMessage());
+            throw new \Dingo\Api\Exception\ResourceException('post api error');
+        }
+        return $resBody;
     }
 }
