@@ -82,7 +82,7 @@ class DataController extends Controller
             if (!empty($value['images'])) {
                 $value['images'] = explode(',', $value['images']);
             }
-            
+
             //整理保存数据
             $createData = [
                 'content_type'       => $params['content_type'],

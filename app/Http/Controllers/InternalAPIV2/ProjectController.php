@@ -212,14 +212,7 @@ class ProjectController extends Controller
                 'show_time'      => $data->show_time,
             ];
 
-            $blockNews = BlockNews::create($newData);
-
-            $result['project_result_id'] = $blockNews->id;
-
-            Log::debug('[v2 ProjectController blockNews] $result = ', $result);
-
-            //触发projectResult事件
-            event(new ProjectResultEvent($result));
+            BlockNews::create($newData);
 
         } catch (\Exception $e) {
             Log::debug('[v2 ProjectController blockNews] error message = ' . $e->getMessage());
