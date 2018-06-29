@@ -45,6 +45,7 @@ class DataController extends Controller
 
             ValidatorService::check($value, [
                 'title'      => 'nullable|string|max:2000',
+                'description'=> 'nullable|string|max:2000',
                 'content'    => 'nullable|string',
                 'detail_url' => 'nullable|string|max:500',
                 'show_time'  => 'nullable|string|max:100',
@@ -81,7 +82,7 @@ class DataController extends Controller
             if (!empty($value['images'])) {
                 $value['images'] = explode(',', $value['images']);
             }
-
+            
             //整理保存数据
             $createData = [
                 'content_type'       => $params['content_type'],
@@ -90,6 +91,7 @@ class DataController extends Controller
                 'md5_title'          => $value['md5_title'],
                 'md5_content'        => $value['md5_content'],
                 'content'            => $value['content'],
+                'description'        => $value['description'],
                 'task_id'            => $params['task_id'],
                 'task_run_log_id'    => $params['task_run_log_id'],
                 'detail_url'         => $value['detail_url'],
@@ -165,4 +167,5 @@ class DataController extends Controller
 
         return $this->resObjectGet($result, 'data', $request->path());
     }
+
 }

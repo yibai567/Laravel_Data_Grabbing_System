@@ -10,10 +10,12 @@
 namespace App\Http\Controllers\InternalAPIV2;
 
 
+use App\Models\BlockNews;
 use App\Models\V2\Data;
 use App\Models\V2\Project;
 use App\Models\V2\ProjectResult;
 use App\Events\ProjectResultEvent;
+use App\Models\V2\Task;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 use Log;
@@ -81,6 +83,7 @@ class ProjectController extends Controller
                 'project_id'      => $params['project_id'],
                 'task_run_log_id' => $data->task_run_log_id,
                 'title'           => $data->title,
+                'description'     => $data->description,
                 'content'         => $data->content,
                 'detail_url'      => $data->detail_url,
                 'show_time'       => $data->show_time,
@@ -142,6 +145,7 @@ class ProjectController extends Controller
                 'project_id'      => $params['project_id'],
                 'task_run_log_id' => $data->task_run_log_id,
                 'title'           => $data->title,
+                'description'     => $data->description,
                 'content'         => $data->content,
                 'detail_url'      => $data->detail_url,
                 'show_time'       => $data->show_time,
@@ -189,36 +193,29 @@ class ProjectController extends Controller
         //查询data数据
         $data = Data::find($params['data_id']);
 
-        if (empty($data)) {
-            Log::debug('[InternalAPIv2 ProjectController blockNews] $data is not found,data_id = ' . $params['data_id']);
+        $task = Task::find($data->task_id);
+        if (empty($task))
+        {
+            Log::debug('[InternalAPIv2 ProjectController blockNews] task is not found' );
             return $this->resObjectGet(false, 'block_news', $request->path());
         }
 
         try {
             //整理保存数据
             $newData = [
-                'content_type'    => $data->content_type,
-                'company'         => $data->company,
-                'task_id'         => $data->task_id,
-                'project_id'      => $params['project_id'],
-                'task_run_log_id' => $data->task_run_log_id,
-                'title'           => $data->title,
-                'content'         => $data->content,
-                'detail_url'      => $data->detail_url,
-                'show_time'       => $data->show_time,
-                'author'          => $data->author,
-                'read_count'      => $data->read_count,
-                'thumbnail'       => $data->thumbnail,
-                'screenshot'      => $data->screenshot,
-                'status'          => $data->status,
-                'start_time'      => $data->start_time,
-                'end_time'        => $data->end_time,
-                'created_time'    => $data->created_time,
+                'requirement_id' => $task->requirement_pool_id,
+                'list_url'       => $task->list_url,
+                'title'          => $data->title,
+                'content'        => $data->content,
+                'read_count'     => $data->read_count,
+                'detail_url'     => $data->detail_url,
+                'show_time'      => $data->show_time,
             ];
 
-            $projectResult = ProjectResult::create($newData);
+            $blockNews = BlockNews::create($newData);
 
-            $result['project_result_id'] = $projectResult->id;
+            $result['project_result_id'] = $blockNews->id;
+
             Log::debug('[v2 ProjectController blockNews] $result = ', $result);
 
             //触发projectResult事件
@@ -226,6 +223,7 @@ class ProjectController extends Controller
 
         } catch (\Exception $e) {
             Log::debug('[v2 ProjectController blockNews] error message = ' . $e->getMessage());
+            return $this->resObjectGet(false, 'block_news', $request->path());
         }
 
 

@@ -52,6 +52,7 @@ class Data extends Model
         'md5_title',
         'md5_content',
         'content',
+        'description',
         'detail_url',
         'show_time',
         'author',
