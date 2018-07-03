@@ -223,5 +223,105 @@ class ProjectController extends Controller
 
         return $this->resObjectGet(true, 'block_news', $request->path());
     }
+    /**
+     * noticeList
+     * 交易所公告列表项目
+     *
+     * @param
+     * @return boolean
+     */
+    public function noticeList(Request $request)
+    {
+        Log::debug('[v2 ProjectController noticeList] start');
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'data_id'    => 'required|integer|max:999999999',
+            'project_id' => 'required|integer|max:100',
+        ]);
+
+        //查询data数据
+        $data = Data::find($params['data_id']);
+
+        if (empty($data)) {
+            Log::debug('[InternalAPIv2 ProjectController noticeList] $data is not found,data_id = ' . $params['data_id']);
+            return $this->resObjectGet(false, 'notice_list', $request->path());
+        }
+
+        try {
+            //整理保存数据
+            $newData = [
+                'task_id'         => $data->task_id,
+                'project_id'      => $params['project_id'],
+                'task_run_log_id' => $data->task_run_log_id,
+                'title'           => $data->title,
+                'content'         => $data->content,
+                'detail_url'      => $data->detail_url,
+            ];
+
+            $projectResult = ProjectResult::create($newData);
+
+            $result['project_result_id'] = $projectResult->id;
+            Log::debug('[InternalAPIv2 ProjectController noticeList] $result = ', $result);
+
+            //分发projectResult事件
+            event(new ProjectResultEvent($result));
+        } catch (\Exception $e) {
+            Log::debug('[InternalAPIv2 ProjectController noticeList] error message = ' . $e->getMessage());
+        }
+
+
+        return $this->resObjectGet(true, 'notice_list', $request->path());
+    }
+
+    /**
+     * noticeDetail
+     * 公告详情项目
+     *
+     * @param
+     * @return boolean
+     */
+    public function noticeDetail(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'data_id'    => 'required|integer|max:999999999',
+            'project_id' => 'required|integer|max:100',
+        ]);
+
+        //查询data数据
+        $data = Data::find($params['data_id']);
+
+        if (empty($data)) {
+            Log::debug('[InternalAPIv2 ProjectController noticeDetail] $data is not found,data_id = ' . $params['data_id']);
+            return $this->resObjectGet(false, 'notice_detail', $request->path());
+        }
+
+        try {
+            //整理保存数据
+            $newData = [
+                'task_id'         => $data->task_id,
+                'project_id'      => $params['project_id'],
+                'task_run_log_id' => $data->task_run_log_id,
+                'title'           => $data->title,
+                'content'         => $data->content,
+                'detail_url'      => $data->detail_url,
+            ];
+
+            $projectResult = ProjectResult::create($newData);
+
+            $result['project_result_id'] = $projectResult->id;
+
+            //分发projectResult事件
+            event(new ProjectResultEvent($result));
+
+        } catch (\Exception $e) {
+            Log::debug('[InternalAPIv2 ProjectController noticeDetail] error message = ' . $e->getMessage());
+        }
+
+
+        return $this->resObjectGet(true, 'notice_detail', $request->path());
+    }
 
 }

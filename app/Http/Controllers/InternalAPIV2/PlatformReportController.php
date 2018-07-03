@@ -51,4 +51,37 @@ class PlatformReportController extends Controller
         Log::debug('[itemResultReport] $res = ' . $res);
         return $this->resObjectGet($res, 'item', $request->path());
     }
+    /**
+     * itemResultReport
+     * 任务结果上报
+     *
+     * @param array
+     */
+    public function noticeResultReport(Request $request)
+    {
+        $params = $request->all();
+        ValidatorService::check($params, [
+            'is_test' => 'integer|required|between:1,2',
+            'result' => 'required|string',
+        ]);
+        Log::debug('[noticeResultReport] 接收参数 $params : ', $params);
+
+        $httpService = new HttpService();
+        $params['result'] = json_decode($params['result'], true);
+        if ($params['is_test'] == ItemRunLog::TYPE_TEST) {
+            $params['is_test'] = 1;
+        } else {
+            $params['is_test'] = 0;
+        }
+        $reportParmas = sign($params);
+
+        //TODO 请求平台接口
+
+        Log::info('[noticeResultReport] 请求 ' . config('url.new_platform_url') . '平台接口', $reportParmas);
+
+        // $res = $httpService->post(config('url.new_platform_url') . '/api/live/put_craw_data', $reportParmas, 'json');
+
+        // Log::debug('[itemResultReport] $res = ' . $res);
+        // return $this->resObjectGet($res, 'item', $request->path());
+    }
 }

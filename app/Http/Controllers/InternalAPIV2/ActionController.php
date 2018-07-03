@@ -184,4 +184,58 @@ class ActionController extends Controller
 
         return $this->resObjectGet(true, 'converter_task', $request->path());
     }
+
+    /**
+     * reportNoticeResult
+     * 公告结果上报
+     *
+     * @param
+     * @return boolean
+     */
+    public function reportNoticeResult(Request $request)
+    {
+        $params = $request->all();
+        ValidatorService::check($params, [
+            'project_result_id' => 'required|integer|max:999999999',
+        ]);
+
+        //获取上报数据信息
+        $projectResult = ProjectResult::find($params['project_result_id']);
+
+        if (empty($projectResult)) {
+            Log::debug('[InternalAPIv2 ActionController reportResult] $projectResult is not found,project_result_id = ' . $params['project_result_id'] );
+            return $this->resObjectGet(false, 'report_result', $request->path());
+        }
+
+        $projectResult = $projectResult->toArray();
+
+        //整理上报数据
+        $newData = [];
+
+        $newData['title'] = $projectResult['title'];
+
+        $newData['task_id'] = $projectResult['task_id'];
+
+        if (!empty($projectResult['detail_url'])) {
+            $newData['url'] = $projectResult['detail_url'];
+        }
+
+        $newData['images'] = [];
+
+        $result = false;
+        if (!empty($newData)) {
+            //整理数据
+            $reportData['is_test'] = TaskRunLog::TYPE_TEST;
+            $reportData['result'] = json_encode([$newData], JSON_UNESCAPED_UNICODE);
+            Log::debug('[InternalAPIV2 ActionController reportResult] reportData = ' , $reportData );
+            try {
+                //调用上传数据接口
+                $result = InternalAPIV2Service::post('/notice/result/report', $reportData);
+            } catch (\Exception $e) {
+                Log::debug('[InternalAPIV2 ActionController reportNoticeResult] error message = ' . $e->getMessage());
+                return $this->resObjectGet($result, 'report_result', $request->path());
+            }
+        }
+        return $this->resObjectGet($result, 'report_notice_result', $request->path());
+    }
 }

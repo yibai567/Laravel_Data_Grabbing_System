@@ -145,6 +145,7 @@ $api->version(
 
         // new route
         $api->post('/item/result/report', 'PlatformReportController@itemResultReport');
+        $api->post('/notice/result/report', 'PlatformReportController@noticeResultReport');
 
         $api->post('/script','ScriptController@create');
         $api->post('/script/update','ScriptController@update');
@@ -180,9 +181,12 @@ $api->version(
         $api->get('/project','ProjectController@retrieve');
         $api->post('/project/live_list','ProjectController@liveList');
         $api->post('/project/live_detail','ProjectController@liveDetail');
+        $api->post('/project/notice_list','ProjectController@noticeList');
+        $api->post('/project/notice_detail','ProjectController@noticeDetail');
         $api->post('/project/block_news','ProjectController@blockNews');
 
         $api->post('/action/report/result', 'ActionController@reportResult');
+        $api->post('/action/report/notice_result', 'ActionController@reportNoticeResult');
         $api->post('/action/converter/task', 'ActionController@converterTask');
 
         //收集资源

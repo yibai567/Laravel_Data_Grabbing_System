@@ -4,6 +4,7 @@
 	use Request;
 	use DB;
 	use CRUDBooster;
+    use App\Services\InternalAPIV2Service;
 
 	class AdminTProjectResultController extends \crocodicstudio\crudbooster\controllers\CBController {
 
@@ -35,7 +36,9 @@
 			$this->col[] = ["label"=>"任务ID","name"=>"task_id"];
 			$this->col[] = ["label"=>"项目ID","name"=>"project_id"];
 			$this->col[] = ["label"=>"标题","name"=>"title",'width'=>'30%'];
-			$this->col[] = ["label"=>"地址","name"=>"detail_url"];
+            $this->col[] = ["label"=>"地址","name"=>"detail_url",'width'=>'200',"callback"=>function ($row) {
+            return '<a href="' . $row->detail_url . '" target="_brank" style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->detail_url .'</a>';
+            }];
             $this->col[] = ["label"=>"创建时间","name"=>"created_at"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
@@ -108,7 +111,7 @@
 	        |
 	        */
 	        $this->addaction = array();
-
+            $this->addaction[] = ['label'=>'重新上报', 'url'=>CRUDBooster::mainpath('again-report/[id]'),'color'=>'info', 'icon'=>'glyphicon glyphicon-send', 'showIf'=>'[project_id] == 4 || [project_id] == 5'];
 
 	        /*
 	        | ----------------------------------------------------------------------
@@ -352,6 +355,14 @@
 
 	    }
 
+        public function getAgainReport($id) {
+            try {
+                $result = InternalAPIV2Service::post('/action/report/notice_result', ['project_result_id' => intval($id)]);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+            }
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "上报成功", "success");
+        }
 
 
 	    //By the way, you can still create your own method in here... :)

@@ -5,7 +5,7 @@
 	use DB;
 	use CRUDBooster;
     use App\Models\V2\ScriptModel;
-    use App\Services\InternalAPIService;
+    use App\Services\InternalAPIV2Service;
     use Illuminate\Support\Facades\Route;
 
 	class AdminTScriptModelController extends \crocodicstudio\crudbooster\controllers\CBController {
@@ -368,7 +368,7 @@
             $formParams['operate_user'] = CRUDBooster::myName();
 
             try {
-                $res = InternalAPIService::post('/script_model', $formParams);
+                $res = InternalAPIV2Service::post('/script_model', $formParams);
             } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
@@ -395,7 +395,7 @@
             $formParams['operate_user'] = CRUDBooster::myName();
 
             try {
-                $res = InternalAPIService::post('/script_model/update', $formParams);
+                $res = InternalAPIV2Service::post('/script_model/update', $formParams);
             } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
