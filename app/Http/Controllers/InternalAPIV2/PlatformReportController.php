@@ -75,13 +75,12 @@ class PlatformReportController extends Controller
         }
         $reportParmas = sign($params);
 
-        //TODO 请求平台接口
-
         Log::info('[noticeResultReport] 请求 ' . config('url.new_platform_url') . '平台接口', $reportParmas);
 
+        //TODO 请求平台接口
         // $res = $httpService->post(config('url.new_platform_url') . '/api/live/put_craw_data', $reportParmas, 'json');
 
         // Log::debug('[itemResultReport] $res = ' . $res);
-        // return $this->resObjectGet($res, 'item', $request->path());
+        return $this->resObjectGet(true, 'item', $request->path());
     }
 }
