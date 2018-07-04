@@ -46,7 +46,7 @@ class QuirementPoolController extends Controller
             'is_capture'        => 'required|integer|between:1,2',
             'company_id'        => 'required|integer',
             'is_download_img'   => 'required|integer|between:1,2',
-            'category'          =>  'required|integer|between:1,2',
+            'category'          =>  'required|integer|between:1,3',
             // 'img_description'   => 'required|max:255',
             'operate_by'=>'required|integer'
         ]);
@@ -92,7 +92,7 @@ class QuirementPoolController extends Controller
             'subscription_type' => 'required|integer|between:1,2',
             'is_capture'        => 'required|integer|between:1,2',
             'is_download_img'   => 'required|integer|between:1,2',
-            'category'         => 'required|integer|between:1,2',
+            'category'         => 'required|integer|between:1,3',
             // 'img_description'   => 'required|max:255'
         ]);
         //$item = Requirement::find($formatParams['id']);
