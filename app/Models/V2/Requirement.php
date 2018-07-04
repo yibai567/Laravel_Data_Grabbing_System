@@ -53,6 +53,7 @@ class Requirement extends Model
         'is_capture',
         'is_download_img',
         'img_description',
+        'company_id',
         'status',
         'updated_at',
         'category',
