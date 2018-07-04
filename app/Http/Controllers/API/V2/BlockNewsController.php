@@ -20,8 +20,7 @@ class BlockNewsController extends Controller
     {
         $quirements = InternalAPIV2Service::get('/quirements', []);
         $data = [];
-        if (!empty($quirements))
-        {
+        if (!empty($quirements)) {
             foreach ($quirements as $key => $value) {
                 $company = InternalAPIV2Service::get('/company/' . $value['company_id']);
                 $value['company_name'] = '';
