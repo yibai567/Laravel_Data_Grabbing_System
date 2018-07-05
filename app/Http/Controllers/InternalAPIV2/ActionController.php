@@ -58,7 +58,7 @@ class ActionController extends Controller
 
         $newData['images'] = [];
         if (!empty($projectResult['thumbnail'])) {
-            $thumbnail = json_decode($projectResult['thumbnail'],true);
+            $thumbnail = $projectResult['thumbnail'];
             foreach ($thumbnail as $key=>$url) {
                 $getSize = getimagesize($url);
                 $newData['images'][$key]['width'] = $getSize[0];
