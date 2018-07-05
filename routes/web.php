@@ -20,7 +20,7 @@ Route::group(
         Route::get('/ajax/update/group/status', 'WWW\WxMessageController@ajaxUpdateGroupStatus');
         Route::get('/ajax/update/status', 'WWW\WxMessageController@ajaxUpdateStatus');
 
-        Route::get('/', 'WWW\WxMessageController@newIndex');
+        Route::get('/', 'WWW\BlockNewsController@all');
         Route::get('/wx/room/message', 'WWW\WxMessageController@newIndex');
         Route::get('/wx/ajax/room/message/{id}', 'WWW\WxMessageController@ajaxMessageList');
 
