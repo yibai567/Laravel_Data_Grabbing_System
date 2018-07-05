@@ -700,7 +700,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         }
 
         if (!empty($data['row']['modules'])) {
-            $data['row']['modules'] =  "http://" . $_SERVER['HTTP_HOST'] . "/vendor/script/script_" . $id . ".js";
+            $data['row']['modules'] =  "http://" . $_SERVER['HTTP_HOST'] . "/vendor/script/script_" . $id . '_' . $data['row']['last_generate_at'] . ".js";
         }
 
         if ($data['row']['cron_type'] == Script::CRON_TYPE_KEEP) {
@@ -735,8 +735,12 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
                     $projects[] = '快讯列表';
                 } else if ($value == 2) {
                     $projects[] = '快讯详情';
-                } else {
+                } else if ($value == 3){
                     $projects[] = '行业新闻';
+                } else if ($value == 4) {
+                    $projects[] = '公告列表';
+                } else if ($value == 5) {
+                    $projects[] = '公告详情';
                 }
             }
             $data['row']['projects'] = json_encode($projects, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);

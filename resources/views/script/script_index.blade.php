@@ -189,7 +189,7 @@
         @endif
 
         @if($row->status == 2)
-            <a class='btn btn-xs btn-warning' target="_blank" title='下载' href="http://{{$_SERVER['HTTP_HOST']}}/vendor/script/script_{{$row->id}}.js" download >
+            <a class='btn btn-xs btn-warning' target="_blank" title='下载' href="http://{{$_SERVER['HTTP_HOST']}}/vendor/script/script_{{$row->id}}_{{$row->last_generate_at}}.js" download >
             <i class='glyphicon glyphicon-download'></i></a>
         @endif
 
