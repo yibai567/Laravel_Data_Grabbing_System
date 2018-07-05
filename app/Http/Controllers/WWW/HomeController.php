@@ -24,6 +24,6 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return redirect('/wx/room/message');
+        return redirect('/news');
     }
 }
