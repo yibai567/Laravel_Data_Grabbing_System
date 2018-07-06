@@ -488,6 +488,8 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
                 array_unshift($value, $key);
                 $newData[] = $value;
             }
+        } else {
+            $data['content'] = $formParams['content'];
         }
 
         $data['modules'] = $newData;

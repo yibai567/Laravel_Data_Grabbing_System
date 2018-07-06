@@ -60,7 +60,8 @@
                         <span class='text-danger' title='This field is required'>*</span>
                     </label>
                     <div class="col-xs-5">
-                        <input type='text' title="list_url" required maxlength='70' class='form-control' name="list_url" value='{{$row[list_url]}}'/>
+                        <textarea name="list_url" id="description" maxlength=5000 class='form-control' rows='2'>{{$row[list_url]}}</textarea>
+
                         <div class="text-danger"></div>
                         <p class='help-block'></p>
                     </div>
