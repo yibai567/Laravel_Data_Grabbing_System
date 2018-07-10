@@ -14,6 +14,7 @@ use App\Models\V2\ProjectResult;
 use App\Models\V2\TaskActionMap;
 use App\Models\V2\TaskRunLog;
 use App\Models\V2\Task;
+use App\Models\V2\Company;
 use App\Models\BlockNews;
 use App\Services\InternalAPIV2Service;
 use App\Services\ValidatorService;
@@ -73,7 +74,7 @@ class ActionController extends Controller
         $result = false;
         if (!empty($newData)) {
             //整理数据
-            $reportData['is_test'] = TaskRunLog::TYPE_TEST;
+            $reportData['is_test'] = TaskRunLog::TYPE_PRO;
             $reportData['result'] = json_encode([$newData], JSON_UNESCAPED_UNICODE);
             Log::debug('[InternalAPIV2 ActionController reportResult] reportData = ' , $reportData );
             try {
@@ -203,39 +204,39 @@ class ActionController extends Controller
         ValidatorService::check($params, [
             'project_result_id' => 'required|integer|max:999999999',
         ]);
-
-        //获取上报数据信息
         $projectResult = ProjectResult::find($params['project_result_id']);
-
         if (empty($projectResult)) {
-            Log::debug('[InternalAPIv2 ActionController reportResult] $projectResult is not found,project_result_id = ' . $params['project_result_id'] );
+            Log::debug('[InternalAPIv2 ActionController reportNoticeResult] $projectResult is not found,project_result_id = ' . $params['project_result_id'] );
+            return $this->resObjectGet(false, 'report_result', $request->path());
+        }
+        $task = Task::find($projectResult->task_id);
+        if (empty($task)) {
+            Log::debug('[InternalAPIv2 ActionController reportNoticeResult] $task is not found,task_id = ' . $task->task_id);
+            return $this->resObjectGet(false, 'report_result', $request->path());
+        }
+        $company = Company::find($task->company_id);
+        if (empty($company)) {
+            Log::debug('[InternalAPIv2 ActionController reportNoticeResult] $company is not found,company_id = ' . $company->company_id);
             return $this->resObjectGet(false, 'report_result', $request->path());
         }
 
-        $projectResult = $projectResult->toArray();
-
-        //整理上报数据
-        $newData = [];
-
-        $newData['title'] = $projectResult['title'];
-
-        $newData['task_id'] = $projectResult['task_id'];
-
-        if (!empty($projectResult['detail_url'])) {
-            $newData['url'] = $projectResult['detail_url'];
+        $newData['result']['title'] = $projectResult->title;
+        $newData['result']['url'] = $projectResult->detail_url;
+        $show_time = formatShowTime($projectResult->show_time);
+        if (!empty($projectResult->content)) {
+            $newData['result']['content'] = $projectResult->content;
         }
+        if (!empty($show_time)) {
+            $newData['result']['publish_time'] = date('Y-m-d H:i:s', $show_time);
+        }
+        $newData['result']['source'] = $company->en_name;
 
-        $newData['images'] = [];
-
-        $result = false;
         if (!empty($newData)) {
             //整理数据
-            $reportData['is_test'] = TaskRunLog::TYPE_TEST;
-            $reportData['result'] = json_encode([$newData], JSON_UNESCAPED_UNICODE);
-            Log::debug('[InternalAPIV2 ActionController reportResult] reportData = ' , $reportData );
+            Log::debug('[InternalAPIV2 ActionController reportResult] reportData = ' , $newData );
             try {
                 //调用上传数据接口
-                $result = InternalAPIV2Service::post('/notice/result/report', $reportData);
+                $result = InternalAPIV2Service::post('/notice/result/report', $newData);
             } catch (\Exception $e) {
                 Log::debug('[InternalAPIV2 ActionController reportNoticeResult] error message = ' . $e->getMessage());
                 return $this->resObjectGet($result, 'report_result', $request->path());
