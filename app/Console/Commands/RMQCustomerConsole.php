@@ -117,9 +117,9 @@ class RMQCustomerConsole extends Command
         return function($msg) use ($customerPath) {
             $message = json_decode($msg->body, true);
             $result = InternalAPIV2Service::post($customerPath, $message['body']);
-            if ($result) {
+            // if ($result) {
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-            }
+            // }
         };
     }
 }
