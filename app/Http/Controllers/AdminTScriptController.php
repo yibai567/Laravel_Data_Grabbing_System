@@ -704,7 +704,9 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         if (!empty($data['row']['modules'])) {
             $data['row']['modules'] =  "http://" . $_SERVER['HTTP_HOST'] . "/vendor/script/script_" . $id . '_' . $data['row']['last_generate_at'] . ".js";
         }
-
+        if (!empty($data['row']['content'])) {
+            $data['row']['content'] =  "http://" . $_SERVER['HTTP_HOST'] . "/vendor/script/script_" . $id . '_' . $data['row']['last_generate_at'] . ".js";
+        }
         if ($data['row']['cron_type'] == Script::CRON_TYPE_KEEP) {
             $data['row']['cron_type'] = '每分钟执行一次';
         } else if($data['row']['cron_type'] == Script::CRON_TYPE_EVERY_FIVE_MINUTES) {
@@ -753,7 +755,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         if (!empty($data['row']['actions'])) {
             $data['row']['actions'] = json_encode($data['row']['actions'], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
         }
-        // dd($data);
         $this->cbView('script/script_detail_view',$data);
     }
 

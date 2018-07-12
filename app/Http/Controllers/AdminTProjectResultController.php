@@ -4,6 +4,9 @@
 	use Request;
 	use DB;
 	use CRUDBooster;
+    use App\Models\V2\ProjectResult;
+    use App\Models\V2\Task;
+    use App\Models\V2\Company;
     use App\Services\InternalAPIV2Service;
 
 	class AdminTProjectResultController extends \crocodicstudio\crudbooster\controllers\CBController {
@@ -357,7 +360,7 @@
 
         public function getAgainReport($id) {
             try {
-                $result = InternalAPIV2Service::post('/action/report/notice_result', ['project_result_id' => intval($id)]);
+                $result = InternalAPIV2Service::post('/action/report/notice_result', ['project_result_id' => $id]);
             } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
