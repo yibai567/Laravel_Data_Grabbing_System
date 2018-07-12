@@ -61,18 +61,13 @@ if (!function_exists('decodeUnicode')) {
 }
 
 if (!function_exists('sign')) {
-    function sign($data) {
+    function sign($httpParams) {
         $dateTime = time();
         $accessKey = config('api_auth.access_secret');
         $secretKey = config('api_auth.secret');
-        $httpParams = [
-            'access_key' => $accessKey,
-            'date' => $dateTime,
-            'is_test' => $data['is_test'],
-            'result' => $data['result'],
-        ];
+        $httpParams['access_key'] = $accessKey;
+        $httpParams['date'] = $dateTime;
         $signParams = array_merge($httpParams, array('secret_key' => $secretKey));
-
         ksort($signParams);
         $signString = http_build_query($signParams);
         $httpParams['sign'] = strtolower(md5($signString));
@@ -152,6 +147,40 @@ if (!function_exists('jsonFormat')) {
         return $ret;
     }
 }
+
+/**
+ * formatShowTime
+ *
+ * @param
+ * @return int
+ */
+if (!function_exists('formatShowTime')) {
+    function formatShowTime($time)
+    {
+        $showTime = strtotime($time);
+
+        if ($showTime) {
+            return $showTime;
+        }
+
+        if (preg_match('/^\d+分钟/', $time)) {
+            preg_match('/^\d+/', $time, $result);
+            return time() - $result[0] * 60;
+        } elseif (preg_match('/^\d+小时/', $time)) {
+            preg_match('/^\d+/', $time, $result);
+            return time() - $result[0] * 60 * 60;
+        } elseif (preg_match('/^\d+秒/', $time)) {
+            preg_match('/^\d+/', $time, $result);
+            return time() - $result[0];
+        } elseif (preg_match('/^\d+天/', $time)) {
+            preg_match('/^\d+/', $time, $result);
+            return time() - $result[0] * 60 * 60 * 24;
+        }
+
+        return 0;
+    }
+}
+
 
 
 
