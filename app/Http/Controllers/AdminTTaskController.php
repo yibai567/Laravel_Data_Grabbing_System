@@ -21,7 +21,7 @@
 			$this->button_action_style = "button_icon";
 			$this->button_add = false;
 			$this->button_edit = false;
-			$this->button_delete = false;
+			$this->button_delete = true;
 			$this->button_detail = false;
 			$this->button_show = true;
 			$this->button_filter = true;
@@ -58,7 +58,7 @@
                 } else if ($row->cron_type == Task::CRON_TYPE_EVERY_TEN_MINUTES) {
                     return '每十分钟执行';
                 } else if ($row->cron_type == Task::CRON_TYPE_KEEP_ONCE){
-                    return '只执行一次';
+                    return '<span style="color:#f00">只执行一次</span>';
                 }
             }];
 
@@ -130,7 +130,7 @@
 	        */
 	        $this->addaction = array();
 
-            $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]'),'color'=>'success', 'icon'=>'fa fa-play', 'showIf'=>'[status] == 1'];
+            $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]'),'color'=>'success', 'icon'=>'fa fa-play', 'showIf'=>'[status] == 1 && [cron_type] != 4'];
 
         $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-down/[id]'),'color'=>'warning', 'icon'=>'fa fa-stop', 'showIf'=>'[status] == 2'];
 	        /*
@@ -191,8 +191,9 @@
 	        */
 	        $this->index_statistic = array();
 
-
-
+            $this->index_statistic[] = ['label'=>'casper启动中列表','count'=>Task::where('data_type', 1)->where('cron_type', '!=', 4)->where('status', 2)->where('deleted_at', null)->count(),'icon'=>'glyphicon glyphicon-tasks','color'=>'warning'];
+            $this->index_statistic[] = ['label'=>'html启动中列表','count'=>Task::where('data_type', 2)->where('cron_type', '!=', 4)->where('status', 2)->where('deleted_at', null)->count(),'icon'=>'glyphicon glyphicon-tasks','color'=>'info'];
+            $this->index_statistic[] = ['label'=>'api启动中列表','count'=>Task::where('data_type', 3)->where('cron_type', '!=', 4)->where('status', 2)->where('deleted_at', null)->count(),'icon'=>'glyphicon glyphicon-tasks','color'=>'success'];
 	        /*
 	        | ----------------------------------------------------------------------
 	        | Add javascript at body

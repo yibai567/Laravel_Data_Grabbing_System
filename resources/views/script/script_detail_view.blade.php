@@ -26,8 +26,12 @@
                             <tr><td>描述</td><td><span class='badge'>{{$row[description]}}</span> </td></tr>
                             <tr><td>列表URL</td><td>{{$row['list_url']}}</td></tr>
                             <tr><td>data_type</td><td>{{$row['data_type']}}</td></tr>
+                            @if (empty($row['content']))
                             <tr><td>casper配置</td><td><pre style='width:1000px;'>{{$row[casper_config]}}</pre></td></tr>
                             <tr><td>脚本</td><td><a href="{{$row['modules']}}" target="_blank">查看脚本</a></td></tr>
+                            @else
+                            <tr><td>脚本</td><td><a href="{{$row['content']}}" target="_blank">查看脚本</a></td></tr>
+                            @endif
                             <tr><td>项目</td><td><pre style='width:1000px;'>{{$row['projects']}}</pre></td></tr>
                             <tr><td>过滤器</td><td><pre style='width:1000px;'>{{$row['filters']}}</pre></td></tr>
                             <tr><td>actions</td><td><pre style='width:1000px;'>{{$row['actions']}}</pre></td></tr>
