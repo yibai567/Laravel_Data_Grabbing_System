@@ -115,4 +115,31 @@ class WxMessageController extends Controller
         $wxMessageGroup = $httpService->get(config('url.jinse_open_url') . '/v2/wx/room/message/' . $id);
         echo $wxMessageGroup->getContents();
     }
+
+    /**
+     * downloadMessageList
+     * 下载聊天记录文件
+     *
+     * @return array
+     */
+    public function downloadMessageList(Request $request, $id)
+    {
+        $httpService = new HttpService();
+        $wxMessageGroup = $httpService->get(config('url.jinse_open_url') . '/v2/wx/room/message/' . $id);
+        $messageList = $wxMessageGroup->getContents();
+        $message = json_decode($messageList, true);
+        if ($message['status_code'] != 200) {
+            return false;
+        }
+        if (count($message['data']) > 0) {
+            foreach ($message['data'] as $key => $value) {
+                echo '<hr />';
+                echo '发送人：' . $key .'<br>';
+                foreach ($value as $content) {
+                    echo $content['content'] .'</br>';
+                }
+            }
+            echo '<hr />';
+        }
+    }
 }

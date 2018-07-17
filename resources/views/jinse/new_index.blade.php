@@ -14,11 +14,13 @@
     @else
         <a href="http://{{$_SERVER['HTTP_HOST']}}/news" class="item" >行业最新新闻</a>
     @endif
+    <!--
     @if($data['nav_status'] == 'wx_message')
         <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/old" class="item active" >相对论信息</a>
     @else
         <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/old" class="item" >相对论信息</a>
     @endif
+    -->
     @if($data['nav_status'] == 'new_wx_message')
         <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message" class="item active" >新版相对论信息</a>
     @else
@@ -75,6 +77,7 @@
     <div class="ten wide column">
         <div class="ui visible message">
           <p id="p"></p>
+          <span id='all'><a href='' target="_blank">查看文本</a></span>
         </div>
 
         <div class="ui link cards" id="card">
@@ -112,6 +115,7 @@
                 }
                 $("#card").html(name);
                 $("#p").html("问题"+num+":     "+problem);
+                $("#all a").attr("href", '/wx/down/room/message/' + id);
             }
         })
     }
