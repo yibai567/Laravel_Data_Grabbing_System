@@ -61,7 +61,7 @@
             @foreach($data['data'] as $key=>$value)
               <div class="item">
                 <a class="ui orange right ribbon label">问题 {{$key+1}}</a>
-                <p>{{$value['content']}}</p>
+                <p>{!! $value['content'] !!}</p>
                 <div class="meta">
                     <div class="right floated content" onclick="getWxMessage({{$value['id']}}, {{$key+1}}, '{{$value['content']}}')">
                     <a class="ui basic left pointing label"><i class="angle right icon"></i></a>
