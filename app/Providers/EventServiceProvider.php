@@ -33,6 +33,10 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\ConverterTaskListener',
         ],
 
+        'App\Events\SaveAlarmResult' => [
+            'App\Listeners\SaveAlarmResultListener',
+        ],
+
         // SqlListener监听QueryExecuted
         'Illuminate\Database\Events\QueryExecuted' => [
             'App\Listeners\SqlListener',
