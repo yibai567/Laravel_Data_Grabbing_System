@@ -376,7 +376,7 @@ class WxMessageController extends Controller
     public function getMessageById(Request $request, $id)
     {
         $wxMessage = WxMessage::where('id', '>', $id)
-                                ->where('contact_name', '李雯@金色财经')
+                                ->where('contact_name', 'zoe')
                                 ->first();
         $res = WxMessage::where('id', '>', $id);
         if (!empty($wxMessage->id)) {
