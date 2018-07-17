@@ -359,7 +359,7 @@ class WxMessageController extends Controller
      */
     public function getGroupProblem(Request $request)
     {
-        $groupProblem = WxMessage::where('contact_name', '金色管理员')
+        $groupProblem = WxMessage::where('contact_name', 'zoe')
                                 ->orderBy('created_at', 'desc')
                                 ->get();
         $result = $groupProblem->toArray();
