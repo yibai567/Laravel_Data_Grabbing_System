@@ -72,10 +72,10 @@ class SaveAlarmResultListener implements ShouldQueue
             $rmq->publishFormart($params, $queue);
             $rmq->close();
         } catch (\Exception $e) {
-            Log::error('[ProjectResultListener handle error]:'."\t".$e->getCode()."\t".$e->getMessage());
+            Log::error('[SaveAlarmResultListener handle error]:'."\t".$e->getCode()."\t".$e->getMessage());
         }
 
-        Log::debug('[SaveDataListener handle] ------- end -------');
+        Log::debug('[SaveAlarmResultListener handle] ------- end -------');
         return true;
 
     }

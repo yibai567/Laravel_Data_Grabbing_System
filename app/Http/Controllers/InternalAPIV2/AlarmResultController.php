@@ -40,6 +40,30 @@ class AlarmResultController extends Controller
         if (empty($params['phone']) && empty($params['wework'])) {
             throw new \Dingo\Api\Exception\ResourceException('phone or wework is empty');
         }
+
+        //已发送的,6小时内之内超过三次就不再发送
+        $wheres = [];
+        $wheres[] = ['type', $params['type']];
+        $wheres[] = ['content', $params['content']];
+        $wheres[] = ['status', AlarmResult::STATUS_SUCCESS];
+        $wheres[] = ['send_at', '>', time() - 60 * 60 * 6];
+
+        if (!empty($params['phone'])) {
+            $wheres[] = ['phone', $params['phone']];
+        }
+
+        if (!empty($params['wework'])) {
+            $wheres[] = ['wework', $params['wework']];
+        }
+
+        $alarmResult = AlarmResult::where($wheres)
+                                ->get();
+        $alarmResultNum = count($alarmResult);
+
+        if ($alarmResultNum >= 3) {
+            return $this->resObjectGet(true, 'alarm_result', $request->path());
+        }
+
         try{
             $alarmResult = new AlarmResult();
             $alarmResult->type = $params['type'];
@@ -110,7 +134,6 @@ class AlarmResultController extends Controller
 
             $alarmResult->save();
 
-            Log::debug('企业微信发送的结果,result = ' . $result);
         } catch (\Exception $e) {
             Log::debug('[InternalAPIv2 AlarmResultController sendWeWork]  企业微信发送通知异常,message = ' . $e->getMessage());
             $alarmResult->status = AlarmResult::STATUS_FAIL;

@@ -39,6 +39,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('jinse:create_script_queue')->runInBackground()->withoutOverlapping(
             $createScriptQueue
         )->everyMinute();
+
+        $taskAlarmResult = 10; // 互斥锁存在时间，单位分钟
+        $schedule->command('task:crawl:over_time_alarm')->runInBackground()->withoutOverlapping(
+            $taskAlarmResult
+        )->everyTenMinutes();
     }
 
     /**

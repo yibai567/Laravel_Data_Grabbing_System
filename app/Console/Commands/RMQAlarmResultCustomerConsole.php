@@ -57,7 +57,7 @@ class RMQAlarmResultCustomerConsole extends Command
                 $queue = 'alarm_sms';
                 $customer_path = '/alarm_result/send_phone';
             } else {
-                Log::debug('[SaveAlarmResultListener handle] type is error');
+                Log::debug('[RMQAlarmResultCustomerConsole handle] type is error');
                 return false;
             }
 
