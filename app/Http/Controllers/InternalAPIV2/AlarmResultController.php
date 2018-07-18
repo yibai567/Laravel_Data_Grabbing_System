@@ -60,7 +60,7 @@ class AlarmResultController extends Controller
                                 ->get();
         $alarmResultNum = count($alarmResult);
 
-        if ($alarmResultNum >= 3) {
+        if ($alarmResultNum >= AlarmResult::MAX_SEND_NUM) {
             return $this->resObjectGet(true, 'alarm_result', $request->path());
         }
 

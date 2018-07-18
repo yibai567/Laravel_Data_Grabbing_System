@@ -18,6 +18,9 @@ class AlarmResult extends Model
     const TYPE_WEWORK = 1; // 企业微信
     const TYPE_PHONE = 2; // 手机
 
+    //一定时间内最大发送信息次数
+    const MAX_SEND_NUM = 3;
+
     protected $dates = ['deleted_at'];
 
     /**
