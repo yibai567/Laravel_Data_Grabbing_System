@@ -7,6 +7,7 @@ use App\Models\V2\Task;
 use App\Models\V2\TaskRunLog;
 use App\Services\InternalAPIV2Service;
 use Illuminate\Console\Command;
+use Log;
 
 class TaskCrawlOverTimeAlarm extends Command
 {
