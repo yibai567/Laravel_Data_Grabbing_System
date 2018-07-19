@@ -62,7 +62,7 @@ class Task extends Model
 
     public function taskStatistics()
     {
-        return $this->hasOne('App\Models\TaskStatistics', 'task_id', 'id');
+        return $this->hasOne('App\Models\V2\TaskLastRunLog', 'task_id', 'id');
     }
 
     public function script()

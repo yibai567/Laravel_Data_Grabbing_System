@@ -113,7 +113,7 @@ $api->version(
         $api->get('/datas/task_run_log_id','DataController@listByTaskRunLogId');
         $api->post('/datas/update/task_run_log_id','DataController@updateByTaskRunLogId');
 
-        $api->post('/task_statistics/update','TaskStatisticsController@update');
+        $api->post('/task_last_run_log/update','TaskLastRunLogController@update');
 
         $api->post('/task_run_log','TaskRunLogController@create');
         $api->post('/task_run_log/status/success','TaskRunLogController@updateStatusSuccess');
@@ -163,7 +163,9 @@ $api->version(
         $api->get('/data/ids','DataController@listByIds');
         $api->post('/data/update/task_run_log_id','DataController@updateByTaskRunLogId');
 
-        $api->post('/task_statistics/update','TaskStatisticsController@update');
+        $api->post('/task_last_run_log/update','TaskLastRunLogController@update');
+        $api->post('/statistics/converter','StatisticsController@converter');
+        $api->post('/statistics/task','StatisticsController@task');
 
         $api->post('/task_run_log','TaskRunLogController@create');
         $api->post('/task_run_log/status/success','TaskRunLogController@updateStatusSuccess');
@@ -217,5 +219,9 @@ $api->version(
         $api->post('/history_topic/update','HistoryTopicController@update');
         $api->get('/history_topics/company_id','HistoryTopicController@listByCompanyId');
         $api->post('/history_topics/crawl/company_id','HistoryTopicController@crawlDataByCompanyId');
+
+        $api->post('/alarm_result', 'AlarmResultController@create');
+        $api->post('/alarm_result/send_sms', 'AlarmResultController@sendSms');
+        $api->post('/alarm_result/send_wework', 'AlarmResultController@sendWeWork');
     }
 );

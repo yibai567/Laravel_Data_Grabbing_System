@@ -12,7 +12,7 @@ namespace App\Http\Controllers\InternalAPIV2;
 use App\Models\V2\Requirement;
 use App\Models\V2\ScriptModel;
 use App\Models\V2\Task;
-use App\Models\V2\TaskStatistics;
+use App\Models\V2\TaskLastRunLog;
 use App\Services\FileService;
 use App\Services\InternalAPIV2Service;
 use Illuminate\Support\Facades\DB;
@@ -270,7 +270,6 @@ class ScriptController extends Controller
 
         //查询script数据
         $script = Script::find($params['id']);
-
         //判断script数据是否存在
         if (empty($script)) {
             throw new \Dingo\Api\Exception\ResourceException('$script is not found');
@@ -303,11 +302,11 @@ class ScriptController extends Controller
             }
 
             //生成task_statistics
-            $taskStatistics = new TaskStatistics;
+            $taskLastRunLog = new TaskLastRunLog;
 
-            $taskStatistics->task_id = $result['id'];
+            $taskLastRunLog->task_id = $result['id'];
 
-            $taskStatistics->save();
+            $taskLastRunLog->save();
         } catch (\Exception $e) {
 
             Log::error('publishScript    Exception:' . "\t" . $e->getCode() . "\t" . $e->getMessage());

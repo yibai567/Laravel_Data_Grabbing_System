@@ -2,33 +2,32 @@
 
 namespace App\Models\V2;
 
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class TaskStatistics extends Model
+class WechatCoinNews extends Model
 {
     use SoftDeletes;
-
-    const TYPE_TASK = 1; //任务
 
     protected $dates = ['deleted_at'];
 
     /**
      * 表名
      */
-    protected $table = 't_task_statistics';
+    protected $table = 't_wechat_coin_news';
 
     /**
      * 可更新的字段
      */
     protected $fillable = [
-        'task_id',
-        'last_job_at',
-        'data_type',
-        'is_proxy',
-        'cron_type',
-        'status',
-        'total_result',
+        'coin_name',
+        'title',
+        'detail_url',
+        'description',
+        'wechat_subscription_number',
+        'publish_time',
+        'md5_all'
     ];
 
     /**

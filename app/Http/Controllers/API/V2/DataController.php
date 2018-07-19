@@ -56,7 +56,7 @@ class DataController extends Controller
             $taskId = $taskRunLog['task_id'];
             $updateTaskStatisticsData['task_id'] = $taskId;
             //记录脚本运行记录
-            $result = InternalAPIV2Service::post('/task_statistics/update', $updateTaskStatisticsData);
+            $result = InternalAPIV2Service::post('/task_last_run_log/update', $updateTaskStatisticsData);
 
             if (!$result) {
 

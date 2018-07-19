@@ -11,7 +11,9 @@ namespace App\Http\Controllers\InternalAPIV2;
 
 use App\Models\V2\Task;
 use App\Models\V2\Script;
+use App\Models\V2\TaskStatistics;
 use App\Services\ValidatorService;
+use App\Events\StatisticsEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Log;
@@ -76,7 +78,11 @@ class TaskController extends Controller
             Log::error('TaskProjectMap create  Exception:' . "\t" . $e->getCode() . "\t" . $e->getMessage());
             throw new \Dingo\Api\Exception\ResourceException("create Task is failed");
         }
-
+        $newData = [
+            "type" => TaskStatistics::TYPE_TASK,
+            "data" => ["task_id" => $result['id'] ]
+        ];
+        event(new StatisticsEvent($newData));
         return $this->resObjectGet($result, 'task', $request->path());
     }
 
