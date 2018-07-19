@@ -60,6 +60,7 @@ class TaskCrawlOverTimeAlarm extends Command
             $taskRunLog = TaskRunLog::select('end_job_at')
                                     ->where('task_id', $task['id'])
                                     ->where('status', TaskRunLog::STATUS_SUCCESS)
+                                    ->orderBy('id', 'desc')
                                     ->first();
             if (empty($taskRunLog)) {
                 Log::debug('[TaskCrawlOverTimeAlarm handle] $taskRunLog is not exist, task_run_log_id = ' . $task['id']);
