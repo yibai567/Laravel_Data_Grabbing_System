@@ -10,6 +10,8 @@
 namespace App\Http\Controllers\InternalAPIV2;
 
 use App\Models\V2\Data;
+use App\Models\V2\TaskStatistics;
+use App\Events\StatisticsEvent;
 use Log;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
@@ -108,7 +110,11 @@ class DataController extends Controller
             $datum = Data::create($createData);
             $result['data'][]['id'] =  $datum->id;
         }
-
+        $newData = [
+            "type" => TaskStatistics::TYPE_TASK,
+            "data" => ["task_id" => $params['task_id'], "task_run_log_id" => $params['task_run_log_id']]
+        ];
+        event(new StatisticsEvent($newData));
         return $this->resObjectGet($result, 'data', $request->path());
     }
 

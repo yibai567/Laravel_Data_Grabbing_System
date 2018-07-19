@@ -1,6 +1,6 @@
 <?php
 /**
- * TaskStatisticsController
+ * TaskLastRunLogController
  * 任务记录控制器
  * @author liqi@jinse.com
  * @version 1.0
@@ -14,7 +14,7 @@ use Log;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 
-class TaskStatisticsController extends Controller
+class TaskLastRunLogController extends Controller
 {
     /**
      * update
@@ -35,10 +35,9 @@ class TaskStatisticsController extends Controller
         try {
             //查看task信息
             $task = Task::where('id',$params['task_id'])->first();
-
             //检测task是否存在
             if (empty($task)) {
-                Log::error('[internal TaskStatisticsController update] task is not found,id = '.$params['task_id']);
+                Log::error('[internal TaskLastRunLogController update] task is not found,id = '.$params['task_id']);
 
                 throw new \Dingo\Api\Exception\ResourceException('$task is not found');
             }
@@ -48,7 +47,7 @@ class TaskStatisticsController extends Controller
 
             //检测taskStatistics是否存在
             if (empty($taskStatistics)) {
-                Log::error('[internal TaskStatisticsController update] taskStatistics is not found');
+                Log::error('[internal TaskLastRunLogController update] taskLastRunLog is not found');
 
                 throw new \Dingo\Api\Exception\ResourceException('$taskStatistics is not found');
             }
