@@ -5,18 +5,16 @@ namespace App\Models\V2;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class TaskStatistics extends Model
+class TaskLastRunLog extends Model
 {
     use SoftDeletes;
-
-    const TYPE_TASK = 1; //任务
 
     protected $dates = ['deleted_at'];
 
     /**
      * 表名
      */
-    protected $table = 't_task_statistics';
+    protected $table = 't_task_last_run_log';
 
     /**
      * 可更新的字段
@@ -24,11 +22,9 @@ class TaskStatistics extends Model
     protected $fillable = [
         'task_id',
         'last_job_at',
-        'data_type',
-        'is_proxy',
-        'cron_type',
+        'run_times',
+        'result_count',
         'status',
-        'total_result',
     ];
 
     /**

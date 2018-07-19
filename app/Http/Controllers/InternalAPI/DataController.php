@@ -57,7 +57,7 @@ class DataController extends Controller
 
         $updateTaskStatisticsData['task_id'] = $taskId;
         //记录脚本运行记录
-        $result = InternalAPIService::post('/task_statistics/update', $updateTaskStatisticsData);
+        $result = InternalAPIService::post('/task_last_run_log/update', $updateTaskStatisticsData);
 
         if (!$result) {
             Log::debug('[DataController batchCreate] update task statistics is failed,task_id : '.$taskId);
