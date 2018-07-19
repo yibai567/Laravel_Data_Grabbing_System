@@ -25,16 +25,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $crawlTaskAutomate = 1; // 互斥锁存在时间，单位分钟
-        $schedule->command('crawl:task:automate')->runInBackground()->withoutOverlapping(
-            $crawlTaskAutomate
-        )->everyMinute();
-
-        $itemCrawlAlarm = 1; // 互斥锁存在时间，单位分钟
-        $schedule->command('item:crawl:alarm')->runInBackground()->withoutOverlapping(
-            $itemCrawlAlarm
-        )->everyMinute();
-
         $createScriptQueue = 1; // 互斥锁存在时间，单位分钟
         $schedule->command('jinse:create_script_queue')->runInBackground()->withoutOverlapping(
             $createScriptQueue

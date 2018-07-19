@@ -53,7 +53,7 @@ class SaveAlarmResultListener implements ShouldQueue
         }
         $option = [
             'server' => [
-                'vhost' => 'test',
+                'vhost' => 'crawl',
             ],
             'type' => 'direct',
             'exchange' => 'alarm',

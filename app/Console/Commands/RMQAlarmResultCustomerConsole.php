@@ -48,8 +48,6 @@ class RMQAlarmResultCustomerConsole extends Command
                 return false;
             }
 
-            $exchangeType = 'direct';
-
             if ($type == AlarmResult::TYPE_WEWORK) {
                 $queue = 'alarm_wework';
                 $customer_path = '/alarm_result/send_wework';
@@ -63,9 +61,9 @@ class RMQAlarmResultCustomerConsole extends Command
 
             $option = [
                 'server' => [
-                    'vhost' => 'test',
+                    'vhost' => 'crawl',
                 ],
-                'type' => $exchangeType,
+                'type' => 'direct',
                 'exchange' => 'alarm',
                 'queue' => $queue,
                 'name' => 'RMQAlarmResultCustomerConsole' . $type
