@@ -103,5 +103,7 @@ $api->version(
         $api->get('/news','BlockNewsController@all');
         // $api->get('/news/{requirement_id}','BlockNewsController@getByRequirementId');
 
+        $api->post('/wechat_server_log','WechatServerController@createLog');
+        $api->post('/wechat_server/stop','WechatServerController@stop');
     }
 );

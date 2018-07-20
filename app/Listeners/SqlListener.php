@@ -30,6 +30,6 @@ class SqlListener
 
         $log = '[' . date('Y-m-d H:i:s') . '] ' . $log . "\r\n";
         $filepath = storage_path('logs/sql.log');
-        file_put_contents($filepath, $log, FILE_APPEND);
+        // file_put_contents($filepath, $log, FILE_APPEND);
     }
 }
