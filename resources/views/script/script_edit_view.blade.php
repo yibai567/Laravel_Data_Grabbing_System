@@ -197,7 +197,7 @@
                         </label>
                         <div class="col-sm-10">
 
-                            <textarea name="content" id="content" maxlength=5000 required class='form-control' style="height:400px;display: block;color: #428bca;">{{$row['content']}}</textarea>
+                            <textarea name="content" id="content" maxlength=10000 required class='form-control' style="height:400px;display: block;color: #428bca;">{{$row['content']}}</textarea>
                             <div class="text-danger"></div>
                             <p class='help-block'></p>
                         </div>
