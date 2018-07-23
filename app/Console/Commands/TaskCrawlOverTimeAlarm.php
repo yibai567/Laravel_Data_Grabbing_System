@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\V2\AlarmResult;
 use App\Models\V2\Task;
-use App\Models\V2\TaskRunLog;
+use App\Models\V2\TaskLastRunLog;
 use App\Services\InternalAPIV2Service;
 use Illuminate\Console\Command;
 use Log;
@@ -57,24 +57,24 @@ class TaskCrawlOverTimeAlarm extends Command
 
         //查询执行脚本最后一次完成时间
         foreach($taskList as $task) {
-            $taskRunLog = TaskRunLog::select('end_job_at')
+            $taskLastRunLog = TaskLastRunLog::select('last_job_at')
                                     ->where('task_id', $task['id'])
-                                    ->where('status', TaskRunLog::STATUS_SUCCESS)
                                     ->orderBy('id', 'desc')
                                     ->first();
-            if (empty($taskRunLog)) {
-                Log::debug('[TaskCrawlOverTimeAlarm handle] $taskRunLog is not exist, task_run_log_id = ' . $task['id']);
+            if (empty($taskLastRunLog)) {
+                Log::debug('[TaskCrawlOverTimeAlarm handle] $taskLastRunLog is not exist, task_id = ' . $task['id']);
                 continue;
             }
             //判断任务最后一次执行时间是否超过15分钟
-            $lastJobAt = strtotime($taskRunLog->end_job_at);
+            $lastJobAt = strtotime($taskLastRunLog->last_job_at);
 
             if ($this->time - $lastJobAt < 60 * 15) {
                 continue;
             }
+
             $data = [];
             $data['type'] = AlarmResult::TYPE_WEWORK;
-            $data['content'] = '任务已超过15分钟未执行成功,任务id: ' . $task['id'] . ',脚本id: ' . $task['script_id'] . ',脚本名称: ' . $task['name'] . ',最后执行成功时间: ' . $taskRunLog->end_job_at;
+            $data['content'] = '任务已超过15分钟未执行成功,任务id: ' . $task['id'] . ',脚本id: ' . $task['script_id'] . ',脚本名称: ' . $task['name'] . ',最后执行时间: ' . $taskLastRunLog->last_job_at;
             $data['wework'] = config('alarm.alarm_recipient');
 
             $result = InternalAPIV2Service::post('/alarm_result', $data);
