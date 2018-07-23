@@ -36,7 +36,9 @@ class AdminTAlarmResultController extends \crocodicstudio\crudbooster\controller
         $this->col[] = ["label"=>"发送内容","name"=>"content"];
         $this->col[] = ["label"=>"手机号","name"=>"phone"];
         $this->col[] = ["label"=>"企业微信号","name"=>"wework"];
-        $this->col[] = ["label"=>"发送时间","name"=>"send_at"];
+        $this->col[] = ["label"=>"发送时间","name"=>"send_at","callback"=>function ($row) {
+            return date("Y-m-d H:i:s",$row->send_at);
+        }];
         $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
             if ( $row->status == AlarmResult::STATUS_SEND) {
                 return '发送中';
