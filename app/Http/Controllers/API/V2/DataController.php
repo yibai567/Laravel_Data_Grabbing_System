@@ -42,6 +42,10 @@ class DataController extends Controller
             return $this->resObjectGet(true, 'data', $request->path());
         }
 
+        $resParams = [
+            'company' => $params['company'],
+            'task_run_log_id' => $params['task_run_log_id']
+        ];
         try {
             //调取根据task_run_log_id查询task_run_log信息
             $selectTaskRunLogData['id'] = $params['task_run_log_id'];
@@ -54,6 +58,7 @@ class DataController extends Controller
 
             //查询taskRunLog对应的taskId
             $taskId = $taskRunLog['task_id'];
+            $resParams['task_id'] = $taskId;
             $updateTaskStatisticsData['task_id'] = $taskId;
             //记录脚本运行记录
             $result = InternalAPIV2Service::post('/task_last_run_log/update', $updateTaskStatisticsData);
@@ -89,12 +94,12 @@ class DataController extends Controller
             $updateTaskRunLogData['id'] = $params['task_run_log_id'];
             //更改task_runRunLog状态
             InternalAPIV2Service::post('/task_run_log/status/fail', $updateTaskRunLogData);
-
+            Log::debug('[v2 DataController batchHandle] resParams = ', $resParams);
             return $this->resObjectGet(false, 'data', $request->path());
         }
 
-
-        return $this->resObjectGet(true, 'data', $request->path());
+        Log::debug('[v2 DataController batchHandle] resParams = ', $resParams);
+        return $this->resObjectGet($resParams, 'data', $request->path());
     }
 
 }

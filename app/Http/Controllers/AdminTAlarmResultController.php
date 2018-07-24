@@ -31,12 +31,18 @@ class AdminTAlarmResultController extends \crocodicstudio\crudbooster\controller
 
         # START COLUMNS DO NOT REMOVE THIS LINE
         $this->col = [];
-        $this->col[] = ["label"=>"ID","name"=>"id"];
-        $this->col[] = ["label"=>"类型","name"=>"type"];
-        $this->col[] = ["label"=>"发送内容","name"=>"content"];
-        $this->col[] = ["label"=>"手机号","name"=>"phone"];
-        $this->col[] = ["label"=>"企业微信号","name"=>"wework"];
-        $this->col[] = ["label"=>"发送时间","name"=>"send_at","callback"=>function ($row) {
+        $this->col[] = ["label"=>"ID","name"=>"id","width"=>"50"];
+        $this->col[] = ["label"=>"类型","name"=>"type","width"=>"100","callback"=>function ($row) {
+            if ($row->type = AlarmResult::TYPE_WEWORK) {
+                return '企业微信';
+            } else if ($row->type = AlarmResult::TYPE_PHONE) {
+                return '手机号';
+            }
+        }];
+
+        $this->col[] = ["label"=>"企业微信号","name"=>"wework", "width"=>"300"];
+        $this->col[] = ["label"=>"发送内容","width"=>"600","name"=>"content"];
+        $this->col[] = ["label"=>"发送时间","name"=>"send_at","width"=>"200","callback"=>function ($row) {
             return date("Y-m-d H:i:s",$row->send_at);
         }];
         $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
@@ -156,8 +162,7 @@ class AdminTAlarmResultController extends \crocodicstudio\crudbooster\controller
         |
         */
         $this->index_statistic = array();
-
-
+        $this->index_statistic[] = ['label'=>'企业微信','count'=>AlarmResult::where('type', AlarmResult::TYPE_WEWORK)->count(),'icon'=>'glyphicon glyphicon-send','color'=>'btn btn-xs btn-success'];
 
         /*
         | ----------------------------------------------------------------------
