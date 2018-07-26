@@ -222,12 +222,12 @@ class ActionController extends Controller
 
         $newData['result']['title'] = $projectResult->title;
         $newData['result']['url'] = $projectResult->detail_url;
-        $show_time = formatShowTime($projectResult->show_time);
+
         if (!empty($projectResult->content)) {
             $newData['result']['content'] = $projectResult->content;
         }
         if (!empty($show_time)) {
-            $newData['result']['publish_time'] = date('Y-m-d H:i:s', $show_time);
+            $newData['result']['publish_time'] = $projectResult->show_time;
         }
         $newData['result']['source'] = $company->en_name;
 
