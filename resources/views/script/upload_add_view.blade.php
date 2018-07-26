@@ -41,7 +41,7 @@
                             <span class='text-danger' title='This field is required'>*</span>
                         </label>
                         <div class="col-xs-5">
-                            <input type='text' title="list_url" required maxlength='70' class='form-control' name="list_url" value=''/>
+                            <textarea name="list_url" maxlength=5000 class='form-control' rows='2'></textarea>
                             <div class="text-danger"></div>
                             <p class='help-block'></p>
                         </div>

@@ -35,6 +35,13 @@
 			$this->col[] = ["label"=>"公司名","name"=>"company"];
 			$this->col[] = ["label"=>"标题","name"=>"title",'width'=>'30%'];
             $this->col[] = ["label"=>"地址","name"=>"detail_url"];
+            $this->col[] = ["label"=>"发布时间","name"=>"show_time","callback"=>function ($row) {
+                if (is_numeric($row->show_time)) {
+                    return $row->show_time = date('Y-m-d H:i:s', $row->show_time/1000);
+                } else {
+                    return $row->show_time;
+                }
+            }];
 			$this->col[] = ["label"=>"创建时间","name"=>"created_at"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 

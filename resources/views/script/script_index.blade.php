@@ -151,6 +151,7 @@
   <thead>
       <tr>
         <th>ID</th>
+        <th>需求ID</th>
         <th>任务名称</th>
         <th>data类型</th>
         <th>最后生成时间</th>
@@ -162,6 +163,7 @@
     @foreach($result as $row)
       <tr>
         <td>{{$row->id}}</td>
+        <td>{{$row->requirement_pool_id}}</td>
         <td>{{$row->name}}</td>
         @if ($row->data_type == 1)
             <td>casperJs</td>
