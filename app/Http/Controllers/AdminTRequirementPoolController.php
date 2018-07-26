@@ -222,9 +222,9 @@
 	        |
 	        */
 	        $this->index_statistic = array();
-
-
-
+            $this->index_statistic[] = ['label'=>'新闻','count'=>Requirement::where('category', 1)->count(),'color'=>'btn btn-xs btn-success'];
+            $this->index_statistic[] = ['label'=>'历史数据','count'=>Requirement::where('category', 2)->count(),'color'=>'btn btn-xs btn-warning'];
+            $this->index_statistic[] = ['label'=>'订阅','count'=>Requirement::where('category', 3)->count(),'color'=>'btn btn-xs btn-info'];
 	        /*
 	        | ----------------------------------------------------------------------
 	        | Add javascript at body
