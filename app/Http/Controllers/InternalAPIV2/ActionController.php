@@ -37,7 +37,6 @@ class ActionController extends Controller
             'project_result_id' => 'required|integer|max:999999999',
         ]);
 
-        //获取上报数据信息
         $projectResult = ProjectResult::find($params['project_result_id']);
 
         if (empty($projectResult)) {
@@ -45,91 +44,42 @@ class ActionController extends Controller
             return $this->resObjectGet(false, 'report_result', $request->path());
         }
 
-        $projectResult = $projectResult->toArray();
-        //整理上报数据
-        $newData = [];
-
-        $newData['title'] = $projectResult['title'];
-
-        $newData['task_id'] = $projectResult['task_id'];
-
-        if (!empty($projectResult['detail_url'])) {
-            $newData['url'] = $projectResult['detail_url'];
+        $task = Task::find($projectResult->task_id);
+        if (empty($task)) {
+            Log::debug('[InternalAPIv2 ActionController reportResult] $task is not found,task_id = ' . $task->task_id);
+            return $this->resObjectGet(false, 'report_result', $request->path());
         }
 
-        $newData['images'] = [];
-        if (!empty($projectResult['thumbnail'])) {
-            $thumbnail = $projectResult['thumbnail'];
-            foreach ($thumbnail as $key=>$url) {
-                $getSize = getimagesize($url);
-                $newData['images'][$key]['width'] = $getSize[0];
-                $newData['images'][$key]['height'] = $getSize[1];
-                $newData['images'][$key]['url'] = $url;
-            }
+        $company = Company::find($task->company_id);
+        if (empty($company)) {
+            Log::debug('[InternalAPIv2 ActionController reportResult] $company is not found,company_id = ' . $company->company_id);
+            return $this->resObjectGet(false, 'report_result', $request->path());
         }
 
-        if (!empty($projectResult['screenshot'])) {
-            $newData['screenshot'] = $projectResult['screenshot'];
+        $newData['result']['title'] = $projectResult->title;
+        $newData['result']['url'] = $projectResult->detail_url;
+        if (!empty($projectResult->content)) {
+            $newData['result']['content'] = $projectResult->content;
         }
+
+        $newData['result']['publish_time'] = $projectResult->show_time;
+        $newData['result']['source'] = $company->en_name;
+
         $result = false;
         if (!empty($newData)) {
             //整理数据
-            $reportData['is_test'] = TaskRunLog::TYPE_PRO;
-            $reportData['result'] = json_encode([$newData], JSON_UNESCAPED_UNICODE);
-            Log::debug('[InternalAPIV2 ActionController reportResult] reportData = ' , $reportData );
+            Log::debug('[InternalAPIV2 ActionController reportResult] reportData = ' , $newData );
             try {
                 //调用上传数据接口
-                $result = InternalAPIV2Service::post('/item/result/report', $reportData);
-            } catch (\Exception $e) {
-                Log::debug('[InternalAPIV2 ActionController reportResult] error message = ' . $e->getMessage());
-            }
-        }
-
-        return $this->resObjectGet($result, 'report_result', $request->path());
-     }
-
-    private function __formatReportResult($projectResult, $request) {
-        //整理上报数据
-        $newData = [];
-
-        $newData['title'] = $projectResult['title'];
-
-        $newData['task_id'] = $projectResult['task_id'];
-
-        if (!empty($projectResult['detail_url'])) {
-            $newData['url'] = $projectResult['detail_url'];
-        }
-
-        $newData['images'] = [];
-        if (!empty($projectResult['thumbnail'])) {
-            $thumbnail = json_decode($projectResult['thumbnail'],true);
-            foreach ($thumbnail as $key=>$url) {
-                $getSize = getimagesize($url);
-                $newData['images'][$key]['width'] = $getSize[0];
-                $newData['images'][$key]['height'] = $getSize[1];
-                $newData['images'][$key]['url'] = $url;
-            }
-        }
-
-        if (!empty($projectResult['screenshot'])) {
-            $newData['screenshot'] = $projectResult['screenshot'];
-        }
-        $result = false;
-        if (!empty($newData)) {
-            //整理数据
-            $reportData['is_test'] = TaskRunLog::TYPE_TEST;
-            $reportData['result'] = json_encode([$newData], JSON_UNESCAPED_UNICODE);
-            Log::debug('[InternalAPIV2 ActionController reportResult] reportData = ' , $reportData );
-            try {
-                //调用上传数据接口
-                $result = InternalAPIV2Service::post('/item/result/report', $reportData);
+                $result = InternalAPIV2Service::post('/notice/result/report', $newData);
             } catch (\Exception $e) {
                 Log::debug('[InternalAPIV2 ActionController reportResult] error message = ' . $e->getMessage());
                 return $this->resObjectGet($result, 'report_result', $request->path());
             }
         }
-        return $result;
-    }
+        return $this->resObjectGet($result, 'report_notice_result', $request->path());
+     }
+
 
     /**
      * converterTask
@@ -222,15 +172,13 @@ class ActionController extends Controller
 
         $newData['result']['title'] = $projectResult->title;
         $newData['result']['url'] = $projectResult->detail_url;
-        $show_time = formatShowTime($projectResult->show_time);
         if (!empty($projectResult->content)) {
             $newData['result']['content'] = $projectResult->content;
         }
-        if (!empty($show_time)) {
-            $newData['result']['publish_time'] = date('Y-m-d H:i:s', $show_time);
-        }
+        $newData['result']['publish_time'] = $projectResult->show_time;
         $newData['result']['source'] = $company->en_name;
 
+        $result = false;
         if (!empty($newData)) {
             //整理数据
             Log::debug('[InternalAPIV2 ActionController reportResult] reportData = ' , $newData );

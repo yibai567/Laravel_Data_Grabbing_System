@@ -75,7 +75,6 @@ class DataController extends Controller
             } else {
                 $row = Data::where('md5_title', $value['md5_title'])->where('task_id',$params['task_id'])->first();
             }
-
             //内容已存在,更新信息
             if (!empty($row)) {
                 continue;
@@ -83,6 +82,12 @@ class DataController extends Controller
 
             if (!empty($value['images'])) {
                 $value['images'] = explode(',', $value['images']);
+            }
+
+            if (!empty($value['show_time'])) {
+                $showTime = formatShowTime($value['show_time']);
+
+                $value['show_time'] = date('Y-m-d H:i:s', $showTime);
             }
 
             //整理保存数据

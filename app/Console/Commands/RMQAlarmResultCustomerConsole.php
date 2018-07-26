@@ -63,7 +63,7 @@ class RMQAlarmResultCustomerConsole extends Command
 
             $option = [
                 'server' => [
-                    'vhost' => 'test',
+                    'vhost' => 'crawl',
                 ],
                 'type' => $exchangeType,
                 'exchange' => 'alarm',

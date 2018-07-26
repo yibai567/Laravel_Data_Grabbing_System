@@ -69,6 +69,7 @@ class DataController extends Controller
             }
 
             $params['task_id'] = $taskId;
+
             $data = InternalAPIV2Service::post('/data', $params);
             Log::debug('[v2 DataController batchHandle] $data = ', $data);
 
