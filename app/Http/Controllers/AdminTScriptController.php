@@ -43,6 +43,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 		# START COLUMNS DO NOT REMOVE THIS LINE
 		$this->col = [];
         $this->col[] = ["label"=>"Id","name"=>"id"];
+        $this->col[] = ["label"=>"需求池ID","name"=>"requirement_pool_id"];
 		$this->col[] = ["label"=>"name","name"=>"name"];
         $this->col[] = ["label"=>"数据类型","name"=>"data_type","callback"=>function ($row) {
             if( $row->data_type == Script::DATA_TYPE_CASPERJS) {
