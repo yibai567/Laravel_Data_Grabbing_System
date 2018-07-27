@@ -26,6 +26,7 @@
     @else
         <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message" class="item" >新版相对论信息</a>
     @endif
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/text" target="_blank" class="item" >相对论文本链接</a>
     @guest
     <a class="ui item right" href="http://{{$_SERVER['HTTP_HOST']}}/login">登陆</a>
     @else

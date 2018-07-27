@@ -8,6 +8,7 @@ use App\Services\ValidatorService;
 use App\Services\HttpService;
 use Log;
 use DB;
+use App\Models\V2\WxMessage;
 
 class WxMessageController extends Controller
 {
@@ -140,6 +141,50 @@ class WxMessageController extends Controller
                 }
             }
             echo '<hr />';
+        }
+    }
+
+    public function text(Request $request)
+    {
+        $ask = WxMessage::where('contact_name', 'zoe')->get();
+        $askCount = count($ask);
+        if ($askCount > 0) {
+            $ask = $ask->toArray();
+            $i = 1;
+            if ($i == count($ask)) {
+                return false;
+            }
+            foreach ($ask as $value) {
+
+                echo '<hr />';
+                echo '问题' . $i . '：' . strip_tags($value['content']) . "</br>";
+                $nextId = '9999';
+                if ($i < $askCount) {
+                    $nextId = $ask[$i]['id'];
+                }
+                $answer = WxMessage::where('id', '>', $value['id'])
+                        ->where('id', '<', $nextId)
+                        ->orderBy('created_at', 'asc')
+                        ->get();
+                if (count($answer) > 0) {
+                    $answer = $answer->toArray();
+                    $contactNames = array_unique(array_pluck($answer, 'contact_name'));
+                    $data = [];
+                    foreach ($answer as $key => $value) {
+                        if (in_array($value['contact_name'], $contactNames)) {
+                            $data[$value['contact_name']][] = $value;
+                        }
+                    }
+                }
+                foreach ($data as $key => $value) {
+                    echo '<br />发送人：' . $key .'<br>';
+                    foreach ($value as $content) {
+                        $content = preg_replace("/\&lt;msg&gt;(.*?)\/msg&gt;/si", "", $content['content']);
+                        echo strip_tags($content) .'</br>';
+                    }
+                }
+                $i++;
+            }
         }
     }
 }
