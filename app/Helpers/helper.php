@@ -157,6 +157,10 @@ if (!function_exists('jsonFormat')) {
 if (!function_exists('formatShowTime')) {
     function formatShowTime($time)
     {
+        if(strtotime(date('Y-m-d H:i:s',$time)) === $time) {
+            return $time;
+        }
+
         $showTime = strtotime($time);
 
         if ($showTime) {
