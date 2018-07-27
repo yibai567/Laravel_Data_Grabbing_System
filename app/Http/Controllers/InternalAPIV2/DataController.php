@@ -84,11 +84,6 @@ class DataController extends Controller
                 $value['images'] = explode(',', $value['images']);
             }
 
-            if (!empty($value['show_time'])) {
-                $showTime = formatShowTime($value['show_time']);
-
-                $value['show_time'] = date('Y-m-d H:i:s', $showTime);
-            }
 
             //整理保存数据
             $createData = [
