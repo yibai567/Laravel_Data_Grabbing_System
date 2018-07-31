@@ -88,48 +88,6 @@ class ActionController extends Controller
         return $this->resObjectGet($result, 'report_result', $request->path());
      }
 
-    private function __formatReportResult($projectResult, $request) {
-        //整理上报数据
-        $newData = [];
-
-        $newData['title'] = $projectResult['title'];
-
-        $newData['task_id'] = $projectResult['task_id'];
-
-        if (!empty($projectResult['detail_url'])) {
-            $newData['url'] = $projectResult['detail_url'];
-        }
-
-        $newData['images'] = [];
-        if (!empty($projectResult['thumbnail'])) {
-            $thumbnail = json_decode($projectResult['thumbnail'],true);
-            foreach ($thumbnail as $key=>$url) {
-                $getSize = getimagesize($url);
-                $newData['images'][$key]['width'] = $getSize[0];
-                $newData['images'][$key]['height'] = $getSize[1];
-                $newData['images'][$key]['url'] = $url;
-            }
-        }
-
-        if (!empty($projectResult['screenshot'])) {
-            $newData['screenshot'] = $projectResult['screenshot'];
-        }
-        $result = false;
-        if (!empty($newData)) {
-            //整理数据
-            $reportData['is_test'] = TaskRunLog::TYPE_TEST;
-            $reportData['result'] = json_encode([$newData], JSON_UNESCAPED_UNICODE);
-            Log::debug('[InternalAPIV2 ActionController reportResult] reportData = ' , $reportData );
-            try {
-                //调用上传数据接口
-                $result = InternalAPIV2Service::post('/item/result/report', $reportData);
-            } catch (\Exception $e) {
-                Log::debug('[InternalAPIV2 ActionController reportResult] error message = ' . $e->getMessage());
-                return $this->resObjectGet($result, 'report_result', $request->path());
-            }
-        }
-        return $result;
-    }
 
     /**
      * converterTask
@@ -231,7 +189,7 @@ class ActionController extends Controller
             $time = formatShowTime($show_time);
 
             if ($time) {
-                $newData['result']['publish_time'] = $projectResult->show_time;
+                $newData['result']['publish_time'] = date('Y-m-d H:i:s', $time);
             }
         }
         $newData['result']['source'] = $company->en_name;
@@ -249,4 +207,5 @@ class ActionController extends Controller
         }
         return $this->resObjectGet($result, 'report_notice_result', $request->path());
     }
+
 }

@@ -224,6 +224,7 @@ $api->version(
         $api->post('/alarm_result/send_sms', 'AlarmResultController@sendSms');
         $api->post('/alarm_result/send_wework', 'AlarmResultController@sendWeWork');
 
+
         // 微信机器人相关
         $api->post('/wechat_server','WechatServerController@create');
         $api->post('/wechat_server/start','WechatServerController@statusToStart');
