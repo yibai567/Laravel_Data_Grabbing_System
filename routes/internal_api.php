@@ -223,5 +223,6 @@ $api->version(
         $api->post('/alarm_result', 'AlarmResultController@create');
         $api->post('/alarm_result/send_sms', 'AlarmResultController@sendSms');
         $api->post('/alarm_result/send_wework', 'AlarmResultController@sendWeWork');
+
     }
 );
