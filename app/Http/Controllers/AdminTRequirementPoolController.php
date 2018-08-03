@@ -104,6 +104,7 @@
 
             $this->form[] = ['label'=>'公司列表','name'=>'company_id','type'=>'select2','datatable'=>'t_company,cn_name'];
 
+            $this->form[] = ['label'=>'公司名称','name'=>'company','type'=>'text','validation'=>'nullable|string|max:255','width'=>'col-sm-10', 'placeholder'=>'公司列表没有结果，请新增公司名'];
 
 			$this->form[] = ['label'=>'图片描述','name'=>'img_description','type'=>'upload','width'=>'col-sm-10',"callback"=>function ($row) {
                 $newIp=$_SERVER['HTTP_HOST']."/".$row->img_description;
@@ -446,10 +447,36 @@
 
         private function __create($params)
         {
-
+            $newData = [
+                "name" => $params['name'],
+                "list_url" => $params['list_url'],
+                "company_id" => $params['company_id'],
+                "img_description" => $params['img_description'],
+                "category" => $params['category'],
+                "subscription_type" => $params['subscription_type'],
+                "is_capture" => $params['is_capture'],
+                "is_download_img" => $params['is_download_img'],
+                "create_by" => $params['create_by'],
+                "created_at" => $params['created_at'],
+                "operate_by" => CRUDBooster::myId(),
+            ];
             try {
-                $params['operate_by'] = CRUDBooster::myId();
-                $result = InternalAPIV2Service::post('/quirement', $params);
+                if (empty($params['company_id'])) {
+                    if (!empty($params['company'])) {
+                        $company = DB::table('t_company')->where('cn_name', $params['company'])->first();
+                        if (empty($company)) {
+                            $id = DB::table('t_company')->insertGetId(['cn_name' => $params['company']]);
+                            if (!empty($id)) {
+                                $newData['company_id'] = $id;
+                            } else {
+                                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+                            }
+                        } else {
+                            $newData['company_id'] = $company->id;
+                        }
+                    }
+                }
+                $result = InternalAPIV2Service::post('/quirement', $newData);
 
             } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
