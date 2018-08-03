@@ -233,5 +233,10 @@ $api->version(
 
         $api->post('/wechat_server_log','WechatServerLogController@create');
         $api->get('/wechat_server_log/wechat_server_id/{wechat_server_id}','WechatServerLogController@ListByWechatServerId');
+
+        //任务测试相关
+        $api->post('/task/test', 'TaskController@updateTestUrl');
+        $api->post('/task/test_status/success', 'TaskController@updateTestStatusSuccess');
+        $api->post('/task/test_status/fail', 'TaskController@updateTestStatusFail');
     }
 );

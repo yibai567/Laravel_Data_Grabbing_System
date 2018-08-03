@@ -10,6 +10,7 @@
 namespace App\Http\Controllers\API\V2;
 
 use App\Events\SaveDataEvent;
+use App\Services\HttpService;
 use Log;
 use App\Services\InternalAPIV2Service;
 use App\Services\ValidatorService;
@@ -101,6 +102,54 @@ class DataController extends Controller
 
         Log::debug('[v2 DataController batchHandle] resParams = ', $resParams);
         return $this->resObjectGet($resParams, 'data', $request->path());
+    }
+
+
+    public function converter(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'company'         => 'required|string|max:500',
+            'content_type'    => 'required|integer|between:1,9',
+            'task_run_log_id' => 'required|string',
+            'start_time'      => 'required|date',
+            'end_time'        => 'required|date',
+            'result'          => 'required|array',
+        ]);
+
+        //处理task_run_log_id
+        $taskRunLogId = explode('|', $params['task_run_log_id']);
+
+        //如果为零走测试
+        if ($taskRunLogId[0] == 0) {
+
+            //是否存在task_run_log_id
+            if (!isset($taskRunLogId[1])) {
+                Log::debug('[v2 DataController converter] $taskRunLogId[1] is not found, task_run_log_id : ' . $params['task_run_log_id']);
+                throw new \Dingo\Api\Exception\ResourceException('task_run_log_id is not found');
+            }
+
+            $testData = ['task_id' => $taskRunLogId[1], 'task_result' => $params['result']];
+
+            if (empty($params['result'])) {
+                Log::debug('[v2 DataController converter] test fail, testData = ', $testData);
+                $task = InternalAPIV2Service::post('/task/test_status/fail', $testData);
+            } else {
+                Log::debug('[v2 DataController converter] test success, testData = ', $testData);
+                $task = InternalAPIV2Service::post('/task/test_status/success', $testData);
+            }
+            return $this->resObjectGet($task, 'task', $request->path());
+        }
+
+        $params['task_run_log_id'] = (int)$params['task_run_log_id'];
+
+        // 真实采集数据接口
+        Log::debug('[v2 DataController converter] batchHandle params = ', $params);
+        $httpService = new HttpService();
+        $resParams = $httpService->post(config('url.jinse_open_url') . '/v2/data/results/handle', $params);
+        return $this->resObjectGet($resParams, 'data', $request->path());
+
     }
 
 }
