@@ -1,11 +1,11 @@
 <?php namespace App\Http\Controllers;
 
-	use Session;
+	use App\Models\V2\Requirement;
+    use Session;
 	use Request;
 	use DB;
 	use CRUDBooster;
     use Config;
-    use App\Models\Requirement;
     use App\Services\InternalAPIV2Service;
     use Illuminate\Support\Facades\Route;
 	class AdminTRequirementPoolController extends \crocodicstudio\crudbooster\controllers\CBController {
@@ -87,7 +87,6 @@
                     return "<a class='btn btn-xs btn-success'><i></i>已获取</a>";
                 }
             }];
-
             $this->col[] = ["label"=>"操作人","name"=>"operate_by","callback"=>function ($row) {
                  return $this->__getUser($row->operate_by);
             }];
@@ -103,7 +102,8 @@
 			$this->form[] = ['label'=>'描述','name'=>'description','type'=>'textarea','validation'=>'nullable|max:20000','width'=>'col-sm-10'];
 
             $this->form[] = ['label'=>'公司列表','name'=>'company_id','type'=>'select2','datatable'=>'t_company,cn_name'];
-
+            $this->form[] = ['label'=>'公司中文名','name'=>'cn_name','type'=>'text','validation'=>'nullable|string|max:255','width'=>'col-sm-10','placeholder'=>'公司列表中未找到时可填写'];
+            $this->form[] = ['label'=>'公司英文名','name'=>'en_name','type'=>'text','validation'=>'nullable|string|max:255','width'=>'col-sm-10','placeholder'=>'公司列表中未找到时可填写'];
 
 			$this->form[] = ['label'=>'图片描述','name'=>'img_description','type'=>'upload','width'=>'col-sm-10',"callback"=>function ($row) {
                 $newIp=$_SERVER['HTTP_HOST']."/".$row->img_description;
@@ -119,6 +119,8 @@
 			$this->form[] = ['label'=>'订阅类型','name'=>'subscription_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|列表;2|详情','value'=>1];
 			$this->form[] = ['label'=>'截图','name'=>'is_capture','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|需要;2|不需要','value'=>2];
 			$this->form[] = ['label'=>'图片资源','name'=>'is_download_img','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|需要;2|不需要','value'=>2];
+            $this->form[] = ['label'=>'需求类型','name'=>'requirement_type','type'=>'radio','validation'=>'nullable|integer','width'=>'col-sm-10','dataenum'=>'1|快讯;2|公告','value'=>'1'];
+            $this->form[] = ['label'=>'执行规则','name'=>'cron_type','type'=>'radio','validation'=>'nullable|integer','width'=>'col-sm-10','dataenum'=>'1|每分钟执行一次;2|每五分钟执行一次;3|每十五分钟执行一次;4|只执行一次','value'=>'1'];
 			$this->form[] = ['label'=>'创建人','name'=>'create_by','type'=>'select','validation'=>'required','width'=>'col-sm-9','dataenum'=>'1|liqi1@jinse.com;2|huangxingxing@jinse.com;3|wangbo@jinse.com',];
 			# END FORM DO NOT REMOVE THIS LINE
 
@@ -448,6 +450,10 @@
         {
 
             try {
+                if (empty($params['company_id'])) {
+                    $params['company_id'] = $this->__getCompanyId($params);
+                }
+
                 $params['operate_by'] = CRUDBooster::myId();
                 $result = InternalAPIV2Service::post('/quirement', $params);
 
@@ -506,7 +512,29 @@
                 Session::put('current_row_id',$id);
                 return view('crudbooster::default.form',compact('row','page_menu','page_title','command','id'));
 
-          }
+        }
+
+        private function __getCompanyId($params)
+        {
+            $validator = validator($params, [
+                'cn_name' => 'required|string|max:255',
+                'en_name' => 'required|string|max:255'
+            ]);
+
+            if ($validator->fails()) {
+                $message = $validator->getMessageBag()->all();
+                return CRUDBooster::redirect($_SERVER['HTTP_REFERER'], trans('crudbooster.alert_validation_error',['error'=>implode(', ',$message)]));
+            }
+
+            $enName = preg_replace('/ +/', '_', $params['en_name']);
+
+            $id = DB::table('t_company')->where('en_name', $enName)->value('id');
+            //没有找到数据就创建新数据
+            if (empty($id)) {
+                $id = DB::table('t_company')->insertGetId(['cn_name'=>$params['cn_name'],'en_name'=>$enName]);
+            }
+            return $id;
+        }
 	    //By the way, you can still create your own method in here... :)
 
 
