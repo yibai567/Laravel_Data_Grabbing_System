@@ -98,6 +98,7 @@
         <th>需求ID</th>
         <th>脚本ID</th>
         <th>任务名称</th>
+        <th>测试地址</th>
         <th>是否翻墙</th>
         <th>执行规则</th>
         <th>数据类型</th>
@@ -112,6 +113,7 @@
         <td>{{$row->requirement_pool_id}}</td>
         <td>{{$row->script_id}}</td>
         <td>{{$row->name}}</td>
+        <td>{{$row->test_url}}</td>
         @if ($row->is_proxy == 1)
             <td>翻墙</td>
         @else

@@ -36,6 +36,7 @@
             $this->col[] = ["label"=>"需求ID","name"=>"requirement_pool_id"];
 			$this->col[] = ["label"=>"脚本ID","name"=>"script_id"];
 			$this->col[] = ["label"=>"任务名称","name"=>"name"];
+			$this->col[] = ["label"=>"测试地址","name"=>"test_url"];
             // $this->col[] = ["label"=>"最后执行时间","name"=>"name","callback"=>function ($row) {
             //     $taskStatistics = DB::table('t_task_statistics')->where('task_id', $row->id)->first();
             //     return $taskStatistics->last_job_at;
