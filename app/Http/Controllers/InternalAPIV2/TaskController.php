@@ -215,7 +215,7 @@ class TaskController extends Controller
         //检测参数
         ValidatorService::check($params, [
             'task_id' => 'required|integer',
-            'task_result' => 'required|array'
+            'result' => 'required|array'
         ]);
         $task = Task::find($params['task_id']);
 
@@ -248,7 +248,7 @@ class TaskController extends Controller
         //检测参数
         ValidatorService::check($params, [
             'task_id' => 'required|integer',
-            'task_result' => 'required|array'
+            'result' => 'required|array'
         ]);
         $task = Task::find($params['task_id']);
 

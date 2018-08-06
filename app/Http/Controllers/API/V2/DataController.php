@@ -132,13 +132,9 @@ class DataController extends Controller
 
             $testData = ['task_id' => $taskRunLogId[1], 'task_result' => $params['result']];
 
-            if (empty($params['result'])) {
-                Log::debug('[v2 DataController converter] test fail, testData = ', $testData);
-                $task = InternalAPIV2Service::post('/task/test_status/fail', $testData);
-            } else {
-                Log::debug('[v2 DataController converter] test success, testData = ', $testData);
-                $task = InternalAPIV2Service::post('/task/test_status/success', $testData);
-            }
+            $name = empty($params['result']) ? 'fail' : 'success';
+            Log::debug('[v2 DataController converter] test success, testData = ', $testData);
+            $task = InternalAPIV2Service::post('/task/test_status/' . $name, $testData);
             return $this->resObjectGet($task, 'task', $request->path());
         }
 
