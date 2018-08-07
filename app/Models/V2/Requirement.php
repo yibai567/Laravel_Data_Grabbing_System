@@ -33,7 +33,19 @@ class Requirement extends Model
     const STATUS_TRUE = 1; //未处理
     const STATUS_FALSE = 2; //已处理
 
+    /**
+     * 任务执行类型 1、每分钟 2、每五分钟 3、每十分钟 4、只执行一次
+     */
+    const CRON_TYPE_KEEP = 1;
+    const CRON_TYPE_EVERY_FIVE_MINUTES = 2;
+    const CRON_TYPE_EVERY_TEN_MINUTES = 3;
+    const CRON_TYPE_ONCE = 4;
 
+    /**
+     * 需求类型
+     */
+    const REQUIREMENT_TYPE_LIVE = 1;//快讯
+    const REQUIREMENT_TYPE_NOTICE = 2; //公告
 
     /**
      * 表名
