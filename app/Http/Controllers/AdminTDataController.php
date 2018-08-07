@@ -4,6 +4,7 @@
 	use Request;
 	use DB;
 	use CRUDBooster;
+    use App\Models\Data;
 
 	class AdminTDataController extends \crocodicstudio\crudbooster\controllers\CBController {
 
@@ -62,24 +63,6 @@
 			$this->form[] = ['label'=>'End Time','name'=>'end_time','type'=>'datetime','validation'=>'required|date_format:Y-m-d H:i:s','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Created Time','name'=>'created_time','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
 			# END FORM DO NOT REMOVE THIS LINE
-
-			# OLD START FORM
-			//$this->form = [];
-			//$this->form[] = ["label"=>"Content Type","name"=>"content_type","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Company","name"=>"company","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Title","name"=>"title","type"=>"text","required"=>TRUE,"validation"=>"required|string|min:3|max:70","placeholder"=>"请输入字母"];
-			//$this->form[] = ["label"=>"Md5 Title","name"=>"md5_title","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Md5 Content","name"=>"md5_content","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Content","name"=>"content","type"=>"textarea","required"=>TRUE,"validation"=>"required|string|min:5|max:5000"];
-			//$this->form[] = ["label"=>"Detail Url","name"=>"detail_url","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Show Time","name"=>"show_time","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Author","name"=>"author","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Read Count","name"=>"read_count","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Status","name"=>"status","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Start Time","name"=>"start_time","type"=>"datetime","required"=>TRUE,"validation"=>"required|date_format:Y-m-d H:i:s"];
-			//$this->form[] = ["label"=>"End Time","name"=>"end_time","type"=>"datetime","required"=>TRUE,"validation"=>"required|date_format:Y-m-d H:i:s"];
-			//$this->form[] = ["label"=>"Created Time","name"=>"created_time","type"=>"number","required"=>TRUE,"validation"=>"required|integer|min:0"];
-			# OLD END FORM
 
 			/*
 	        | ----------------------------------------------------------------------
@@ -166,7 +149,8 @@
 	        | @label, @count, @icon, @color
 	        |
 	        */
-	        $this->index_statistic = array();
+            $this->index_statistic = array();
+	        $this->index_statistic[] = ['label'=>'结果总数','count'=>Data::count(),'icon'=>'fa fa-check','color'=>'btn btn-xs btn-success'];
 
 
 
