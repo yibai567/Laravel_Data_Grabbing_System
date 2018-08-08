@@ -419,7 +419,7 @@
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
 
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试成功", "success");
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试已提交", "success");
         }
 	    //By the way, you can still create your own method in here... :)
 

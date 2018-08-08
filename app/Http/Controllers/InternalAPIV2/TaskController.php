@@ -215,7 +215,7 @@ class TaskController extends Controller
         //检测参数
         ValidatorService::check($params, [
             'task_id' => 'required|integer',
-            'result' => 'required|array'
+            'task_result' => 'required|array'
         ]);
         $task = Task::find($params['task_id']);
 
@@ -226,7 +226,7 @@ class TaskController extends Controller
 
         $task->last_test_end_at = date('Y-m-d H:i:s');
         $task->test_status = Task::TEST_STATUS_SUCCESS;
-        $task->test_result = $params['result'];
+        $task->test_result = $params['task_result'];
 
         $task->save();
 
@@ -248,7 +248,7 @@ class TaskController extends Controller
         //检测参数
         ValidatorService::check($params, [
             'task_id' => 'required|integer',
-            'result' => 'required|array'
+            'task_result' => 'required|array'
         ]);
         $task = Task::find($params['task_id']);
 
@@ -259,7 +259,7 @@ class TaskController extends Controller
 
         $task->last_test_end_at = date('Y-m-d H:i:s');
         $task->test_status = Task::TEST_STATUS_FAIL;
-        $task->test_result = $params['result'];
+        $task->test_result = $params['task_result'];
 
         $task->save();
 
