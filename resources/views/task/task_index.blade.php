@@ -78,6 +78,25 @@
 
     <div class="box">
       <div class="box-header">
+        @if($button_bulk_action && ( ($button_delete && CRUDBooster::isDelete()) || $button_selected) )
+        <div class="pull-{{ trans('crudbooster.left') }}">
+          <div class="selected-action" style="display:inline-block;position:relative;">
+            <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class='fa fa-check-square-o'></i> {{trans("crudbooster.button_selected_action")}}
+              <span class="fa fa-caret-down"></span></button>
+              <ul class="dropdown-menu">
+                @if($button_delete && CRUDBooster::isDelete())
+                  <li><a href="javascript:void(0)" data-name='delete' title='{{trans('crudbooster.action_delete_selected')}}'><i class="fa fa-trash"></i> {{trans('crudbooster.action_delete_selected')}}</a></li>
+                @endif
+
+                @if($button_selected)
+                  @foreach($button_selected as $button)
+                    <li><a href="javascript:void(0)" data-name='{{$button["name"]}}' title='{{$button["label"]}}'><i class="fa fa-{{$button['icon']}}"></i> {{$button['label']}}</a></li>
+                  @endforeach
+                @endif
+              </ul><!--end-dropdown-menu-->
+          </div><!--end-selected-action-->
+        </div><!--end-pull-left-->
+        @endif
         <div class="box-tools pull-{{ trans('crudbooster.right') }}" style="position: relative;margin-top: -5px;margin-right: -10px">
 
               @if($button_filter)
@@ -85,7 +104,39 @@
                 <i class="fa fa-filter"></i> {{trans("crudbooster.button_filter")}}
               </a>
               @endif
-
+              <form method='get' style="display:inline-block;width: 260px;" action='{{Request::url()}}'>
+                <div class="input-group">
+                  <input type="text" name="q" value="{{ Request::get('q') }}" class="form-control input-sm pull-{{ trans('crudbooster.right') }}" placeholder="{{trans('crudbooster.filter_search')}}"/>
+                    {!! CRUDBooster::getUrlParameters(['q']) !!}
+                      <div class="input-group-btn">
+                              @if(Request::get('q'))
+                                  <?php
+                                  $parameters = Request::all();
+                                  unset($parameters['q']);
+                                  $build_query = urldecode(http_build_query($parameters));
+                                  $build_query = ($build_query)?"?".$build_query:"";
+                                  $build_query = (Request::all())?$build_query:"";
+                                  ?>
+                                  <button type='button' onclick='location.href="{{ CRUDBooster::mainpath().$build_query}}"' title="{{trans('crudbooster.button_reset')}}" class='btn btn-sm btn-warning'><i class='fa fa-ban'></i></button>
+                              @endif
+                              <button type='submit' class="btn btn-sm btn-default"><i class="fa fa-search"></i></button>
+                          </div>
+                      </div>
+                  </form>
+                  <form method='get' id='form-limit-paging' style="display:inline-block" action='{{Request::url()}}'>
+                      {!! CRUDBooster::getUrlParameters(['limit']) !!}
+                      <div class="input-group">
+                          <select onchange="$('#form-limit-paging').submit()" name='limit' style="width: 56px;"  class='form-control input-sm'>
+                              <option {{($limit==5)?'selected':''}} value='5'>5</option>
+                              <option {{($limit==10)?'selected':''}} value='10'>10</option>
+                              <option {{($limit==20)?'selected':''}} value='20'>20</option>
+                              <option {{($limit==25)?'selected':''}} value='25'>25</option>
+                              <option {{($limit==50)?'selected':''}} value='50'>50</option>
+                              <option {{($limit==100)?'selected':''}} value='100'>100</option>
+                              <option {{($limit==200)?'selected':''}} value='200'>200</option>
+                          </select>
+                      </div>
+                  </form>
         </div>
 
         <br style="clear:both"/>
@@ -94,6 +145,9 @@
 <table id='table_dashboard' class='table table-striped table-bordered'>
   <thead>
       <tr>
+        @if($button_bulk_action)
+          <th width='3%'><input type='checkbox' id='checkall'/></th>
+        @endif
         <th>ID</th>
         <th>需求ID</th>
         <th>脚本ID</th>
@@ -109,6 +163,9 @@
   <tbody>
     @foreach($result as $row)
       <tr>
+        @if($button_bulk_action)
+          <th width='3%'><input type='checkbox' id='checkall'/></th>
+        @endif
         <td>{{$row->id}}</td>
         <td>{{$row->requirement_pool_id}}</td>
         <td>{{$row->script_id}}</td>
@@ -150,6 +207,20 @@
           <i class='fa fa-play'></i> 测试</a>
           <a class="btn btn-xs btn-success" title="结果列表" href="{{CRUDBooster::mainpath("stop-down/$row->id")}}">
           <i class="fa fa-bars"></i> 结果列表</a>
+          @if(CRUDBooster::isDelete())
+            <a class='btn btn-xs btn-warning btn-delete' href='javascript:void(0)' onclick="swal({
+              title: '确认删除吗 ?',
+              text: '删除之后将无法恢复!',
+              type: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#ff0000',
+              confirmButtonText: '是!',
+              cancelButtonText: '否',
+              closeOnConfirm: false },
+              function(){  location.href='{{CRUDBooster::mainpath("delete/$row->id")}}' });">
+              <i class="fa fa-trash"></i>
+            </a>
+          @endif
         </td>
        </tr>
     @endforeach
@@ -171,10 +242,66 @@
             }
         });
     }
+    function showFilter() {
+        $('#btn_advanced_filter').click(function() {
+            $('#advanced_filter_modal').modal('show');
+        })
+        $(".filter-combo").change(function() {
+            var n = $(this).val();
+            var p = $(this).parents('.row-filter-combo');
+            var type_data = $(this).attr('data-type');
+            var filter_value = p.find('.filter-value');
 
-    function postTest()
-    {
-
+            p.find('.between-group').hide();
+            p.find('.between-group').find('input').prop('disabled',true);
+            filter_value.val('').show().focus();
+            switch(n) {
+                default:
+                    filter_value.removeAttr('placeholder').val('').prop('disabled',true);
+                    p.find('.between-group').find('input').prop('disabled',true);
+                    break;
+                case 'like':
+                case 'not like':
+                    filter_value.attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum")}}').prop('disabled',false);
+                    break;
+                case 'asc':
+                    filter_value.prop('disabled',true).attr('placeholder','{{trans("crudbooster.filter_sort_ascending")}}');
+                    break;
+                case 'desc':
+                    filter_value.prop('disabled',true).attr('placeholder','{{trans("crudbooster.filter_sort_descending")}}');
+                    break;
+                case '=':
+                    filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum")}}');
+                    break;
+                case '>=':
+                    filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : 1000');
+                    break;
+                case '<=':
+                    filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : 1000');
+                    break;
+                case '>':
+                    filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : 1000');
+                    break;
+                case '<':
+                    filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : 1000');
+                    break;
+                case '!=':
+                    filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum")}}');
+                    break;
+                case 'in':
+                    filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum_dolor_sit")}}');
+                    break;
+                case 'not in':
+                    filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum_dolor_sit")}}');
+                    break;
+                case 'between':
+                    filter_value.val('').hide();
+                    p.find('.between-group input').prop('disabled',false);
+                    p.find('.between-group').show().focus();
+                    p.find('.filter-value-between').prop('disabled',false);
+                    break;
+            }
+        })
     }
 
   </script>
