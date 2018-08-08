@@ -23,7 +23,7 @@ class AdminTTaskDetailListController extends \crocodicstudio\crudbooster\control
         $this->button_add = false;
         $this->button_edit = false;
         $this->button_delete = true;
-        $this->button_detail = false;
+        $this->button_detail = true;
         $this->button_show = true;
         $this->button_filter = true;
         $this->button_import = false;
@@ -95,6 +95,7 @@ class AdminTTaskDetailListController extends \crocodicstudio\crudbooster\control
         $this->form[] = ['label'=>'Status','name'=>'status','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'Test Url','name'=>'test_url','type'=>'text','validation'=>'required','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'Task Id','name'=>'task_id','type'=>'text','validation'=>'required|min:1','width'=>'col-sm-10'];
+        $this->form[] = ['label'=>'Test Result','name'=>'test_result','type'=>'text','validation'=>'required|min:1','width'=>'col-sm-10'];
         # END FORM DO NOT REMOVE THIS LINE
 
         # OLD START FORM

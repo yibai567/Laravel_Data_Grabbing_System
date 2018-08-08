@@ -205,8 +205,11 @@
           @endif
           <a class='btn btn-xs btn-primary' title='测试' onclick="showTestUrlForm({{$row->id}})">
           <i class='fa fa-play'></i> 测试</a>
-          <a class="btn btn-xs btn-success" title="结果列表" href="{{CRUDBooster::mainpath("stop-down/$row->id")}}">
+          <a class="btn btn-xs btn-success" title="结果列表" onclick='location.href="/admin/t_data?parent_table=t_task&parent_columns=id&parent_columns_alias=&parent_id={{$row->id}}&return_url=http://{{$_SERVER['HTTP_HOST']}}/admin/t_task_detail_list&foreign_key=task_id&label=任务详情列表"'>
           <i class="fa fa-bars"></i> 结果列表</a>
+          <a class='btn btn-xs btn-primary btn-detail' title='详情' href='{{CRUDBooster::mainpath("detail/$row->id")}}'>
+            <i class='fa fa-eye'></i>
+          </a>
           @if(CRUDBooster::isDelete())
             <a class='btn btn-xs btn-warning btn-delete' href='javascript:void(0)' onclick="swal({
               title: '确认删除吗 ?',
@@ -238,7 +241,7 @@
             content: $("#showtest"),
             cancel: function(index, layero){
 
-                $("#showupload").hide()
+                $("#showtest").hide()
             }
         });
     }
