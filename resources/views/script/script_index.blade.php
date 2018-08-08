@@ -200,9 +200,15 @@
                 <i class="fa fa-pencil"></i>
             </a>
         @endif
-        <a class='btn btn-xs btn-success' onclick='location.href="/admin/t_task?parent_table=t_script&parent_columns=id&parent_columns_alias=&parent_id={{$row->id}}&return_url=http://{{$_SERVER['HTTP_HOST']}}/admin/t_script&foreign_key=script_id&label=任务列表"'>
+        @if($row->cron_type == 4)
+            <a class='btn btn-xs btn-success' onclick='location.href="/admin/t_task_detail_list?parent_table=t_script&parent_columns=id&parent_columns_alias=&parent_id={{$row->id}}&return_url=http://{{$_SERVER['HTTP_HOST']}}/admin/t_script&foreign_key=script_id&label=任务列表"'>
                 <i class="fa fa-bars">任务列表</i>
-        </a>
+            </a>
+        @else
+            <a class='btn btn-xs btn-success' onclick='location.href="/admin/t_task?parent_table=t_script&parent_columns=id&parent_columns_alias=&parent_id={{$row->id}}&return_url=http://{{$_SERVER['HTTP_HOST']}}/admin/t_script&foreign_key=script_id&label=任务列表"'>
+                <i class="fa fa-bars">任务列表</i>
+            </a>
+        @endif
         <a class='btn btn-xs btn-primary btn-detail' title='详情' href='{{CRUDBooster::mainpath("detail/$row->id")}}'>
             <i class='fa fa-eye'></i>
         </a>

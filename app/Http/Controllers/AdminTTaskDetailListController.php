@@ -416,15 +416,42 @@ class AdminTTaskDetailListController extends \crocodicstudio\crudbooster\control
             CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
         }
 
-        $data['table']    = $this->table;
+        if(Request::get('parent_table')) {
+            $parentTablePK = CB::pk(g('parent_table'));
+            $data['parent_table'] = DB::table(Request::get('parent_table'))->where($parentTablePK,Request::get('parent_id'))->first();
+            if(Request::get('foreign_key')) {
+                $data['parent_field'] = Request::get('foreign_key');
+            }else{
+                $data['parent_field'] = CB::getTableForeignKey(g('parent_table'),$this->table);
+            }
+
+            if($parent_field) {
+                foreach($this->columns_table as $i=>$col) {
+                    if($col['name'] == $parent_field) {
+                        unset($this->columns_table[$i]);
+                    }
+                }
+            }
+        }
+
+        $data['table'] 	  = $this->table;
         $data['table_pk'] = CB::pk($this->table);
         $data['page_title']       = $module->name;
         $data['page_description'] = trans('crudbooster.default_module_description');
         $data['date_candidate']   = $this->date_candidate;
         $data['limit'] = $limit   = (Request::get('limit'))?Request::get('limit'):$this->limit;
 
+        $tablePK = $data['table_pk'];
         $table_columns = CB::getTableColumns($this->table);
         $result = DB::table($this->table)->select(DB::raw($this->table.".".$this->primary_key));
+
+        if(Request::get('parent_id')) {
+            $table_parent = $this->table;
+            $table_parent = CRUDBooster::parseSqlTable($table_parent)['table'];
+            $result->where($table_parent.'.'.Request::get('foreign_key'),Request::get('parent_id'));
+        }
+
+
         $this->hook_query_index($result);
 
         if(in_array('deleted_at', $table_columns)) {
@@ -669,10 +696,24 @@ class AdminTTaskDetailListController extends \crocodicstudio\crudbooster\control
             }
         }
 
+        $mainpath      = CRUDBooster::mainpath();
+        $orig_mainpath = $this->data['mainpath'];
+        $title_field   = $this->title_field;
         $html_contents = array();
+        $page = (Request::get('page'))?Request::get('page'):1;
+        $number = ($page-1)*$limit+1;
         foreach($data['result'] as $row) {
             $html_content = array();
 
+            if($this->button_bulk_action) {
+
+                $html_content[] = "<input type='checkbox' class='checkbox' name='checkbox[]' value='".$row->{$tablePK}."'/>";
+            }
+
+            if($this->show_numbering) {
+                $html_content[] = $number.'. ';
+                $number++;
+            }
 
             foreach($columns_table as $col) {
                 if($col['visible']===FALSE) continue;
@@ -738,6 +779,7 @@ class AdminTTaskDetailListController extends \crocodicstudio\crudbooster\control
 
                 $html_content[] = $value;
             } //end foreach columns_table
+
             if($this->button_table_action):
 
                 $button_action_style = $this->button_action_style;
@@ -758,10 +800,9 @@ class AdminTTaskDetailListController extends \crocodicstudio\crudbooster\control
         $html_contents = ['html'=>$html_contents,'data'=>$data['result']];
 
         $data['html_contents'] = $html_contents;
+
         $this->cbView("task/task_index", $data);
     }
-
-
 
     public function postTestSave() {
         $this->cbLoader();
