@@ -53,51 +53,50 @@
       </div>
     </div>
     @endif
-     <div class="container kv-main"   id="showupload" style="display: none">
+     <div class="container kv-main"   id="showtest" style="display: none">
 
-             <?php
-            $action = CRUDBooster::mainpath("upload-save");
-
+         <?php
+            $action = CRUDBooster::mainpath("test-save");
             ?>
-            <form enctype="multipart/form-data" action='{{$action}}' method='post' id='form'>
+         <form enctype="multipart/form-data" action='{{$action}}' method='post' id='form'>
 
-                <div class="form-group">
-                    <input id="file-5" class="file" name="files" required type="file"  data-preview-file-type="any" data-upload-url="#">
-                </div>
-                {{ csrf_field() }}
+             <br/>
+             <div class="input-group">
+                 <span class="input-group-addon">测试地址</span>
+                 <input type="text" class="form-control" name='test_url' required placeholder="请填写测试地址" >
+                 <input type="hidden" class="task-id" name="task_id" >
+             </div>
+             <br/>
+             {{ csrf_field() }}
+             <div align="center">
+                 <!-- <button type="button" class="btn btn-primary" onclick="submit()">保存</button> -->
+                 <input type="submit" name="submit" value='保存' class='btn btn-primary'>
+             </div>
+         </form>
 
-                    <div class="input-group">
-                        <span class="input-group-addon">URL</span>
-                        <input type="text" class="form-control" name='url' required maxlength='255' placeholder="请填写url" >
-                    </div>
-                  <br/>
-                  <div align="center">
-                    <!-- <button type="button" class="btn btn-primary" onclick="submit()">保存</button> -->
-                     <input type="submit" name="submit" value='保存' class='btn btn-primary'>
-                </div>
-            </form>
-
-        </div>
-
+     </div>
 
     <div class="box">
       <div class="box-header">
+        @if($button_bulk_action && ( ($button_delete && CRUDBooster::isDelete()) || $button_selected) )
+        <div class="pull-{{ trans('crudbooster.left') }}">
+          <div class="selected-action" style="display:inline-block;position:relative;">
+            <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class='fa fa-check-square-o'></i> {{trans("crudbooster.button_selected_action")}}
+              <span class="fa fa-caret-down"></span></button>
+              <ul class="dropdown-menu">
+                @if($button_delete && CRUDBooster::isDelete())
+                  <li><a href="javascript:void(0)" data-name='delete' title='{{trans('crudbooster.action_delete_selected')}}'><i class="fa fa-trash"></i> {{trans('crudbooster.action_delete_selected')}}</a></li>
+                @endif
 
-            <a href='{{CRUDBooster::mainpath("add?dataType=1")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
-              <i class="fa fa-plus-circle"></i> casperJs
-            </a>
-            <a href='{{CRUDBooster::mainpath("add?dataType=2")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
-              <i class="fa fa-plus-circle"></i> Html
-            </a>
-            <a href='{{CRUDBooster::mainpath("add?dataType=3")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
-              <i class="fa fa-plus-circle"></i> Api
-            </a>
-            <!-- <a id="uploadfile" class="btn btn-sm btn-success" title="上传脚本">
-              <i class="fa fa-plus-circle"></i> 上传脚本
-            </a> -->
-             <a href='{{CRUDBooster::mainpath("upload")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="发布脚本">
-              <i class="fa fa-plus-circle"></i> 发布脚本
-            </a>
+                @if($button_selected)
+                  @foreach($button_selected as $button)
+                    <li><a href="javascript:void(0)" data-name='{{$button["name"]}}' title='{{$button["label"]}}'><i class="fa fa-{{$button['icon']}}"></i> {{$button['label']}}</a></li>
+                  @endforeach
+                @endif
+              </ul><!--end-dropdown-menu-->
+          </div><!--end-selected-action-->
+        </div><!--end-pull-left-->
+        @endif
         <div class="box-tools pull-{{ trans('crudbooster.right') }}" style="position: relative;margin-top: -5px;margin-right: -10px">
 
               @if($button_filter)
@@ -105,43 +104,39 @@
                 <i class="fa fa-filter"></i> {{trans("crudbooster.button_filter")}}
               </a>
               @endif
-
-            <form method='get' style="display:inline-block;width: 260px;" action='{{Request::url()}}'>
+              <form method='get' style="display:inline-block;width: 260px;" action='{{Request::url()}}'>
                 <div class="input-group">
                   <input type="text" name="q" value="{{ Request::get('q') }}" class="form-control input-sm pull-{{ trans('crudbooster.right') }}" placeholder="{{trans('crudbooster.filter_search')}}"/>
-                  {!! CRUDBooster::getUrlParameters(['q']) !!}
-                  <div class="input-group-btn">
-                    @if(Request::get('q'))
-                    <?php
-                      $parameters = Request::all();
-                      unset($parameters['q']);
-                      $build_query = urldecode(http_build_query($parameters));
-                      $build_query = ($build_query)?"?".$build_query:"";
-                      $build_query = (Request::all())?$build_query:"";
-                    ?>
-                    <button type='button' onclick='location.href="{{ CRUDBooster::mainpath().$build_query}}"' title="{{trans('crudbooster.button_reset')}}" class='btn btn-sm btn-warning'><i class='fa fa-ban'></i></button>
-                    @endif
-                    <button type='submit' class="btn btn-sm btn-default"><i class="fa fa-search"></i></button>
-                  </div>
-                </div>
-            </form>
-
-
-          <form method='get' id='form-limit-paging' style="display:inline-block" action='{{Request::url()}}'>
-              {!! CRUDBooster::getUrlParameters(['limit']) !!}
-              <div class="input-group">
-                <select onchange="$('#form-limit-paging').submit()" name='limit' style="width: 56px;"  class='form-control input-sm'>
-                    <option {{($limit==5)?'selected':''}} value='5'>5</option>
-                    <option {{($limit==10)?'selected':''}} value='10'>10</option>
-                    <option {{($limit==20)?'selected':''}} value='20'>20</option>
-                    <option {{($limit==25)?'selected':''}} value='25'>25</option>
-                    <option {{($limit==50)?'selected':''}} value='50'>50</option>
-                    <option {{($limit==100)?'selected':''}} value='100'>100</option>
-                    <option {{($limit==200)?'selected':''}} value='200'>200</option>
-                </select>
-              </div>
-            </form>
-
+                    {!! CRUDBooster::getUrlParameters(['q']) !!}
+                      <div class="input-group-btn">
+                              @if(Request::get('q'))
+                                  <?php
+                                  $parameters = Request::all();
+                                  unset($parameters['q']);
+                                  $build_query = urldecode(http_build_query($parameters));
+                                  $build_query = ($build_query)?"?".$build_query:"";
+                                  $build_query = (Request::all())?$build_query:"";
+                                  ?>
+                                  <button type='button' onclick='location.href="{{ CRUDBooster::mainpath().$build_query}}"' title="{{trans('crudbooster.button_reset')}}" class='btn btn-sm btn-warning'><i class='fa fa-ban'></i></button>
+                              @endif
+                              <button type='submit' class="btn btn-sm btn-default"><i class="fa fa-search"></i></button>
+                          </div>
+                      </div>
+                  </form>
+                  <form method='get' id='form-limit-paging' style="display:inline-block" action='{{Request::url()}}'>
+                      {!! CRUDBooster::getUrlParameters(['limit']) !!}
+                      <div class="input-group">
+                          <select onchange="$('#form-limit-paging').submit()" name='limit' style="width: 56px;"  class='form-control input-sm'>
+                              <option {{($limit==5)?'selected':''}} value='5'>5</option>
+                              <option {{($limit==10)?'selected':''}} value='10'>10</option>
+                              <option {{($limit==20)?'selected':''}} value='20'>20</option>
+                              <option {{($limit==25)?'selected':''}} value='25'>25</option>
+                              <option {{($limit==50)?'selected':''}} value='50'>50</option>
+                              <option {{($limit==100)?'selected':''}} value='100'>100</option>
+                              <option {{($limit==200)?'selected':''}} value='200'>200</option>
+                          </select>
+                      </div>
+                  </form>
         </div>
 
         <br style="clear:both"/>
@@ -150,11 +145,17 @@
 <table id='table_dashboard' class='table table-striped table-bordered'>
   <thead>
       <tr>
+        @if($button_bulk_action)
+          <th width='3%'><input type='checkbox' id='checkall'/></th>
+        @endif
         <th>ID</th>
         <th>需求ID</th>
+        <th>脚本ID</th>
         <th>任务名称</th>
-        <th>data类型</th>
-        <th>最后生成时间</th>
+        <th>测试地址</th>
+        <th>是否翻墙</th>
+        <th>执行规则</th>
+        <th>数据类型</th>
         <th>状态</th>
         <th style="float: right;">操作</th>
        </tr>
@@ -162,177 +163,148 @@
   <tbody>
     @foreach($result as $row)
       <tr>
+        @if($button_bulk_action)
+          <th width='3%'><input type='checkbox' id='checkall'/></th>
+        @endif
         <td>{{$row->id}}</td>
         <td>{{$row->requirement_pool_id}}</td>
+        <td>{{$row->script_id}}</td>
         <td>{{$row->name}}</td>
+        <td>{{$row->test_url}}</td>
+        @if ($row->is_proxy == 1)
+            <td>翻墙</td>
+        @else
+            <td>不翻墙</td>
+        @endif
+        @if ($row->cron_type == 4)
+            <td><span style="color:#f00">只执行一次</span></td>
+        @else
+            <td>111</td>
+        @endif
         @if ($row->data_type == 1)
             <td>casperJs</td>
         @elseif ($row->data_type == 2)
             <td>html</td>
-        @else
+        @elseif ($row->data_type == 3)
             <td>api</td>
         @endif
-        @if (!empty($row->last_generate_at))
-            <td>{{date('Y-m-d H:i:s',$row->last_generate_at)}}</td>
-        @else
-            <td>{{$row->last_generate_at}}</td>
-        @endif
         @if ($row->status == 1)
-        <td><a class='btn btn-xs btn-warning'><i></i>创建</a></td>
-        @else
-        <td><a class='btn btn-xs btn-success'><i></i>已发布</a></td>
+            <td><a class='btn btn-xs btn-warning'><i></i>初始化</a></td>
+        @elseif ($row->status == 2)
+            <td><a class='btn btn-xs btn-success'><i></i>已启动</a></td>
         @endif
         <td style="float: right;">
-          <!-- To make sure we have read access, wee need to validate the privilege -->
+          @if($row->status == 1)
+            <a class='btn btn-xs btn-success' title='启动' href='{{CRUDBooster::mainpath("start-up/$row->id")}}'>
+            <i class='fa fa-play'></i> 启动</a>
+          @endif
 
-        @if($row->status == 1)
-            <a class='btn btn-xs btn-warning' title='发布' href='{{CRUDBooster::mainpath("publish/$row->id")}}'>
-            <i class='glyphicon glyphicon-send'></i> 发布</a>
-        @endif
-
-        @if($row->status == 2)
-            <a class='btn btn-xs btn-warning' target="_blank" title='下载' href="http://{{$_SERVER['HTTP_HOST']}}/vendor/script/script_{{$row->id}}_{{$row->last_generate_at}}.js" download >
-            <i class='glyphicon glyphicon-download'></i></a>
-        @endif
-
-        @if(CRUDBooster::isUpdate() && $button_edit)
-            <a class='btn btn-xs btn-success btn-edit' href='{{CRUDBooster::mainpath("edit/$row->id")}}'>
-                <i class="fa fa-pencil"></i>
-            </a>
-        @endif
-        @if($row->cron_type == 4)
-            <a class='btn btn-xs btn-success' onclick='location.href="/admin/t_task_detail_list?parent_table=t_script&parent_columns=id&parent_columns_alias=&parent_id={{$row->id}}&return_url=http://{{$_SERVER['HTTP_HOST']}}/admin/t_script&foreign_key=script_id&label=任务列表"'>
-                <i class="fa fa-bars">任务列表</i>
-            </a>
-        @else
-            <a class='btn btn-xs btn-success' onclick='location.href="/admin/t_task?parent_table=t_script&parent_columns=id&parent_columns_alias=&parent_id={{$row->id}}&return_url=http://{{$_SERVER['HTTP_HOST']}}/admin/t_script&foreign_key=script_id&label=任务列表"'>
-                <i class="fa fa-bars">任务列表</i>
-            </a>
-        @endif
-        <a class='btn btn-xs btn-primary btn-detail' title='详情' href='{{CRUDBooster::mainpath("detail/$row->id")}}'>
+          @if($row->status == 2)
+            <a class='btn btn-xs btn-warning' title='停止' href="{{CRUDBooster::mainpath("stop-down/$row->id")}}">
+            <i class='fa fa-stop'></i>停止</a>
+          @endif
+          <a class='btn btn-xs btn-primary' title='测试' onclick="showTestUrlForm({{$row->id}})">
+          <i class='fa fa-play'></i> 测试</a>
+          <a class="btn btn-xs btn-success" title="结果列表" onclick='location.href="/admin/t_data?parent_table=t_task&parent_columns=id&parent_columns_alias=&parent_id={{$row->id}}&return_url=http://{{$_SERVER['HTTP_HOST']}}/admin/t_task_detail_list&foreign_key=task_id&label=任务详情列表"'>
+          <i class="fa fa-bars"></i> 结果列表</a>
+          <a class='btn btn-xs btn-primary btn-detail' title='详情' href='{{CRUDBooster::mainpath("detail/$row->id")}}'>
             <i class='fa fa-eye'></i>
-        </a>
-
-        @if(CRUDBooster::isDelete() && $button_edit && $row->status != $item_status['start'])
-        <a class='btn btn-xs btn-warning btn-delete' href='javascript:void(0)' onclick="swal({
-                title: '确认删除吗 ?',
-                text: '删除之后将无法恢复!',
-                type: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ff0000',
-                confirmButtonText: '是!',
-                cancelButtonText: '否',
-                closeOnConfirm: false },
-                function(){  location.href='{{CRUDBooster::mainpath("delete/$row->id")}}' });">
-            <i class="fa fa-trash"></i>
-        </a>
-        @endif
-                <!-- 按钮触发模态框 -->
-        <!-- <button class="btn btn-xs btn-warning" data-toggle="modal" data-target="#myModal">测试结果</button> -->
-        <!-- 模态框（Modal） -->
-        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-dialog" style="width: 70%">
-                <div class="modal-content">
-                    <div class="modal-body" id='modal-body'><div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    </div>
-                </div><!-- /.modal-content -->
-            </div><!-- /.modal -->
-        </div>
-
+          </a>
+          @if(CRUDBooster::isDelete())
+            <a class='btn btn-xs btn-warning btn-delete' href='javascript:void(0)' onclick="swal({
+              title: '确认删除吗 ?',
+              text: '删除之后将无法恢复!',
+              type: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#ff0000',
+              confirmButtonText: '是!',
+              cancelButtonText: '否',
+              closeOnConfirm: false },
+              function(){  location.href='{{CRUDBooster::mainpath("delete/$row->id")}}' });">
+              <i class="fa fa-trash"></i>
+            </a>
+          @endif
         </td>
        </tr>
     @endforeach
   </tbody>
   <script type="text/javascript">
-    function query(id) {
-        var url = "http://{{$_SERVER['HTTP_HOST']}}/admin/t_item/test-result/" + id;
-        $.ajax({
-            url : url,
-            async : true,
-            type : "GET",
-            data : {
-                "type" : "query",
-                "id" : id
-            },
-            // 成功后开启模态框
-            success : showQuery,
-            error : function() {
-                alert("请求失败");
-            },
-            dataType : "json"
+
+    function showTestUrlForm(id) {
+        $('.task-id').val(id);
+
+        layer.open({
+            type: 1,
+            title:['测试', 'font-size:14px;'],
+            area: ['600px', '160px'],
+            shadeClose: true, //点击遮罩关闭
+            content: $("#showtest"),
+            cancel: function(index, layero){
+
+                $("#showtest").hide()
+            }
         });
-    }
-    function showQuery(data) {
-        if (data == '') {
-            $("#modal-body").html('暂无数据');
-        } else {
-            $("#modal-body").html('<pre>'+JSON.stringify(data, null, 4)+'</pre>');
-        }
-        // 显示模态框
-        $('#myModal').modal('show');
     }
     function showFilter() {
         $('#btn_advanced_filter').click(function() {
             $('#advanced_filter_modal').modal('show');
-          })
+        })
         $(".filter-combo").change(function() {
-                var n = $(this).val();
-                var p = $(this).parents('.row-filter-combo');
-                var type_data = $(this).attr('data-type');
-                var filter_value = p.find('.filter-value');
+            var n = $(this).val();
+            var p = $(this).parents('.row-filter-combo');
+            var type_data = $(this).attr('data-type');
+            var filter_value = p.find('.filter-value');
 
-                p.find('.between-group').hide();
-                p.find('.between-group').find('input').prop('disabled',true);
-                filter_value.val('').show().focus();
-                switch(n) {
-                  default:
+            p.find('.between-group').hide();
+            p.find('.between-group').find('input').prop('disabled',true);
+            filter_value.val('').show().focus();
+            switch(n) {
+                default:
                     filter_value.removeAttr('placeholder').val('').prop('disabled',true);
                     p.find('.between-group').find('input').prop('disabled',true);
-                  break;
-                  case 'like':
-                  case 'not like':
+                    break;
+                case 'like':
+                case 'not like':
                     filter_value.attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum")}}').prop('disabled',false);
-                  break;
-                  case 'asc':
+                    break;
+                case 'asc':
                     filter_value.prop('disabled',true).attr('placeholder','{{trans("crudbooster.filter_sort_ascending")}}');
-                  break;
-                  case 'desc':
+                    break;
+                case 'desc':
                     filter_value.prop('disabled',true).attr('placeholder','{{trans("crudbooster.filter_sort_descending")}}');
-                  break;
-                  case '=':
+                    break;
+                case '=':
                     filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum")}}');
-                  break;
-                  case '>=':
+                    break;
+                case '>=':
                     filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : 1000');
-                  break;
-                  case '<=':
+                    break;
+                case '<=':
                     filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : 1000');
-                  break;
-                  case '>':
+                    break;
+                case '>':
                     filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : 1000');
-                  break;
-                  case '<':
+                    break;
+                case '<':
                     filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : 1000');
-                  break;
-                  case '!=':
+                    break;
+                case '!=':
                     filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum")}}');
-                  break;
-                  case 'in':
+                    break;
+                case 'in':
                     filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum_dolor_sit")}}');
-                  break;
-                  case 'not in':
+                    break;
+                case 'not in':
                     filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum_dolor_sit")}}');
-                  break;
-                  case 'between':
+                    break;
+                case 'between':
                     filter_value.val('').hide();
                     p.find('.between-group input').prop('disabled',false);
                     p.find('.between-group').show().focus();
                     p.find('.filter-value-between').prop('disabled',false);
-                  break;
-                }
-              })
+                    break;
+            }
+        })
     }
 
   </script>
@@ -453,24 +425,6 @@
             <script src="{{URL::asset('/js/bootstrap.min.js')}}" type="text/javascript"></script>
 
             <script src="{{URL::asset('/js/layer-v3.1.1/layer/layer.js')}}"></script>
-              <script type="text/javascript">
-
-                //弹出一个页面层
-                  $('#uploadfile').on('click', function(){
-                    layer.open({
-                      type: 1,
-                      title:['上传脚本', 'font-size:14px;'],
-                      area: ['600px', '440px'],
-                      shadeClose: true, //点击遮罩关闭
-                      content: $("#showupload"),
-                      cancel: function(index, layero){
-
-                            $("#showupload").hide()
-                      }
-                    });
-                  });
-            </script>
-
 
 
 

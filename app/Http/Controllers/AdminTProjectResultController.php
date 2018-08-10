@@ -122,7 +122,7 @@
 	        |
 	        */
 	        $this->addaction = array();
-            $this->addaction[] = ['label'=>'重新上报', 'url'=>CRUDBooster::mainpath('again-report/[id]'),'color'=>'info', 'icon'=>'glyphicon glyphicon-send', 'showIf'=>'[project_id] == 4 || [project_id] == 5'];
+            $this->addaction[] = ['label'=>'重新上报', 'url'=>CRUDBooster::mainpath('again-report/[id]'),'color'=>'info', 'icon'=>'glyphicon glyphicon-send', 'showIf'=>'[project_id] == 4 || [project_id] == 5 || [project_id] == 1 || [project_id] == 2'];
 
 	        /*
 	        | ----------------------------------------------------------------------

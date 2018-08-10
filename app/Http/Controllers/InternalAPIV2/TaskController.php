@@ -12,6 +12,7 @@ namespace App\Http\Controllers\InternalAPIV2;
 use App\Models\V2\Task;
 use App\Models\V2\Script;
 use App\Models\V2\TaskStatistics;
+use App\Services\AMQPService;
 use App\Services\ValidatorService;
 use App\Events\StatisticsEvent;
 use Illuminate\Http\Request;
@@ -200,5 +201,161 @@ class TaskController extends Controller
         }
 
         return $this->resObjectGet($result, 'task', $request->path());
+    }
+
+    /**
+     * 测试成功
+     * @param
+     * @return array
+     */
+    public function updateTestStatusSuccess(Request $request)
+    {
+        $params = $request->all();
+
+        //检测参数
+        ValidatorService::check($params, [
+            'task_id' => 'required|integer',
+            'task_result' => 'required|array'
+        ]);
+        $task = Task::find($params['task_id']);
+
+        //判断task数据是否存在
+        if (empty($task)) {
+            throw new \Dingo\Api\Exception\ResourceException('$task is not found');
+        }
+
+        $task->last_test_end_at = date('Y-m-d H:i:s');
+        $task->test_status = Task::TEST_STATUS_SUCCESS;
+        $task->test_result = $params['task_result'];
+
+        $task->save();
+
+
+        $result = $task->toArray();
+
+        return $this->resObjectGet($result, 'task', $request->path());
+    }
+
+    /**
+     * 测试失败
+     * @param
+     * @return array
+     */
+    public function updateTestStatusFail(Request $request)
+    {
+        $params = $request->all();
+
+        //检测参数
+        ValidatorService::check($params, [
+            'task_id' => 'required|integer',
+            'task_result' => 'required|array'
+        ]);
+        $task = Task::find($params['task_id']);
+
+        //判断task数据是否存在
+        if (empty($task)) {
+            throw new \Dingo\Api\Exception\ResourceException('$task is not found');
+        }
+
+        $task->last_test_end_at = date('Y-m-d H:i:s');
+        $task->test_status = Task::TEST_STATUS_FAIL;
+        $task->test_result = $params['task_result'];
+
+        $task->save();
+
+
+        $result = $task->toArray();
+
+        return $this->resObjectGet($result, 'task', $request->path());
+    }
+
+    /**
+     * 测试
+     * @param
+     * @return array
+     */
+    public function updateTestUrl(Request $request)
+    {
+        $params = $request->all();
+
+        //检测参数
+        ValidatorService::check($params, [
+            'task_id' => 'required|integer',
+            'test_url' => 'required|string'
+        ]);
+        $task = Task::find($params['task_id']);
+
+        //判断task数据是否存在
+        if (empty($task)) {
+            throw new \Dingo\Api\Exception\ResourceException('$task is not found');
+        }
+
+        $task->last_test_start_at = date('Y-m-d H:i:s');
+        $task->test_url = $params['test_url'];
+
+        $task->save();
+
+        $result = $task->toArray();
+
+        //入队列
+        $this->__testQueueHandle($result);
+
+        return $this->resObjectGet($result, 'task', $request->path());
+    }
+
+    /**
+     * 入测试队列
+     * @param $task
+     * @return bool
+     */
+    private function __testQueueHandle($task)
+    {
+        switch ($task['data_type']) {
+            case Task::DATA_TYPE_CASPERJS:
+                $queue = 'test_engine_casperjs';
+                break;
+
+            case Task::DATA_TYPE_HTML:
+                $queue = 'test_engine_node';
+                break;
+
+            case Task::DATA_TYPE_API:
+                $queue = 'test_engine_node';
+                break;
+
+            default:
+                $queue = '';
+                break;
+        }
+
+        $params = [
+            'path' => $task['script_path'],
+            'task_run_log_id' => '0|' . $task['id'],
+            'url' => $task['cron_type'] == Task::CRON_TYPE_KEEP_ONCE ? $task['test_url'] : '',
+        ];
+
+        $option = [
+            'server' => [
+                'vhost' => 'crawl',
+            ],
+            'type' => 'direct',
+            'exchange' => 'instant_task',
+            'queue' => $queue,
+            'name' => $queue
+        ];
+        try {
+
+            $rmq = AMQPService::getInstance($option);
+            $rmq->prepareExchange();
+            $rmq->prepareQueue();
+            $rmq->queueBind();
+            $rmq->publishFormart($params, $queue);
+            $rmq->close();
+        } catch (\Exception $e) {
+            Log::error('[testQueueHandle error]:'."\t".$e->getCode()."\t".$e->getMessage());
+        }
+
+        Log::debug('[testQueueHandle] ------- end -------');
+        return true;
     }
 }

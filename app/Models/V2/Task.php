@@ -18,12 +18,17 @@ class Task extends Model
     const CRON_TYPE_KEEP = 1;
     const CRON_TYPE_EVERY_FIVE_MINUTES = 2;
     const CRON_TYPE_EVERY_TEN_MINUTES = 3;
+    const CRON_TYPE_KEEP_ONCE = 4;
 
     //任务状态 1、初始化，2、启动，3停止
 
     const STATUS_INIT = 1;
     const STATUS_START = 2;
     const STATUS_STOP = 3;
+
+    //任务测试状态
+    const TEST_STATUS_SUCCESS = 1;
+    const TEST_STATUS_FAIL = 2;
 
     /**
      * 表名
@@ -103,6 +108,14 @@ class Task extends Model
         $this->attributes['actions'] = json_encode($value, JSON_UNESCAPED_UNICODE);
     }
 
+    /**
+     * 设置test_result字段入库时转化为json
+     * @param $value
+     */
+    public function setTestResultAttribute($value)
+    {
+        $this->attributes['test_result'] = json_encode($value, JSON_UNESCAPED_UNICODE);
+    }
 
     /**
      * 获取projects字段时转化为array
@@ -137,4 +150,14 @@ class Task extends Model
         return json_decode($value, true);
     }
 
+    /**
+     * 获取test_result字段时转化成array
+     *
+     * @param string $value
+     * @return string
+     */
+    public function getTestResultAttribute($value)
+    {
+        return json_decode($value, true);
+    }
 }

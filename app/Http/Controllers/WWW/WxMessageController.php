@@ -176,7 +176,7 @@ class WxMessageController extends Controller
                         }
                     }
                 }
-                if (count($answer) > 0) {
+                if (count($data) > 0) {
                     foreach ($data as $key => $value) {
                         echo '<br />发送人：' . $key .'<br>';
                         foreach ($value as $content) {
