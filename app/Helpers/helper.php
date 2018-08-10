@@ -158,9 +158,13 @@ if (!function_exists('formatShowTime')) {
     function formatShowTime($time)
     {
         // 判断时间是否为时间戳格式 判断条件:1.是否为数字 2.时间戳位数为10位
-        if(is_numeric($time) && strlen($time) == 10) {
+        if (is_numeric($time) && strlen($time) == 10) {
             return $time;
         }
+
+        $time =  strtr($time, array("年" => "-", "月" => "-", "日" => "-"));
+
+        $time = trim($time, "-");
 
         $showTime = strtotime($time);
 
