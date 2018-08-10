@@ -1,6 +1,7 @@
 <?php namespace App\Http\Controllers;
 
-	use App\Models\V2\Requirement;
+	use App\Models\V2\AlarmResult;
+    use App\Models\V2\Requirement;
     use Session;
 	use Request;
 	use DB;
@@ -8,6 +9,8 @@
     use Config;
     use App\Services\InternalAPIV2Service;
     use Illuminate\Support\Facades\Route;
+    use Log;
+
 	class AdminTRequirementPoolController extends \crocodicstudio\crudbooster\controllers\CBController {
 
 	    public function cbInit() {
@@ -467,6 +470,19 @@
 
                 $params['operate_by'] = CRUDBooster::myId();
                 $result = InternalAPIV2Service::post('/quirement', $params);
+
+                if ($result) {
+                    $data = [
+                        'type' => AlarmResult::TYPE_WEWORK,
+                        'content' => '有新的需求，请及时处理！',
+                        'wework' => config('alarm.alarm_recipient')
+                    ];
+
+                    $alarmResult = InternalAPIV2Service::post('/alarm_result', $data);
+                    if (!$alarmResult) {
+                        Log::debug('[Requirement Create] create alarm_result is failed');
+                    }
+                }
 
             } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");

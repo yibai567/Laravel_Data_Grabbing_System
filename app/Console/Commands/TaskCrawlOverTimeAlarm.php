@@ -11,7 +11,6 @@ use Log;
 
 class TaskCrawlOverTimeAlarm extends Command
 {
-    protected $time;
     /**
      * The name and signature of the console command.
      *
@@ -33,7 +32,6 @@ class TaskCrawlOverTimeAlarm extends Command
      */
     public function __construct()
     {
-        $this->time = time();
         parent::__construct();
     }
 
@@ -45,19 +43,15 @@ class TaskCrawlOverTimeAlarm extends Command
     public function handle()
     {
         //获取启动中的任务
-        $tasks = Task::select('id', 'script_id', 'name')->where('status', Task::STATUS_START)->get();
+        $tasks = Task::select('id', 'script_id', 'name', 'cron_type')->where('status', Task::STATUS_START)->get()->toArray();
 
         if (empty($tasks)) {
             Log::debug('[TaskCrawlOverTimeAlarm handle] task of running is empty');
             return true;
         }
 
-        $taskList = $tasks->toArray();
-
-
-        //查询执行脚本最后一次完成时间
-        foreach($taskList as $task) {
-            $taskLastRunLog = TaskLastRunLog::select('last_job_at')
+        foreach($tasks as $task) {
+            $taskLastRunLog = TaskLastRunLog::select('last_job_at', 'created_at')
                                     ->where('task_id', $task['id'])
                                     ->orderBy('id', 'desc')
                                     ->first();
@@ -65,22 +59,28 @@ class TaskCrawlOverTimeAlarm extends Command
                 Log::debug('[TaskCrawlOverTimeAlarm handle] $taskLastRunLog is not exist, task_id = ' . $task['id']);
                 continue;
             }
-            //判断任务最后一次执行时间是否超过15分钟
-            $lastJobAt = strtotime($taskLastRunLog->last_job_at);
 
-            if ($this->time - $lastJobAt < 60 * 15) {
+            //如果是只运行一次的任务，且有最后执行时间的证明脚本正常
+            if ($task['cron_type'] == Task::CRON_TYPE_KEEP_ONCE && $taskLastRunLog->last_job_at) {
                 continue;
             }
 
-            $data = [];
-            $data['type'] = AlarmResult::TYPE_WEWORK;
-            $data['content'] = '任务已超过15分钟未执行成功,任务id: ' . $task['id'] . ',脚本id: ' . $task['script_id'] . ',脚本名称: ' . $task['name'] . ',最后执行时间: ' . $taskLastRunLog->last_job_at;
-            $data['wework'] = config('alarm.alarm_recipient');
+            //如果是刚创建的任务，最后执行时间可能不存在，所以可以使用创建时间来确定
+            $lastJobAt = $taskLastRunLog->last_job_at ?? $taskLastRunLog->created_at;
 
-            $result = InternalAPIV2Service::post('/alarm_result', $data);
-            if (!$result) {
-                Log::debug('[TaskCrawlOverTimeAlarm handle] create alarm_result is failed');
-                return false;
+            //任务最后一次执行时间超过15分钟触发报警通知
+            if (time()- strtotime($lastJobAt) > 60 * 15) {
+                $data = [
+                    'type' => AlarmResult::TYPE_WEWORK,
+                    'content' => '任务已超过15分钟未执行成功,任务id: ' . $task['id'] . ',脚本id: ' . $task['script_id'] . ',脚本名称: ' . $task['name'] . ',最后执行时间: ' . $lastJobAt,
+                    'wework' => config('alarm.alarm_recipient')
+                ];
+
+                $result = InternalAPIV2Service::post('/alarm_result', $data);
+                if (!$result) {
+                    Log::debug('[TaskCrawlOverTimeAlarm handle] create alarm_result is failed');
+                    return false;
+                }
             }
         }
 
