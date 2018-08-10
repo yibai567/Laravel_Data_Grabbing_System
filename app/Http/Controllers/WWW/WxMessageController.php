@@ -166,21 +166,23 @@ class WxMessageController extends Controller
                         ->where('id', '<', $nextId)
                         ->orderBy('created_at', 'asc')
                         ->get();
+                $data = [];
                 if (count($answer) > 0) {
                     $answer = $answer->toArray();
                     $contactNames = array_unique(array_pluck($answer, 'contact_name'));
-                    $data = [];
                     foreach ($answer as $key => $value) {
                         if (in_array($value['contact_name'], $contactNames)) {
                             $data[$value['contact_name']][] = $value;
                         }
                     }
                 }
-                foreach ($data as $key => $value) {
-                    echo '<br />发送人：' . $key .'<br>';
-                    foreach ($value as $content) {
-                        $content = preg_replace("/\&lt;msg&gt;(.*?)\/msg&gt;/si", "", $content['content']);
-                        echo strip_tags($content) .'</br>';
+                if (count($answer) > 0) {
+                    foreach ($data as $key => $value) {
+                        echo '<br />发送人：' . $key .'<br>';
+                        foreach ($value as $content) {
+                            $content = preg_replace("/\&lt;msg&gt;(.*?)\/msg&gt;/si", "", $content['content']);
+                            echo strip_tags($content) .'</br>';
+                        }
                     }
                 }
                 $i++;
