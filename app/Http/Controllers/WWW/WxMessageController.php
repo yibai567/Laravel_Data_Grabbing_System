@@ -8,6 +8,7 @@ use App\Services\ValidatorService;
 use App\Services\HttpService;
 use Log;
 use DB;
+use App\Models\V2\WxMessage;
 
 class WxMessageController extends Controller
 {
@@ -114,5 +115,78 @@ class WxMessageController extends Controller
         $httpService = new HttpService();
         $wxMessageGroup = $httpService->get(config('url.jinse_open_url') . '/v2/wx/room/message/' . $id);
         echo $wxMessageGroup->getContents();
+    }
+
+    /**
+     * downloadMessageList
+     * 下载聊天记录文件
+     *
+     * @return array
+     */
+    public function downloadMessageList(Request $request, $id)
+    {
+        $httpService = new HttpService();
+        $wxMessageGroup = $httpService->get(config('url.jinse_open_url') . '/v2/wx/room/message/' . $id);
+        $messageList = $wxMessageGroup->getContents();
+        $message = json_decode($messageList, true);
+        if ($message['status_code'] != 200) {
+            return false;
+        }
+        if (count($message['data']) > 0) {
+            foreach ($message['data'] as $key => $value) {
+                echo '<hr />';
+                echo '发送人：' . $key .'<br>';
+                foreach ($value as $content) {
+                    echo $content['content'] .'</br>';
+                }
+            }
+            echo '<hr />';
+        }
+    }
+
+    public function text(Request $request)
+    {
+        $ask = WxMessage::where('contact_name', 'zoe')->get();
+        $askCount = count($ask);
+        if ($askCount > 0) {
+            $ask = $ask->toArray();
+            $i = 1;
+            if ($i == count($ask)) {
+                return false;
+            }
+            foreach ($ask as $value) {
+
+                echo '<hr />';
+                echo '问题' . $i . '：' . strip_tags($value['content']) . "</br>";
+                $nextId = '9999';
+                if ($i < $askCount) {
+                    $nextId = $ask[$i]['id'];
+                }
+                $answer = WxMessage::where('id', '>', $value['id'])
+                        ->where('id', '<', $nextId)
+                        ->orderBy('created_at', 'asc')
+                        ->get();
+                $data = [];
+                if (count($answer) > 0) {
+                    $answer = $answer->toArray();
+                    $contactNames = array_unique(array_pluck($answer, 'contact_name'));
+                    foreach ($answer as $key => $value) {
+                        if (in_array($value['contact_name'], $contactNames)) {
+                            $data[$value['contact_name']][] = $value;
+                        }
+                    }
+                }
+                if (count($data) > 0) {
+                    foreach ($data as $key => $value) {
+                        echo '<br />发送人：' . $key .'<br>';
+                        foreach ($value as $content) {
+                            $content = preg_replace("/\&lt;msg&gt;(.*?)\/msg&gt;/si", "", $content['content']);
+                            echo strip_tags($content) .'</br>';
+                        }
+                    }
+                }
+                $i++;
+            }
+        }
     }
 }

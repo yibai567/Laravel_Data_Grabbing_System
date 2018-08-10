@@ -40,6 +40,10 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\StatisticsEvent' => [
             'App\Listeners\StatisticsListener',
         ],
+        // 微信服务事件
+        'App\Events\WechatServerEvent' => [
+            'App\Listeners\WechatServerListener',
+        ],
 
         // SqlListener监听QueryExecuted
         'Illuminate\Database\Events\QueryExecuted' => [

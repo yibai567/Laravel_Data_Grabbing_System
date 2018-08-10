@@ -56,11 +56,9 @@ class AlarmResultController extends Controller
             $wheres[] = ['wework', $params['wework']];
         }
 
-        $alarmResult = AlarmResult::where($wheres)
-                                ->get();
-        $alarmResultNum = count($alarmResult);
+        $alarmResultsCount = AlarmResult::where($wheres)->count();
 
-        if ($alarmResultNum >= AlarmResult::MAX_SEND_NUM) {
+        if ($alarmResultsCount >= AlarmResult::MAX_SEND_NUM) {
             return $this->resObjectGet(true, 'alarm_result', $request->path());
         }
 
@@ -122,11 +120,11 @@ class AlarmResultController extends Controller
 
         try {
             $alarmResult->send_at = time();
-            $alarmResult->save();
 
             $weWork = new WeWorkService();
             $result = $weWork->pushMessage('text', $alarmResult->content, $users);
             $result = json_decode($result, true);
+
             $alarmResult->status = AlarmResult::STATUS_SUCCESS;
             if ($result['errcode'] !== 0) {
                 $alarmResult->status = AlarmResult::STATUS_FAIL;

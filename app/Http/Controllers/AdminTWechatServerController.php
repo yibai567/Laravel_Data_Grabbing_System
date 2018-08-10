@@ -1,99 +1,65 @@
 <?php namespace App\Http\Controllers;
 
-	use Session;
-	use Request;
-	use DB;
-	use CRUDBooster;
-    use App\Models\V2\ProjectResult;
-    use App\Models\V2\Task;
-    use App\Models\V2\Company;
-    use App\Services\InternalAPIV2Service;
+use Session;
+use Request;
+use DB;
+use CRUDBooster;
+use App\Models\V2\WechatServer;
+use App\Services\InternalAPIV2Service;
 
-	class AdminTProjectResultController extends \crocodicstudio\crudbooster\controllers\CBController {
+	class AdminTWechatServerController extends \crocodicstudio\crudbooster\controllers\CBController {
 
 	    public function cbInit() {
 
 			# START CONFIGURATION DO NOT REMOVE THIS LINE
-			$this->title_field = "content_type";
+			$this->title_field = "wechat_name";
 			$this->limit = "20";
 			$this->orderby = "id,desc";
 			$this->global_privilege = false;
 			$this->button_table_action = true;
 			$this->button_bulk_action = true;
 			$this->button_action_style = "button_icon";
-			$this->button_add = false;
-			$this->button_edit = false;
+			$this->button_add = true;
+			$this->button_edit = true;
 			$this->button_delete = true;
 			$this->button_detail = true;
 			$this->button_show = true;
 			$this->button_filter = true;
 			$this->button_import = false;
 			$this->button_export = false;
-			$this->table = "t_project_result";
+			$this->table = "t_wechat_server";
 			# END CONFIGURATION DO NOT REMOVE THIS LINE
 
 			# START COLUMNS DO NOT REMOVE THIS LINE
 			$this->col = [];
-			$this->col[] = ["label"=>"Id","name"=>"id"];
-			$this->col[] = ["label"=>"公司名","name"=>"company"];
-			$this->col[] = ["label"=>"任务ID","name"=>"task_id"];
-			$this->col[] = ["label"=>"项目ID","name"=>"project_id"];
-			$this->col[] = ["label"=>"标题","name"=>"title",'width'=>'30%'];
-            $this->col[] = ["label"=>"地址","name"=>"detail_url",'width'=>'200',"callback"=>function ($row) {
-            return '<a href="' . $row->detail_url . '" target="_brank" style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->detail_url .'</a>';
-            }];
-            $this->col[] = ["label"=>"发布时间","name"=>"show_time","callback"=>function ($row) {
-                if (is_numeric($row->show_time)) {
-                    return $row->show_time = date('Y-m-d H:i:s', $row->show_time/1000);
+			$this->col[] = ["label"=>"管理微信名称","name"=>"wechat_name"];
+			$this->col[] = ["label"=>"群名称","name"=>"room_name"];
+            $this->col[] = ["label"=>"监听类型","name"=>"listen_type","callback"=>function ($row) {
+                if ( $row->listen_type == WechatServer::LISTEN_TYPE_ROOM) {
+                    return '监听群';
                 } else {
-                    return $row->show_time;
+                    return '监听服务号';
                 }
             }];
-
-            $this->col[] = ["label"=>"创建时间","name"=>"created_at"];
+            $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
+                if ( $row->status == WechatServer::STATUS_INIT) {
+                    return '待启动';
+                } elseif ( $row->status == WechatServer::STATUS_START ){
+                    return '启动中';
+                } else {
+                    return '已停止';
+                }
+            }];
+            $this->col[] = ["label"=>"启动时间","name"=>"start_at"];
+			$this->col[] = ["label"=>"停止时间","name"=>"stop_at"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
-			$this->form[] = ['label'=>'Content Type','name'=>'content_type','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Company','name'=>'company','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Task Id','name'=>'task_id','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Project Id','name'=>'project_id','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Task Run Log Id','name'=>'task_run_log_id','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Title','name'=>'title','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Content','name'=>'content','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Detail Url','name'=>'detail_url','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Show Time','name'=>'show_time','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Author','name'=>'author','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Read Count','name'=>'read_count','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Thumbnail','name'=>'thumbnail','type'=>'upload','validation'=>'required|image|max:3000','width'=>'col-sm-10','help'=>'支持的图片类型 : JPG, JPEG, PNG, GIF, BMP'];
-			$this->form[] = ['label'=>'Screenshot','name'=>'screenshot','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Status','name'=>'status','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Start Time','name'=>'start_time','type'=>'datetime','validation'=>'required|date_format:Y-m-d H:i:s','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'End Time','name'=>'end_time','type'=>'datetime','validation'=>'required|date_format:Y-m-d H:i:s','width'=>'col-sm-10'];
-			$this->form[] = ['label'=>'Created Time','name'=>'created_time','type'=>'number','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'管理微信名称','name'=>'wechat_name','type'=>'text','validation'=>'required|min:1|max:100','width'=>'col-sm-4'];
+            $this->form[] = ['label'=>'群名称','name'=>'room_name','type'=>'text','validation'=>'required|min:1|max:100','width'=>'col-sm-4'];
+			$this->form[] = ['label'=>'监听类型','name'=>'listen_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-6','dataenum'=>'1|监听群;2|监听公众号','value'=>'1'];
 			# END FORM DO NOT REMOVE THIS LINE
-
-			# OLD START FORM
-			//$this->form = [];
-			//$this->form[] = ["label"=>"Content Type","name"=>"content_type","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Company","name"=>"company","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Task Id","name"=>"task_id","type"=>"select2","required"=>TRUE,"validation"=>"required|integer|min:0","datatable"=>"task,id"];
-			//$this->form[] = ["label"=>"Project Id","name"=>"project_id","type"=>"select2","required"=>TRUE,"validation"=>"required|integer|min:0","datatable"=>"project,id"];
-			//$this->form[] = ["label"=>"Task Run Log Id","name"=>"task_run_log_id","type"=>"select2","required"=>TRUE,"validation"=>"required|integer|min:0","datatable"=>"task_run_log,id"];
-			//$this->form[] = ["label"=>"Title","name"=>"title","type"=>"textarea","required"=>TRUE,"validation"=>"required|string|min:5|max:5000"];
-			//$this->form[] = ["label"=>"Content","name"=>"content","type"=>"textarea","required"=>TRUE,"validation"=>"required|string|min:5|max:5000"];
-			//$this->form[] = ["label"=>"Detail Url","name"=>"detail_url","type"=>"textarea","required"=>TRUE,"validation"=>"required|string|min:5|max:5000"];
-			//$this->form[] = ["label"=>"Show Time","name"=>"show_time","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Author","name"=>"author","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Read Count","name"=>"read_count","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Thumbnail","name"=>"thumbnail","type"=>"upload","required"=>TRUE,"validation"=>"required|image|max:3000","help"=>"支持的图片类型 : JPG, JPEG, PNG, GIF, BMP"];
-			//$this->form[] = ["label"=>"Screenshot","name"=>"screenshot","type"=>"textarea","required"=>TRUE,"validation"=>"required|string|min:5|max:5000"];
-			//$this->form[] = ["label"=>"Status","name"=>"status","type"=>"text","required"=>TRUE,"validation"=>"required|min:1|max:255"];
-			//$this->form[] = ["label"=>"Start Time","name"=>"start_time","type"=>"datetime","required"=>TRUE,"validation"=>"required|date_format:Y-m-d H:i:s"];
-			//$this->form[] = ["label"=>"End Time","name"=>"end_time","type"=>"datetime","required"=>TRUE,"validation"=>"required|date_format:Y-m-d H:i:s"];
-			//$this->form[] = ["label"=>"Created Time","name"=>"created_time","type"=>"number","required"=>TRUE,"validation"=>"required|integer|min:0"];
-			# OLD END FORM
 
 			/*
 	        | ----------------------------------------------------------------------
@@ -122,7 +88,10 @@
 	        |
 	        */
 	        $this->addaction = array();
-            $this->addaction[] = ['label'=>'重新上报', 'url'=>CRUDBooster::mainpath('again-report/[id]'),'color'=>'info', 'icon'=>'glyphicon glyphicon-send', 'showIf'=>'[project_id] == 4 || [project_id] == 5 || [project_id] == 1 || [project_id] == 2'];
+            $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start/[id]'),'color'=>'info', 'icon'=>'glyphicon glyphicon-play', 'showIf'=>'[status] != ' . WechatServer::STATUS_START];
+            $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop/[id]'),'color'=>'warning', 'icon'=>'glyphicon glyphicon-stop', 'showIf'=>'[status] == ' . WechatServer::STATUS_START];
+
+
 
 	        /*
 	        | ----------------------------------------------------------------------
@@ -301,8 +270,12 @@
 	    |
 	    */
 	    public function hook_before_add(&$postdata) {
-	        //Your code here
-
+            try {
+                $wechat = InternalAPIV2Service::post('/wechat_server', $postdata);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+            }
+            CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_wechat_server", "创建成功", "success");
 	    }
 
 	    /*
@@ -366,17 +339,54 @@
 
 	    }
 
-        public function getAgainReport($id) {
+	    //By the way, you can still create your own method in here... :)
+        // 启动服务
+        public function getStart($id)
+        {
             try {
-                $result = InternalAPIV2Service::post('/action/report/notice_result', ['project_result_id' => $id]);
+                $res = InternalAPIV2Service::post('/wechat_server/start', ['id' => $id]);
             } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "上报成功", "success");
+            $res['log'] = [];
+
+            CRUDBooster::redirect('/admin/t_wechat_server/detail/' . $id . '?last_time=' . $res['start_at'], "启动成功", "success");
         }
 
+        public function getDetail($id)
+        {
+            try {
+                $res = InternalAPIV2Service::get('/wechat_server/' . $id);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+            }
+            $log = InternalAPIV2Service::get('/wechat_server_log/wechat_server_id/' . $id, ['last_time' => $res['start_at']]);
+            $wechatServer = $res;
+            $wechatServer['log'] = $log;
+            $this->cbView('admin.wechat_server_log', $wechatServer);
+        }
 
-	    //By the way, you can still create your own method in here... :)
+        public function getLog($id)
+        {
+            $last_time = Request::get('last_time');
+            $asc = Request::get('asc');
+            $log_id = Request::get('log_id');
+            if (empty($last_time)) {
+                $last_time = date("Y-m-d H:i:s");
+            }
+            $log = InternalAPIV2Service::get('/wechat_server_log/wechat_server_id/' . $id, ['last_time' => $last_time, 'asc' => $asc, 'log_id' => $log_id]);
+            echo json_encode($log);
+        }
 
+        // 停止服务
+        public function getStop($id)
+        {
+            try {
+                $res = InternalAPIV2Service::post('/wechat_server/stop', ['id' => $id]);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+            }
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "启动成功", "success");
+        }
 
 	}

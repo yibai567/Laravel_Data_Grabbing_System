@@ -14,16 +14,19 @@
     @else
         <a href="http://{{$_SERVER['HTTP_HOST']}}/news" class="item" >行业最新新闻</a>
     @endif
+    <!--
     @if($data['nav_status'] == 'wx_message')
         <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/old" class="item active" >相对论信息</a>
     @else
         <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/old" class="item" >相对论信息</a>
     @endif
+    -->
     @if($data['nav_status'] == 'new_wx_message')
         <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message" class="item active" >新版相对论信息</a>
     @else
         <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message" class="item" >新版相对论信息</a>
     @endif
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/text" target="_blank" class="item" >相对论文本链接</a>
     @guest
     <a class="ui item right" href="http://{{$_SERVER['HTTP_HOST']}}/login">登陆</a>
     @else
@@ -59,7 +62,7 @@
             @foreach($data['data'] as $key=>$value)
               <div class="item">
                 <a class="ui orange right ribbon label">问题 {{$key+1}}</a>
-                <p>{{$value['content']}}</p>
+                <p>{!! $value['content'] !!}</p>
                 <div class="meta">
                     <div class="right floated content" onclick="getWxMessage({{$value['id']}}, {{$key+1}}, '{{$value['content']}}')">
                     <a class="ui basic left pointing label"><i class="angle right icon"></i></a>
@@ -75,6 +78,7 @@
     <div class="ten wide column">
         <div class="ui visible message">
           <p id="p"></p>
+          <span id='all'><a href='' target="_blank">查看文本</a></span>
         </div>
 
         <div class="ui link cards" id="card">
@@ -112,6 +116,7 @@
                 }
                 $("#card").html(name);
                 $("#p").html("问题"+num+":     "+problem);
+                $("#all a").attr("href", '/wx/down/room/message/' + id);
             }
         })
     }

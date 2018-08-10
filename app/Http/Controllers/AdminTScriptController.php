@@ -62,6 +62,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
                 return '已生成';
             }
         }];
+        $this->col[] = ["label"=>"执行规则","name"=>"cron_type"];
 
 		# END COLUMNS DO NOT REMOVE THIS LINE
 

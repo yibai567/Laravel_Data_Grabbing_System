@@ -77,7 +77,8 @@ $api->version(
         });
 
         //新版抓取路由
-        $api->post('/data/results', 'DataController@batchHandle');
+        $api->post('/data/results', 'DataController@converter');
+        $api->post('/data/results/handle', 'DataController@batchHandle');
 
         $api->post('/image/upload', 'ImageController@upload');
 
@@ -103,5 +104,8 @@ $api->version(
         $api->get('/news','BlockNewsController@all');
         // $api->get('/news/{requirement_id}','BlockNewsController@getByRequirementId');
 
+        $api->post('/wechat_server_log','WechatServerController@createLog');
+        $api->post('/wechat_server/stop','WechatServerController@stop');
+        $api->post('/wechat_official/message', 'WxMessageController@officialMessageCreate');
     }
 );

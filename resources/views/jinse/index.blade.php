@@ -14,11 +14,13 @@
     @else
         <a href="http://{{$_SERVER['HTTP_HOST']}}/news" class="item" >行业最新新闻</a>
     @endif
+    <!--
     @if($data['nav_status'] == 'wx_message')
         <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/old" class="item active" >相对论信息</a>
     @else
         <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/old" class="item" >相对论信息</a>
     @endif
+    -->
     @if($data['nav_status'] == 'new_wx_message')
         <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message" class="item active" >新版相对论信息</a>
     @else

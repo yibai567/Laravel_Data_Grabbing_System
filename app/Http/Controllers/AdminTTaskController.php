@@ -22,7 +22,7 @@
 			$this->button_add = false;
 			$this->button_edit = false;
 			$this->button_delete = true;
-			$this->button_detail = false;
+			$this->button_detail = true;
 			$this->button_show = true;
 			$this->button_filter = true;
 			$this->button_import = false;
@@ -36,6 +36,7 @@
             $this->col[] = ["label"=>"需求ID","name"=>"requirement_pool_id"];
 			$this->col[] = ["label"=>"脚本ID","name"=>"script_id"];
 			$this->col[] = ["label"=>"任务名称","name"=>"name"];
+			$this->col[] = ["label"=>"测试地址","name"=>"test_url"];
             // $this->col[] = ["label"=>"最后执行时间","name"=>"name","callback"=>function ($row) {
             //     $taskStatistics = DB::table('t_task_statistics')->where('task_id', $row->id)->first();
             //     return $taskStatistics->last_job_at;
@@ -91,6 +92,8 @@
 			$this->form[] = ['label'=>'Cron Type','name'=>'cron_type','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'data Type','name'=>'data_type','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Status','name'=>'status','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'Test Url','name'=>'test_url','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'Test Result','name'=>'test_result','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
@@ -133,7 +136,9 @@
 
             $this->addaction[] = ['label'=>'启动', 'url'=>CRUDBooster::mainpath('start-up/[id]'),'color'=>'success', 'icon'=>'fa fa-play', 'showIf'=>'[status] == 1 && [cron_type] != 4'];
 
-        $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-down/[id]'),'color'=>'warning', 'icon'=>'fa fa-stop', 'showIf'=>'[status] == 2'];
+            $this->addaction[] = ['label'=>'停止', 'url'=>CRUDBooster::mainpath('stop-down/[id]'),'color'=>'warning', 'icon'=>'fa fa-stop', 'showIf'=>'[status] == 2'];
+
+            $this->addaction[] = ['label'=>'测试', 'url'=>CRUDBooster::mainpath('test/[id]'), 'icon'=>'fa fa-play'];
 	        /*
 	        | ----------------------------------------------------------------------
 	        | Add More Button Selected
@@ -291,7 +296,7 @@
 	    */
 	    public function hook_query_index(&$query) {
 	        //Your code here
-
+            $query->where('cron_type', Task::CRON_TYPE_KEEP);
 	    }
 
 	    /*
@@ -399,6 +404,23 @@
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "停止成功", "success");
         }
 
+        public function getTest($id)
+        {
+            try {
+                $task = InternalAPIV2Service::get('/task', ['id' => intval($id)]);
+
+                //判断task数据是否存在
+                if (empty($task)) {
+                    CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "task is not found", "error");
+                }
+
+                $result = InternalAPIV2Service::post('/task/test', ['task_id' => intval($id), 'test_url' => $task['list_url']]);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+            }
+
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "测试已提交", "success");
+        }
 	    //By the way, you can still create your own method in here... :)
 
 

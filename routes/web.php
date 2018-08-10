@@ -23,6 +23,8 @@ Route::group(
         Route::get('/', 'WWW\BlockNewsController@all');
         Route::get('/wx/room/message', 'WWW\WxMessageController@newIndex');
         Route::get('/wx/ajax/room/message/{id}', 'WWW\WxMessageController@ajaxMessageList');
+        Route::get('/wx/down/room/message/{id}', 'WWW\WxMessageController@downloadMessageList');
+        Route::get('/wx/room/message/text', 'WWW\WxMessageController@text');
 
         Route::get('/news', 'WWW\BlockNewsController@all');
         Route::get('/block_news', 'WWW\BlockNewsController@index');
