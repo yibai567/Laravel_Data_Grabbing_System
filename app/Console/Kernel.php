@@ -34,6 +34,15 @@ class Kernel extends ConsoleKernel
         $schedule->command('task:crawl:over_time_alarm')->runInBackground()->withoutOverlapping(
             $taskAlarmResult
         )->everyTenMinutes();
+
+        //代理监控 每10分钟一次
+        $schedule->command('proxy:alarm 127.0.0.1:8123')->runInBackground()->withoutOverlapping(
+            $taskAlarmResult
+        )->everyTenMinutes();
+        //每天十点监测未处理的需求
+        $schedule->command('requirement:alarm')->runInBackground()->dailyAt('10:00');
+        //每天十点监测任务结果24小时无更新
+        $schedule->command('task:result_alarm 24')->runInBackground()->dailyAt('10:00');
     }
 
     /**
