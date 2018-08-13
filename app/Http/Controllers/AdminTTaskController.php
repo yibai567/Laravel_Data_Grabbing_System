@@ -296,7 +296,7 @@
 	    */
 	    public function hook_query_index(&$query) {
 	        //Your code here
-            $query->where('cron_type', Task::CRON_TYPE_KEEP);
+            $query->where('cron_type', '!=', Task::CRON_TYPE_KEEP_ONCE);
 	    }
 
 	    /*
