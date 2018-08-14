@@ -66,7 +66,11 @@ class TaskCrawlOverTimeAlarm extends Command
             }
 
             //如果是刚创建的任务，最后执行时间可能不存在，所以可以使用创建时间来确定
-            $lastJobAt = $taskLastRunLog->last_job_at ?? $taskLastRunLog->created_at;
+            $lastJobAt = $taskLastRunLog->last_job_at;
+
+            if (!$lastJobAt) {
+                $lastJobAt = $taskLastRunLog->created_at;
+            }
 
             //任务最后一次执行时间超过15分钟触发报警通知
             if (time()- strtotime($lastJobAt) > 60 * 15) {
