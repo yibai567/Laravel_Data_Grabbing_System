@@ -107,5 +107,8 @@ $api->version(
         $api->post('/wechat_server_log','WechatServerController@createLog');
         $api->post('/wechat_server/stop','WechatServerController@stop');
         $api->post('/wechat_official/message', 'WxMessageController@officialMessageCreate');
+
+        $api->get('/fast_news/companies','FastNewsController@getCompanies');
+        $api->get('/fast_news/requirement','FastNewsController@getNewsByRequirement');
     }
 );

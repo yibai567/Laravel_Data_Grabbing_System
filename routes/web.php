@@ -31,6 +31,9 @@ Route::group(
         Route::get('/ajax_block_news', 'WWW\BlockNewsController@ajaxList');
 
         Route::get('/home', 'WWW\HomeController@index');
+
+        Route::get('/fast_news', 'WWW\FastNewsController@index');
+        Route::get('/fast_news/requirement', 'WWW\FastNewsController@getNewsByRequirementPoolId');
     }
 );
 Route::get('/logout', function(){

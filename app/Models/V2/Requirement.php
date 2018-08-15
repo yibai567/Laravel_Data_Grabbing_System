@@ -48,6 +48,11 @@ class Requirement extends Model
     const REQUIREMENT_TYPE_NOTICE = 2; //公告
 
     /**
+     * 分类
+     */
+    const CATEGORY_FAST_NEWS= 4; //行业快讯
+
+    /**
      * 表名
      */
     protected $table = 't_requirement_pool';

@@ -12,6 +12,7 @@ namespace App\Http\Controllers\InternalAPIV2;
 
 use App\Models\BlockNews;
 use App\Models\V2\Data;
+use App\Models\V2\FastNews;
 use App\Models\V2\Project;
 use App\Models\V2\ProjectResult;
 use App\Events\ProjectResultEvent;
@@ -223,6 +224,58 @@ class ProjectController extends Controller
 
         return $this->resObjectGet(true, 'block_news', $request->path());
     }
+
+
+    /**
+     * blockNew
+     * 新闻块项目
+     *
+     * @param
+     * @return boolean
+     */
+    public function fastNews(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'data_id'    => 'required|integer|max:999999999',
+            'project_id' => 'required|integer|max:100',
+        ]);
+
+        //查询data数据
+        $data = Data::find($params['data_id']);
+
+        $task = Task::find($data->task_id);
+        if (empty($task))
+        {
+            Log::debug('[InternalAPIv2 ProjectController fastNews] task is not found' );
+            return $this->resObjectGet(false, 'fast_news', $request->path());
+        }
+
+        try {
+            //整理保存数据
+            $newData = [
+                'requirement_id' => $task->requirement_pool_id,
+                'list_url'       => $task->list_url,
+                'title'          => $data->title,
+                'description'    => $data->description,
+                'content'        => $data->content,
+                'read_count'     => $data->read_count,
+                'detail_url'     => $data->detail_url,
+                'show_time'      => $data->show_time,
+            ];
+
+            FastNews::create($newData);
+
+        } catch (\Exception $e) {
+            Log::debug('[v2 ProjectController fastNews] error message = ' . $e->getMessage());
+            return $this->resObjectGet(false, 'fast_news', $request->path());
+        }
+
+
+        return $this->resObjectGet(true, 'fast_news', $request->path());
+    }
+
     /**
      * noticeList
      * 交易所公告列表项目
