@@ -186,6 +186,7 @@ $api->version(
         $api->post('/project/notice_list','ProjectController@noticeList');
         $api->post('/project/notice_detail','ProjectController@noticeDetail');
         $api->post('/project/block_news','ProjectController@blockNews');
+        $api->post('/project/fast_news','ProjectController@fastNews');
 
         $api->post('/action/report/result', 'ActionController@reportResult');
         $api->post('/action/report/notice_result', 'ActionController@reportNoticeResult');
@@ -197,6 +198,7 @@ $api->version(
         $api->get('/quirements', 'QuirementPoolController@all');
         $api->get('/quirement', 'QuirementPoolController@retrieve');
         $api->post('/quirement/update_status','QuirementPoolController@updateStatus');
+        $api->get('/quirements/category_id','QuirementPoolController@getQuirementByCategoryId');
         //微信消息
         $api->post('/wx/message/group','WxMessageController@createGroup');
         $api->post('/wx/message/group/status','WxMessageController@updateGroupStatus');
@@ -238,5 +240,8 @@ $api->version(
         $api->post('/task/test', 'TaskController@updateTestUrl');
         $api->post('/task/test_status/success', 'TaskController@updateTestStatusSuccess');
         $api->post('/task/test_status/fail', 'TaskController@updateTestStatusFail');
+
+        //行业快讯
+        $api->get('/fast_news', 'FastNewsController@all');
     }
 );

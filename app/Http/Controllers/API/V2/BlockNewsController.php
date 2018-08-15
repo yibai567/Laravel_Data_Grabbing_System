@@ -28,7 +28,7 @@ class BlockNewsController extends Controller
                     $value['company_name'] = $company['cn_name'];
                 }
                 $news = InternalAPIV2Service::get('/news/' . $value['id']);
-                $value['news'] = $news;
+                $value['result'] = $news;
                 $data[] = $value;
             }
         }

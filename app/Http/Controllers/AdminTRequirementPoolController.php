@@ -50,8 +50,10 @@
                     return '新闻';
                 } else if($row->category == 2) {
                     return '历史数据';
+                } else if($row->category == 3){
+                   return '订阅';
                 } else {
-                    return '订阅';
+                   return '行业快讯';
                 }
             }];
 			$this->col[] = ["label"=>"订阅类型","name"=>"subscription_type","callback"=>function ($row){
@@ -117,7 +119,7 @@
                     echo $string;
                 }
             }];
-            $this->form[] = ['label'=>'分类','name'=>'category','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|新闻;2|历史数据;3|订阅','value'=>1];
+            $this->form[] = ['label'=>'分类','name'=>'category','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|新闻;2|历史数据;3|订阅;4|行业快讯','value'=>1];
 			$this->form[] = ['label'=>'订阅类型','name'=>'subscription_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|列表;2|详情','value'=>1];
 			$this->form[] = ['label'=>'截图','name'=>'is_capture','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|需要;2|不需要','value'=>2];
 			$this->form[] = ['label'=>'图片资源','name'=>'is_download_img','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|需要;2|不需要','value'=>2];
@@ -229,6 +231,7 @@
             $this->index_statistic[] = ['label'=>'新闻','count'=>Requirement::where('category', 1)->count(),'color'=>'btn btn-xs btn-success'];
             $this->index_statistic[] = ['label'=>'历史数据','count'=>Requirement::where('category', 2)->count(),'color'=>'btn btn-xs btn-warning'];
             $this->index_statistic[] = ['label'=>'订阅','count'=>Requirement::where('category', 3)->count(),'color'=>'btn btn-xs btn-info'];
+            $this->index_statistic[] = ['label'=>'行业快讯','count'=>Requirement::where('category', 4)->count(),'color'=>'btn btn-xs btn-info'];
 	        /*
 	        | ----------------------------------------------------------------------
 	        | Add javascript at body

@@ -46,7 +46,7 @@ class QuirementPoolController extends Controller
             'is_capture'        => 'required|integer|between:1,2',
             'company_id'        => 'required|integer',
             'is_download_img'   => 'required|integer|between:1,2',
-            'category'          =>  'required|integer|between:1,3',
+            'category'          =>  'required|integer|between:1,4',
             // 'img_description'   => 'required|max:255',
             'operate_by'=>'required|integer'
         ]);
@@ -92,7 +92,7 @@ class QuirementPoolController extends Controller
             'subscription_type' => 'required|integer|between:1,2',
             'is_capture'        => 'required|integer|between:1,2',
             'is_download_img'   => 'required|integer|between:1,2',
-            'category'         => 'required|integer|between:1,3',
+            'category'         => 'required|integer|between:1,4',
             // 'img_description'   => 'required|max:255'
         ]);
         //$item = Requirement::find($formatParams['id']);
@@ -285,5 +285,28 @@ class QuirementPoolController extends Controller
         return $this->resObjectGet($result, 'quirement_pool', $request->path());
     }
 
+    /**
+     * getQuirementByCategoryId
+     * 根据分类获取需求资源列表
+     *
+     * @param
+     * @return array
+     */
+    public function getQuirementByCategoryId(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'category_id' => 'required|integer',
+        ]);
+
+        //获取数据
+        $res = Requirement::where('category', $params['category_id'])->get();
+        $result = [];
+        if (!empty($res)) {
+            $result = $res->toArray();
+        }
+        return $this->resObjectGet($result, 'quirement_pool', $request->path());
+    }
 
 }

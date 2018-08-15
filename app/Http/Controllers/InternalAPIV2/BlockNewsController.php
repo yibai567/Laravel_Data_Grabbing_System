@@ -27,6 +27,12 @@ class BlockNewsController extends Controller
     {
         $startTime = time();
         $endTime = time() - 24*3600;
+        $total = BlockNews::where(function ($query) use ($requirement_id) {
+            if (!empty($requirement_id)) {
+                $query->where('requirement_id', $requirement_id);
+
+            }
+        })->where('created_at', '<=', date("Y-m-d H:i:s", $startTime))->where('created_at', '>=', date("Y-m-d H:i:s", $endTime))->count();
 
         $res = BlockNews::where('requirement_id', $requirement_id)
                             ->where('created_at', '<=', date("Y-m-d H:i:s", $startTime))
@@ -34,8 +40,9 @@ class BlockNewsController extends Controller
                             ->get();
         $result = [];
         if (!empty($res)) {
-            $result = $res->toArray();
+            $result['news'] = $res->toArray();
         }
+        $result['total'] = $total;
         return $this->resObjectGet($result, 'block_news', $request->path());
     }
 }

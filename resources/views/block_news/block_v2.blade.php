@@ -29,6 +29,13 @@
     @else
         <a href="#" class="item" >行业最新新闻</a>
     @endif
+
+    @if($data['nav_status'] == 'fast_news')
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/fast_news" class="item active" >行业最新快讯</a>
+    @else
+        <a href="http://{{$_SERVER['HTTP_HOST']}}/fast_news" class="item" >行业最新快讯</a>
+    @endif
+
     <!--
     @if($data['nav_status'] == 'wx_message')
         <a href="http://{{$_SERVER['HTTP_HOST']}}/wx/room/message/old" class="item active" >相对论信息</a>
@@ -54,12 +61,13 @@
             @if ($value['status'] == 1)
                 <a class="ui orange right ribbon label">开发中</a>
             @endif
-            <div class="header">{{$value['company_name']}}</div>
+            <div class="header"><a href="{{$value['list_url']}}" target="_bank" style="letter-spacing: 0.08em;color: #000;">{{$value['company_name']}}</a></div>
+                <div style="float:right">条数:{{$value['result']['total'] ?? 0}}</div>
         </div>
         <div class="content div">
             <div class="ui relaxed divided list">
-            @if (!empty($value['news']))
-                @foreach($value['news'] as $newsValue)
+            @if (!empty($value['result']['news']))
+                @foreach($value['result']['news'] as $newsValue)
                   <div class="item listitem">
                     <p><a href="{{$newsValue['detail_url']}}" target="_bank" style="letter-spacing: 0.08em;color: #000;">{{$newsValue['title']}}</a></p>
                     <div class="meta" style="color: #1567a5;font-size: 0.8em;">
