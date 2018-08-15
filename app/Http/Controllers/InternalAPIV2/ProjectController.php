@@ -260,8 +260,6 @@ class ProjectController extends Controller
                 'title'          => $data->title,
                 'description'    => $data->description,
                 'content'        => $data->content,
-                'read_count'     => $data->read_count,
-                'detail_url'     => $data->detail_url,
                 'show_time'      => $data->show_time,
             ];
 

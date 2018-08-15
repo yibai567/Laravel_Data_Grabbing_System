@@ -42,9 +42,7 @@ class FastNews extends Model
         'title',
         'description',
         'content',
-        'detail_url',
-        'show_time',
-        'read_count',
+        'show_time'
     ];
 
 
