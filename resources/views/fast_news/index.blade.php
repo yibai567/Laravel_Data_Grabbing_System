@@ -92,7 +92,7 @@
     function getNewsByRequirement(id) {
         $.ajax({
             type: "get",
-            url: "http://webmagic.jinse.cn/fast_news/requirement?requirement_id=" + id + "&offset=0&limit=200",
+            url: "/fast_news/requirement?requirement_id=" + id + "&offset=0&limit=200",
             data : "",
             crossDomain: true,
             xhrFields: {
