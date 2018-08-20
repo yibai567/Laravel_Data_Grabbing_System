@@ -62,7 +62,7 @@
                 <a class="ui orange right ribbon label">开发中</a>
             @endif
             <div class="header"><a href="{{$value['list_url']}}" target="_bank" style="letter-spacing: 0.08em;color: #000;">{{$value['company_name']}}</a></div>
-                <div style="float:right">条数:{{$value['result']['total'] ?? 0}}</div>
+                <div style="float:right">条数:<p style="float:right" class="count_num"> 0</p></div>
         </div>
         <div class="content div">
             <div class="ui relaxed divided list">
