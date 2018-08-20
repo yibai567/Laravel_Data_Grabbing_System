@@ -16,7 +16,7 @@ class BlockNewsController extends Controller
      *
      * @return array
      */
-    public function all(Request $request)
+    public function getCompanies(Request $request)
     {
         $quirements = InternalAPIV2Service::get('/quirements', []);
         $data = [];
@@ -27,8 +27,6 @@ class BlockNewsController extends Controller
                 if (!empty($company)) {
                     $value['company_name'] = $company['cn_name'];
                 }
-                $news = InternalAPIV2Service::get('/news/' . $value['id']);
-                $value['result'] = $news;
                 $data[] = $value;
             }
         }
@@ -36,15 +34,23 @@ class BlockNewsController extends Controller
     }
 
     /**
-     * getByRequirementId
-     * 获取新闻列表
+     * getCompanies
+     * 根据需求池id查询行业新闻
      *
-     * @param $requirement_id
      * @return array
      */
-    public function getByRequirementId(Request $request, $requirement_id)
+    public function getNewsByRequirement(Request $request)
     {
-        $result = InternalAPIV2Service::get('/block_news/' . $requirement_id);
-        return $this->resObjectGet($result, 'block_news', $request->path());
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'requirement_id' => 'required|integer',
+            'offset' => 'nullable|integer',
+            'limit' => 'nullable|integer'
+        ]);
+
+        $data = InternalAPIV2Service::get('/block_news', $params);
+
+        return $this->resObjectGet($data, 'block_news', $request->path());
     }
 }
