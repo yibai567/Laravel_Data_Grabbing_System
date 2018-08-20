@@ -133,7 +133,8 @@ class BlockNewsController extends Controller
     {
         $data = [];
         $httpService = new HttpService();
-        $blockNews = $httpService->get(config('url.jinse_open_url') . '/v2/news', []);
+
+        $blockNews = $httpService->get(config('url.jinse_open_url') . '/v2/block_news/companies', []);
         $data = json_decode($blockNews->getContents(), true);
         $data['nav_status'] = 'block_news';
         return view('block_news.block_v2', ["data" => $data]);
@@ -147,5 +148,20 @@ class BlockNewsController extends Controller
         echo $blockNews->getContents();
     }
 
+    public function getNewsByRequirementPoolId(Request $request)
+    {
+        $params = $request->all();
+
+        ValidatorService::check($params, [
+            'requirement_id' => 'required|integer',
+            'offset'         => 'nullable|integer',
+            'limit'          => 'nullable|integer'
+        ]);
+
+        $httpService = new HttpService();
+        $blockNews = $httpService->get(config('url.jinse_open_url') . '/v2/block_news/requirement', $params);
+
+        return $blockNews->getContents();
+    }
 
 }

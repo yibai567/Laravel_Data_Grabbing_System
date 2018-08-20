@@ -56,7 +56,7 @@
 </div>
 <div class="ui link cards">
     @foreach($data['data'] as $value)
-    <div class="card">
+    <div class="card company" id="{{$value['id']}}" status="{{$value['status']}}">
         <div class="content">
             @if ($value['status'] == 1)
                 <a class="ui orange right ribbon label">开发中</a>
@@ -66,35 +66,59 @@
         </div>
         <div class="content div">
             <div class="ui relaxed divided list">
-            @if (!empty($value['result']['news']))
-                @foreach($value['result']['news'] as $newsValue)
-                  <div class="item listitem">
-                    <p><a href="{{$newsValue['detail_url']}}" target="_bank" style="letter-spacing: 0.08em;color: #000;">{{$newsValue['title']}}</a></p>
-                    <div class="meta" style="color: #1567a5;font-size: 0.8em;">
-
-                    <div class="ui grid">
-                        <div class="six wide column">{{$newsValue['show_time']}}</div>
-                        <!-- <div class="four wide column">{{$value['company_name']}}</div> -->
-                        @if(empty($newsValue['read_count']))
-                        <div class="four wide column"><i class="unhide icon"></i> 无</div>
-                        @else
-                        <div class="six wide column"><i class="unhide icon"></i> {{$newsValue['read_count']}}</div>
-                        @endif
-                    </div>
-                    </div>
-                  </div>
-                @endforeach
-            @else
-                <div class="ui" style="text-align: center; margin-top: 200px;">
-                  <h3 class="ui grey header">24小时内</h3>
-                  <h3 class="ui grey header">暂无数据</h3>
+                <div class="ui prompt" style="text-align: center; margin-top: 200px;">
+                    <h3 class="ui grey header">加载中...</h3>
                 </div>
-            @endif
             </div>
         </div>
     </div>
     @endforeach
 
   </div>
+<script type="text/javascript">
+
+  $(function(){
+    var height = $(window).height() * 0.5
+    $('.div').height(height)
+    $('.company').each(function () {
+      if ($(this).attr('status') == 2) {
+        var id = $(this).attr('id')
+        getNewsByRequirement(id)
+      } else {
+        $(this).find('.prompt h3').text('敬请期待...')
+      }
+    })
+  })
+
+  function getNewsByRequirement(id) {
+    $.ajax({
+      type: "get",
+      url: "/block_news/requirement?requirement_id=" + id + "&offset=0&limit=200",
+      data : "",
+      crossDomain: true,
+      xhrFields: {
+        withCredentials: true
+      },
+      dataType: "json",
+      contentType: "application/json; charset=utf-8"
+    }).done(function (response) {
+      if (response.data.result.length > 0) {
+        $('#' + id).find('.ui.prompt').hide()
+        var data = response.data
+        $('#' + id).find(".count_num").text(data.total)
+        var content = ''
+        data.result.forEach(function(fastNews){
+          content += '<div class="item listitem"><p>' + fastNews['title'] + '</p><div class="meta" style="color: #1567a5;font-size: 0.8em;"><div class="ui grid"><div class="wide column">' + fastNews['show_time'] + '</div></div></div></div>'
+        })
+        $('#' + id).find('.list').append(content)
+      } else {
+        $('#' + id).find('.prompt h3').text('24小时数内')
+        $('#' + id).find('.prompt').append('<h3 class="ui grey header">暂无数据</h3>')
+      }
+    }).fail(function () {
+      $('#' + id).find('.prompt h3').text('加载失败...')
+    })
+  }
+</script>
 </body>
 </html>

@@ -215,7 +215,6 @@ $api->version(
 
 
         $api->get('/company/{id}', 'CompanyController@getById');
-        $api->get('/news/{requirement_id}', 'BlockNewsController@getByRequirementId');
 
         $api->post('/history_topics','HistoryTopicController@create');
         $api->post('/history_topic/update','HistoryTopicController@update');
@@ -243,5 +242,7 @@ $api->version(
 
         //行业快讯
         $api->get('/fast_news', 'FastNewsController@all');
+        //区块链新闻
+        $api->get('/block_news','BlockNewsController@all');
     }
 );

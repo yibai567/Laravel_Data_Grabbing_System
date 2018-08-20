@@ -29,6 +29,7 @@ Route::group(
         Route::get('/news', 'WWW\BlockNewsController@all');
         Route::get('/block_news', 'WWW\BlockNewsController@index');
         Route::get('/ajax_block_news', 'WWW\BlockNewsController@ajaxList');
+        Route::get('/block_news/requirement', 'WWW\BlockNewsController@getNewsByRequirementPoolId');
 
         Route::get('/home', 'WWW\HomeController@index');
 
