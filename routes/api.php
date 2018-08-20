@@ -101,8 +101,8 @@ $api->version(
         $api->get('/wx/room/message/{id}','WxMessageController@getMessageById');
 
         //行业新闻
-        $api->get('/news','BlockNewsController@all');
-        // $api->get('/news/{requirement_id}','BlockNewsController@getByRequirementId');
+        $api->get('/block_news/companies','BlockNewsController@getCompanies');
+        $api->get('/block_news/requirement','BlockNewsController@getNewsByRequirement');
 
         $api->post('/wechat_server_log','WechatServerController@createLog');
         $api->post('/wechat_server/stop','WechatServerController@stop');
