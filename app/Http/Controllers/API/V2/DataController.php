@@ -112,7 +112,7 @@ class DataController extends Controller
         ValidatorService::check($params, [
             'company'         => 'required|string|max:500',
             'content_type'    => 'required|integer|between:1,9',
-            'task_run_log_id' => 'required|string',
+            'task_run_log_id' => 'required|integer',
             'start_time'      => 'required|date',
             'end_time'        => 'required|date',
             'result'          => 'required|array',
