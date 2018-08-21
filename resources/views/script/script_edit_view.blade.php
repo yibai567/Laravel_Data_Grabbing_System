@@ -66,6 +66,69 @@
                         <p class='help-block'></p>
                     </div>
                 </div>
+                <div class='form-group header-group-0 ' id='form-group-load_images'>
+                    <label class='control-label col-sm-2'>data类型
+                        <span class='text-danger' title='This field is required'>*</span>
+                    </label>
+                    <div>
+                        <div class="col-sm-10">
+                            @if ($row['data_type'] == 1)
+                            <label class='radio-inline'>
+                                <input type="radio" name="data_type" value="1" checked> CasperJs
+                            </label>
+                            @else
+                            <label class='radio-inline'>
+                                <input type="radio" name="data_type" value="1"> CasperJs
+                            </label>
+                            @endif
+                            @if ($row['data_type'] == 2)
+                            <label class='radio-inline'>
+                                <input type="radio" name="data_type" value="2" checked> Html
+                            </label>
+                            @else
+                            <label class='radio-inline'>
+                                <input type="radio" name="data_type" value="2"> Html
+                            </label>
+                            @endif
+                            @if ($row['data_type'] == 3)
+                            <label class='radio-inline'>
+                                <input type="radio" name="data_type" value="3" checked> Api
+                            </label>
+                            @else
+                            <label class='radio-inline'>
+                                <input type="radio" name="data_type" value="3"> Api
+                            </label>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <div class='form-group header-group-0 ' id='form-group-load_images'>
+                    <label class='control-label col-sm-2'>脚本类型
+                        <span class='text-danger' title='This field is required'>*</span>
+                    </label>
+                    <div>
+                        <div class="col-sm-10">
+                            @if ($row['ext'] == 1)
+                            <label class='radio-inline'>
+                                <input type="radio" name="ext" value="1" checked> JS
+                            </label>
+                            @else
+                            <label class='radio-inline'>
+                                <input type="radio" name="ext" value="1"> JS
+                            </label>
+                            @endif
+                            @if ($row['ext'] == 2)
+                            <label class='radio-inline'>
+                                <input type="radio" name="ext" value="2" checked> PHP
+                            </label>
+                            @else
+                            <label class='radio-inline'>
+                                <input type="radio" name="ext" value="2"> PHP
+                                </label>
+                            @endif
+                        </div>
+                    </div>
+                </div>
                 @if ($row['data_type'] == 1 && empty($row['content']))
                 <div class="table-bordered">
                     <div class='form-group'>
