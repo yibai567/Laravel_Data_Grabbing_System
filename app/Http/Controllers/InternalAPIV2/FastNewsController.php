@@ -58,7 +58,7 @@ class FastNewsController extends Controller
 
         $fastNews->take($params['limit']);
         $fastNews->skip($params['offset']);
-        $fastNews->orderBy('show_time', 'desc')->orderBy('created_at', 'desc');
+        $fastNews->orderBy('created_at', 'desc');
 
         $res = $fastNews->get();
 
