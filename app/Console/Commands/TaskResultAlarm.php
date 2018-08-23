@@ -55,7 +55,7 @@ class TaskResultAlarm extends Command
 
         foreach($tasks as $task) {
             $alarm = [];
-            $data = Data::select('created_time')
+            $data = Data::select('id', 'updated_at')
                 ->where('task_id', $task['id'])
                 ->orderBy('id', 'desc')
                 ->first();
@@ -69,7 +69,7 @@ class TaskResultAlarm extends Command
                     continue;
                 }
                 $alarm['content'] = '任务脚本已运行完毕，结果未产生数据,任务id: ' . $task['id'] . ',脚本id: ' . $task['script_id'] . ',脚本名称: ' . $task['name'] . '，脚本最后运行时间为：' . $taskLastRunLog->last_job_at;
-            } else if (time() - $data->created_time >= 60 * 60 * $hour) {
+            } else if (time() - strtotime($data->updated_at) >= 60 * 60 * $hour) {
                 $alarm['content'] = '任务结果已超过' . $hour. '小时未更新,任务id: ' . $task['id'] . ',脚本id: ' . $task['script_id'] . ',脚本名称: ' . $task['name'];
             }
 
