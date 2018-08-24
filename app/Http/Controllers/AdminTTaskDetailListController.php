@@ -37,7 +37,7 @@ class AdminTTaskDetailListController extends \crocodicstudio\crudbooster\control
         $this->col[] = ["label"=>"需求ID","name"=>"requirement_pool_id"];
         $this->col[] = ["label"=>"脚本ID","name"=>"script_id"];
         $this->col[] = ["label"=>"任务名称","name"=>"name"];
-        $this->col[] = ["label"=>"测试地址","name"=>"test_url"];
+        $this->col[] = ["label"=>"测试地址","name"=>"test_url",'width'=>'20%'];
         // $this->col[] = ["label"=>"最后执行时间","name"=>"name","callback"=>function ($row) {
         //     $taskStatistics = DB::table('t_task_statistics')->where('task_id', $row->id)->first();
         //     return $taskStatistics->last_job_at;
@@ -199,9 +199,9 @@ class AdminTTaskDetailListController extends \crocodicstudio\crudbooster\control
         */
         $this->index_statistic = array();
 
-        $this->index_statistic[] = ['label'=>'casper启动中列表','count'=>Task::where('data_type', 1)->where('cron_type', '!=', 4)->where('status', 2)->where('deleted_at', null)->count(),'icon'=>'glyphicon glyphicon-tasks','color'=>'warning'];
-        $this->index_statistic[] = ['label'=>'html启动中列表','count'=>Task::where('data_type', 2)->where('cron_type', '!=', 4)->where('status', 2)->where('deleted_at', null)->count(),'icon'=>'glyphicon glyphicon-tasks','color'=>'info'];
-        $this->index_statistic[] = ['label'=>'api启动中列表','count'=>Task::where('data_type', 3)->where('cron_type', '!=', 4)->where('status', 2)->where('deleted_at', null)->count(),'icon'=>'glyphicon glyphicon-tasks','color'=>'success'];
+        $this->index_statistic[] = ['label'=>'casper启动中列表','count'=>Task::where('data_type', 1)->where('cron_type', 4)->where('status', 2)->where('deleted_at', null)->count(),'icon'=>'glyphicon glyphicon-tasks','color'=>'warning'];
+        $this->index_statistic[] = ['label'=>'html启动中列表','count'=>Task::where('data_type', 2)->where('cron_type', 4)->where('status', 2)->where('deleted_at', null)->count(),'icon'=>'glyphicon glyphicon-tasks','color'=>'info'];
+        $this->index_statistic[] = ['label'=>'api启动中列表','count'=>Task::where('data_type', 3)->where('cron_type', 4)->where('status', 2)->where('deleted_at', null)->count(),'icon'=>'glyphicon glyphicon-tasks','color'=>'success'];
         /*
         | ----------------------------------------------------------------------
         | Add javascript at body

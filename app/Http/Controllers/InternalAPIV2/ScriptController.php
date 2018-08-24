@@ -438,11 +438,16 @@ class ScriptController extends Controller
         //替换步骤中的换行符
         $content = str_replace(array("\r\n", "\r", "\n"), PHP_EOL,  $content);
 
+        $filename = '';
         //命名js名称
-        if ($script->ext == Script::EXT_TYPE_JS) {
+        if ($script->ext == Script::EXT_TYPE_JS && $script->cron_type !== Script::CRON_TYPE_ONCE) {
             $filename = 'script_' . $script->id . '_' . time() . '.js';
-        } elseif ($script->ext == Script::EXT_TYPE_PHP) {
+        } elseif ($script->ext == Script::EXT_TYPE_JS && $script->cron_type == Script::CRON_TYPE_ONCE) {
+            $filename = 'script_' . $script->id . '.js';
+        } elseif ($script->ext == Script::EXT_TYPE_PHP && $script->cron_type !== Script::CRON_TYPE_ONCE) {
             $filename = 'script_' . $script->id . '_' . time() . '.php';
+        } elseif ($script->ext == Script::EXT_TYPE_PHP && $script->cron_type == Script::CRON_TYPE_ONCE) {
+            $filename = 'script_' . $script->id . '.php';
         }
 
         $fileService = new FileService();

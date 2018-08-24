@@ -72,11 +72,16 @@ class TaskCrawlOverTimeAlarm extends Command
                 $lastJobAt = $taskLastRunLog->created_at;
             }
 
+            $alarmTime = 60 * 15;
+            if ($task['data_type'] == Task::DATA_TYPE_CASPERJS) {
+                $alarmTime = 60 * 60;
+            }
+
             //任务最后一次执行时间超过15分钟触发报警通知
-            if (time()- strtotime($lastJobAt) > 60 * 15) {
+            if (time()- strtotime($lastJobAt) > $alarmTime) {
                 $data = [
                     'type' => AlarmResult::TYPE_WEWORK,
-                    'content' => '任务已超过15分钟未执行成功,任务id: ' . $task['id'] . ',脚本id: ' . $task['script_id'] . ',脚本名称: ' . $task['name'] . ',最后执行时间: ' . $lastJobAt,
+                    'content' => '任务已超过15分钟未执行成功,任务id: ' . $task['id'] . ',脚本id: ' . $task['script_id'] . ',脚本名称: ' . $task['name'] . '，脚本类型：'. Task::DATA_TYPE_ARRAY[$task['data_type']] . '，最后执行时间: ' . $lastJobAt,
                     'wework' => config('alarm.alarm_recipient')
                 ];
 

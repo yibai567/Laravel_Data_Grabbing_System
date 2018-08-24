@@ -110,5 +110,7 @@ $api->version(
 
         $api->get('/fast_news/companies','FastNewsController@getCompanies');
         $api->get('/fast_news/requirement','FastNewsController@getNewsByRequirement');
+
+        $api->post('/alarm_result/handle', 'AlarmResultController@handle');
     }
 );
