@@ -36,7 +36,9 @@
             $this->col[] = ["label"=>"需求ID","name"=>"requirement_pool_id"];
 			$this->col[] = ["label"=>"脚本ID","name"=>"script_id"];
 			$this->col[] = ["label"=>"任务名称","name"=>"name"];
-			$this->col[] = ["label"=>"测试地址","name"=>"test_url",'width'=>'20%'];
+			$this->col[] = ["label"=>"测试地址","name"=>"test_url",'width'=>'200',"callback"=>function ($row) {
+                return '<span style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->test_url .'</span>';
+            }];
             // $this->col[] = ["label"=>"最后执行时间","name"=>"name","callback"=>function ($row) {
             //     $taskStatistics = DB::table('t_task_statistics')->where('task_id', $row->id)->first();
             //     return $taskStatistics->last_job_at;

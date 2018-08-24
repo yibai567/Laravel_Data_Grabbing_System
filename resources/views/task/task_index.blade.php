@@ -170,7 +170,7 @@
         <td>{{$row->requirement_pool_id}}</td>
         <td>{{$row->script_id}}</td>
         <td>{{$row->name}}</td>
-        <td>{{$row->test_url}}</td>
+        <td><span style="width:150px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">{{$row->test_url}}</span></td>
         @if ($row->is_proxy == 1)
             <td>翻墙</td>
         @else
