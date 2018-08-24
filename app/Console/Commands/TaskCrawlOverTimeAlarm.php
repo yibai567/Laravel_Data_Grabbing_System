@@ -43,7 +43,7 @@ class TaskCrawlOverTimeAlarm extends Command
     public function handle()
     {
         //获取启动中的任务
-        $tasks = Task::select('id', 'script_id', 'name', 'cron_type')->where('status', Task::STATUS_START)->get()->toArray();
+        $tasks = Task::select('id', 'script_id', 'name', 'cron_type', 'data_type')->where('status', Task::STATUS_START)->get()->toArray();
 
         if (empty($tasks)) {
             Log::debug('[TaskCrawlOverTimeAlarm handle] task of running is empty');
