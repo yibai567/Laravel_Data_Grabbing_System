@@ -75,8 +75,10 @@ class DataController extends Controller
             } else {
                 $row = Data::where('md5_title', $value['md5_title'])->where('task_id',$params['task_id'])->first();
             }
-            //内容已存在,更新信息
+            //内容已存在,只更新updated_at，证明脚本可以抓取到内容
             if (!empty($row)) {
+                $row->updated_at = date('Y-m-d H:i:s', time());
+                $row->save();
                 continue;
             }
 

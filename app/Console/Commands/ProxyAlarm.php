@@ -51,6 +51,7 @@ class ProxyAlarm extends Command
 
         $requestParams = [
             'timeout'  => 10000,
+            'http_errors' => false
         ];
 
         try {

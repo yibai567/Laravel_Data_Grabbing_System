@@ -2,6 +2,8 @@
 
 use App\Models\ScriptConfig;
 use App\Services\FileService;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use Session;
 use Request;
 use Illuminate\Http\Request as HttpRequest;
@@ -92,6 +94,8 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $this->form[] = ['name'=>'projects','type'=>'text'];
         $this->form[] = ['name'=>'ext','type'=>'text'];
         $this->form[] = ['label'=>'project_config','name'=>'project_config','type'=>'text','validation'=>'nullable','width'=>'col-sm-10'];
+        $this->form[] = ['label'=>'Test Url','name'=>'test_url','type'=>'text','validation'=>'required','width'=>'col-sm-10'];
+        $this->form[] = ['label'=>'Proxy','name'=>'proxy','type'=>'text','validation'=>'nullable','width'=>'col-sm-10'];
 		# END FORM DO NOT REMOVE THIS LINE
 
 		/*
@@ -1323,6 +1327,39 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $res['action_info'] = $action->toArray();
         $res['id'] = $id;
         $this->cbView('script/script_filter_action_view', $res);
+    }
+
+    public function postTestIp()
+    {
+        $this->cbLoader();
+        if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE) {
+            CRUDBooster::insertLog(trans('crudbooster.log_try_add_save',['name'=>Request::input($this->title_field),'module'=>CRUDBooster::getCurrentModule()->name ]));
+            CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
+        }
+
+        $this->validation();
+        $this->input_assignment();
+
+        $formParams = $this->arr;
+
+        $options = ['connect_timeout' => 5];
+        if (!empty($formParams['proxy'])) {
+            $options['proxy'] = 'tcp://' . $formParams['proxy'];
+        }
+
+        try {
+            $client = new Client();
+            $response = $client->request('get', $formParams['test_url'], $options);
+            return (string)$response->getBody();
+        }catch (RequestException $e) {
+            if ($e->hasResponse()) {
+                return $e->getResponse();
+            }
+            return $e;
+        }
+
+
+
     }
     //By the way, you can still create your own method in here... :)
 

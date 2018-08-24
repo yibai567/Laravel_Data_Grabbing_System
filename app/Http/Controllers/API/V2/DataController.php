@@ -43,6 +43,11 @@ class DataController extends Controller
             return $this->resObjectGet(true, 'data', $request->path());
         }
 
+        if (empty($params['result'])) {//触发报警信息
+            $this->__alarm($params['task_run_log_id']);
+            return $this->resObjectGet(true, 'data', $request->path());
+        }
+
         $resParams = [
             'company' => $params['company'],
             'task_run_log_id' => $params['task_run_log_id']
@@ -148,4 +153,14 @@ class DataController extends Controller
 
     }
 
+    protected function __alarm($taskRunLogId)
+    {
+        $alarmParams = [
+            'task_run_log_id' => $taskRunLogId,
+            'content' => '脚本未抓取到数据。'
+        ];
+        $httpService = new HttpService();
+        $httpService->post(config('url.jinse_open_url') . '/v2/alarm_result/handle', $alarmParams);
+        return true;
+    }
 }

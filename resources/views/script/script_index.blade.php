@@ -78,7 +78,35 @@
             </form>
 
         </div>
+       <div class="container kv-main"   id="showtestip" style="display: none;margin-top: 20px;">
 
+         <form enctype="multipart/form-data" action='' id='formtestip'>
+           {{ csrf_field() }}
+           <div class="input-group">
+               <span class="input-group-addon">URL</span>
+               <input type="text" class="form-control test-url" name='test_url' required maxlength='255' placeholder="请填写url" >
+           </div>
+           <div class="input-group">
+             <span class="input-group-addon">代理</span>
+             <input type="text" class="form-control proxy" name='proxy' maxlength='255' placeholder="如果需要翻墙请填写代理" >
+           </div>
+           <br/>
+           <div align="center">
+               <input type="button" value='测试' class='btn btn-primary' onclick="testQuery()">
+           </div>
+         </form>
+
+       </div>
+       <div class="container kv-main"   id="showtestcontent" style="display: none;margin-top: 20px;">
+
+         <form enctype="multipart/form-data" action=''>
+           {{ csrf_field() }}
+           <div class="layui-input-block">
+               <textarea name="desc" placeholder="请输入内容" class="form-control test-textarea" style="height:380px"></textarea>
+           </div>
+         </form>
+
+       </div>
 
     <div class="box">
       <div class="box-header">
@@ -91,6 +119,9 @@
             </a>
             <a href='{{CRUDBooster::mainpath("add?dataType=3")}}' id="btn_add_new_data" class="btn btn-sm btn-success" title="新增">
               <i class="fa fa-plus-circle"></i> Api
+            </a>
+            <a class="btn btn-sm btn-success test-ip" onclick="showTestIpForm()" title="测试IP">
+              <i class="fa fa-plus-circle"></i> 测试IP
             </a>
             <!-- <a id="uploadfile" class="btn btn-sm btn-success" title="上传脚本">
               <i class="fa fa-plus-circle"></i> 上传脚本
@@ -334,7 +365,48 @@
                 }
               })
     }
+    function showTestIpForm() {
+      layer.open({
+        type:1,
+        title:['测试IP', 'font-size:14px;'],
+        area: ['600px', '200px'],
+        shadeClose:false,
+        content: $('#showtestip'),
+        cancel:function(index, layero){
+          $('#showtestip').hide()
+        }
+      })
+    }
 
+    function testQuery() {
+
+      if ($('.test-url').val() == ''){
+        return false;
+      }
+      $.ajax({
+        type : "POST",
+        url : "http://{{$_SERVER['HTTP_HOST']}}/admin/t_script/test-ip/",
+        async : true,
+        data : $('#formtestip').serialize(),
+        success : showTestResult,
+        error : function() {
+          alert("请求失败");
+        },
+      });
+    }
+    function showTestResult(data) {
+      $('.test-textarea').val(data.trim());
+      layer.closeAll(1);
+      layer.open({
+        type: 1,
+        title:"测试结果",
+        area: ['620px', '450px'], //宽高
+        content: $('#showtestcontent'),
+        cancel:function(index, layero){
+          $('#showtestcontent').hide()
+        }
+      });
+    }
   </script>
 
 </table>
