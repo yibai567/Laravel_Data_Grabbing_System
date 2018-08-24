@@ -30,6 +30,12 @@ class Task extends Model
     const TEST_STATUS_SUCCESS = 1;
     const TEST_STATUS_FAIL = 2;
 
+    const DATA_TYPE_ARRAY = [
+        self::DATA_TYPE_CASPERJS => 'casperjs',
+        self::DATA_TYPE_HTML => 'HTML',
+        self::DATA_TYPE_API => 'API'
+    ];
+
     /**
      * 表名
      */
