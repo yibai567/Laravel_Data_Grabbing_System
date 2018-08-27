@@ -1,6 +1,7 @@
 <?php namespace App\Http\Controllers;
 
 	use App\Models\V2\AlarmResult;
+    use App\Models\V2\Company;
     use App\Models\V2\Requirement;
     use Session;
 	use Request;
@@ -561,7 +562,16 @@
             $id = DB::table('t_company')->where('en_name', $enName)->value('id');
             //没有找到数据就创建新数据
             if (empty($id)) {
-                $id = DB::table('t_company')->insertGetId(['cn_name'=>$params['cn_name'],'en_name'=>$enName]);
+                $data = [
+                    'cn_name'=>$params['cn_name'],
+                    'en_name'=>$enName,
+                    'type' => 1,
+                    'url' => $params['list_url']
+                ];
+                $company = new Company();
+                $company->setRawAttributes($data);
+                $company->save();
+                $id = $company->id;
             }
             return $id;
         }
