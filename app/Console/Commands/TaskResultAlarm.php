@@ -55,9 +55,9 @@ class TaskResultAlarm extends Command
 
         foreach($tasks as $task) {
             $alarm = [];
-            $data = Data::select('id', 'updated_at')
+            $data = Data::select('updated_at')
                 ->where('task_id', $task['id'])
-                ->orderBy('id', 'desc')
+                ->orderBy('updated_at', 'desc')
                 ->first();
             //如果没有数据结果，查看是否有脚本运行记录
             if (empty($data)) {
