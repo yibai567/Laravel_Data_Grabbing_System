@@ -45,7 +45,6 @@ class DataController extends Controller
 
         if (empty($params['result'])) {//触发报警信息
             $this->__alarm($params['task_run_log_id']);
-            return $this->resObjectGet(true, 'data', $request->path());
         }
 
         $resParams = [
