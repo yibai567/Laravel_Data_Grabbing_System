@@ -125,7 +125,7 @@
 			$this->form[] = ['label'=>'图片资源','name'=>'is_download_img','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|需要;2|不需要','value'=>2];
             $this->form[] = ['label'=>'需求类型','name'=>'requirement_type','type'=>'radio','validation'=>'nullable|integer','width'=>'col-sm-10','dataenum'=>'1|快讯;2|公告','value'=>'1'];
             $this->form[] = ['label'=>'执行规则','name'=>'cron_type','type'=>'radio','validation'=>'nullable|integer','width'=>'col-sm-10','dataenum'=>'1|每分钟执行一次;2|每五分钟执行一次;3|每十分钟执行一次;4|只执行一次','value'=>'1'];
-			$this->form[] = ['label'=>'创建人','name'=>'create_by','type'=>'select','validation'=>'required','width'=>'col-sm-9','dataenum'=>'1|liqi1@jinse.com;2|huangxingxing@jinse.com;3|wangbo@jinse.com',];
+			$this->form[] = ['label'=>'创建人','name'=>'create_by','type'=>'select','validation'=>'required','width'=>'col-sm-9','dataenum'=>'4|guoyuemin@jinse.com;1|liqi@jinse.com;2|huangxingxing@jinse.com;3|wangbo@jinse.com',];
 			# END FORM DO NOT REMOVE THIS LINE
 
 			# OLD START FORM
