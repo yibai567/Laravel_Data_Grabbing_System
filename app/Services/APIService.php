@@ -219,6 +219,7 @@ class APIService extends Service
                 return true;
             }
         } catch (RequestException $e) {
+            Log::error('[APIService post] error message = ' . $e->getMessage());
             throw new \Dingo\Api\Exception\ResourceException('post api error');
             // returnError(501, '调用接口失败');
         }

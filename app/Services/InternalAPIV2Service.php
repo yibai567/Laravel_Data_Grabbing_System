@@ -32,7 +32,7 @@ class InternalAPIV2Service extends Service
         } catch (\Dingo\Api\Exception\InternalHttpException $e) {
             $response = $e->getResponse();
             $errorMessage = $response->getContent();
-            Log::debug("['internalv2 API post error'] " . $errorMessage);
+            Log::error("['internalv2 API post error'] " . $errorMessage);
             throw new \Dingo\Api\Exception\ResourceException('internalv2 API post error');
 
         } catch (\App\Exceptions\Exception $e) {
@@ -60,7 +60,8 @@ class InternalAPIV2Service extends Service
 
             $response = $e->getResponse();
             $errorMessage = $response->getContent();
-            throw new \Dingo\Api\Exception\ResourceException('API post error');
+            Log::error("['internalv2 API get error'] " . $errorMessage);
+            throw new \Dingo\Api\Exception\ResourceException('API get error');
 
         } catch (\App\Exceptions\Exception $e) {
             throw new \Dingo\Api\Exception\ResourceException('API Exception error ');

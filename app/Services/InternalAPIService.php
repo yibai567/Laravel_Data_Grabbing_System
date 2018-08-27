@@ -32,7 +32,7 @@ class InternalAPIService extends Service
         } catch (\Dingo\Api\Exception\InternalHttpException $e) {
             $response = $e->getResponse();
             $errorMessage = $response->getContent();
-            Log::debug("['internal API post error'] " . $errorMessage);
+            Log::error("['internal API post error'] " . $errorMessage);
             throw new \Dingo\Api\Exception\ResourceException('internal API post error');
 
         } catch (\App\Exceptions\Exception $e) {
@@ -60,6 +60,7 @@ class InternalAPIService extends Service
 
             $response = $e->getResponse();
             $errorMessage = $response->getContent();
+            Log::error("['internal API get error'] " . $errorMessage);
             throw new \Dingo\Api\Exception\ResourceException('API post error');
 
         } catch (\App\Exceptions\Exception $e) {

@@ -24,7 +24,7 @@ class HttpService extends Service
             $resCode  = $response->getStatusCode();
             $resBody  = $response->getBody();
         } catch (Exception $e) {
-            Log::debug('[HttpService->get]' . $e->getMessage());
+            Log::error('[HttpService->get]' . $e->getMessage());
             throw new \Dingo\Api\Exception\ResourceException('get api error');
         }
         return $resBody;
@@ -48,7 +48,7 @@ class HttpService extends Service
                 return true;
             }
         } catch (RequestException $e) {
-            Log::debug('[HttpService->post]' . $e->getMessage());
+            Log::error('[HttpService->post]' . $e->getMessage());
             throw new \Dingo\Api\Exception\ResourceException('post api error');
         }
 
@@ -66,7 +66,7 @@ class HttpService extends Service
             $resCode  = (string) $response->getStatusCode();
             $resBody  = $response->getbody();
         } catch (RequestException $e) {
-            Log::debug('[HttpService->post]' . $e->getMessage());
+            Log::error('[HttpService->post]' . $e->getMessage());
             throw new \Dingo\Api\Exception\ResourceException('post api error');
         }
         return $resBody;
