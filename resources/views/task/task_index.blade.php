@@ -194,12 +194,12 @@
             <td><a class='btn btn-xs btn-success'><i></i>已启动</a></td>
         @endif
         <td style="float: right;">
-          @if($row->status == 1)
+          @if($row->status == 1 && $row->cron_type !== 4)
             <a class='btn btn-xs btn-success' title='启动' href='{{CRUDBooster::mainpath("start-up/$row->id")}}'>
             <i class='fa fa-play'></i> 启动</a>
           @endif
 
-          @if($row->status == 2)
+          @if($row->status == 2 && $row->cron_type !== 4)
             <a class='btn btn-xs btn-warning' title='停止' href="{{CRUDBooster::mainpath("stop-down/$row->id")}}">
             <i class='fa fa-stop'></i>停止</a>
           @endif

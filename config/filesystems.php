@@ -45,7 +45,7 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => '/alidata/www',
+            'root' => storage_path('app'),
         ],
 
         'public' => [
