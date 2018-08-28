@@ -35,7 +35,7 @@ class HttpService extends Service
     public function post($url, $params = [])
     {
         $requestParams = [
-            'timeout'  => 2,
+            'timeout'  => 30,
             'debug' => false,
         ];
         $client = new Client($requestParams);

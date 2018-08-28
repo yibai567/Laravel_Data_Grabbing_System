@@ -34,7 +34,7 @@
             $this->col[] = ["label"=>"ID","name"=>"id"];
 			$this->col[] = ["label"=>"分类","name"=>"content_type"];
 			$this->col[] = ["label"=>"公司名","name"=>"company"];
-			$this->col[] = ["label"=>"标题","name"=>"title",'width'=>'30%'];
+			$this->col[] = ["label"=>"标题","name"=>"title",'width'=>'300'];
             $this->col[] = ["label"=>"地址","name"=>"detail_url", 'width'=>'200'];
             $this->col[] = ["label"=>"发布时间","name"=>"show_time","callback"=>function ($row) {
                 if (is_numeric($row->show_time)) {
@@ -44,6 +44,7 @@
                 }
             }];
 			$this->col[] = ["label"=>"创建时间","name"=>"created_at"];
+            $this->col[] = ["label"=>"更新时间","name"=>"updated_at"];
 			# END COLUMNS DO NOT REMOVE THIS LINE
 
 			# START FORM DO NOT REMOVE THIS LINE
