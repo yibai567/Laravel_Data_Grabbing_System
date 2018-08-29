@@ -199,9 +199,9 @@ class AdminTTaskDetailListController extends \crocodicstudio\crudbooster\control
         */
         $this->index_statistic = array();
 
-        $this->index_statistic[] = ['label'=>'casper启动中列表','count'=>Task::where('data_type', 1)->where('cron_type', 4)->where('status', 2)->where('deleted_at', null)->count(),'icon'=>'glyphicon glyphicon-tasks','color'=>'warning'];
-        $this->index_statistic[] = ['label'=>'html启动中列表','count'=>Task::where('data_type', 2)->where('cron_type', 4)->where('status', 2)->where('deleted_at', null)->count(),'icon'=>'glyphicon glyphicon-tasks','color'=>'info'];
-        $this->index_statistic[] = ['label'=>'api启动中列表','count'=>Task::where('data_type', 3)->where('cron_type', 4)->where('status', 2)->where('deleted_at', null)->count(),'icon'=>'glyphicon glyphicon-tasks','color'=>'success'];
+        $this->index_statistic[] = ['label'=>'casper列表','count'=>Task::where('data_type', 1)->where('cron_type', 4)->where('deleted_at', null)->count(),'icon'=>'glyphicon glyphicon-tasks','color'=>'warning'];
+        $this->index_statistic[] = ['label'=>'html列表','count'=>Task::where('data_type', 2)->where('cron_type', 4)->where('deleted_at', null)->count(),'icon'=>'glyphicon glyphicon-tasks','color'=>'info'];
+        $this->index_statistic[] = ['label'=>'api列表','count'=>Task::where('data_type', 3)->where('cron_type', 4)->where('deleted_at', null)->count(),'icon'=>'glyphicon glyphicon-tasks','color'=>'success'];
         /*
         | ----------------------------------------------------------------------
         | Add javascript at body

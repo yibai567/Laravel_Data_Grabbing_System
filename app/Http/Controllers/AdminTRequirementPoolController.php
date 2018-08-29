@@ -3,9 +3,11 @@
 	use App\Models\V2\AlarmResult;
     use App\Models\V2\Company;
     use App\Models\V2\Requirement;
+    use App\Services\ImageService;
     use Session;
 	use Request;
 	use DB;
+    use CB;
 	use CRUDBooster;
     use Config;
     use App\Services\InternalAPIV2Service;
@@ -111,9 +113,7 @@
             $this->form[] = ['label'=>'公司英文名','name'=>'en_name','type'=>'text','validation'=>'nullable|string|max:255','width'=>'col-sm-10','placeholder'=>'公司列表中未找到时可填写'];
 
 			$this->form[] = ['label'=>'图片描述','name'=>'img_description','type'=>'upload','width'=>'col-sm-10',"callback"=>function ($row) {
-                $newIp=$_SERVER['HTTP_HOST']."/".$row->img_description;
-                $domain = strstr($newIp, '/uploads');
-                if($domain){
+                if(!$row->img_description){
                     return $row->img_description;
                 }else{
                     $string="<div class='col-sm-10' style='margin-left:208px;margin-bottom:15px'><a data-lightbox='roadtrip' href=' ".$row->img_description."'><img style='max-width:160px'  src=".$row->img_description."></a><div class='text-danger'></div></div>";
@@ -575,7 +575,133 @@
             }
             return $id;
         }
-	    //By the way, you can still create your own method in here... :)
+
+        public function input_assignment($id=null) {
+            $hide_form = (Request::get('hide_form'))?unserialize(Request::get('hide_form')):array();
+
+            foreach($this->data_inputan as $ro) {
+                $name = $ro['name'];
+
+                if(!$name) continue;
+
+                if($ro['exception']) continue;
+
+                if($name=='hide_form') continue;
+
+                if(count($hide_form)) {
+                    if(in_array($name, $hide_form)) {
+                        continue;
+                    }
+                }
+
+                if($ro['type']=='checkbox' && $ro['relationship_table']) {
+                    continue;
+                }
+
+                if($ro['type']=='select2' && $ro['relationship_table']) {
+                    continue;
+                }
+
+                $inputdata = Request::get($name);
+
+                if($ro['type']=='money') {
+                    $inputdata = preg_replace('/[^\d-]+/', '', $inputdata);
+                }
+
+                if($ro['type']=='child') continue;
+
+                if($name) {
+                    if($inputdata!='') {
+                        $this->arr[$name] = $inputdata;
+                    }else{
+                        if(CB::isColumnNULL($this->table,$name) && $ro['type']!='upload') {
+                            continue;
+                        }else{
+                            $this->arr[$name] = "";
+                        }
+                    }
+                }
+
+                $password_candidate = explode(',',config('crudbooster.PASSWORD_FIELDS_CANDIDATE'));
+                if(in_array($name, $password_candidate)) {
+                    if(!empty($this->arr[$name])) {
+                        $this->arr[$name] = Hash::make($this->arr[$name]);
+                    }else{
+                        unset($this->arr[$name]);
+                    }
+                }
+
+                if($ro['type']=='checkbox') {
+
+                    if(is_array($inputdata)) {
+                        if($ro['datatable'] != '') {
+                            $table_checkbox = explode(',',$ro['datatable'])[0];
+                            $field_checkbox = explode(',',$ro['datatable'])[1];
+                            $table_checkbox_pk = CB::pk($table_checkbox);
+                            $data_checkbox = DB::table($table_checkbox)->whereIn($table_checkbox_pk,$inputdata)->pluck($field_checkbox)->toArray();
+                            $this->arr[$name] = implode(";",$data_checkbox);
+                        }else{
+                            $this->arr[$name] = implode(";",$inputdata);
+                        }
+                    }
+                }
+
+                //multitext colomn
+                if($ro['type']=='multitext') {
+                    $name = $ro['name'];
+                    $multitext="";
+
+                    for($i=0;$i<=count($this->arr[$name])-1;$i++) {
+                        $multitext .= $this->arr[$name][$i]."|";
+                    }
+                    $multitext=substr($multitext,0,strlen($multitext)-1);
+                    $this->arr[$name]=$multitext;
+                }
+
+                if($ro['type']=='googlemaps') {
+                    if($ro['latitude'] && $ro['longitude']) {
+                        $latitude_name = $ro['latitude'];
+                        $longitude_name = $ro['longitude'];
+                        $this->arr[$latitude_name] = Request::get('input-latitude-'.$name);
+                        $this->arr[$longitude_name] = Request::get('input-longitude-'.$name);
+                    }
+                }
+
+                if($ro['type']=='select' || $ro['type']=='select2') {
+                    if($ro['datatable']) {
+                        if($inputdata=='') {
+                            $this->arr[$name] = 0;
+                        }
+                    }
+                }
 
 
+                if(@$ro['type']=='upload') {
+                    if (Request::hasFile($name))
+                    {
+                        $file = Request::file($name);
+                        $imageService = new ImageService();
+                        $imgResult = $imageService->uploadByFile($file);
+                        if (empty($imgResult['id'])) {
+                            if (!empty($imgResult['msg'])) {
+                                return response(500, $imgResult['msg']);
+                            }
+                            return response(500, '上传图片失败');
+                        }
+
+                        $this->arr[$name] = $imgResult['oss_url'];
+                    }
+
+                    if(!$this->arr[$name]) {
+                        $this->arr[$name] = Request::get('_'.$name);
+                    }
+                }
+
+                if(@$ro['type']=='filemanager') {
+                    $filename = str_replace('/'.config('lfm.prefix').'/'.config('lfm.files_folder_name').'/','',$this->arr[$name]);
+                    $url = 'uploads/'.$filename;
+                    $this->arr[$name] = $url;
+                }
+            }
+        }
 	}
