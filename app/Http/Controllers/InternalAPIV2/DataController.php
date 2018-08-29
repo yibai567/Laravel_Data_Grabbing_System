@@ -43,6 +43,7 @@ class DataController extends Controller
         $result = [];
         $result['task_id'] = $params['task_id'];
         $result['data'] = [];
+        $same = 0;
         foreach ($params['result'] as $value) {
 
             ValidatorService::check($value, [
@@ -76,9 +77,10 @@ class DataController extends Controller
                 $row = Data::where('md5_title', $value['md5_title'])->where('task_id',$params['task_id'])->first();
             }
             //内容已存在,只更新updated_at，证明脚本可以抓取到内容
-            if (!empty($row)) {
+            if (!empty($row) && $same < 1) {
                 $row->updated_at = date('Y-m-d H:i:s', time());
                 $row->save();
+                $same++;
                 continue;
             }
 
