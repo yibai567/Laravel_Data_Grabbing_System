@@ -149,17 +149,17 @@
                 @endif
                 <th>任务ID</th>
                 <th>任务名称</th>
-                <th width="200">任务地址</th>
+                <th width="170">任务地址</th>
                 <th>公司名称</th>
                 <th>分类</th>
                 <th>订阅类型</th>
                 <th>截图</th>
-                <th>图片资源</th>
+                <th>图片</th>
                 <th>状态</th>
                 <th>全部数据</th>
                 <th>操作人</th>
                 <th>创建时间</th>
-                <th style="float: right;">操作</th>
+                <th>操作</th>
             </tr>
             </thead>
             <tbody>
@@ -187,21 +187,21 @@
                         <td>详情</td>
                     @endif
                     @if( $row->is_capture == 1)
-                        <td>需要</td>
+                        <td>是</td>
                     @else
-                        <td>不需要</td>
+                        <td>否</td>
                     @endif
                     @if( $row->is_download_img == 1)
-                        <td>需要</td>
+                        <td>是</td>
                     @else
-                        <td>不需要</td>
+                        <td>否</td>
                     @endif
                     @if($row->status == 1)
                         <td><a class='btn btn-xs btn-warning'><i></i>未处理</a></td>
                     @elseif($row->status == 2)
                         <td><a class='btn btn-xs btn-success'><i></i>已处理</a></td>
                     @elseif ($row->status == 3)
-                        <td><a class='btn btn-xs btn-warning' title="{{$row->status_reason}}"><i></i>已暂停</a></td>
+                        <td><a class='btn btn-xs btn-pinterest' title="{{$row->status_reason}}"><i></i>已暂停</a></td>
                     @endif
                     @if($row->status_identity == 1)
                         <td><a class='btn btn-xs btn-warning'><i></i>未获取</a></td>
@@ -212,22 +212,18 @@
                     <td>{{$row->created_at}}</td>
                     <td style="float: right;">
                         @if($row->status == 1)
-                            <a class='btn btn-xs btn-warning' title='done' href='{{CRUDBooster::mainpath("modify-state/$row->id/2")}}'>
-                                <i class='ion-arrow-right-c'></i>done</a>
+                            <a class='btn btn-xs btn-twitter' title='done' href='{{CRUDBooster::mainpath("modify-state/$row->id/2")}}'>完成</a>
                         @endif
 
                         @if($row->status == 1)
-                            <a class='btn btn-xs btn-warning' title='stash' onclick="showStash({{$row->id}})">
-                                <i class='ion-arrow-right-c'></i>stash</a>
+                            <a class='btn btn-xs btn-pinterest' title='stash' onclick="showStash({{$row->id}})">暂停</a>
                         @endif
                         @if($row->status != 1)
-                            <a class='btn btn-xs btn-info' title='restart' href="{{CRUDBooster::mainpath("modify-state/$row->id/1")}}">
-                                <i class='ion-arrow-right-c'></i>restart</a>
+                            <a class='btn btn-xs btn-soundcloud' title='restart' href="{{CRUDBooster::mainpath("modify-state/$row->id/1")}}">重启</a>
                         @endif
 
                         @if($row->status_identity == 1)
-                            <a class='btn btn-xs btn-info' title='restart' href="{{CRUDBooster::mainpath("modify-state/$row->id/1")}}">
-                                <i class='ion-arrow-right-c'></i>获取全部数据</a>
+                            <a class='btn btn-xs btn-info' title='获取数据' href="{{CRUDBooster::mainpath("modify-state/$row->id/1")}}">获取数据</a>
                         @endif
                         <a class='btn btn-xs btn-primary btn-detail' title='详情' href='{{CRUDBooster::mainpath("detail/$row->id")}}'>
                             <i class='fa fa-eye'></i>
