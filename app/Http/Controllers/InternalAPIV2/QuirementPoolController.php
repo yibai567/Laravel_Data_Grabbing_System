@@ -191,7 +191,9 @@ class QuirementPoolController extends Controller
 
         ValidatorService::check($params, [
             "id" => "required|integer",
-            "user_id"=>"required|integer"
+            "user_id" => "required|integer",
+            'status' => "required|integer",
+            'status_reason' => "required_if:status," . Requirement::STATUS_STASH ."|string|max:255|"
         ]);
 
         $req = Requirement::find($params['id']);
@@ -203,6 +205,9 @@ class QuirementPoolController extends Controller
 
         $req->operate_by = $params['user_id'];
 
+        if (!empty($params['status_reason']) && $params['status'] == Requirement::STATUS_STASH) {
+            $req->status_reason = $params['status_reason'];
+        }
 
         $req->save();
 

@@ -32,6 +32,7 @@ class Requirement extends Model
      */
     const STATUS_TRUE = 1; //未处理
     const STATUS_FALSE = 2; //已处理
+    const STATUS_STASH = 3; //暂存
 
     /**
      * 任务执行类型 1、每分钟 2、每五分钟 3、每十分钟 4、只执行一次
@@ -77,6 +78,7 @@ class Requirement extends Model
         'category',
         'operate_by',
         'create_by',
+        'status_reason',
     ];
 
 
