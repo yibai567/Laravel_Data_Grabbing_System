@@ -214,7 +214,7 @@ class ImageService extends Service
             $ossPath = 'http://'.$host;
 
             $oss = AliyunOSS::boot($ossPath, $accessKey, $secret);
-            $objectKey = config('aliyun.oss.base_key') . $image->id . '.' . $image->ext;
+            $objectKey = config('aliyun.oss.base_key') . $image->id;
 
             if (!empty($isPrivate)) { // 加密上传
                 $oss->setBucket(config('aliyun.oss.bucket_private'));

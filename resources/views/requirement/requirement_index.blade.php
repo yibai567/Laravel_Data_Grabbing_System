@@ -149,7 +149,7 @@
                 @endif
                 <th>任务ID</th>
                 <th>任务名称</th>
-                <th width="170">任务地址</th>
+                <th>任务地址</th>
                 <th>公司名称</th>
                 <th>分类</th>
                 <th>订阅类型</th>
@@ -170,7 +170,7 @@
                     @endif
                     <td>{{$row->id}}</td>
                     <td>{{$row->name}}</td>
-                    <td>{{$row->list_url}}</td>
+                    <td><a href="{{$row->list_url}}" style="width:180px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">{{$row->list_url}}</a></td>
                     <td>{{$row->company_id}}</td>
                     @if ( $row->category == 1)
                         <td>新闻</td>
