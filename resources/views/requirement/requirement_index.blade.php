@@ -149,7 +149,7 @@
                 @endif
                 <th>任务ID</th>
                 <th>任务名称</th>
-                <th>任务地址</th>
+                <th width="200">任务地址</th>
                 <th>公司名称</th>
                 <th>分类</th>
                 <th>订阅类型</th>
