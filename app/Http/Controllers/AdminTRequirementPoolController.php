@@ -112,13 +112,10 @@
             $this->form[] = ['label'=>'公司中文名','name'=>'cn_name','type'=>'text','validation'=>'nullable|string|max:255','width'=>'col-sm-10','placeholder'=>'公司列表中未找到时可填写'];
             $this->form[] = ['label'=>'公司英文名','name'=>'en_name','type'=>'text','validation'=>'nullable|string|max:255','width'=>'col-sm-10','placeholder'=>'公司列表中未找到时可填写'];
 
-			$this->form[] = ['label'=>'图片描述','name'=>'img_description','type'=>'upload','width'=>'col-sm-10',"callback"=>function ($row) {
-                if(!$row->img_description){
-                    return $row->img_description;
-                }else{
+            $this->form[] = ['label'=>'图片描述','name'=>'img_description','type'=>'upload','width'=>'col-sm-10',"callback"=>function ($row) {
+
                     $string="<div class='col-sm-10' style='margin-left:208px;margin-bottom:15px'><a data-lightbox='roadtrip' href=' ".$row->img_description."'><img style='max-width:160px'  src=".$row->img_description."></a><div class='text-danger'></div></div>";
                     echo $string;
-                }
             }];
             $this->form[] = ['label'=>'分类','name'=>'category','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|新闻;2|历史数据;3|订阅;4|行业快讯','value'=>1];
 			$this->form[] = ['label'=>'订阅类型','name'=>'subscription_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|列表;2|详情','value'=>1];

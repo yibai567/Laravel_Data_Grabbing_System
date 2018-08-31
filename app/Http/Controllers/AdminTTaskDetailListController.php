@@ -90,9 +90,6 @@ class AdminTTaskDetailListController extends \crocodicstudio\crudbooster\control
         $this->form[] = ['label'=>'Script Id','name'=>'script_id','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'Name','name'=>'name','type'=>'text','validation'=>'required|string|min:3|max:70','width'=>'col-sm-10','placeholder'=>'请输入字母'];
         $this->form[] = ['label'=>'Description','name'=>'description','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-        $this->form[] = ['label'=>'Cron Type','name'=>'cron_type','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-        $this->form[] = ['label'=>'data Type','name'=>'data_type','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
-        $this->form[] = ['label'=>'Status','name'=>'status','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'Test Url','name'=>'test_url','type'=>'text','validation'=>'required','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'Task Id','name'=>'task_id','type'=>'text','validation'=>'required|min:1','width'=>'col-sm-10'];
         $this->form[] = ['label'=>'Test Result','name'=>'test_result','type'=>'text','validation'=>'required|min:1','width'=>'col-sm-10'];
@@ -832,5 +829,26 @@ class AdminTTaskDetailListController extends \crocodicstudio\crudbooster\control
             CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
         }
         CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_task_detail_list", "测试已提交", "success");
+    }
+
+    //By the way, you can still create your own method in here... :)
+    public function getDetail($id)	{
+        $this->cbLoader();
+        $row        = Task::find($id)->toArray();
+        $row['test_result'] = json_decode($row['test_result'], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT)[0];
+        if(!CRUDBooster::isRead() && $this->global_privilege==true || $this->button_edit==true) {
+            CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
+        }
+
+        $data = [];
+        $data['page_title'] = '任务详情';
+        $data['row'] = $row;
+        if ($data['row']['is_proxy'] == 1) {
+            $data['row']['is_proxy'] = '翻墙';
+        } else {
+            $data['row']['is_proxy'] = '不翻墙';
+        }
+        $this->cbView('task/task_detail_view',$data);
+
     }
 }

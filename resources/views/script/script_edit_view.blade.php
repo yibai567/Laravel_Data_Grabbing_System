@@ -92,24 +92,29 @@
                             <input type="checkbox" {{$checked}} name="verbose" value="1">
                         </label>
                     </div>
+
                     <div class='form-group'>
                         <label class='control-label col-md-2'></label>
-                        <?php $checked = "" ?>
-                        @if ($row['casper_config']['log_level'] == 'debug')
-                            <?php $checked = "checked" ?>
-                        @elseif ($row['casper_config']['log_level'] == 'info')
-                            <?php $checked = "checked" ?>
-                        @else
-                            <?php $checked = "checked" ?>
-                        @endif
                         <label class='control-label col-md-3'>日志级别 debug&nbsp&nbsp&nbsp&nbsp
-                            <input type="radio" name="log_level" {{$checked}} value="debug">
+                            @if ($row['casper_config']['log_level'] == 'debug')
+                                <input type="radio" name="log_level" checked = "checked" value="debug">
+                            @else
+                                <input type="radio" name="log_level" value="debug">
+                            @endif
                         </label>
                         <label class='control-label col-md-3'>info&nbsp&nbsp&nbsp&nbsp
-                            <input type="radio" name="log_level" {{$checked}} value="info">
+                            @if ($row['casper_config']['log_level'] == 'info')
+                                <input type="radio" name="log_level" checked = "checked" value="info">
+                            @else
+                                <input type="radio" name="log_level" value="info">
+                            @endif
                         </label>
                         <label class='control-label col-md-3'>error&nbsp&nbsp&nbsp&nbsp
-                            <input type="radio" name="log_level" {{$checked}} value="error">
+                            @if ($row['casper_config']['log_level'] == 'error')
+                                <input type="radio" name="log_level" checked = "checked" value="error">
+                            @else
+                                <input type="radio" name="log_level" value="error">
+                            @endif
                         </label>
                     </div>
                     <div class='form-group'>
