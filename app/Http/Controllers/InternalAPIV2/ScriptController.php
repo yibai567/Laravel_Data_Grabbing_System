@@ -287,29 +287,35 @@ class ScriptController extends Controller
             $postTaskData['script_id'] = $script->id;
             $postTaskData['script_path'] = $filename;
             $postTaskData['publisher'] = $params['publisher'];
-            $result = InternalAPIV2Service::post('/task', $postTaskData);
+            $task = Task::where('script_id', $script->id)->first();
+            if ($script->cron_type == Script::CRON_TYPE_ONCE && !empty($task)) {
+                $postTaskData['task_id'] = $task->id;
+                $result = InternalAPIV2Service::post('/task/update', $postTaskData);
+            } else {
+                $result = InternalAPIV2Service::post('/task', $postTaskData);
 
-            //调用保存任务与分发器关系接口
-            $postTaskProjectMapData = [];
-            $postTaskProjectMapData['task_id'] = $result['id'];
+                //调用保存任务与分发器关系接口
+                $postTaskProjectMapData = [];
+                $postTaskProjectMapData['task_id'] = $result['id'];
 
-            InternalAPIV2Service::post('/task/project_map', $postTaskProjectMapData);
+                InternalAPIV2Service::post('/task/project_map', $postTaskProjectMapData);
 
-            $postTaskData['id'] = $result['id'];
+                $postTaskData['id'] = $result['id'];
 
-            if ($script->cron_type !== Script::CRON_TYPE_ONCE) {
-                InternalAPIV2Service::post('/task/start', $postTaskData);
+                if ($script->cron_type !== Script::CRON_TYPE_ONCE) {
+                    InternalAPIV2Service::post('/task/start', $postTaskData);
+                }
+
+                //生成task_statistics
+                $taskLastRunLog = new TaskLastRunLog;
+
+                $taskLastRunLog->task_id = $result['id'];
+
+                $taskLastRunLog->save();
             }
-
-            //生成task_statistics
-            $taskLastRunLog = new TaskLastRunLog;
-
-            $taskLastRunLog->task_id = $result['id'];
-
-            $taskLastRunLog->save();
         } catch (\Exception $e) {
 
-            Log::error('publishScript    Exception:' . "\t" . $e->getCode() . "\t" . $e->getMessage());
+            Log::error('publishScript Exception:' . "\t" . $e->getCode() . "\t" . $e->getMessage());
             throw new \Dingo\Api\Exception\ResourceException("script publish is failed");
         }
 
@@ -412,7 +418,7 @@ class ScriptController extends Controller
             //获取script基础模板内容
             $content = $this->__getBaseScriptModel($dataType);
 
-            if ($dataType == Task::DATA_TYPE_CASPERJS) {
+            if ($dataType == Script::DATA_TYPE_CASPERJS) {
 
                 //获取script配置数据
                 $scriptConfig = $script->casperConfig;

@@ -185,6 +185,11 @@ class ActionController extends Controller
         if (!empty($projectResult->content)) {
             $newData['result']['content'] = $projectResult->content;
         }
+
+        if (empty($projectResult->content) && !empty($projectResult->description)) {
+            $newData['result']['content'] = $projectResult->description;
+        }
+
         if (!empty($show_time)) {
             $time = formatShowTime($show_time);
 

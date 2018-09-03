@@ -176,6 +176,7 @@ $api->version(
         $api->post('/task/start','TaskController@taskStart');
         $api->post('/task/stop','TaskController@taskStop');
         $api->post('/task/delete','TaskController@delete');
+        $api->post('/task/update','TaskController@update');
         $api->get('/task','TaskController@retrieve');
 
         $api->post('/task/project_map','TaskProjectMapController@create');

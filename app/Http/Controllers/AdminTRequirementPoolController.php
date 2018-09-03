@@ -581,7 +581,7 @@
                     foreach($columns_table as $col) {
                         if(!$col['field_with']) continue;
                         if($col['is_subquery']) continue;
-                        $w->orwhere($col['field_with'],"like","%".Request::get("q")."%");
+                        $w->orwhere($col['field_with'],"like binary","%".Request::get("q")."%");
                     }
                 });
             }

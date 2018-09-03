@@ -88,6 +88,67 @@ class TaskController extends Controller
     }
 
     /**
+     * update
+     * 更新task信息
+     *
+     * @param $request
+     * @return array
+     */
+    public function update(Request $request)
+    {
+        $params = $request->all();
+
+        //验证参数
+        ValidatorService::check($params, [
+            'task_id'   => 'required|integer|max:1000',
+            'publisher'   => 'required|string|max:100',
+            'script_path' => 'required|string|max:255'
+        ]);
+
+        $task = Task::find($params['task_id']);
+
+        if (empty($task)) {
+            throw new \Dingo\Api\Exception\ResourceException('$task is not found');
+        }
+
+        $script = Script::find($task->script_id);
+
+        if (empty($script)) {
+            throw new \Dingo\Api\Exception\ResourceException('$script is not found');
+        }
+
+        //整理task数据
+        $taskData = [
+            'script_id'           => $script->id,
+            'name'                => $script->name,
+            'description'         => $script->description,
+            'list_url'            => $script->list_url,
+            'data_type'           => $script->data_type,
+            'script_path'         => $params['script_path'],
+            'is_proxy'            => $script->is_proxy,
+            'projects'            => $script->projects,
+            'filters'             => $script->filters,
+            'actions'             => $script->actions,
+            'cron_type'           => $script->cron_type,
+            'ext'                 => $script->ext,
+            'requirement_pool_id' => $script->requirement_pool_id,
+            'company_id'          => $script->company_id,
+            'publisher'           => $params['publisher'],
+            'status'              => Task::STATUS_INIT,
+        ];
+
+        $task->update($taskData);
+
+        $newData = [
+            "type" => TaskStatistics::TYPE_TASK,
+            "data" => ["task_id" => $task->id]
+        ];
+        event(new StatisticsEvent($newData));
+
+        return $this->resObjectGet($task->toArray(), 'task', $request->path());
+    }
+
+    /**
      * taskStart
      * 开启任务
      *
