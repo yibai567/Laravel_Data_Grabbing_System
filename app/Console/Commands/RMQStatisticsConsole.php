@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Services\AMQPService;
 use App\Services\InternalAPIV2Service;
+use Exception;
 
 class RMQStatisticsConsole extends Command
 {
@@ -73,7 +74,12 @@ class RMQStatisticsConsole extends Command
             }
 
             // 请求统计接口
-            $result = InternalAPIV2Service::post('/statistics/converter', $message['body']);
+            try {
+                $result = InternalAPIV2Service::post('/statistics/converter', $message['body']);
+
+            } catch (Exception $e) {
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+            }
             $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
             return true;
         };

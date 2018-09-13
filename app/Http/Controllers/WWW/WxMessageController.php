@@ -146,7 +146,7 @@ class WxMessageController extends Controller
 
     public function text(Request $request)
     {
-        $ask = WxMessage::where('contact_name', 'zoe')->get();
+        $ask = WxMessage::where('contact_name', 'zoe 李雯 金色财经')->get();
         $askCount = count($ask);
         if ($askCount > 0) {
             $ask = $ask->toArray();
