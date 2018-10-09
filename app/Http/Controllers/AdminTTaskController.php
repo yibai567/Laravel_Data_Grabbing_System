@@ -425,7 +425,12 @@
         public function getDetail($id)	{
             $this->cbLoader();
             $row        = Task::find($id)->toArray();
-            $row['test_result'] = json_decode($row['test_result'], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT)[0];
+            $testResult = json_decode($row['test_result'], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+
+            if (!is_array($testResult[0])) {
+                $row['test_result'] = $testResult[0];
+            }
+
             if(!CRUDBooster::isRead() && $this->global_privilege==true || $this->button_edit==true) {
                 CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
             }
