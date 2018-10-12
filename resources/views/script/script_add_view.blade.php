@@ -200,10 +200,10 @@
                     <div>
                         <div class="col-sm-10">
                             <label class='radio'>
-                                <input type="radio" checked name="cron_type" value="1"> 每分钟执行一次
+                                <input type="radio" name="cron_type" value="1"> 每分钟执行一次
                             </label>
                             <label class='radio'>
-                                <input type="radio" name="cron_type" value="2"> 每五分钟执行一次
+                                <input type="radio" checked name="cron_type" value="2"> 每五分钟执行一次
                             </label>
                             <label class='radio'>
                                 <input type="radio" name="cron_type" value="3"> 每十分钟执行一次

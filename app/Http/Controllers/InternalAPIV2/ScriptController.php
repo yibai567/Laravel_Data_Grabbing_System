@@ -540,6 +540,21 @@ class ScriptController extends Controller
             $structures .= $structure . PHP_EOL . PHP_EOL;
         }
 
+        if (!strpos($structures, '~proxy~')) {
+            return $structures;
+        }
+
+        //脚本是否翻墙,如翻墙则添加翻墙设置
+        if ($script['is_proxy'] == Script::WALL_OVER_TRUE) {
+            //获取代理IP
+            $proxyIp = Config('script.proxy_ip');
+            $replaceCode = '.proxy("' . $proxyIp . '")';
+
+            $structures = str_replace('~proxy~', $replaceCode, $structures);
+        } else {
+            $structures = str_replace('~proxy~', '', $structures);
+        }
+
         return $structures;
     }
 
