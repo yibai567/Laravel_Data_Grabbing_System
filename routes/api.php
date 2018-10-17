@@ -113,6 +113,6 @@ $api->version(
 
         $api->post('/alarm_result/handle', 'AlarmResultController@handle');
 
-        $api->get('/project_results', 'ProjectResultController@all');
+        $api->get('/posts', 'ProjectResultController@all');
     }
 );

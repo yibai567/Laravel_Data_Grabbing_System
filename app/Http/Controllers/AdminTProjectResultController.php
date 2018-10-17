@@ -43,6 +43,8 @@
                     return '英文';
                 } elseif ($row->language_type == ProjectResult::LANGUAGE_TYPE_CHINESE) {
                     return '中文';
+                } else {
+                    return '未知';
                 }
             }];
 			$this->col[] = ["label"=>"标题","name"=>"title",'width'=>'30%'];

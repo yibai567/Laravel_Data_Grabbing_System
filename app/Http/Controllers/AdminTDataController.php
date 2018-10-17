@@ -39,8 +39,11 @@
                     return '英文';
                 } elseif ($row->language_type == Data::LANGUAGE_TYPE_CHINESE) {
                     return '中文';
+                } else {
+                    return '未知';
                 }
-            }];			$this->col[] = ["label"=>"标题","name"=>"title",'width'=>'300'];
+            }];
+            $this->col[] = ["label"=>"标题","name"=>"title",'width'=>'300'];
             $this->col[] = ["label"=>"地址","name"=>"detail_url", 'width'=>'200'];
             $this->col[] = ["label"=>"发布时间","name"=>"show_time","callback"=>function ($row) {
                 if (is_numeric($row->show_time)) {
