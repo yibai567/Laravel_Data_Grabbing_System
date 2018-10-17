@@ -181,7 +181,7 @@ class ActionController extends Controller
         $newData['result']['title'] = $projectResult->title;
         $newData['result']['url'] = $projectResult->detail_url;
         $newData['result']['task_id'] = $task->id;
-        $show_time = $projectResult->show_time;
+        $showTime = $projectResult->show_time;
         if (!empty($projectResult->content)) {
             $newData['result']['content'] = $projectResult->content;
         }
@@ -190,8 +190,11 @@ class ActionController extends Controller
             $newData['result']['content'] = $projectResult->description;
         }
 
-        if (!empty($show_time)) {
-            $newData['result']['publish_time'] = date('Y-m-d H:i:s', $show_time);
+        if (!empty($showTime)) {
+            $time = formatShowTime($showTime);
+            if (!empty($time)) {
+                $newData['result']['publish_time'] = date('Y-m-d H:i:s', $time);
+            }
         }
         $newData['result']['source'] = $company->en_name;
 

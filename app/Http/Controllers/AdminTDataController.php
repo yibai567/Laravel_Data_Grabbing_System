@@ -60,6 +60,7 @@
 			$this->form = [];
 			$this->form[] = ['label'=>'Content Type','name'=>'content_type','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Company','name'=>'company','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
+			$this->form[] = ['label'=>'Language Type','name'=>'language_type','type'=>'text','validation'=>'required|min:1|integer','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Title','name'=>'title','type'=>'text','validation'=>'required|string|min:3|max:70','width'=>'col-sm-10','placeholder'=>'请输入字母'];
 			$this->form[] = ['label'=>'Md5 Title','name'=>'md5_title','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Md5 Content','name'=>'md5_content','type'=>'text','validation'=>'required|min:1|max:255','width'=>'col-sm-10'];

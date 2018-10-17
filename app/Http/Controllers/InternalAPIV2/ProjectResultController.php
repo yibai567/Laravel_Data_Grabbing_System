@@ -46,8 +46,9 @@ class ProjectResultController extends Controller
         $projectResult = ProjectResult::whereNotNull('content')
                                     ->take($params['limit'])
                                     ->skip($params['offset'])
-                                    ->orderBy('id')
+                                    ->orderBy('id', 'desc')
                                     ->get();
+
         $result = [];
 
         if (!empty($projectResult)) {

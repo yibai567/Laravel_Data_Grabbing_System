@@ -69,6 +69,7 @@
 			$this->form[] = ['label'=>'Task Id','name'=>'task_id','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Project Id','name'=>'project_id','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Task Run Log Id','name'=>'task_run_log_id','type'=>'select2','validation'=>'required|integer|min:0','width'=>'col-sm-10'];
+            $this->form[] = ['label'=>'Language Type','name'=>'language_type','type'=>'text','validation'=>'required|min:1|integer','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Title','name'=>'title','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Content','name'=>'content','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
 			$this->form[] = ['label'=>'Detail Url','name'=>'detail_url','type'=>'textarea','validation'=>'required|string|min:5|max:5000','width'=>'col-sm-10'];
