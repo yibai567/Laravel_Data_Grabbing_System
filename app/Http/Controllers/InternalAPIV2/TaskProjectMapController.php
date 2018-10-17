@@ -17,6 +17,7 @@ use App\Models\V2\TaskProjectMap;
 use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Log;
 
 class TaskProjectMapController extends Controller
 {
@@ -49,6 +50,13 @@ class TaskProjectMapController extends Controller
             $taskProjectMaps = [];
             $taskActionMaps = [];
 
+            //保证关联表内部存在脏数据
+            TaskProjectMap::where('task_id', $params['task_id'])
+                            ->delete();
+            TaskFilterMap::where('task_id', $params['task_id'])
+                           ->delete();
+            TaskActionMap::where('task_id', $params['task_id'])
+                           ->delete();
             if (!empty($task->projects)) {
                 //创建task与分发项目的关系
                 $taskProjectMap['task_id'] = $params['task_id'];

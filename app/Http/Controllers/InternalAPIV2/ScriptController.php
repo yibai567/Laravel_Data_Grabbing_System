@@ -297,16 +297,8 @@ class ScriptController extends Controller
             } else {
                 $result = InternalAPIV2Service::post('/task', $postTaskData);
 
-                //调用保存任务与分发器关系接口
-                $postTaskProjectMapData = [];
-                $postTaskProjectMapData['task_id'] = $result['id'];
-
-                InternalAPIV2Service::post('/task/project_map', $postTaskProjectMapData);
-
-                $postTaskData['id'] = $result['id'];
-
                 if ($script->cron_type !== Script::CRON_TYPE_ONCE) {
-                    InternalAPIV2Service::post('/task/start', $postTaskData);
+                    InternalAPIV2Service::post('/task/start', ['id' => $result['id']]);
                 }
 
                 //生成task_statistics
@@ -316,6 +308,9 @@ class ScriptController extends Controller
 
                 $taskLastRunLog->save();
             }
+
+            //调用保存任务与分发器关系接口
+            InternalAPIV2Service::post('/task/project_map', ['task_id' => $result['id']]);
         } catch (\Exception $e) {
 
             Log::error('publishScript Exception:' . "\t" . $e->getCode() . "\t" . $e->getMessage());
