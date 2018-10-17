@@ -191,11 +191,7 @@ class ActionController extends Controller
         }
 
         if (!empty($show_time)) {
-            $time = formatShowTime($show_time);
-
-            if ($time) {
-                $newData['result']['publish_time'] = date('Y-m-d H:i:s', $time);
-            }
+            $newData['result']['publish_time'] = date('Y-m-d H:i:s', $show_time);
         }
         $newData['result']['source'] = $company->en_name;
 

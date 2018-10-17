@@ -56,6 +56,16 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
                 return 'api';
             }
         }];
+
+        $this->col[] = ["label"=>"语言类型","name"=>"language_type","callback"=>function ($row) {
+            if( $row->data_type == Script::LANGUAGE_TYPE_ENGLISH) {
+                return '英文';
+            } else if ($row->data_type == Script::LANGUAGE_TYPE_ENGLISH) {
+                return '中文';
+            } else {
+                return '未知';
+            }
+        }];
 		$this->col[] = ["label"=>"最后生成时间","name"=>"last_generate_at"];
         $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
             if ( $row->status == Script::STATUS_INIT) {
@@ -86,6 +96,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         $this->form[] = ['label'=>'步骤','name'=>'modules','type'=>'textarea','validation'=>'nullable','width'=>'col-sm-10'];
         $this->form[] = ['name'=>'script_model_params','type'=>'text'];
 		$this->form[] = ['label'=>'执行规则','name'=>'cron_type','type'=>'radio','validation'=>'nullable|integer','width'=>'col-sm-10','dataenum'=>'1|每分钟执行一次;2|每五分钟执行一次;3|每十五分钟执行一次;','value'=>'1'];
+        $this->form[] = ['label'=>'语言类型','name'=>'language_type','type'=>'radio','validation'=>'nullable|integer','width'=>'col-sm-10','dataenum'=>'1|英文;2|中文;','value'=>'1'];
         $this->form[] = ['label'=>'是否上报','name'=>'is_report','type'=>'checkout','validation'=>'nullable|integer','width'=>'col-sm-10','value'=>'1'];
         $this->form[] = ['label'=>'是否下载','name'=>'is_download','type'=>'checkout','validation'=>'nullable|integer','width'=>'col-sm-10','value'=>'1'];
         $this->form[] = ['label'=>'是否翻墙','name'=>'is_proxy','type'=>'checkout','validation'=>'nullable|integer','width'=>'col-sm-10','value'=>'1'];
@@ -526,6 +537,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
 
         $data['cron_type'] = $formParams['cron_type'];
         $data['data_type'] = $formParams['data_type'];
+        $data['language_type'] = $formParams['language_type'];
         $data['requirement_pool_id'] = $formParams['requirement_pool_id'];
 
         if (empty($formParams['is_proxy'])) {
@@ -648,6 +660,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
                          ];
         $data['cron_type'] = $formParams['cron_type'];
         $data['data_type'] = $formParams['data_type'];
+        $data['language_type'] = $formParams['language_type'];
         $data['requirement_pool_id'] = $formParams['requirement_pool_id'];
 
         if (empty($formParams['is_proxy'])) {
@@ -657,6 +670,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         }
 
         $data['created_by'] = CRUDBooster::myName();
+
         try {
             $res = InternalAPIV2Service::post('/script', $data);
         } catch (\Dingo\Api\Exception\ResourceException $e) {
@@ -721,6 +735,12 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
             $data['row']['cron_type'] = '每十分钟执行一次';
         }
 
+        if ($data['row']['language_type'] == Script::LANGUAGE_TYPE_ENGLISH) {
+            $data['row']['language_type'] = '英文';
+        } else if($data['row']['language_type'] == Script::LANGUAGE_TYPE_CHINESE) {
+            $data['row']['language_type'] = '中文';
+        }
+
         if ($data['row']['data_type'] == Script::DATA_TYPE_CASPERJS) {
             $data['row']['data_type'] = 'casperJS';
         } else if($data['row']['data_type'] == Script::DATA_TYPE_HTML) {
@@ -738,7 +758,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         if (!empty($data['row']['last_generate_at'])) {
             $data['row']['last_generate_at'] = date('Y-m-d H:i:s', $data['row']['last_generate_at']);
         }
-
         if (!empty($data['row']['projects'])) {
             foreach ($data['row']['projects'] as $key => $value) {
                 if ($value == 1) {
@@ -1132,7 +1151,6 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
           $html_contents[] = $html_content;
         } //end foreach data[result]
 
-
         $html_contents = ['html'=>$html_contents,'data'=>$data['result']];
 
         $data['html_contents'] = $html_contents;
@@ -1259,6 +1277,7 @@ class AdminTScriptController extends \crocodicstudio\crudbooster\controllers\CBC
         }
         $data['ext'] = $formParams['ext'];
         $data['created_by'] = CRUDBooster::myName();
+        $data['language_type'] = $formParams['language_type'];
         $res = [];
         try {
             $res = InternalAPIV2Service::post('/script', $data);

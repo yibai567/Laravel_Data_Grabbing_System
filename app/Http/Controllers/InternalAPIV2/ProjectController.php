@@ -76,6 +76,9 @@ class ProjectController extends Controller
         }
 
         try {
+
+            $showTime = formatShowTime($data->show_time);
+
             //整理保存数据
             $newData = [
                 'content_type'    => $data->content_type,
@@ -87,11 +90,12 @@ class ProjectController extends Controller
                 'description'     => $data->description,
                 'content'         => $data->content,
                 'detail_url'      => $data->detail_url,
-                'show_time'       => $data->show_time,
+                'show_time'       => $showTime,
                 'author'          => $data->author,
                 'read_count'      => $data->read_count,
                 'thumbnail'       => $data->thumbnail,
                 'screenshot'      => $data->screenshot,
+                'language_type'   => $data->language_type,
                 'status'          => $data->status,
                 'start_time'      => $data->start_time,
                 'end_time'        => $data->end_time,
@@ -138,6 +142,8 @@ class ProjectController extends Controller
         }
 
         try {
+
+            $showTime = formatShowTime($data->show_time);
             //整理保存数据
             $newData = [
                 'content_type'    => $data->content_type,
@@ -149,11 +155,12 @@ class ProjectController extends Controller
                 'description'     => $data->description,
                 'content'         => $data->content,
                 'detail_url'      => $data->detail_url,
-                'show_time'       => $data->show_time,
+                'show_time'       => $showTime,
                 'author'          => $data->author,
                 'read_count'      => $data->read_count,
                 'thumbnail'       => $data->thumbnail,
                 'screenshot'      => $data->screenshot,
+                'language_type'   => $data->language_type,
                 'status'          => $data->status,
                 'start_time'      => $data->start_time,
                 'end_time'        => $data->end_time,
@@ -300,14 +307,25 @@ class ProjectController extends Controller
         }
 
         try {
+
+            $showTime = formatShowTime($data->show_time);
+
             //整理保存数据
             $newData = [
+                'content_type'    => $data->content_type,
+                'company'         => $data->company,
                 'task_id'         => $data->task_id,
                 'project_id'      => $params['project_id'],
                 'task_run_log_id' => $data->task_run_log_id,
                 'title'           => $data->title,
                 'content'         => $data->content,
                 'detail_url'      => $data->detail_url,
+                'show_time'       => $showTime,
+                'status'          => $data->status,
+                'start_time'      => $data->start_time,
+                'end_time'        => $data->end_time,
+                'language_type'   => $data->language_type,
+                'created_time'    => $data->created_time,
             ];
 
             $projectResult = ProjectResult::create($newData);
@@ -350,14 +368,23 @@ class ProjectController extends Controller
         }
 
         try {
+            $showTime = formatShowTime($data->show_time);
             //整理保存数据
             $newData = [
+                'content_type'    => $data->content_type,
+                'company'         => $data->company,
                 'task_id'         => $data->task_id,
                 'project_id'      => $params['project_id'],
                 'task_run_log_id' => $data->task_run_log_id,
                 'title'           => $data->title,
                 'content'         => $data->content,
                 'detail_url'      => $data->detail_url,
+                'show_time'       => $showTime,
+                'status'          => $data->status,
+                'start_time'      => $data->start_time,
+                'end_time'        => $data->end_time,
+                'language_type'   => $data->language_type,
+                'created_time'    => $data->created_time,
             ];
 
             $projectResult = ProjectResult::create($newData);

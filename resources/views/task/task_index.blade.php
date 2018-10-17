@@ -156,6 +156,7 @@
         <th>是否翻墙</th>
         <th>执行规则</th>
         <th>数据类型</th>
+        <th>语言类型</th>
         <th>状态</th>
         <th style="float: right;">操作</th>
        </tr>
@@ -187,6 +188,13 @@
             <td>html</td>
         @elseif ($row->data_type == 3)
             <td>api</td>
+        @endif
+        @if ($row->language_type == 1)
+            <td>英文</td>
+        @elseif ($row->language_type == 2)
+            <td>中文</td>
+        @else
+            <td>未知</td>
         @endif
         @if ($row->status == 1)
             <td><a class='btn btn-xs btn-warning'><i></i>初始化</a></td>

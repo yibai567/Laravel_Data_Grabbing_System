@@ -77,6 +77,16 @@
                 }
             }];
 
+            $this->col[] = ["label"=>"语言类型","name"=>"language_type","callback"=>function ($row) {
+                if( $row->language_type == Task::LANGUAGE_TYPE_ENGLISH) {
+                    return '英文';
+                } else if ($row->language_type == Task::LANGUAGE_TYPE_CHINESE) {
+                    return '中文';
+                } else {
+                    return '未知';
+                }
+            }];
+
             $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
                 if( $row->status == Task::STATUS_INIT) {
                     return "<a class='btn btn-xs btn-warning'><i></i>初始化</a>";
@@ -443,6 +453,13 @@
             } else {
                 $data['row']['is_proxy'] = '不翻墙';
             }
+
+            if ($data['row']['language_type'] == Task::LANGUAGE_TYPE_ENGLISH) {
+                $data['row']['language_type'] = '英文';
+            } elseif ($data['row']['language_type'] == Task::LANGUAGE_TYPE_CHINESE) {
+                $data['row']['language_type'] = '中文';
+            }
+
             $this->cbView('task/task_detail_view',$data);
 
         }

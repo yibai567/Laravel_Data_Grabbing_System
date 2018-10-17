@@ -25,6 +25,10 @@ class Task extends Model
     const STATUS_INIT = 1;
     const STATUS_START = 2;
 
+    //语言类型 1、英文 2、中文
+    const LANGUAGE_TYPE_ENGLISH = 1;
+    const LANGUAGE_TYPE_CHINESE = 2;
+
     protected $dates = ['deleted_at'];
 
     /**
@@ -42,6 +46,7 @@ class Task extends Model
         'description',
         'cron_type',
         'data_type',
+        'language_type',
         'status',
     ];
 

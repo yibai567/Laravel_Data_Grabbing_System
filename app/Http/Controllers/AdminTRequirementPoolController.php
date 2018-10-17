@@ -66,6 +66,16 @@
                     return '详情';
                 }
             }];
+
+
+            $this->col[] = ["label"=>"语言类型","name"=>"language_type","callback"=>function ($row) {
+                if ( $row->language_type == Requirement::LANGUAGE_TYPE_ENGLISH) {
+                    return '英文';
+                } elseif ($row->language_type == Requirement::LANGUAGE_TYPE_CHINESE){
+                    return '中文';
+                }
+            }];
+
 			$this->col[] = ["label"=>"截图","name"=>"is_capture","callback"=>function ($row) {
                 if ( $row->is_capture == Requirement::IS_CAPTURE_TRUE) {
                     return '需要';
@@ -81,6 +91,7 @@
                     return '不需要';
                 }
             }];
+
             $this->col[] = ["label"=>"状态","name"=>"status","callback"=>function ($row) {
                 if ($row->status == Requirement::STATUS_TRUE) {
                     return "<a class='btn btn-xs btn-warning'><i></i>未处理</a>";
@@ -123,6 +134,7 @@
 			$this->form[] = ['label'=>'截图','name'=>'is_capture','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|需要;2|不需要','value'=>2];
 			$this->form[] = ['label'=>'图片资源','name'=>'is_download_img','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|需要;2|不需要','value'=>2];
             $this->form[] = ['label'=>'需求类型','name'=>'requirement_type','type'=>'radio','validation'=>'nullable|integer','width'=>'col-sm-10','dataenum'=>'1|快讯;2|公告','value'=>'1'];
+            $this->form[] = ['label'=>'语言类型','name'=>'language_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-10','dataenum'=>'1|英文;2|中文','value'=>'1'];
             $this->form[] = ['label'=>'执行规则','name'=>'cron_type','type'=>'radio','validation'=>'nullable|integer','width'=>'col-sm-10','dataenum'=>'1|每分钟执行一次;2|每五分钟执行一次;3|每十分钟执行一次;4|只执行一次','value'=>'1'];
 			$this->form[] = ['label'=>'创建人','name'=>'create_by','type'=>'select','validation'=>'required','width'=>'col-sm-9','dataenum'=>'4|guoyuemin@jinse.com;1|liqi@jinse.com;2|huangxingxing@jinse.com;3|wangbo@jinse.com',];
 			$this->form[] = ['label' => 'ID','name'=>'id','type'=>'hidden'];
@@ -856,17 +868,18 @@
         private function __create($params)
         {
             $newData = [
-                "name" => $params['name'],
-                "list_url" => $params['list_url'],
-                "company_id" => $params['company_id'],
-                "img_description" => $params['img_description'],
-                "category" => $params['category'],
+                "name"              => $params['name'],
+                "list_url"          => $params['list_url'],
+                "company_id"        => $params['company_id'],
+                "img_description"   => $params['img_description'],
+                "category"          => $params['category'],
                 "subscription_type" => $params['subscription_type'],
-                "is_capture" => $params['is_capture'],
-                "is_download_img" => $params['is_download_img'],
-                "create_by" => $params['create_by'],
-                "created_at" => $params['created_at'],
-                "operate_by" => CRUDBooster::myId(),
+                "language_type"     => $params['language_type'],
+                "is_capture"        => $params['is_capture'],
+                "is_download_img"   => $params['is_download_img'],
+                "create_by"         => $params['create_by'],
+                "created_at"        => $params['created_at'],
+                "operate_by"        => CRUDBooster::myId(),
             ];
             try {
                 if (empty($params['company_id'])) {
@@ -925,11 +938,18 @@
                 $row->is_capture = '否';
             }
 
-            if ($row->is_download_img == IS_DOWNLOAD_TRUE) {
+            if ($row->is_download_img == Requirement::IS_DOWNLOAD_TRUE) {
                 $row->is_download_img = '是';
             } else {
                 $row->is_download_img = '否';
             }
+
+            if ($row->language_type == Requirement::LANGUAGE_TYPE_ENGLISH) {
+                $row->language_type = '英文';
+            } elseif ($row->language_type == Requirement::LANGUAGE_TYPE_CHINESE) {
+                $row->language_type = '中文';
+            }
+
             $createBy = config('user');
 
             $row->create_by=$createBy[$row->create_by];

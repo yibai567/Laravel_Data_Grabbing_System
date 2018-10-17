@@ -200,6 +200,7 @@ $api->version(
         $api->get('/quirement', 'QuirementPoolController@retrieve');
         $api->post('/quirement/update_status','QuirementPoolController@updateStatus');
         $api->get('/quirements/category_id','QuirementPoolController@getQuirementByCategoryId');
+        $api->get('/quirements/task_id','QuirementPoolController@getQuirementByTaskId');
         //微信消息
         $api->post('/wx/message/group','WxMessageController@createGroup');
         $api->post('/wx/message/group/status','WxMessageController@updateGroupStatus');
@@ -245,5 +246,7 @@ $api->version(
         $api->get('/fast_news', 'FastNewsController@all');
         //区块链新闻
         $api->get('/block_news','BlockNewsController@all');
+
+        $api->get('/project_results', 'ProjectResultController@all');
     }
 );

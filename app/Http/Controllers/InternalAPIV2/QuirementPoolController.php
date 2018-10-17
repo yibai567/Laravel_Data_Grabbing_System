@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\InternalAPIV2;
 
+use App\Models\V2\Task;
 use Illuminate\Http\Request;
 use Log;
 use App\Services\ValidatorService;
@@ -43,12 +44,13 @@ class QuirementPoolController extends Controller
             'list_url'          => 'required|string|max:255',
             'description'       => 'nullable|max:20000',
             'subscription_type' => 'required|integer|between:1,2',
+            'language_type'     => 'required|integer|between:1,2',
             'is_capture'        => 'required|integer|between:1,2',
             'company_id'        => 'required|integer',
             'is_download_img'   => 'required|integer|between:1,2',
-            'category'          =>  'required|integer|between:1,4',
+            'category'          => 'required|integer|between:1,4',
             // 'img_description'   => 'required|max:255',
-            'operate_by'=>'required|integer'
+            'operate_by'        => 'required|integer'
         ]);
 
 
@@ -90,6 +92,7 @@ class QuirementPoolController extends Controller
             'description'       => 'nullable|max:20000',
             'company_id'        => 'required|integer',
             'subscription_type' => 'required|integer|between:1,2',
+            'language_type'     => 'required|integer|between:1,2',
             'is_capture'        => 'required|integer|between:1,2',
             'is_download_img'   => 'required|integer|between:1,2',
             'category'         => 'required|integer|between:1,4',
@@ -312,6 +315,35 @@ class QuirementPoolController extends Controller
             $result = $res->toArray();
         }
         return $this->resObjectGet($result, 'quirement_pool', $request->path());
+    }
+
+
+    /**
+     * getQuirementByTaskId
+     * 根据task_id获取资源
+     *
+     * @param
+     * @return array
+     */
+    public function getQuirementByTaskId(Request $request)
+    {
+        $params = $request->all();
+
+        //检测参数
+        ValidatorService::check($params, [
+            'task_id' => 'required|integer|max:3000',
+        ]);
+
+        $task = Task::find($params['task_id']);
+
+        $requirementPool = Requirement::with('company')->where('id',$task->requirement_pool_id)->first();
+
+        $result = [];
+
+        if (!empty($requirementPool)) {
+            $result = $requirementPool->toArray();
+        }
+        return $this->resObjectGet($result, 'requirement_pool', $request->path());
     }
 
 }

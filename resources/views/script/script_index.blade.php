@@ -185,6 +185,7 @@
         <th>需求ID</th>
         <th>任务名称</th>
         <th>data类型</th>
+        <th>语言类型</th>
         <th>最后生成时间</th>
         <th>状态</th>
         <th style="float: right;">操作</th>
@@ -202,6 +203,13 @@
             <td>html</td>
         @else
             <td>api</td>
+        @endif
+        @if ($row->language_type == 1)
+          <td>英文</td>
+        @elseif ($row->language_type == 2)
+          <td>中文</td>
+        @else
+          <td>未知</td>
         @endif
         @if (!empty($row->last_generate_at))
             <td>{{date('Y-m-d H:i:s',$row->last_generate_at)}}</td>

@@ -35,6 +35,7 @@
                             <tr><td>项目</td><td><pre style='width:1000px;'>{{$row['projects']}}</pre></td></tr>
                             <tr><td>过滤器</td><td><pre style='width:1000px;'>{{$row['filters']}}</pre></td></tr>
                             <tr><td>actions</td><td><pre style='width:1000px;'>{{$row['actions']}}</pre></td></tr>
+                            <tr><td>语言类型</td><td><span class='badge'>{{$row[language_type]}}</span> </td></tr>
                             <tr><td>执行规则</td><td><span class='badge'>{{$row[cron_type]}}</span> </td></tr>
                             <tr><td>最后生成时间</td><td><span class='badge'>{{$row[last_generate_at]}}</span> </td></tr>
                             <tr><td>状态</td><td><span class='badge'>{{$row[status]}}</span> </td></tr>

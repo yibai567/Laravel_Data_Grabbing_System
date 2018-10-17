@@ -27,6 +27,7 @@
                                     <tr><td>任务名称</td><td>{{$row[name]}}</td></tr>
                                     <tr><td>测试地址</td><td>{{$row[test_url]}}</td></tr>
                                     <tr><td>是否翻墙</td><td>{{$row[is_proxy]}}</td></tr>
+                                    <tr><td>语言类型</td><td>{{$row[language_type]}}</td></tr>
                                     <tr><td>测试结果</td><td><pre>{{$row[test_result]}}</pre></td></tr>
                                 </tbody>
                             </table>

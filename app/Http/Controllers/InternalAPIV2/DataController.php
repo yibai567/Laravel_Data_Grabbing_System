@@ -10,6 +10,7 @@
 namespace App\Http\Controllers\InternalAPIV2;
 
 use App\Models\V2\Data;
+use App\Models\V2\Task;
 use App\Models\V2\TaskStatistics;
 use App\Events\StatisticsEvent;
 use Log;
@@ -40,10 +41,17 @@ class DataController extends Controller
             'result'          => 'required|array'
         ]);
 
+        $task = Task::find($params['task_id']);
+
+        if (empty($task)) {
+            Log::debug('[InternalAPIV2 DataController batchSave]  $task is not found,task_id : ' . $params['task_id']);
+            return $this->resObjectGet(false, 'data', $request->path());
+        }
         $result = [];
         $result['task_id'] = $params['task_id'];
         $result['data'] = [];
         $same = 0;
+
         foreach ($params['result'] as $value) {
 
             ValidatorService::check($value, [
@@ -93,24 +101,25 @@ class DataController extends Controller
 
             //整理保存数据
             $createData = [
-                'content_type'       => $params['content_type'],
-                'company'            => $params['company'],
-                'title'              => $value['title'],
-                'md5_title'          => $value['md5_title'],
-                'md5_content'        => $value['md5_content'],
-                'content'            => $value['content'],
-                'description'        => $value['description'],
-                'task_id'            => $params['task_id'],
-                'task_run_log_id'    => $params['task_run_log_id'],
-                'detail_url'         => $value['detail_url'],
-                'show_time'          => $value['show_time'],
-                'author'             => $value['author'],
-                'read_count'         => $value['read_count'],
-                'thumbnail'          => $value['images'],
-                'status'             => Data::STATUS_NORMAL,
-                'start_time'         => $params['start_time'],
-                'end_time'           => $params['end_time'],
-                'created_time'       => time()
+                'content_type'    => $params['content_type'],
+                'company'         => $params['company'],
+                'title'           => $value['title'],
+                'md5_title'       => $value['md5_title'],
+                'md5_content'     => $value['md5_content'],
+                'content'         => $value['content'],
+                'description'     => $value['description'],
+                'task_id'         => $params['task_id'],
+                'task_run_log_id' => $params['task_run_log_id'],
+                'detail_url'      => $value['detail_url'],
+                'show_time'       => $value['show_time'],
+                'author'          => $value['author'],
+                'read_count'      => $value['read_count'],
+                'thumbnail'       => $value['images'],
+                'language_type'   => $task->language_type,
+                'status'          => Data::STATUS_NORMAL,
+                'start_time'      => $params['start_time'],
+                'end_time'        => $params['end_time'],
+                'created_time'    => time()
             ];
 
             $datum = Data::create($createData);

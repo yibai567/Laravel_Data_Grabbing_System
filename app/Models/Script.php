@@ -45,6 +45,10 @@ class Script extends Model
     const SCRIPT_TYPE_JS = 1;
     const SCRIPT_TYPE_PHP = 2;
 
+    //语言类型 1、英文 2、中文
+    const LANGUAGE_TYPE_ENGLISH = 1;
+    const LANGUAGE_TYPE_CHINESE = 2;
+
     /**
      * 表名
      */
@@ -77,6 +81,7 @@ class Script extends Model
         'operate_user',
         'next_script_id',
         'requirement_pool_id',
+        'language_type',
         'is_report',
         'is_download',
         'is_proxy',

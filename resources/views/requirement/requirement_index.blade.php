@@ -153,6 +153,7 @@
                 <th>公司名称</th>
                 <th>分类</th>
                 <th>订阅类型</th>
+                <th>语言类型</th>
                 <th>截图</th>
                 <th>图片</th>
                 <th>状态</th>
@@ -185,6 +186,13 @@
                         <td>列表</td>
                     @else
                         <td>详情</td>
+                    @endif
+                    @if ($row->language_type == 1)
+                        <td>英文</td>
+                    @elseif($row->language_type == 2)
+                        <td>中文</td>
+                    @else
+                        <td>未知</td>
                     @endif
                     @if( $row->is_capture == 1)
                         <td>是</td>

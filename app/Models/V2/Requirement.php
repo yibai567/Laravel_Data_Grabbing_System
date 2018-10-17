@@ -49,6 +49,12 @@ class Requirement extends Model
     const REQUIREMENT_TYPE_NOTICE = 2; //公告
 
     /**
+     * 语言类型
+     */
+    const LANGUAGE_TYPE_ENGLISH = 1;//英文
+    const LANGUAGE_TYPE_CHINESE = 2; //中文
+
+    /**
      * 分类
      */
     const CATEGORY_FAST_NEWS= 4; //行业快讯
@@ -68,6 +74,7 @@ class Requirement extends Model
         'list_url',
         'description',
         'subscription_type',
+        'language_type',
         'is_capture',
         'is_download_img',
         'img_description',
@@ -81,5 +88,9 @@ class Requirement extends Model
         'status_reason',
     ];
 
+    public function company()
+    {
+        return $this->hasOne('App\Models\V2\Company', 'id', 'company_id');
+    }
 
 }

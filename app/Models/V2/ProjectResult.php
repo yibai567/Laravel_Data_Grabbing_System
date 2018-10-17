@@ -46,6 +46,7 @@ class ProjectResult extends Model
         'read_count',
         'thumbnail',
         'screenshot',
+        'language_type',
         'status',
         'start_time',
         'end_time',

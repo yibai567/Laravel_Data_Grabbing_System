@@ -238,7 +238,31 @@
                         <p class='help-block'></p>
                     </div>
                 </div>
-
+                <div class='form-group header-group-0 ' id='form-group-cron_type'>
+                    <label class='control-label col-sm-2'>语言类型
+                        <span class='text-danger' title='This field is required'>*</span>
+                    </label>
+                    <div class="col-sm-10">
+                        @if ($row[language_type] == 1)
+                            <label class='radio'>
+                                <input type="radio" checked name="language_type" value="1"> 英文
+                            </label>
+                        @else
+                            <label class='radio'>
+                                <input type="radio" name="language_type" value="1"> 英文
+                            </label>
+                        @endif
+                        @if ($row[language_type] == 2)
+                            <label class='radio'>
+                                <input type="radio" checked name="language_type" value="2"> 中文
+                            </label>
+                        @else
+                            <label class='radio'>
+                                <input type="radio" name="language_type" value="2"> 中文
+                            </label>
+                        @endif
+                    </div>
+                </div>
                 <div class='form-group header-group-0 ' id='form-group-cron_type'>
                     <label class='control-label col-sm-2'>cron_type
                         <span class='text-danger' title='This field is required'>*</span>

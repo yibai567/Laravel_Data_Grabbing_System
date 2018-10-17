@@ -36,6 +36,10 @@ class Task extends Model
         self::DATA_TYPE_API => 'API'
     ];
 
+    //语言类型 1、英文 2、中文
+    const LANGUAGE_TYPE_ENGLISH = 1;
+    const LANGUAGE_TYPE_CHINESE = 2;
+
     /**
      * 表名
      */
@@ -56,6 +60,7 @@ class Task extends Model
         'projects',
         'filters',
         'actions',
+        'language_type',
         'cron_type',
         'ext',
         'publisher',

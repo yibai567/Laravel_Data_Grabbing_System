@@ -61,6 +61,7 @@ class Data extends Model
         'img_task_undone',
         'img_task_total',
         'screenshot',
+        'language_type',
         'status',
         'start_time',
         'end_time',

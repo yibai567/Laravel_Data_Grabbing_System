@@ -45,6 +45,10 @@ class Script extends Model
     const EXT_TYPE_JS = 1;
     const EXT_TYPE_PHP = 2;
 
+    //语言类型 1、英文 2、中文
+    const LANGUAGE_TYPE_ENGLISH = 1;
+    const LANGUAGE_TYPE_CHINESE = 2;
+
     /**
      * 表名
      */
@@ -82,6 +86,7 @@ class Script extends Model
         'projects',
         'filters',
         'actions',
+        'language_type',
         'cron_type',
         'ext',
         'created_by',
