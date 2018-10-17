@@ -285,7 +285,7 @@ class QuirementPoolController extends Controller
     public function all(Request $request)
     {
         //获取数据
-        $res = Requirement::where('category', 1)->get();
+        $res = Requirement::where('category', 1)->whereIn('status', [Requirement::STATUS_TRUE, Requirement::STATUS_FALSE])->get();
         $result = [];
         if (!empty($res)) {
             $result = $res->toArray();
@@ -309,7 +309,8 @@ class QuirementPoolController extends Controller
         ]);
 
         //获取数据
-        $res = Requirement::where('category', $params['category_id'])->get();
+        $res = Requirement::where('category', $params['category_id'])->whereIn('status', [Requirement::STATUS_TRUE, Requirement::STATUS_FALSE])->get();
+
         $result = [];
         if (!empty($res)) {
             $result = $res->toArray();

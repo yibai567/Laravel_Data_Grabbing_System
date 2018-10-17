@@ -30,14 +30,14 @@ class ProjectResultController extends Controller
     {
         $params = [
             'limit'    => $request->get('limit', $this->limit),
-            'offset'   => $request->get('offset', 0),
+            'page'     => $request->get('page', 0),
             'metadata' => $request->get('metadata'),
         ];
 
         //检测参数
         ValidatorService::check($params, [
             'limit'    => 'integer',
-            'offset'   => 'integer',
+            'page'     => 'integer',
             'metadata' => 'nullable'
         ]);
 
@@ -46,8 +46,8 @@ class ProjectResultController extends Controller
         }
 
         $queryData = [
-            'limit' => $params['limit'],
-            'offset' => $params['offset']
+            'limit'  => $params['limit'],
+            'offset' => $params['page'] * $params['limit']
         ];
 
         $projectResults = InternalAPIV2Service::get('/project_results', $queryData);
