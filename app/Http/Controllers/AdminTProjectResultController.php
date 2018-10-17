@@ -38,6 +38,13 @@
 			$this->col[] = ["label"=>"公司名","name"=>"company"];
 			$this->col[] = ["label"=>"任务ID","name"=>"task_id"];
 			$this->col[] = ["label"=>"项目ID","name"=>"project_id"];
+            $this->col[] = ["label"=>"语言类型","name"=>"language_type","callback"=>function ($row) {
+                if ($row->language_type == ProjectResult::LANGUAGE_TYPE_ENGLISH) {
+                    return '英文';
+                } elseif ($row->language_type == ProjectResult::LANGUAGE_TYPE_CHINESE) {
+                    return '中文';
+                }
+            }];
 			$this->col[] = ["label"=>"标题","name"=>"title",'width'=>'30%'];
             $this->col[] = ["label"=>"地址","name"=>"detail_url",'width'=>'200',"callback"=>function ($row) {
             return '<a href="' . $row->detail_url . '" target="_brank" style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->detail_url .'</a>';

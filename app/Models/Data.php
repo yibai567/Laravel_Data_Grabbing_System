@@ -20,6 +20,10 @@ class Data extends Model
         BlockNews::CONTENT_TYPE_LIVE => '快讯'
     );
 
+    //语言类型 1、英文 2、中文
+    const LANGUAGE_TYPE_ENGLISH = 1;
+    const LANGUAGE_TYPE_CHINESE = 2;
+    
     /**
      * 表名
      */

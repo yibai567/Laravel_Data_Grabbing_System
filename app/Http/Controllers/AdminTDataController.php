@@ -34,7 +34,13 @@
             $this->col[] = ["label"=>"ID","name"=>"id"];
 			$this->col[] = ["label"=>"分类","name"=>"content_type"];
 			$this->col[] = ["label"=>"公司名","name"=>"company"];
-			$this->col[] = ["label"=>"标题","name"=>"title",'width'=>'300'];
+            $this->col[] = ["label"=>"语言类型","name"=>"language_type","callback"=>function ($row) {
+                if ($row->language_type == Data::LANGUAGE_TYPE_ENGLISH) {
+                    return '英文';
+                } elseif ($row->language_type == Data::LANGUAGE_TYPE_CHINESE) {
+                    return '中文';
+                }
+            }];			$this->col[] = ["label"=>"标题","name"=>"title",'width'=>'300'];
             $this->col[] = ["label"=>"地址","name"=>"detail_url", 'width'=>'200'];
             $this->col[] = ["label"=>"发布时间","name"=>"show_time","callback"=>function ($row) {
                 if (is_numeric($row->show_time)) {
