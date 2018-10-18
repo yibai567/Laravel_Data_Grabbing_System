@@ -89,15 +89,16 @@ class ProjectResultController extends Controller
      */
     private function __formatProjectResult($projectResult, $requirementPool, $metadata) {
        $data = [
-           'source'       => [
+           'source'        => [
                'domain' => '',
                'title'  => $requirementPool['company']['en_name'],
                'path'   => null
            ],
-           'title'        => $projectResult['title'],
-           'published_at' => $projectResult['show_time'],
-           'slug'         => '',
-           'url'          => $projectResult['detail_url'],
+           'title'         => $projectResult['title'],
+           'id'            => $projectResult['id'],
+           'published_at'  => $projectResult['show_time'],
+           'slug'          => '',
+           'url'           => $projectResult['detail_url'],
            'language_type' => $projectResult['language_type']
        ];
 
