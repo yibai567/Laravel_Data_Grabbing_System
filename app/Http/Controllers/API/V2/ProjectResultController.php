@@ -18,6 +18,7 @@ class ProjectResultController extends Controller
 {
 
     protected $limit = 20;
+    protected $page = 20;
 
     /**
      * all
@@ -43,6 +44,10 @@ class ProjectResultController extends Controller
 
         if($params['limit'] > $this->limit) {
             $params['limit'] = $this->limit;
+        }
+
+        if($params['page'] > $this->page) {
+            $params['page'] = $this->page;
         }
 
         $queryData = [
