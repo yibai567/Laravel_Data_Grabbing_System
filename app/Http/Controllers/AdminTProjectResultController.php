@@ -52,11 +52,11 @@
             return '<a href="' . $row->detail_url . '" target="_brank" style="width:200px;overflow: hidden; display: -webkit-box;text-overflow: ellipsis; word-break: break-all;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">'. $row->detail_url .'</a>';
             }];
             $this->col[] = ["label"=>"发布时间","name"=>"show_time","callback"=>function ($row) {
-                if (is_numeric($row->show_time)) {
-                    return $row->show_time = date('Y-m-d H:i:s', $row->show_time/1000);
-                } else {
-                    return $row->show_time;
+                $showTime = formatShowTime($row->show_time);
+                if (!$showTime) {
+                    return '';
                 }
+                return $row->show_time = date('Y-m-d H:i:s', $showTime);
             }];
 
             $this->col[] = ["label"=>"创建时间","name"=>"created_at"];

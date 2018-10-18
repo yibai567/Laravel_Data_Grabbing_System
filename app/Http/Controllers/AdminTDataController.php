@@ -46,11 +46,11 @@
             $this->col[] = ["label"=>"标题","name"=>"title",'width'=>'300'];
             $this->col[] = ["label"=>"地址","name"=>"detail_url", 'width'=>'200'];
             $this->col[] = ["label"=>"发布时间","name"=>"show_time","callback"=>function ($row) {
-                if (is_numeric($row->show_time)) {
-                    return $row->show_time = date('Y-m-d H:i:s', $row->show_time/1000);
-                } else {
-                    return $row->show_time;
+                $showTime = formatShowTime($row->show_time);
+                if (!$showTime) {
+                    return '';
                 }
+                return $row->show_time = date('Y-m-d H:i:s', $showTime);
             }];
 			$this->col[] = ["label"=>"创建时间","name"=>"created_at"];
             $this->col[] = ["label"=>"更新时间","name"=>"updated_at"];
@@ -161,7 +161,7 @@
 	        |
 	        */
             $this->index_statistic = array();
-	        $this->index_statistic[] = ['label'=>'结果总数','count'=>Data::where('status', Data::STATUS_NORMAL)->count(),'icon'=>'fa fa-check','color'=>'btn btn-xs btn-success'];
+//	        $this->index_statistic[] = ['label'=>'结果总数','count'=>Data::where('status', Data::STATUS_NORMAL)->count(),'icon'=>'fa fa-check','color'=>'btn btn-xs btn-success'];
 
 
 
