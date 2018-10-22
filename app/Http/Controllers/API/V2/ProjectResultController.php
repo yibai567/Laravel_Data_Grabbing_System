@@ -110,8 +110,7 @@ class ProjectResultController extends Controller
 
        if ($metadata) {
            $data['metadata'] = [
-               'content' => $projectResult['content'],
-               'description' => $projectResult['description']
+               'content' => $projectResult['content']
            ];
        }
 
