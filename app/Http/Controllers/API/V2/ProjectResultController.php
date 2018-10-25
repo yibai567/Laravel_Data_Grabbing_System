@@ -73,8 +73,9 @@ class ProjectResultController extends Controller
     private function __formatProjectResults($projectResults, $metadata) {
         $result = [];
         foreach ($projectResults as $projectResult) {
-            $requirementPool = InternalAPIV2Service::get('/quirements/task_id', ['task_id' => $projectResult['task_id']]);
-            $result[] = $this->__formatProjectResult($projectResult, $requirementPool, $metadata);
+            $task = InternalAPIV2Service::get('/task', ['id' => $projectResult['task_id']]);
+
+            $result[] = $this->__formatProjectResult($projectResult, $task, $metadata);
         }
 
         return $result;
@@ -87,11 +88,11 @@ class ProjectResultController extends Controller
      * @param
      * @return array
      */
-    private function __formatProjectResult($projectResult, $requirementPool, $metadata) {
+    private function __formatProjectResult($projectResult, $task, $metadata) {
        $data = [
            'source'        => [
                'domain' => '',
-               'title'  => $requirementPool['company']['en_name'],
+               'title'  => $projectResult['company'],
                'path'   => null
            ],
            'title'         => $projectResult['title'],
@@ -102,7 +103,7 @@ class ProjectResultController extends Controller
            'language_type' => $projectResult['language_type']
        ];
 
-       $url = parse_url($requirementPool['list_url']);
+       $url = parse_url($task['list_url']);
        $data['source']['domain'] = $url['host'];
        $data['source']['path'] = $url['path'];
 

@@ -253,7 +253,7 @@ class TaskController extends Controller
 
         //检测参数
         ValidatorService::check($params, [
-            'id' => 'required|integer|max:3000',
+            'id' => 'required|integer|max:5000',
         ]);
         $task = Task::find($params['id']);
 

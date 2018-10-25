@@ -317,34 +317,4 @@ class QuirementPoolController extends Controller
         }
         return $this->resObjectGet($result, 'quirement_pool', $request->path());
     }
-
-
-    /**
-     * getQuirementByTaskId
-     * 根据task_id获取资源
-     *
-     * @param
-     * @return array
-     */
-    public function getQuirementByTaskId(Request $request)
-    {
-        $params = $request->all();
-
-        //检测参数
-        ValidatorService::check($params, [
-            'task_id' => 'required|integer|max:3000',
-        ]);
-
-        $task = Task::find($params['task_id']);
-
-        $requirementPool = Requirement::with('company')->where('id',$task->requirement_pool_id)->first();
-
-        $result = [];
-
-        if (!empty($requirementPool)) {
-            $result = $requirementPool->toArray();
-        }
-        return $this->resObjectGet($result, 'requirement_pool', $request->path());
-    }
-
 }
