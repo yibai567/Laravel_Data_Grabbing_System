@@ -226,13 +226,12 @@ class WxMessageController extends Controller
 
         ValidatorService::check($params, [
             "urls" => "required|array",
-            "start_time" => "required|date",
             "name" => "required|string",
             "content" => "required|string",
         ]);
         $weiXinMessage = new WxOfficialMessage;
         $weiXinMessage->urls = json_encode($params['urls']);
-        $weiXinMessage->start_time = $params['start_time'];
+        $weiXinMessage->start_time = date("Y-m-d H:i:s");
         $weiXinMessage->name = $params['name'];
         $weiXinMessage->content = $params['content'];
         try {
