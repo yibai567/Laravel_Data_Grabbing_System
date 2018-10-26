@@ -26,13 +26,17 @@ class WechatServerController extends Controller
         //验证参数
         ValidatorService::check($params, [
             'wechat_name' => 'required|string|max:100',
-            'room_name'   => 'required|string|max:100',
+            'room_name'   => 'nullable|string|max:100',
             'email'       => 'nullable|email',
             'listen_type' => 'required|integer|between:1,2',
         ]);
 
         if ($params['listen_type'] == WechatServer::LISTEN_TYPE_OFFICIAL && empty($params['email'])) {
             throw new \Dingo\Api\Exception\ResourceException('when selecting listener official, email is required');
+        }
+
+        if ($params['listen_type'] == WechatServer::LISTEN_TYPE_ROOM && empty($params['room_name'])) {
+            throw new \Dingo\Api\Exception\ResourceException('when selecting listener group, room_name is required');
         }
 
         $params['status'] = WechatServer::STATUS_INIT;
@@ -71,6 +75,10 @@ class WechatServerController extends Controller
 
         if ($params['listen_type'] == WechatServer::LISTEN_TYPE_OFFICIAL && (empty($params['email']) && empty($wechatServer->email))) {
             throw new \Dingo\Api\Exception\ResourceException('when selecting listener official, email is required');
+        }
+
+        if ($params['listen_type'] == WechatServer::LISTEN_TYPE_ROOM && (empty($params['room_name']) && empty($wechatServer->room_name))) {
+            throw new \Dingo\Api\Exception\ResourceException('when selecting listener group, room_name is required');
         }
 
         $wechatServer->update($params);

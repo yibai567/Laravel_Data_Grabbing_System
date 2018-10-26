@@ -58,7 +58,7 @@ use App\Services\InternalAPIV2Service;
 			# START FORM DO NOT REMOVE THIS LINE
 			$this->form = [];
 			$this->form[] = ['label'=>'管理微信名称','name'=>'wechat_name','type'=>'text','validation'=>'required|min:1|max:100','width'=>'col-sm-4'];
-            $this->form[] = ['label'=>'群名称','name'=>'room_name','type'=>'text','validation'=>'required|min:1|max:100','width'=>'col-sm-4'];
+            $this->form[] = ['label'=>'群名称','name'=>'room_name','type'=>'text','validation'=>'nullable|min:1|max:100','width'=>'col-sm-4'];
             $this->form[] = ['label'=>'通知邮箱','name'=>'email','type'=>'email','validation'=>'nullable|email','width'=>'col-sm-4'];
 			$this->form[] = ['label'=>'监听类型','name'=>'listen_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-6','dataenum'=>'1|监听群;2|监听公众号','value'=>'1'];
 			# END FORM DO NOT REMOVE THIS LINE
@@ -171,16 +171,20 @@ use App\Services\InternalAPIV2Service;
 
                     if (listen_type == 1) {
                        $(\"#form-group-email\").css(\"display\", \"none\")
+                       $(\"#form-group-room_name\").css(\"display\", \"\")
                     } else if (listen_type == 2) {
                        $(\"#form-group-email\").css(\"display\", \"\")
+                       $(\"#form-group-room_name\").css(\"display\", \"none\")
                     }
                    
                     $(\"input[name='listen_type']\").change(function(){
                         var listen_type = $(\"input[name='listen_type']:checked\").val()
                         if (listen_type == 1) {
                            $(\"#form-group-email\").css(\"display\", \"none\")
+                           $(\"#form-group-room_name\").css(\"display\", \"\")
                         } else if (listen_type == 2) {
                            $(\"#form-group-email\").css(\"display\", \"\")
+                           $(\"#form-group-room_name\").css(\"display\", \"none\")
                         }
                     });
                 })
@@ -292,14 +296,7 @@ use App\Services\InternalAPIV2Service;
 	    | @arr
 	    |
 	    */
-	    public function hook_before_add(&$postdata) {
-            try {
-                $wechat = InternalAPIV2Service::post('/wechat_server', $postdata);
-            } catch (\Dingo\Api\Exception\ResourceException $e) {
-                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
-            }
-            CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_wechat_server", "创建成功", "success");
-	    }
+	    public function hook_before_add(&$postdata) {}
 
 	    /*
 	    | ----------------------------------------------------------------------
@@ -377,6 +374,10 @@ use App\Services\InternalAPIV2Service;
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "监听公众号时,邮箱必填", "error");
             }
 
+            if ($formParams['listen_type'] == WechatServer::LISTEN_TYPE_ROOM && empty($formParams['room_name'])) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "监听群时,群名称必填", "error");
+            }
+
             try {
                 InternalAPIV2Service::post('/wechat_server', $formParams);
             } catch (\Dingo\Api\Exception\ResourceException $e) {
@@ -402,6 +403,11 @@ use App\Services\InternalAPIV2Service;
             if ($formParams['listen_type'] == WechatServer::LISTEN_TYPE_OFFICIAL && empty($formParams['email'])) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "监听公众号时,邮箱必填", "error");
             }
+
+            if ($formParams['listen_type'] == WechatServer::LISTEN_TYPE_ROOM && empty($formParams['room_name'])) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "监听群时,群名称必填", "error");
+            }
+
 
             $formParams['id'] = $id;
 
