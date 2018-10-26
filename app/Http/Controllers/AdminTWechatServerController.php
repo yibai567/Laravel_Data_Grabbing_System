@@ -472,7 +472,7 @@ use App\Services\InternalAPIV2Service;
             } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
-            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "启动成功", "success");
+            CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "停止成功", "success");
         }
 
 	}

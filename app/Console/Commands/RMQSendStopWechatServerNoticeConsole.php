@@ -88,10 +88,17 @@ class RMQSendStopWechatServerNoticeConsole extends Command
         return function($msg) use ($customerPath) {
             $message = json_decode($msg->body, true);
 
-            $result = InternalAPIV2Service::post($customerPath, $message['body']);
-            if ($result) {
+
+
+            try {
+                $result = InternalAPIV2Service::post($customerPath, $message['body']);
+            } catch (Exception $e) {
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                return false;
             }
+
+            $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+            return true;
         };
     }
 }
