@@ -15,7 +15,7 @@ class WechatServer extends Model
 
     const LISTEN_TYPE_ROOM = 1;
     const LISTEN_TYPE_OFFICIAL = 2;
-
+    
     /**
      * 表名
      */
@@ -38,6 +38,7 @@ class WechatServer extends Model
         'wechat_name',
         'room_name',
         'listen_type',
+        'email',
         'status',
     ];
 }

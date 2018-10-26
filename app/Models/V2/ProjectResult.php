@@ -100,4 +100,10 @@ class ProjectResult extends Model
     {
         return json_decode($value, true);
     }
+
+
+    public function task()
+    {
+        return $this->hasOne('App\Models\V2\Task', 'id', 'task_id');
+    }
 }

@@ -230,9 +230,14 @@ $api->version(
 
         // 微信机器人相关
         $api->post('/wechat_server','WechatServerController@create');
+        $api->post('/wechat_server/update','WechatServerController@update');
         $api->post('/wechat_server/start','WechatServerController@statusToStart');
         $api->post('/wechat_server/stop','WechatServerController@statusToStop');
+        $api->post('/wechat_server/send_email','WechatServerController@sendEmail');
+        $api->post('/wechat_server/send_wework','WechatServerController@sendWework');
         $api->get('/wechat_server/{id}','WechatServerController@retrieve');
+
+
 
         $api->post('/wechat_server_log','WechatServerLogController@create');
         $api->get('/wechat_server_log/wechat_server_id/{wechat_server_id}','WechatServerLogController@ListByWechatServerId');

@@ -88,9 +88,5 @@ class Requirement extends Model
         'status_reason',
     ];
 
-    public function company()
-    {
-        return $this->hasOne('App\Models\V2\Company', 'id', 'company_id');
-    }
 
 }

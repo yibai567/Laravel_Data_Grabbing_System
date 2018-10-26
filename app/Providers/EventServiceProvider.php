@@ -37,12 +37,18 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\SaveAlarmResultListener',
         ],
 
-        'App\Events\StatisticsEvent' => [
+        'App\Events\StatisticsEvent'               => [
             'App\Listeners\StatisticsListener',
         ],
         // 微信服务事件
-        'App\Events\WechatServerEvent' => [
+        'App\Events\WechatServerEvent'             => [
             'App\Listeners\WechatServerListener',
+        ],
+
+        // 微信服务公众号停止监听事件
+        'App\Events\StopWechatServerEvent'       => [
+            'App\Listeners\sendStopWechatServerEmailListener',
+            'App\Listeners\sendStopWechatServerWeworkListener',
         ],
 
         // SqlListener监听QueryExecuted

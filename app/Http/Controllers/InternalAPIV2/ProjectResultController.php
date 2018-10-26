@@ -43,7 +43,8 @@ class ProjectResultController extends Controller
             $params['limit'] = $this->limit;
         }
 
-        $projectResult = ProjectResult::whereNotNull('content')
+        $projectResult = ProjectResult::with('task')
+                                    ->whereNotNull('content')
                                     ->take($params['limit'])
                                     ->skip($params['offset'])
                                     ->orderBy('id', 'desc')

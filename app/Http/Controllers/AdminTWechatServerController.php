@@ -34,6 +34,7 @@ use App\Services\InternalAPIV2Service;
 			$this->col = [];
 			$this->col[] = ["label"=>"管理微信名称","name"=>"wechat_name"];
 			$this->col[] = ["label"=>"群名称","name"=>"room_name"];
+			$this->col[] = ["label"=>"邮箱","name"=>"email"];
             $this->col[] = ["label"=>"监听类型","name"=>"listen_type","callback"=>function ($row) {
                 if ( $row->listen_type == WechatServer::LISTEN_TYPE_ROOM) {
                     return '监听群';
@@ -58,6 +59,7 @@ use App\Services\InternalAPIV2Service;
 			$this->form = [];
 			$this->form[] = ['label'=>'管理微信名称','name'=>'wechat_name','type'=>'text','validation'=>'required|min:1|max:100','width'=>'col-sm-4'];
             $this->form[] = ['label'=>'群名称','name'=>'room_name','type'=>'text','validation'=>'required|min:1|max:100','width'=>'col-sm-4'];
+            $this->form[] = ['label'=>'通知邮箱','name'=>'email','type'=>'email','validation'=>'nullable|email','width'=>'col-sm-4'];
 			$this->form[] = ['label'=>'监听类型','name'=>'listen_type','type'=>'radio','validation'=>'required|integer','width'=>'col-sm-6','dataenum'=>'1|监听群;2|监听公众号','value'=>'1'];
 			# END FORM DO NOT REMOVE THIS LINE
 
@@ -161,7 +163,28 @@ use App\Services\InternalAPIV2Service;
 	        | $this->script_js = "function() { ... }";
 	        |
 	        */
-	        $this->script_js = NULL;
+
+
+	        $this->script_js = "
+                $(function(){
+                    var listen_type = $(\"input[name='listen_type']:checked\").val()
+
+                    if (listen_type == 1) {
+                       $(\"#form-group-email\").css(\"display\", \"none\")
+                    } else if (listen_type == 2) {
+                       $(\"#form-group-email\").css(\"display\", \"\")
+                    }
+                   
+                    $(\"input[name='listen_type']\").change(function(){
+                        var listen_type = $(\"input[name='listen_type']:checked\").val()
+                        if (listen_type == 1) {
+                           $(\"#form-group-email\").css(\"display\", \"none\")
+                        } else if (listen_type == 2) {
+                           $(\"#form-group-email\").css(\"display\", \"\")
+                        }
+                    });
+                })
+	        ";
 
 
             /*
@@ -339,6 +362,59 @@ use App\Services\InternalAPIV2Service;
 
 	    }
 
+        public function postAddSave() {
+            $this->cbLoader();
+            if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE) {
+                CRUDBooster::insertLog(trans('crudbooster.log_try_add_save',['name'=>Request::input($this->title_field),'module'=>CRUDBooster::getCurrentModule()->name ]));
+                CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
+            }
+
+            $this->validation();
+            $this->input_assignment();
+
+            $formParams = $this->arr;
+            if ($formParams['listen_type'] == WechatServer::LISTEN_TYPE_OFFICIAL && empty($formParams['email'])) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "监听公众号时,邮箱必填", "error");
+            }
+
+            try {
+                InternalAPIV2Service::post('/wechat_server', $formParams);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+            }
+
+            CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_wechat_server", "创建成功", "success");
+        }
+
+        public function postEditSave($id) {
+            $this->cbLoader();
+            $row = DB::table($this->table)->where($this->primary_key,$id)->first();
+
+            if(!CRUDBooster::isUpdate() && $this->global_privilege==FALSE) {
+                CRUDBooster::insertLog(trans("crudbooster.log_try_add",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
+                CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
+            }
+
+            $this->validation($id);
+            $this->input_assignment($id);
+
+            $formParams = $this->arr;
+            if ($formParams['listen_type'] == WechatServer::LISTEN_TYPE_OFFICIAL && empty($formParams['email'])) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "监听公众号时,邮箱必填", "error");
+            }
+
+            $formParams['id'] = $id;
+
+            try {
+                InternalAPIV2Service::post('/wechat_server/update', $formParams);
+            } catch (\Dingo\Api\Exception\ResourceException $e) {
+                CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
+            }
+
+            CRUDBooster::redirect($_SERVER['HTTP_ORIGIN'] . "/admin/t_wechat_server", "修改成功", "success");
+        }
+
+
 	    //By the way, you can still create your own method in here... :)
         // 启动服务
         public function getStart($id)
@@ -360,9 +436,13 @@ use App\Services\InternalAPIV2Service;
             } catch (\Dingo\Api\Exception\ResourceException $e) {
                 CRUDBooster::redirect($_SERVER['HTTP_REFERER'], "系统错误，请重试", "error");
             }
-            $log = InternalAPIV2Service::get('/wechat_server_log/wechat_server_id/' . $id, ['last_time' => $res['start_at']]);
+
+
             $wechatServer = $res;
-            $wechatServer['log'] = $log;
+            $wechatServer['log'] = [];
+            if (!empty($res['start_at'])) {
+                $log = InternalAPIV2Service::get('/wechat_server_log/wechat_server_id/' . $id, ['last_time' => $res['start_at']]);
+            }
             $this->cbView('admin.wechat_server_log', $wechatServer);
         }
 
